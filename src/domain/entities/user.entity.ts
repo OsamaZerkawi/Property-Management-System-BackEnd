@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from "typeorm";
 import { RefreshToken } from "./refresh-token.entity";
+import { Office } from "./offices.entity";
 
 export enum Role {
   ADMIN = 'admin',
@@ -45,5 +46,8 @@ export class User {
 
   @OneToOne(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshToken: RefreshToken;
+
+  @OneToOne(() => Office, (office) => office.user)
+  office: Office;
 
 }
