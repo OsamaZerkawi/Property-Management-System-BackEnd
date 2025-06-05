@@ -1,14 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
 import { City } from "./city.entity";
 import { Office } from "./offices.entity";
 import { Property } from "./property.entity";
 
+@Unique(['name', 'city'])
 @Entity('regions')
 export class Region {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({unique:true})
     name: string;
 
     @ManyToOne(() => City, city => city.regions, { onDelete: 'CASCADE' })

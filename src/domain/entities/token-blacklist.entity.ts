@@ -5,7 +5,7 @@ export class TokenBlackList{
     @PrimaryColumn('varchar' , {length : 512})
     token: string;
 
-    @Column({type : 'timestamp'})
+    @Column({name: 'expires_at',type : 'timestamp'})
     @Index()
     expiresAt: Date;
 

@@ -40,5 +40,30 @@ export class TokenService {
         const expiresInDays = parseInt(process.env.JWT_REFRESH_TOKEN_EXPIRES_IN || '7');
         
         await this.authRepo.updateRefreshToken(userId,expiresInDays,hashedRefreshToken);
-    } 
+    }
+    
+    async generateAccessToken(userId: number,username : string){
+        const accessToken =  this.jwtService.signAsync({
+            sub: userId,
+            username: username
+        },{
+            secret : process.env.JWT_TOKEN_SECRET,
+            expiresIn : 15 * 60,
+        });
+
+        return accessToken;
+    }
+
+    async validateRefreshToken(userId: number, incomingToken: string){
+
+        // Get user with refresh token 
+        const user = await this.authRepo.getUserWithRefreshToken(userId);
+
+        if(!user || !user.refreshToken || new Date() > user.refreshToken.expiredAt){
+            return false;
+        }
+
+        // Comparison
+        return await bcrypt.compare(incomingToken,user.refreshToken.refreshToken);
+    }
 }

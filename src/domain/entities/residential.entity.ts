@@ -8,7 +8,7 @@ import {
 import { Property } from './property.entity';
 import { Direction } from '../enums/direction.enum';
 import { RentalPeriod } from '../enums/rental-period.enum';
-import { PropertyStatus } from '../enums/property-status.enum';
+import { PropertyStatus} from '../enums/property-status.enum';
 import { ListingType } from '../enums/listing-type.enum';
 import { OwnershipType } from '../enums/ownership-type.enum';
 
@@ -36,7 +36,7 @@ export class Residential {
   @Column({ type: 'int', nullable: true })
   installment_duration: number;
 
-  @Column({ type: 'enum', enum: PropertyStatus })
+  @Column({ type: 'enum', enum: PropertyStatus,default:PropertyStatus.AVAILABLE })
   status: PropertyStatus;
 
   @Column({ type: 'enum', enum: ListingType })

@@ -1,6 +1,7 @@
 export enum PropertyStatus {
-  AVAILABLE = 'available',
-  RENTED = 'rented',
-  SOLD = 'sold',
-  UNDER_MAINTENANCE = 'under_maintenance',
+  AVAILABLE = 'متوفر',
+  UNAVAILABLE = 'غير متوفر',
+  UNDER_MAINTENANCE = 'في الصيانة',
+  RESERVED = 'محجوز',
+  SOLD = 'تم البيع',
 }

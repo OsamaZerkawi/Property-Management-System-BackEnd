@@ -1,5 +1,5 @@
 export enum Direction {
- NORTH = 'شمال',
+  NORTH = 'شمال',
   SOUTH = 'جنوب',
   EAST = 'شرق',
   WEST = 'غرب',

@@ -8,12 +8,15 @@ import {
   JoinColumn,
   ManyToOne,
   OneToOne,
+  OneToMany,
 } from 'typeorm';
 import { Office } from './offices.entity';
 import { Region } from './region.entity';
 import { Residential } from './residential.entity';
 import { AdminAgreement } from '../enums/admin-agreement.enum';
 import { PropertyType} from '../enums/property-type.enum';
+import { PropertyPost } from './property-posts.entitiy';
+import { Image } from './image.entity';
 
 
 @Entity('properties')
@@ -36,14 +39,15 @@ export class Property {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-  @Column({ type: 'enum', enum: AdminAgreement })
-  admin_agreement: AdminAgreement;
 
   @Column({ type: 'float', default: 0 })
   rate: number;
 
   @Column({ type: 'boolean', default: false })
   highlighted: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  room_count: number;
 
   @Column({ type: 'int', default: 0 })
   bedroom_count: number;
@@ -76,6 +80,12 @@ export class Property {
 
   @OneToOne(() => Residential, (residential) => residential.property)
   residential: Residential;
+
+  @OneToOne(() => PropertyPost, post => post.property)
+  post: PropertyPost;
+
+  @OneToMany(() => Image, (image) => image.property)
+  images: Image[];
 
   @CreateDateColumn()
   created_at: Date;

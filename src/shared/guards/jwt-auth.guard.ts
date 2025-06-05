@@ -39,14 +39,14 @@ export class JwtAuthGuard extends AuthGuard('jwt'){
         const authHeader = request.headers['authorization'];
         if(!authHeader){
             throw new UnauthorizedException(
-                errorResponse('Authorization header missing',401),
+                errorResponse('لم يتم إرسال بيانات التفويض',401),
             );
         }
 
         const [type ,token] = authHeader.split(' ');
         if(type !== 'Bearer' || !token){
             throw new UnauthorizedException(
-                errorResponse('Invalid token format',401),
+                errorResponse('تنسيق التوكن غير صالح',401),
             );
         }
 
@@ -66,7 +66,7 @@ export class JwtAuthGuard extends AuthGuard('jwt'){
         
         if(await this.tokenBlackListService.isTokenBlackListed(userId,token)){
             throw new UnauthorizedException(
-                errorResponse('Token revoked',401)
+                errorResponse('تم إلغاء صلاحية التوكن',401)
             )
         }
 

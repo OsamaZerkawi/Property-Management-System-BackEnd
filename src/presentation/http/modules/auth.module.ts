@@ -18,6 +18,9 @@ import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { ValidateUserUseCase } from "src/application/use-cases/auth/validate-user.use-case";
 import { LoginUseCase } from "src/application/use-cases/auth/login.use-case";
 import { LogoutUseCase } from "src/application/use-cases/auth/logout.use-case";
+import { USER_REPOSITORY } from "src/domain/repositories/user.repository";
+import { UserRepository } from "src/infrastructure/repositories/user.property";
+import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-case";
 
 @Module({
     imports:[
@@ -34,9 +37,14 @@ import { LogoutUseCase } from "src/application/use-cases/auth/logout.use-case";
            provide: AUTH_REPOSITORY,
            useClass: AuthRepository,
         },
+        {
+            provide:USER_REPOSITORY,
+            useClass:UserRepository
+        },
         LoginUseCase,
         LogoutUseCase,
         ValidateUserUseCase,
+        RefreshTokenUseCase,
         LocalStrategy,
         JwtAuthGuard,
         JwtService,

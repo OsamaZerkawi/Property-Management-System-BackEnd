@@ -8,6 +8,10 @@ import { City } from "src/domain/entities/city.entity";
 import { Region } from "src/domain/entities/region.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
+import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
+import { Tag } from "src/domain/entities/tag.entity";
+import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
+import { Image } from "src/domain/entities/image.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -16,7 +20,9 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     username: configService.get<string>('DB_USERNAME'),
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
-    entities: [User,RefreshToken,TokenBlackList,Office,City,Region,Property,Residential],
+    entities: [User,RefreshToken,TokenBlackList,Office,City,
+        Region,Property,Residential,PropertyPost,Tag,PropertyPostTag,Image
+    ],
     synchronize: true,
 });
 
