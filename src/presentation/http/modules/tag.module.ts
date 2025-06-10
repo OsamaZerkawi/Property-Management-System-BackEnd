@@ -14,13 +14,7 @@ import { FindTagsUseCase } from "src/application/use-cases/tag/find-tags.use-cas
 @Module({
     imports:[
        AuthModule,
-       TypeOrmModule.forFeature([Tag]),
-       JwtModule.registerAsync({
-               imports: [ConfigModule],
-               inject: [ConfigService],
-               useFactory: jwtConfig
-       }),
-       
+       TypeOrmModule.forFeature([Tag]),       
     ],
     providers:[
         GetAllTagsUseCase,

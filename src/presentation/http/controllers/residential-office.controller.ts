@@ -1,14 +1,19 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
+import { validateSync } from "class-validator";
 import { Request } from "express";
 import { CreateResidentialPropertyDto } from "src/application/dtos/property/createResidentialProperty.dto";
 import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
+import { UpdateResidentialPropertyDto } from "src/application/dtos/property/updateResidentialProperty.dto";
 import { CreateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/create-residential-property-details.use-case";
 import { GetPropertiesForOfficeWithFiltersUseCase } from "src/application/use-cases/property/get-properties-for-office-with-filters.use-case";
 import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
+import { GetPropertyForOfficeUseCase } from "src/application/use-cases/property/get-propety-for-office.use-case";
+import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cases/property/search-residential-property.dto";
+import { UpdateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/update-residential-property-details.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
-import { PropertyImageInterceptor, PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
 
 @Controller('residential-office')
 export class ResidentialOfficeController {
@@ -16,6 +21,9 @@ export class ResidentialOfficeController {
       private readonly createResidentialPropertyDetailsUseCase: CreateResidentialPropertyDetailsUseCase,
       private readonly getPropertiesForOfficeUseCase: GetPropertiesForOfficeUseCase,
       private readonly getPropertiesForOfficeWithFiltersUseCase: GetPropertiesForOfficeWithFiltersUseCase,
+      private readonly getPropertyForOfficeUseCase: GetPropertyForOfficeUseCase,
+      private readonly updateResidentialPropertyDetailsUseCase: UpdateResidentialPropertyDetailsUseCase,
+      private readonly searchResidentialPropertyByTitleUseCase: SearchResidentialPropertyByTitleUseCase,
     )
     {}
 
@@ -35,9 +43,9 @@ export class ResidentialOfficeController {
       return successResponse(properties,'تم ارجاع جميع العقارات الخاصة بمكتبك',200);
     }
 
-    @Get('/search')
+    @Get('/filters')
     @UseGuards(JwtAuthGuard)
-    async searchProerties(
+    async searchProertiesWithFilters(
       @Query() filters: SearchPropertiesDto,
       @CurrentUser() user,
       @Req() request: Request,
@@ -51,6 +59,41 @@ export class ResidentialOfficeController {
       return successResponse(properties,'تم ارجاع جميع العقارات الخاصة بمكتبك مفلترة',200);
 
     }
+
+    @Get('/search')
+    @UseGuards(JwtAuthGuard)
+    async seacrhPropertiesByTitle(
+      @Query() search: {title: string},
+      @CurrentUser() user,
+      @Req() request: Request,
+    ){
+      const userId = user.sub;
+
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+      const properties = await this.searchResidentialPropertyByTitleUseCase.execute(userId,search.title,baseUrl);
+
+      return successResponse(properties,'تم ارجاع جميع العقارات الخاصة المتعقلة بالبحث',200);
+
+    }
+
+    @Get('/properties/:propertyId')
+    @UseGuards(JwtAuthGuard)
+    async getProperty(
+      @Param('propertyId') propertyId: number,
+      @CurrentUser() user,
+      @Req() request: Request,
+    ){
+      const userId = user.sub;
+
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+      const property = await this.getPropertyForOfficeUseCase.execute(userId,propertyId,baseUrl);
+
+      return successResponse(property,'تم ارجاع العقار بنجاح',200);
+    }
+
+
 
     @Post()
     @UseGuards(JwtAuthGuard)
@@ -74,4 +117,35 @@ export class ResidentialOfficeController {
 
         return successResponse(residentialPropert,'تم إضافة العقار بنجاح',201);
     }
+
+    @Post(':residentialId')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @PropertyPostImageInterceptor()
+    async updateResidentialkProeprty(
+      @Param('residentialId') residentialId,
+      @UploadedFile() file: Express.Multer.File,
+      @Body() residentialDetails: UpdateResidentialPropertyDto,
+      @CurrentUser() user,
+    ){
+      const userId = user.sub;
+
+      let imageName: string | undefined = undefined;
+
+      if (file && file.filename) {
+        imageName = file.filename;
+      }
+  
+      await this.updateResidentialPropertyDetailsUseCase.execute(
+        userId,
+        residentialId,
+        residentialDetails,
+        imageName,
+      );
+  
+      return successResponse([],'تم تحديث تفاصيل العقار بنجاح',200);
+
+    }
+
+
 }

@@ -14,4 +14,11 @@ export class OfficeRepository implements OfficeRepositoryInterface {
             where: {user: {id : userId}}
         });
     }
+
+    async getCommission(officeId: number) {
+        return await this.officeRepo.findOne({
+            where: {id: officeId},
+            select: ['id','commission']
+        });
+    }
 }

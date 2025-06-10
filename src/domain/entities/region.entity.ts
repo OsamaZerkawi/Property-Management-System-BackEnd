@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, Primar
 import { City } from "./city.entity";
 import { Office } from "./offices.entity";
 import { Property } from "./property.entity";
+import { UserPost } from "./user-post.entity";
 
 @Unique(['name', 'city'])
 @Entity('regions')
@@ -27,4 +28,7 @@ export class Region {
 
     @OneToMany(() => Property, (property) => property.region)
     properties: Property[];
+
+    @OneToMany(() => UserPost, post => post.region)
+    userPosts: UserPost[];
 }

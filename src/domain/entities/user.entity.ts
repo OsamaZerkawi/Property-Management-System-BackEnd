@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from "typeorm";
 import { RefreshToken } from "./refresh-token.entity";
 import { Office } from "./offices.entity";
+import { UserPost } from "./user-post.entity";
 
 export enum Role {
   ADMIN = 'admin',
@@ -50,4 +51,7 @@ export class User {
   @OneToOne(() => Office, (office) => office.user)
   office: Office;
 
+  @OneToMany(() => UserPost,post => post.user)
+  userPosts: UserPost[];
+  
 }

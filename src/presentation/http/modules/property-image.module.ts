@@ -15,18 +15,13 @@ import { UpdatePropertyImageUseCase } from "src/application/use-cases/property/u
 import { DeletePropertyImageUseCase } from "src/application/use-cases/property/delete-property-image.use-case";
 import { PropertyAccessService } from "src/application/services/propertyAccess.service";
 import { PROPERTY_REPOSITORY } from "src/domain/repositories/property.repository";
-import { PropertyRepository } from "uploads/properties/images/property.repository";
+import { PropertyRepository } from "src/infrastructure/repositories/property.repository";
 import { Office } from "src/domain/entities/offices.entity";
 
 @Module({
     imports:[
         AuthModule,
         TypeOrmModule.forFeature([Image,Property,Office]),
-        JwtModule.registerAsync({
-                imports: [ConfigModule],
-                inject: [ConfigService],
-                useFactory: jwtConfig
-        })
     ],
     controllers:[PropertyImageController],
     providers:[

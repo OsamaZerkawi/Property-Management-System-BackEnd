@@ -53,7 +53,7 @@ import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-
         JwtService,
         TokenService,
         AuthTokenBlackListService,],
-    exports:[JwtAuthGuard,JwtService,AuthTokenBlackListService,ValidateUserUseCase]
+    exports:[JwtAuthGuard,JwtService,AuthTokenBlackListService,ValidateUserUseCase,JwtModule]
 })
 export class AuthModule {
 

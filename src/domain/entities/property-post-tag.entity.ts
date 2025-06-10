@@ -6,10 +6,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Unique,
 } from 'typeorm';
 import { PropertyPost } from './property-posts.entitiy';
 import { Tag } from './tag.entity';
 
+@Unique(['propertyPost', 'tag']) 
 @Entity('property_post_tags')
 export class PropertyPostTag {
   @PrimaryGeneratedColumn()

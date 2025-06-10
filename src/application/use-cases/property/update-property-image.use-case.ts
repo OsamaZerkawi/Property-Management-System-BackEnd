@@ -26,7 +26,7 @@ export class UpdatePropertyImageUseCase {
       }
       
       
-      const oldimagePath = path.join(process.cwd(), 'uploads', image.image_path);
+      const oldimagePath = path.join(process.cwd(), 'uploads/properties/images', image.image_path);
       
       if (fs.existsSync(oldimagePath)) {
         fs.unlinkSync(oldimagePath);

@@ -22,7 +22,7 @@ import { PaymentMethod } from '../enums/payment-method.enum';
 @Entity('offices')
 export class Office {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ type: 'varchar', length: 255 })
   name: string;

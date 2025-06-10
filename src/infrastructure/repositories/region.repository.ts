@@ -35,4 +35,11 @@ export class RegionRepository implements RegionRepositoryInterface {
             order: { name: 'ASC' },
         });
     }
+
+    async getExpectedpPrice(regionId: number) {
+        return await this.regionRepo.findOne({
+            where: {id: regionId},
+            select:['id','name','default_meter_price']
+        });
+    }
 }

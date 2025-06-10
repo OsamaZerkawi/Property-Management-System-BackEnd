@@ -10,20 +10,19 @@ import { jwtConfig } from "src/infrastructure/config/jwt.config";
 import { Region } from "src/domain/entities/region.entity";
 import { City } from "src/domain/entities/city.entity";
 import { RegionController } from "../controllers/region.controller";
+import { FindRegionUseCase } from "src/application/use-cases/region/find-region-by-id.use-case";
+import { GetExpectedPriceForRegionUseCase } from "src/application/use-cases/region/get-expected-price-for-region.use-case";
 
 @Module({
     imports:[
         AuthModule,
         TypeOrmModule.forFeature([Region,City]),
-        JwtModule.registerAsync({
-                imports: [ConfigModule],
-                inject: [ConfigService],
-                useFactory: jwtConfig
-        })
     ],
     controllers:[RegionController],
     providers:[
         getRegionsByCityIdUseCase,
+        GetExpectedPriceForRegionUseCase,
+        FindRegionUseCase,
         {
             provide:REGION_REPOSITORY,
             useClass: RegionRepository
@@ -31,6 +30,7 @@ import { RegionController } from "../controllers/region.controller";
     ],
     exports: [
         REGION_REPOSITORY,
+        FindRegionUseCase
     ]
 })
 export class RegionModule{}

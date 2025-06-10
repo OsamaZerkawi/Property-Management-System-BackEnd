@@ -6,62 +6,70 @@ import { RentDetailsDto } from "./rentDetails.dto";
 import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyType } from "src/domain/enums/property-type.enum";
 
-export class CreateResidentialPropertyDto {
+export class UpdateResidentialPropertyDto {
     @IsString()
-    postTitle: string;
+    @IsOptional()
+    postTitle?: string;
 
     @IsArray()
     @ArrayNotEmpty()
+    @IsOptional()
     @IsInt({ each: true })
-    @Type(() => Number)
-    tags: number[];
+    tags?: number[];
 
     @IsInt()
-    @Type(() => Number)
-    regionId: number;
+    @IsOptional()
+    regionId?: number;
 
 
     @IsNumber()
-    @Type(() => Number)
-    floor_number: number;
+    @IsOptional()
+    floor_number?: number;
 
     @IsNumber()
-    @Type(() => Number)
-    latitude: number;
+    @IsOptional()
+    latitude?: number;
 
     @IsNumber()
-    @Type(() => Number)
-    longitude: number;
+    @IsOptional()
+    longitude?: number;
 
     @IsNumber()
-    @Type(() => Number)
-    area: number;
+    @IsOptional()
+    area?: number;
 
+    @IsOptional()
     @IsEnum(OwnershipType)
-    ownership_type: OwnershipType;
+    ownership_type?: OwnershipType;
 
+    @IsOptional()
     @IsEnum(Direction)
-    direction: Direction;
+    direction?: Direction;
 
+    @IsOptional()
     @IsBoolean()
-    @Type(() => Boolean)
-    has_furniture: boolean;
+    has_furniture?: boolean;
 
+    @IsOptional()
     @ValidateNested()
     @Type(() => RoomDetailsDto)
-    room_details: RoomDetailsDto;
+    room_details?: RoomDetailsDto;
     
+    @IsOptional()
     @ValidateNested()
     @Type(() => RentDetailsDto)
     @IsOptional()
     rent_details?: RentDetailsDto;
   
+    @IsOptional()
     @ValidateNested()
     @Type(() => SellDetailsDto)
     @IsOptional()
     sell_details?: SellDetailsDto;
 
     @IsEnum(ListingType)
+    @IsOptional()
     listing_type: ListingType;
 }

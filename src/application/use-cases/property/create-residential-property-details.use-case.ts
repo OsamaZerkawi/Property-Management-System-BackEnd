@@ -14,6 +14,8 @@ import { Office } from "src/domain/entities/offices.entity";
 import { Repository } from "typeorm";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { PropertyType } from "src/domain/enums/property-type.enum";
+import { FindRegionUseCase } from "../region/find-region-by-id.use-case";
+import { FindOfficeForUserUseCase } from "../office/find-office-for-user.use-case";
 export class CreateResidentialPropertyDetailsUseCase {
     constructor(
         private readonly createPropertyUseCase: CreatePropertyUseCase,
@@ -21,20 +23,16 @@ export class CreateResidentialPropertyDetailsUseCase {
         private readonly findTagsUseCase: FindTagsUseCase,
         private readonly attachTagsToPostUseCase: AttachTagsToPostUseCase,
         private readonly createResidentialPropertyUseCase: createResidentialPropertyUseCase,
-        @Inject(REGION_REPOSITORY)
-        private readonly regionRepo: RegionRepositoryInterface,
+        private readonly findRegionUseCase: FindRegionUseCase,
+        private readonly findOfficeForUserUseCase: FindOfficeForUserUseCase,
         @InjectRepository(Office)
         private  readonly officeRepo: Repository<Office>
     ){}
 
     async execute(data: CreateResidentialPropertyDto,userId: number,imageName: string){
-        const region = await this.regionRepo.findById(data.regionId);
+        const region = await this.findRegionUseCase.execute(data.regionId);
 
-        const office = await this.officeRepo.findOne({
-            where: {
-                user: {id : userId}
-            }
-        });
+        const office = await this.findOfficeForUserUseCase.execute(userId);
 
         if(!office){
             throw new NotFoundException(

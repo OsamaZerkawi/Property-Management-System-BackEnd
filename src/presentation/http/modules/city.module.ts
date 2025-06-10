@@ -15,11 +15,6 @@ import { GetAllCitiesUseCase } from "src/application/use-cases/city/get-cities.u
     imports:[
         AuthModule,
         TypeOrmModule.forFeature([City,Region]),
-        JwtModule.registerAsync({
-                imports: [ConfigModule],
-                inject: [ConfigService],
-                useFactory: jwtConfig
-        })
     ],
     controllers:[CityController],
     providers:[
