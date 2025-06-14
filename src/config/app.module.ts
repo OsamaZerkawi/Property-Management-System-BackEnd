@@ -23,10 +23,11 @@ import { OfficeModule } from 'src/presentation/http/modules/office.module';
     PropertyPostModule,
     RegionModule,
     PropertyImageModule,
-    ResidentialOfficeModule,
+    ResidentialOfficeModule, 
     ConfigModule.forRoot({
-      isGlobal:true,
-    }),
+      isGlobal: true,
+      envFilePath: '.env', 
+     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => OrmConfig(configService),
