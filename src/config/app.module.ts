@@ -17,9 +17,17 @@ import { UserPostModule } from 'src/presentation/http/modules/user-post.module';
 import { UserPostSuggestionModule } from 'src/presentation/http/modules/user-post-suggestion.module';
 import { PropertyReservationModule } from 'src/presentation/http/modules/proeprty-reservation.module';
 import { ServiceProviderModule } from 'src/presentation/http/modules/service-provider.module';
+import { RoleModule } from 'src/presentation/http/modules/role.module';
+import { PermissionModule } from 'src/presentation/http/modules/permission.module';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { PermissionsGuard } from 'src/shared/guards/permission.guard';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 
 @Module({
   imports: [
+    RoleModule,
+    PermissionModule,
     UserPostModule,
     ServiceProviderModule,
     UserPostSuggestionModule,
@@ -42,6 +50,20 @@ import { ServiceProviderModule } from 'src/presentation/http/modules/service-pro
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // authenticate first, sets request.user
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
+  ],
 })
 export class AppModule {}

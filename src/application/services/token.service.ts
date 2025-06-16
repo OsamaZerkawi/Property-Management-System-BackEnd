@@ -45,7 +45,7 @@ export class TokenService {
     async generateAccessToken(userId: number,username : string){
         const accessToken =  this.jwtService.signAsync({
             sub: userId,
-            username: username
+            username
         },{
             secret : process.env.JWT_TOKEN_SECRET,
             expiresIn : 15 * 60,

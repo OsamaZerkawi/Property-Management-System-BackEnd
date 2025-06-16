@@ -11,7 +11,6 @@ export class UserPostSuggestionController {
    ){}
 
    @Post()
-   @UseGuards(JwtAuthGuard)
    @HttpCode(HttpStatus.CREATED)
    async suggestProperty(
     @Body() data: UserPostSuggestionDto

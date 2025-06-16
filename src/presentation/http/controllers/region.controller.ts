@@ -12,7 +12,6 @@ export class RegionController {
     ){}
 
     @Get('/cities/:cityId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getRegionsByCity(
         @Param('cityId',ParseIntPipe) cityId: number
@@ -23,7 +22,6 @@ export class RegionController {
     }
 
     @Get(':regionId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)    
     async getExpectedPriceForRegion(
         @Param('regionId') regionId: number,

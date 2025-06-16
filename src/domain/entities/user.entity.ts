@@ -6,6 +6,7 @@ import { UserPropertyPurchase } from "./user-property-purchase.entity";
 import { UserPropertyInvoice } from "./user-property-invoice.entity";
 import { ServiceProvider } from "./service-provider.entity";
 import { ServiceFeedback } from "./service-feedback.entity";
+import { UserRole } from "./user-role.entity";
 
 export enum Role {
   ADMIN = 'admin',
@@ -69,6 +70,12 @@ export class User {
 
   @OneToMany(() => ServiceFeedback, (feedback) => feedback.user)
   feedbacks: ServiceFeedback[];
+
+  @OneToMany(() => UserRole, ur => ur.user)
+  userRoles: UserRole[];
+
+  // @OneToMany(() => UserPermission, up => up.user)
+  // userPermissions: UserPermission[];
  
   @CreateDateColumn()
   created_at: Date;

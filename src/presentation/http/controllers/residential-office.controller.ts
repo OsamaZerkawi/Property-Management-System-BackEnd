@@ -11,6 +11,8 @@ import { GetPropertyForOfficeUseCase } from "src/application/use-cases/property/
 import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cases/property/search-residential-property.dto";
 import { UpdateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/update-residential-property-details.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
+import { Public } from "src/shared/decorators/public.decorator";
+import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
@@ -29,7 +31,6 @@ export class ResidentialOfficeController {
     {}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getProperties(
       @CurrentUser() user,
@@ -45,7 +46,6 @@ export class ResidentialOfficeController {
     }
 
     @Get('/filters')
-    @UseGuards(JwtAuthGuard)
     async searchProertiesWithFilters(
       @Query() filters: SearchPropertiesDto,
       @CurrentUser() user,
@@ -62,7 +62,6 @@ export class ResidentialOfficeController {
     }
 
     @Get('/search')
-    @UseGuards(JwtAuthGuard)
     async seacrhPropertiesByTitle(
       @Query() search: {title: string},
       @CurrentUser() user,
@@ -79,7 +78,6 @@ export class ResidentialOfficeController {
     }
 
     @Get('/properties/:propertyId')
-    @UseGuards(JwtAuthGuard)
     async getProperty(
       @Param('propertyId') propertyId: number,
       @CurrentUser() user,
@@ -95,7 +93,6 @@ export class ResidentialOfficeController {
     }
 
     @Get('/properties/:propertyId/expected-price')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getExpectedPriceForProperty(
       @Param('propertyId',ParseIntPipe) propertyId: number
@@ -105,10 +102,8 @@ export class ResidentialOfficeController {
       return successResponse(data,'تم ارجاع السعر المتوقع للعقار',200);
     }
 
-
-
+    @Roles('صاحب مكتب')
     @Post()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
     @PropertyPostImageInterceptor()
     async addResidentialProperty(
@@ -130,8 +125,8 @@ export class ResidentialOfficeController {
         return successResponse(residentialPropert,'تم إضافة العقار بنجاح',201);
     }
 
+    @Roles('صاحب مكتب')
     @Post(':residentialId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     @PropertyPostImageInterceptor()
     async updateResidentialkProeprty(

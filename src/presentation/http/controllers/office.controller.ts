@@ -4,6 +4,7 @@ import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/g
 import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
 import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
+import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
 
@@ -15,8 +16,8 @@ export class OfficeController {
         private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase
     ){}
 
+    @Roles('صاحب مكتب')
     @Get()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getCommissionOfOffice(
         @CurrentUser() user,
@@ -28,8 +29,8 @@ export class OfficeController {
         return successResponse(data,'تم ارجاع عمولة المكتب',200);
     }
 
+    @Roles('صاحب مكتب')
     @Get('fees')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getFees(
         @CurrentUser() user,
@@ -41,8 +42,8 @@ export class OfficeController {
         return successResponse(data,'تم ارجاع رسوم المكتب',200);
     }
 
+    @Roles('صاحب مكتب')
     @Put('fees')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async updateFees(
         @Query() data: UpdateOfficeFeesDto,

@@ -9,8 +9,7 @@ export class UserController {
         private readonly findUserByPhoneUseCase: FindUserByPhoneUseCase,
     ){}
 
-    @Get('')
-    @UseGuards(JwtAuthGuard)
+    @Get()
     async getUserByPhone(
         @Query('phone') phone: string,
     ){

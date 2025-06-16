@@ -5,6 +5,7 @@ import { GetPropertyImagesUseCase } from "src/application/use-cases/property/get
 import { UpdatePropertyImageUseCase } from "src/application/use-cases/property/update-property-image.use-case";
 import { UploadPropertyImagesUseCase } from "src/application/use-cases/property/upload-property-image.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
+import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
 import { PropertyImageInterceptor, PropertyImagesInterceptor } from "src/shared/interceptors/file-upload.interceptor";
@@ -21,8 +22,8 @@ export class PropertyImageController {
     ){}
 
 
+    @Roles('صاحب مكتب')
     @Post(':propertyId/images')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
     @PropertyImagesInterceptor()
     async uploadImages(
@@ -36,7 +37,6 @@ export class PropertyImageController {
     }
 
     @Get(':propertyId/images')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getImages(
         @Param('propertyId', ParseIntPipe) propertyId: number,
@@ -47,8 +47,8 @@ export class PropertyImageController {
         return successResponse(images,'تم ارجاع صور العقار بنجاح',200);
     }
 
+    @Roles('صاحب مكتب')
     @Put(':propertyId/images/:imageId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     @PropertyImageInterceptor()
     async updateImge(
@@ -62,8 +62,8 @@ export class PropertyImageController {
         return successResponse([],'تم تعديل صورة العقار بنجاح',200);
     }
 
+    @Roles('صاحب مكتب')
     @Delete(':propertyId/images/:imageId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async deleteImage(
         @Param('propertyId',ParseIntPipe) propertyId: number,

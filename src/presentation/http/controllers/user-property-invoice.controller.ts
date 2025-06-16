@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, NotFoundException, Param, Post,
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
 import { CreateUserProeprtyInvoiceUseCase } from "src/application/use-cases/user-property-reservation/create-user-property-invoice.use-case";
 import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-property-reservation/upload-document-invoice.use-case";
+import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { UserPropertyInvoiceImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
@@ -13,7 +14,7 @@ export class UserPropertyInvoiceController {
         private readonly createUserProeprtyInvoiceUseCasec:CreateUserProeprtyInvoiceUseCase,
     ){}
 
-    @UseGuards(JwtAuthGuard)
+    @Roles('صاحب مكتب')
     @UserPropertyInvoiceImageInterceptor()
     @HttpCode(HttpStatus.OK)
     @Post(':invoiceId/upload-docement')
@@ -32,7 +33,7 @@ export class UserPropertyInvoiceController {
         return successResponse([],'تم رفع صورة الوثيقة بنجاح',200);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @Roles('صاحب مكتب')
     @HttpCode(HttpStatus.CREATED)
     @UserPropertyInvoiceImageInterceptor()
     @Post('/upload-docement')

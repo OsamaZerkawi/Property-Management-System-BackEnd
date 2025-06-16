@@ -5,6 +5,7 @@ import { FindPropertyReservationDetails } from "src/application/use-cases/user-p
 import { FindUserProeprtyReservationWithDetailsUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation-with-details.use-case";
 import { FindUserProeprtyReservationsWithFiltersUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation-with-filters.use-case";
 import { FindUserProeprtyReservationsUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation.use-case";
+import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
 
@@ -16,9 +17,9 @@ export class PropertyReservationController {
         private readonly findUserProeprtyReservationWithDetailsUseCase: FindUserProeprtyReservationWithDetailsUseCase,
         private readonly findPropertyReservationDetails: FindPropertyReservationDetails,
     ){}
-
+    
+    @Roles('صاحب مكتب')
     @Get()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getAll(
         @Req() request: Request
@@ -30,8 +31,8 @@ export class PropertyReservationController {
         return successResponse(data,'تم إرجاع جميع السجلات الخاصة بحجز الأملاك',200);
     }
 
+    @Roles('صاحب مكتب')
     @Get('/filters')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getAllWithFilters(
         @Query() filters: PropertyReservationFiltersDto,
@@ -44,8 +45,8 @@ export class PropertyReservationController {
         return successResponse(data,'تم إرجاع جميع السجلات الخاصة بحجز الأملاك مفلترة',200)
     }
 
+    @Roles('صاحب مكتب')
     @Get(':propertyReservationId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getUserPropertyReservationWithDetails(
         @Param('propertyReservationId') propertyReservationId: number,
@@ -58,8 +59,8 @@ export class PropertyReservationController {
         return successResponse(data,'تم ارجاع سجل حجز الاملاك مع السجلات المالية الخاصة به',200);
     }
 
+    @Roles('صاحب مكتب')
     @Get('/properties/:propertyId')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getPropetyReservationDetails(
         @Param('propertyId') propertyId: number

@@ -15,7 +15,6 @@ export class ServiceProviderController{
     ){}
 
     @Get()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getAll(){
         const data = await this.getAllServiceProvidersUseCase.execute();
@@ -24,7 +23,6 @@ export class ServiceProviderController{
     }
 
     @Get('filters')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getAllWithFilters(
         @Query() filters: ServiceProviderFiltersDto
@@ -35,7 +33,6 @@ export class ServiceProviderController{
     }
 
     @Get('search')
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async search(
         @Query('name') name: string,

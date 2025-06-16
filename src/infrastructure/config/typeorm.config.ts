@@ -18,6 +18,10 @@ import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase
 import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
 import { ServiceProvider } from "src/domain/entities/service-provider.entity";
 import { ServiceFeedback } from "src/domain/entities/service-feedback.entity";
+import { Role } from "src/domain/entities/role.entity";
+import { UserRole } from "src/domain/entities/user-role.entity";
+import { Permission } from "src/domain/entities/permissions.entity";
+import { RolePermission } from "src/domain/entities/role-permissions";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -31,7 +35,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         Region,Property,Residential,PropertyPost,Tag,
         PropertyPostTag,Image,UserPost,UserPostSuggestion,
         UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
-        ServiceFeedback,
+        ServiceFeedback,Role,UserRole,Permission,RolePermission,
     ],
     synchronize: true,
 });
