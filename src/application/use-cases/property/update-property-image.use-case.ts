@@ -16,6 +16,7 @@ export class UpdatePropertyImageUseCase {
     ) {}
 
     async execute(propertyId: number,userId: number,imageId: number,file: Express.Multer.File){
+      
       await this.propertyAccessService.verifyUserIsOwner(propertyId,userId);
       
       const image = await this.imageRepo.findById(imageId);

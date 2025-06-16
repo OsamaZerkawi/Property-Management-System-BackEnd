@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from "typeorm";
 import { City } from "./city.entity";
 import { Office } from "./offices.entity";
 import { Property } from "./property.entity";
 import { UserPost } from "./user-post.entity";
+import { ServiceProvider } from "./service-provider.entity";
 
 @Unique(['name', 'city'])
 @Entity('regions')
@@ -31,4 +32,13 @@ export class Region {
 
     @OneToMany(() => UserPost, post => post.region)
     userPosts: UserPost[];
+
+    @OneToMany(() => ServiceProvider, (sp) => sp.region)
+    serviceProviders: ServiceProvider[];
+
+    @CreateDateColumn()
+    created_at: Date;
+
+    @UpdateDateColumn()
+    updated_at: Date;
 }

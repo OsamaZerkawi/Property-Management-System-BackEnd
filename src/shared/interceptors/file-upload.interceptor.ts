@@ -45,7 +45,29 @@ export function PropertyImageInterceptor() {
       storage: diskStorage({
         destination: './uploads/properties/images',
         filename: (req, file, cb) => {
-        const propertyId = req.params.propertyId;
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+        const safeBaseName = file.originalname
+          .replace(/\s+/g, '-')        // replace spaces with dashes
+          .replace(/\.[^/.]+$/, '')    // remove original extension
+          .replace(/[^a-zA-Z0-9-_]/g, ''); // remove unsafe characters
+
+        const filename = `property-invoice-${safeBaseName}-${timestamp}${ext}`;
+        cb(null, filename);
+      },
+      }),
+    }),
+  );
+}
+
+
+export function UserPropertyInvoiceImageInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('document', {
+      storage: diskStorage({
+        destination: './uploads/properties/users/invoices/images',
+        filename: (req, file, cb) => {
+        const propertyId = req.body.propertyId;
         const timestamp = Date.now();
         const ext = extname(file.originalname);
         const safeBaseName = file.originalname

@@ -34,6 +34,7 @@ import { ResidentialPropertyAccessService } from "src/application/services/resid
 import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-office-for-user.use-case";
 import { OfficeModule } from "./office.module";
 import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cases/property/search-residential-property.dto";
+import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/property/get-expected-price.use-case";
 
 @Module({
     imports: [
@@ -68,6 +69,10 @@ import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cas
         ResidentialPropertyAccessService,
         FindOfficeForUserUseCase,
         SearchResidentialPropertyByTitleUseCase,
+        GetExpectedPricePropertyUseCase,
     ],
+    exports: [
+        PROPERTY_REPOSITORY
+    ]
 })
 export class ResidentialOfficeModule {}

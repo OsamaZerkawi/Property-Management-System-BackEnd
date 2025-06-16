@@ -1,10 +1,10 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
-import { validateSync } from "class-validator";
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { CreateResidentialPropertyDto } from "src/application/dtos/property/createResidentialProperty.dto";
 import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdateResidentialPropertyDto } from "src/application/dtos/property/updateResidentialProperty.dto";
 import { CreateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/create-residential-property-details.use-case";
+import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/property/get-expected-price.use-case";
 import { GetPropertiesForOfficeWithFiltersUseCase } from "src/application/use-cases/property/get-properties-for-office-with-filters.use-case";
 import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
 import { GetPropertyForOfficeUseCase } from "src/application/use-cases/property/get-propety-for-office.use-case";
@@ -24,6 +24,7 @@ export class ResidentialOfficeController {
       private readonly getPropertyForOfficeUseCase: GetPropertyForOfficeUseCase,
       private readonly updateResidentialPropertyDetailsUseCase: UpdateResidentialPropertyDetailsUseCase,
       private readonly searchResidentialPropertyByTitleUseCase: SearchResidentialPropertyByTitleUseCase,
+      private readonly getExpectedPricePropertyUseCase: GetExpectedPricePropertyUseCase,
     )
     {}
 
@@ -91,6 +92,17 @@ export class ResidentialOfficeController {
       const property = await this.getPropertyForOfficeUseCase.execute(userId,propertyId,baseUrl);
 
       return successResponse(property,'تم ارجاع العقار بنجاح',200);
+    }
+
+    @Get('/properties/:propertyId/expected-price')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    async getExpectedPriceForProperty(
+      @Param('propertyId',ParseIntPipe) propertyId: number
+    ){
+      const data = await this.getExpectedPricePropertyUseCase.execute(propertyId);
+
+      return successResponse(data,'تم ارجاع السعر المتوقع للعقار',200);
     }
 
 

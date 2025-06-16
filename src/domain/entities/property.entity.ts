@@ -17,6 +17,8 @@ import { AdminAgreement } from '../enums/admin-agreement.enum';
 import { PropertyType} from '../enums/property-type.enum';
 import { PropertyPost } from './property-posts.entitiy';
 import { Image } from './image.entity';
+import { UserPostSuggestion } from './user-post-suggestions.entity';
+import { UserPropertyInvoice } from './user-property-invoice.entity';
 
 
 @Entity('properties')
@@ -86,6 +88,12 @@ export class Property {
 
   @OneToMany(() => Image, (image) => image.property)
   images: Image[];
+  
+  @OneToMany(() => UserPostSuggestion,userPostSuggestion => userPostSuggestion.property)
+  userPostSuggestions: UserPostSuggestion[];
+
+  @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.property)
+  invoices: UserPropertyInvoice[];
 
   @CreateDateColumn()
   created_at: Date;

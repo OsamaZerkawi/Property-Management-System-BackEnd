@@ -1,7 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { RefreshToken } from "./refresh-token.entity";
 import { Office } from "./offices.entity";
 import { UserPost } from "./user-post.entity";
+import { UserPropertyPurchase } from "./user-property-purchase.entity";
+import { UserPropertyInvoice } from "./user-property-invoice.entity";
+import { ServiceProvider } from "./service-provider.entity";
+import { ServiceFeedback } from "./service-feedback.entity";
 
 export enum Role {
   ADMIN = 'admin',
@@ -53,5 +57,22 @@ export class User {
 
   @OneToMany(() => UserPost,post => post.user)
   userPosts: UserPost[];
+
+  @OneToMany(() => UserPropertyPurchase,(purchase) => purchase.user)
+  propertyPurchases: UserPropertyPurchase[];
+
+  @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.user)
+  invoices: UserPropertyInvoice[];
   
+  @OneToOne(() => ServiceProvider, (sp) => sp.user)
+  serviceProvider: ServiceProvider;
+
+  @OneToMany(() => ServiceFeedback, (feedback) => feedback.user)
+  feedbacks: ServiceFeedback[];
+ 
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

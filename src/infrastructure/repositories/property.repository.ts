@@ -24,6 +24,37 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           relations: {office: {user: true}},
       });
   }
+  
+  async findById(id: number) {
+    return await this.propertyRepo.findOne({
+      where:{id}
+    });
+  }
+
+  async findPropertyReservationDetails(id: number) {
+    const result = await this.propertyRepo
+        .createQueryBuilder('property')
+        .leftJoin('property.residential', 'residential')
+        .leftJoin('property.office', 'office')
+        .where('residential.listing_type = :listingType', { listingType: ListingType.SALE })
+        .andWhere('property.id = :id', { id })
+        .select([
+          'residential.selling_price AS residential_selling_price',
+          '(residential.selling_price * office.commission) AS office_commission_amount',
+          '(property.area * office.deposit_per_m2) AS total_deposit',
+          '(residential.selling_price + (residential.selling_price * office.commission)) AS final_price'
+        ])
+        .getRawOne();
+
+    if (!result) {
+      throw new NotFoundException(
+        errorResponse(`لم يتم العثور على العقار بالمعرّف ${id} أو أنه غير معروض للبيع.`,404)
+      );
+    }
+  
+    return result;
+
+  }
 
   async createPropertyAndSaveIt(data: CreatePropertyDto) {
     const property = await this.propertyRepo.create({
@@ -109,6 +140,34 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     }
 
     return this.formatPropertyDetails(property,baseUrl);
+  }
+
+  async getExpectedpPriceInRegion(propertyId: number) {
+      const result = await this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoin('property.region','region')
+      .where('property.id = :propertyId',{propertyId})
+      .select([
+        'property.id',
+        'property.area as area',
+        'region.id',
+        'region.default_meter_price as default_meter_price',
+      ])
+      .getRawOne();
+
+      if(!result){
+        throw new NotFoundException(
+          errorResponse('لم يتم العثور على العقار أو المنطقة',404)
+        );
+      }
+
+      const area = Number(result.area);
+      const pricePerMeter = Number(result.default_meter_price);
+      const expectedPrice = area * pricePerMeter;
+
+      return  {
+        'expected_price': expectedPrice
+      };
   }
 
   private formatPropertyDetails(property: Property, baseUrl: string) {

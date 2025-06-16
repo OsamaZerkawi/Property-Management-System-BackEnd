@@ -13,9 +13,16 @@ import { RegionModule } from 'src/presentation/http/modules/region.module';
 import { TagModule } from 'src/presentation/http/modules/tag.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
 import { OfficeModule } from 'src/presentation/http/modules/office.module';
+import { UserPostModule } from 'src/presentation/http/modules/user-post.module';
+import { UserPostSuggestionModule } from 'src/presentation/http/modules/user-post-suggestion.module';
+import { PropertyReservationModule } from 'src/presentation/http/modules/proeprty-reservation.module';
+import { ServiceProviderModule } from 'src/presentation/http/modules/service-provider.module';
 
 @Module({
   imports: [
+    UserPostModule,
+    ServiceProviderModule,
+    UserPostSuggestionModule,
     OfficeModule,
     AuthModule,
     TagModule,
@@ -24,6 +31,7 @@ import { OfficeModule } from 'src/presentation/http/modules/office.module';
     RegionModule,
     PropertyImageModule,
     ResidentialOfficeModule,
+    PropertyReservationModule,
     ConfigModule.forRoot({
       isGlobal:true,
     }),

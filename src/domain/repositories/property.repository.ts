@@ -5,6 +5,7 @@ import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.
 export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
 
 export interface PropertyRepositoryInterface {
+    findById(id: number);
     findByIdWithOwner(propertyId: number);
     createPropertyAndSaveIt(data: CreatePropertyDto);
     updateProperty(id: number,data: UpdatePropertyDto);
@@ -12,4 +13,6 @@ export interface PropertyRepositoryInterface {
     findPropertiesByUserOfficeWithFilters(userId: number,filters: SearchPropertiesDto,baseUrl: string);
     findPropertyByPropertyIdAndUserOffice(userId: number,propertyId: number,baseUrl: string);
     searchPropertiesByTitle(userId: number,title: string,baseUrl: string);
+    findPropertyReservationDetails(id: number);
+    getExpectedpPriceInRegion(propertyId: number);
 }

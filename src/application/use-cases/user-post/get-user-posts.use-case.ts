@@ -7,5 +7,7 @@ export class GetUserPostsUseCase {
         private readonly userPostRepo: UserPostRepositoryInterface,
     ){}
 
-    async execute(){}
+    async execute(){
+        return await this.userPostRepo.getAll();
+    }
 }

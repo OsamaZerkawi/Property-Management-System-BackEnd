@@ -1,4 +1,4 @@
 export enum PaymentMethod {
-  STRIPE = 'stripe',
-  CASH = 'cash',
+  STRIPE = 'دفع الكتروني',
+  CASH = 'دفع يدوي',
 }

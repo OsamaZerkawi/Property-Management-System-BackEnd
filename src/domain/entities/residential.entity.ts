@@ -4,6 +4,9 @@ import {
   Column,
   OneToOne,
   JoinColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Property } from './property.entity';
 import { Direction } from '../enums/direction.enum';
@@ -11,6 +14,7 @@ import { RentalPeriod } from '../enums/rental-period.enum';
 import { PropertyStatus} from '../enums/property-status.enum';
 import { ListingType } from '../enums/listing-type.enum';
 import { OwnershipType } from '../enums/ownership-type.enum';
+import { UserPropertyPurchase } from './user-property-purchase.entity';
 
 
 @Entity('residentials')
@@ -48,4 +52,13 @@ export class Residential {
   @OneToOne(() => Property, (property) => property.residential, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'property_id' })
   property: Property;
+
+  @OneToMany(() => UserPropertyPurchase, (purchase) => purchase.residential)
+  purchases: UserPropertyPurchase[];
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }

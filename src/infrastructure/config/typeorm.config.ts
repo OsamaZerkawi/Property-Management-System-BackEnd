@@ -13,6 +13,11 @@ import { Tag } from "src/domain/entities/tag.entity";
 import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { Image } from "src/domain/entities/image.entity";
 import { UserPost } from "src/domain/entities/user-post.entity";
+import { UserPostSuggestion } from "src/domain/entities/user-post-suggestions.entity";
+import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
+import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
+import { ServiceProvider } from "src/domain/entities/service-provider.entity";
+import { ServiceFeedback } from "src/domain/entities/service-feedback.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -24,7 +29,9 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     entities: [
         User,RefreshToken,TokenBlackList,Office,City,
         Region,Property,Residential,PropertyPost,Tag,
-        PropertyPostTag,Image,UserPost
+        PropertyPostTag,Image,UserPost,UserPostSuggestion,
+        UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
+        ServiceFeedback,
     ],
     synchronize: true,
 });

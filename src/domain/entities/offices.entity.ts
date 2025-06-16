@@ -38,8 +38,7 @@ export class Office {
 
   @Column({
     type: 'decimal',
-    precision: 5,
-    scale: 4,
+    nullable:true
   })
   commission: number;
 
@@ -50,10 +49,15 @@ export class Office {
 
   @Column({
     type: 'decimal',
-    precision: 10,
-    scale: 2,
+    nullable:true
   })
   deposit_per_m2: number;
+
+  @Column({
+    type:'decimal',
+    nullable:true,
+  })
+  tourism_deposit_percentage: number;
 
   @Column({
     type: 'enum',
@@ -68,16 +72,14 @@ export class Office {
   @Column({ type: 'boolean', default: false })
   is_deleted: boolean;
 
-  @Column({ type: 'time' })
+  @Column({type:'text'})
   opening_time: string;
 
-  @Column({ type: 'time' })
+  @Column({type:'text'})
   closing_time: string;
 
   @Column({
     type: 'decimal',
-    precision: 15,
-    scale: 2,
     default: 0,
   })
   profits: number;

@@ -12,6 +12,8 @@ import { Region } from "src/domain/entities/region.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
 import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-office-for-user.use-case";
+import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
+import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
 
 @Module({
     imports: [
@@ -22,6 +24,8 @@ import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-
     providers:[
         GetCommissionOfOfficeUseCase,
         FindOfficeForUserUseCase,
+        GetOfficeFeesUseCase,
+        UpdateOfficeFeesUseCase,
         {
             provide: OFFICE_REPOSITORY,
             useClass: OfficeRepository

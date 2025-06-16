@@ -36,7 +36,7 @@ export class PropertyImageController {
     }
 
     @Get(':propertyId/images')
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getImages(
         @Param('propertyId', ParseIntPipe) propertyId: number,
