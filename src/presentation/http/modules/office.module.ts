@@ -12,6 +12,7 @@ import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
 import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-office.usecase";
+import { GetOfficeDetailsUseCase } from "src/application/use-cases/office/get-office-details.usecase";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-off
     FindOfficeForUserUseCase,
     CreateOfficeUseCase,
     UpdateOfficeUseCase,
+    GetOfficeDetailsUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository,

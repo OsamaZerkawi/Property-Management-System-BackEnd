@@ -12,13 +12,16 @@ import {
   import { successResponse } from "src/shared/helpers/response.helper";
   import { CreateOfficeDto } from "src/application/dtos/office/create-office.dto";
   import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
-
+  import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
+  import { OfficeResource } from 'src/presentation/http/resources/office.resource';
+  
   @Controller('office')
   export class OfficeController {
     constructor(
       private readonly getCommissionOfOfficeUseCase: GetCommissionOfOfficeUseCase,
       private readonly createOfficeUseCase: CreateOfficeUseCase,
-      private readonly updateOfficeUseCase: UpdateOfficeUseCase
+      private readonly updateOfficeUseCase: UpdateOfficeUseCase,
+      private readonly getOfficeDetailsUseCase: GetOfficeDetailsUseCase
     ) {}
   
     @Get()
@@ -54,6 +57,20 @@ import {
       const officeId = parseInt(id, 10);
       const result = await this.updateOfficeUseCase.execute(userId, officeId, dto);
       return successResponse(result, 'تم تحديث بيانات المكتب بنجاح', 200);
+    }
+
+    @Get(':id')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    async getOfficeDetails(
+      @CurrentUser() user,
+      @Param('id') id: string,
+    ) {
+      const officeId = parseInt(id, 10);
+      const userId = user.sub;
+      const officeEntity = await this.getOfficeDetailsUseCase.execute(userId, officeId);
+      const data = OfficeResource.toJson(officeEntity);
+      return successResponse(data, 'تم جلب بيانات المكتب بنجاح', 200);
     }
   }
  
