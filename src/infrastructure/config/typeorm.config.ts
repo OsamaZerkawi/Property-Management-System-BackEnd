@@ -13,6 +13,7 @@ import { Tag } from "src/domain/entities/tag.entity";
 import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { Image } from "src/domain/entities/image.entity";
 import { UserPost } from "src/domain/entities/user-post.entity";
+import { OfficeSocial } from "src/domain/entities/office-social.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -24,7 +25,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     entities: [
         User,RefreshToken,TokenBlackList,Office,City,
         Region,Property,Residential,PropertyPost,Tag,
-        PropertyPostTag,Image,UserPost
+        PropertyPostTag,Image,UserPost,OfficeSocial
     ],
     synchronize: true,
 });

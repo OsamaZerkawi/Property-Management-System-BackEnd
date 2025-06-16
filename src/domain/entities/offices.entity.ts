@@ -12,6 +12,7 @@ import {
 import { User } from './user.entity';
 import { Region } from './region.entity';
 import { Property } from './property.entity';
+import {OfficeSocial} from './office-social.entity'
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 
@@ -56,6 +57,13 @@ export class Office {
   deposit_per_m2: number;
 
   @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+  })
+  tourism_deposit: number;
+
+  @Column({
     type: 'enum',
     enum: PaymentMethod,
     default: PaymentMethod.CASH,
@@ -98,4 +106,7 @@ export class Office {
 
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
+
+  @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
+  socials: OfficeSocial[];
 }

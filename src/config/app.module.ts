@@ -24,6 +24,7 @@ import { OfficeModule } from 'src/presentation/http/modules/office.module';
     RegionModule,
     PropertyImageModule,
     ResidentialOfficeModule, 
+    
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env', 
