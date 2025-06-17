@@ -14,6 +14,7 @@ import { TagModule } from 'src/presentation/http/modules/tag.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
 import { OfficeModule } from 'src/presentation/http/modules/office.module';
 import { SentryModule } from "@sentry/nestjs/setup";
+import { ServicePriceModule } from 'src/presentation/http/modules/service-price.module';
 @Module({
   imports: [
     OfficeModule,
@@ -24,6 +25,7 @@ import { SentryModule } from "@sentry/nestjs/setup";
     RegionModule,
     PropertyImageModule,
     ResidentialOfficeModule, 
+    ServicePriceModule,
     SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,

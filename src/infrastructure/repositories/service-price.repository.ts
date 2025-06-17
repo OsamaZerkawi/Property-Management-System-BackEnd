@@ -1,0 +1,18 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { IServicePriceRepository } from 'src/domain/repositories/service-price.repository';
+import { ServicePrice } from 'src/domain/entities/service-price.entity';
+
+@Injectable()
+export class ServicePriceRepository implements IServicePriceRepository {
+  constructor(
+    @InjectRepository(ServicePrice)
+    private readonly repo: Repository<ServicePrice>,
+  ) {}
+
+  async findPriceByService(service: string): Promise<number | null> {
+    const entity = await this.repo.findOne({ where: { service, isActive: true } });
+    return entity?.pricePerDay ?? null;
+  }
+}

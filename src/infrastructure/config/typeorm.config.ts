@@ -14,7 +14,7 @@ import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { Image } from "src/domain/entities/image.entity";
 import { UserPost } from "src/domain/entities/user-post.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
-
+import {ServicePrice} from "src/domain/entities/service-price.entity";
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
@@ -25,7 +25,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     entities: [
         User,RefreshToken,TokenBlackList,Office,City,
         Region,Property,Residential,PropertyPost,Tag,
-        PropertyPostTag,Image,UserPost,OfficeSocial
+        PropertyPostTag,Image,UserPost,OfficeSocial,ServicePrice
     ],
     synchronize: true,
 });
