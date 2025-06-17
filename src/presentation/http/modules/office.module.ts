@@ -13,6 +13,7 @@ import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
 import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-office.usecase";
 import { GetOfficeDetailsUseCase } from "src/application/use-cases/office/get-office-details.usecase";
+import { GetOfficePaymentMethodUseCase } from "src/application/use-cases/office/get-office-payment-method.use-case";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { GetOfficeDetailsUseCase } from "src/application/use-cases/office/get-of
     CreateOfficeUseCase,
     UpdateOfficeUseCase,
     GetOfficeDetailsUseCase,
+    GetOfficePaymentMethodUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository,
@@ -34,6 +36,7 @@ import { GetOfficeDetailsUseCase } from "src/application/use-cases/office/get-of
   exports: [
     OFFICE_REPOSITORY,
     FindOfficeForUserUseCase,
+    GetOfficePaymentMethodUseCase
   ],
 })
 export class OfficeModule {}

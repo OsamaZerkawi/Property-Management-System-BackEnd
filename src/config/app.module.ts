@@ -13,7 +13,7 @@ import { RegionModule } from 'src/presentation/http/modules/region.module';
 import { TagModule } from 'src/presentation/http/modules/tag.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
 import { OfficeModule } from 'src/presentation/http/modules/office.module';
-
+import { SentryModule } from "@sentry/nestjs/setup";
 @Module({
   imports: [
     OfficeModule,
@@ -24,7 +24,7 @@ import { OfficeModule } from 'src/presentation/http/modules/office.module';
     RegionModule,
     PropertyImageModule,
     ResidentialOfficeModule, 
-    
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env', 

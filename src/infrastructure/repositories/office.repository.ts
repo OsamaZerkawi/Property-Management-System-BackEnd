@@ -72,7 +72,6 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       relations: ['user', 'socials', 'region','region.city'],
     });
   }
-
   async updateOfficeWithSocials(
     officeId: number,
     dto: UpdateOfficeDto,

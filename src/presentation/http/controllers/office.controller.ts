@@ -2,7 +2,7 @@
 import {
     Controller, Get, Post, Body, Put,Patch,
     Param,
-    HttpCode, HttpStatus, UseGuards
+    HttpCode, HttpStatus, UseGuards,UseInterceptors
   } from "@nestjs/common";
   import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
   import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
@@ -14,14 +14,17 @@ import {
   import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
   import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
   import { OfficeResource } from 'src/presentation/http/resources/office.resource';
-  
+  import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
+import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-method.dto'; 
+ 
   @Controller('office')
   export class OfficeController {
     constructor(
       private readonly getCommissionOfOfficeUseCase: GetCommissionOfOfficeUseCase,
       private readonly createOfficeUseCase: CreateOfficeUseCase,
       private readonly updateOfficeUseCase: UpdateOfficeUseCase,
-      private readonly getOfficeDetailsUseCase: GetOfficeDetailsUseCase
+      private readonly getOfficeDetailsUseCase: GetOfficeDetailsUseCase,
+      private readonly getPaymentMethodUseCase: GetOfficePaymentMethodUseCase
     ) {}
   
     @Get()
@@ -71,6 +74,17 @@ import {
       const officeEntity = await this.getOfficeDetailsUseCase.execute(userId, officeId);
       const data = OfficeResource.toJson(officeEntity);
       return successResponse(data, 'تم جلب بيانات المكتب بنجاح', 200);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('/payment-method/:id')
+    async getPaymentMethod(
+      @CurrentUser() user,
+      @Param('id') id: string,
+    ): Promise<GetPaymentMethodDto> { 
+      const userId = user.sub;
+      const officeId = parseInt(id, 10);
+      return this.getPaymentMethodUseCase.execute(userId,officeId);
     }
   }
  
