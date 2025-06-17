@@ -30,6 +30,7 @@ export class ResidentialOfficeController {
     )
     {}
 
+    @Roles('صاحب مكتب')
     @Get()
     @HttpCode(HttpStatus.OK)
     async getProperties(
@@ -45,6 +46,7 @@ export class ResidentialOfficeController {
       return successResponse(properties,'تم ارجاع جميع العقارات الخاصة بمكتبك',200);
     }
 
+    @Roles('صاحب مكتب')
     @Get('/filters')
     async searchProertiesWithFilters(
       @Query() filters: SearchPropertiesDto,
@@ -61,6 +63,7 @@ export class ResidentialOfficeController {
 
     }
 
+    @Roles('صاحب مكتب')
     @Get('/search')
     async seacrhPropertiesByTitle(
       @Query() search: {title: string},
@@ -77,6 +80,7 @@ export class ResidentialOfficeController {
 
     }
 
+    @Roles('صاحب مكتب')
     @Get('/properties/:propertyId')
     async getProperty(
       @Param('propertyId') propertyId: number,
@@ -92,6 +96,7 @@ export class ResidentialOfficeController {
       return successResponse(property,'تم ارجاع العقار بنجاح',200);
     }
 
+    @Roles('صاحب مكتب')
     @Get('/properties/:propertyId/expected-price')
     @HttpCode(HttpStatus.OK)
     async getExpectedPriceForProperty(

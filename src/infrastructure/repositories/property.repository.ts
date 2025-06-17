@@ -104,9 +104,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return updatedProeprty;
   }
 
-  
-
-
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {
     const properties = await this.buildPropertyQuery(userId).getMany();
 

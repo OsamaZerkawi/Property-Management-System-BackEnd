@@ -16,7 +16,7 @@ export class UserPropertyInvoice{
     @Column({type:'enum',enum:InoviceReasons})
     reason: InoviceReasons;
 
-    @Column({type:'enum', enum: InvoicesStatus,})
+    @Column({type:'enum', enum: InvoicesStatus})
     status:InvoicesStatus
 
     @Column({type:'integer',nullable:true})
