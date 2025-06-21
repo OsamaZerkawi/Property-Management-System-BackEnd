@@ -14,6 +14,7 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { RolesGuard } from "src/shared/guards/roles.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
 
@@ -158,6 +159,5 @@ export class ResidentialOfficeController {
       return successResponse([],'تم تحديث تفاصيل العقار بنجاح',200);
 
     }
-
 
 }

@@ -1,9 +1,13 @@
 import { NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
 import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
+import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
+import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { ResidentialPropertyRepositoryInterface } from "src/domain/repositories/residential-property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
@@ -43,11 +47,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
           city: true,
         },
         office: true,
-        post: {
-          propertyPostTags: {
-            tag: true,
-          },
-        },
+        post: true,
       },
     },
   });
@@ -81,5 +81,134 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .getOne();
 
       return updatedResidentialProperty;
+  }
+
+  async searchFilteredResidentialsProperties(baseUrl: string, filters: ResidentialPropertiesSearchFiltersDto,page = 1,items = 10) {
+    console.log('inside search filter function')
+    const query = this.buildBaseQuery();
+    const filterMap = this.getFilterMap();
+
+    //Apply simple filters using the map
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && filterMap.has(key as keyof ResidentialPropertiesSearchFiltersDto)) {
+        filterMap.get(key as keyof ResidentialPropertiesSearchFiltersDto)!(query, value);
+      }
+    });
+
+    this.applyRoomDetailsFilter(query,filters.room_details);
+    filters.tag && this.applyTagsFilters(query, filters.tag);
+
+    query.select([
+      'property.id',
+      'property.area',
+      'property.region',
+      'post.id',
+      'post.title',
+      'post.image',
+      'post.status',
+      'post.description',
+      'residential.id',
+      'residential.listing_type',
+      'residential.selling_price',
+      'residential.monthly_price',
+      'residential.rental_period',
+      'region.id',
+      'region.name',
+      'city.id',
+      'city.name'
+    ]);
+
+  const [residentials, total] = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getManyAndCount();
+
+  const formatted = residentials.map((residential) => this.formatResidential(residential, baseUrl));
+
+  return [formatted, total];
+  }
+  
+  private formatResidential(residential: Residential, baseUrl: string) {
+    const property = residential.property;
+  
+    const base = {
+      postTitle: property.post?.title ?? '',
+      postDescription: property.post.description,
+      postImage: `${baseUrl}/uploads/properties/posts/images/${property.post?.image ?? 'default.jpg'}`,
+      location: `${property.region?.city?.name ?? ''}, ${property.region?.name ?? ''}`,
+    };
+  
+    if (residential.listing_type === ListingType.RENT) {
+      const rentalPeriod = residential.rental_period ?? null;
+      const baseMonthlyPrice = residential.monthly_price ?? null;
+      const adjustedMonthlyPrice =
+        rentalPeriod === RentalPeriod.YEARLY && baseMonthlyPrice !== null
+          ? baseMonthlyPrice * 12
+          : baseMonthlyPrice;
+  
+      return {
+        ...base,
+        listing_type: 'أجار',
+        price: adjustedMonthlyPrice,
+      };
+    } else {
+      return {
+        ...base,
+        listing_type: 'بيع',
+        price: residential.selling_price ?? null,
+      };
+    }
+  }
+
+  private getFilterMap(){
+    return new Map<keyof ResidentialPropertiesSearchFiltersDto, (query: any,value: any) => void>([
+      ['regionId', (q, v) => q.andWhere('property.region_id = :regionId', { regionId: v })],
+      ['listing_type', (q, v) => q.andWhere('residential.listing_type = :listing_type', { listing_type: v })],
+      ['ownership_type', (q, v) => q.andWhere('residential.ownership_type = :ownership_type', { ownership_type: v })],
+      ['status', (q, v) => q.andWhere('residential.status = :status', { status: v })],
+      ['has_furniture', (q, v) => q.andWhere('property.has_furniture = :has_furniture', { has_furniture: v })],
+      ['direction', (q, v) => q.andWhere('residential.direction = :direction', { direction: v })],
+      ['minPrice', (q, v) => q.andWhere('(residential.monthly_price >= :minPrice OR residential.selling_price >= :minPrice)', { minPrice: v })],
+      ['maxPrice', (q, v) => q.andWhere('(residential.monthly_price <= :maxPrice OR residential.selling_price <= :maxPrice)', { maxPrice: v })],
+      ['minArea', (q, v) => q.andWhere('property.area >= :minArea', { minArea: v })],
+      ['maxArea', (q, v) => q.andWhere('property.area <= :maxArea', { maxArea: v })],
+      ['floor_number', (q, v) => q.andWhere('property.floor_number = :floor_number', { floor_number: v })],    
+    ]);
+  }
+
+  private applyRoomDetailsFilter(query: any,roomDetails?: ResidentialPropertiesSearchFiltersDto['room_details']){
+    if (!roomDetails) return; 
+
+    const roomFilters = [
+      { key: 'room_count', field: 'property.room_count' },
+      { key: 'bedroom_count', field: 'property.bedroom_count' },
+      { key: 'living_room_count', field: 'property.living_room_count' },
+      { key: 'kitchen_count', field: 'property.kitchen_count' },
+      { key: 'bathroom_count', field: 'property.bathroom_count' },
+    ];
+
+    roomFilters.forEach(({ key, field }) => {
+      const value = roomDetails[key as keyof typeof roomDetails];
+      if (value !== undefined) {
+        query.andWhere(`${field} = :${key}`, { [key]: value });
+      }
+    });
+  }
+
+  private applyTagsFilters(query: any,tag: PropertyPostTag){
+    if(tag){
+      query.andWhere('post.tag = :tag', { tag });
+    }
+  }
+
+  private buildBaseQuery(){
+    return this.residentialRepo
+      .createQueryBuilder('residential')
+      .leftJoin('residential.property', 'property')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.post', 'post')
+      .where('property.is_deleted = false')
+      .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED });
   }
 }

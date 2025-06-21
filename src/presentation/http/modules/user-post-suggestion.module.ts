@@ -10,12 +10,13 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserPost } from "src/domain/entities/user-post.entity";
 import { UserPostSuggestion } from "src/domain/entities/user-post-suggestions.entity";
 import { Property } from "src/domain/entities/property.entity";
+import { PropertyModule } from "./property.module";
 
 @Module({
     imports:[
         AuthModule,
         UserPostModule,
-        ResidentialOfficeModule,
+        PropertyModule,
         TypeOrmModule.forFeature([UserPost,UserPostSuggestion,Property])
     ],
     controllers:[UserPostSuggestionController],

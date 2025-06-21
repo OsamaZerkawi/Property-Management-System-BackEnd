@@ -1,13 +1,13 @@
 import { Inject } from "@nestjs/common";
 import { PROPERTY_REPOSITORY, PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 
-export class SearchResidentialPropertyByTitleUseCase {
+export class SearchPropertiesByTitleUseCase {
     constructor(
-        @Inject(PROPERTY_REPOSITORY)
+        @Inject(PROPERTY_REPOSITORY)    
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(userId: number,title: string,baseUrl: string){
-        return await this.propertyRepo.searchPropertiesForOfficeByTitle(userId,title,baseUrl);
+    async execute(title: string,baseUrl: string,page: number,items: number){
+        return await this.propertyRepo.searchPropertyByTitle(title,baseUrl,page,items);
     }
 }

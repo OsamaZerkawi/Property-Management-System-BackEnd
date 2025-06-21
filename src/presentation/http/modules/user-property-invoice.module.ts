@@ -11,11 +11,12 @@ import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { User } from "src/domain/entities/user.entity";
 import { CreateUserProeprtyInvoiceUseCase } from "src/application/use-cases/user-property-reservation/create-user-property-invoice.use-case";
+import { PropertyModule } from "./property.module";
 
 @Module({
     imports:[
         AuthModule,
-        ResidentialOfficeModule,
+        PropertyModule,
         TypeOrmModule.forFeature([UserPropertyInvoice,Property,Residential,User])
     ],
     controllers:[UserPropertyInvoiceController],

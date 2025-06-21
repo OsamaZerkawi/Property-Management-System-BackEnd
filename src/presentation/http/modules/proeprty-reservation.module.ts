@@ -17,10 +17,11 @@ import { Property } from "src/domain/entities/property.entity";
 import { FindUserProeprtyReservationWithDetailsUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation-with-details.use-case";
 import { ResidentialOfficeModule } from "./residential-office.module";
 import { FindPropertyReservationDetails } from "src/application/use-cases/user-property-reservation/find-property-reservation-details.use-case";
+import { PropertyModule } from "./property.module";
 
 @Module({
     imports:[
-        ResidentialOfficeModule,
+        PropertyModule,
         UserPropertyInvoiceModule,
         AuthModule,
         TypeOrmModule.forFeature([UserPropertyPurchase,Office,PropertyPost,Region,City,Residential,Property]),

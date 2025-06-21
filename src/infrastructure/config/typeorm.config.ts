@@ -9,8 +9,8 @@ import { Region } from "src/domain/entities/region.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
-import { Tag } from "src/domain/entities/tag.entity";
-import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
+// import { Tag } from "src/domain/entities/tag.entity";
+// import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { Image } from "src/domain/entities/image.entity";
 import { UserPost } from "src/domain/entities/user-post.entity";
 import { UserPostSuggestion } from "src/domain/entities/user-post-suggestions.entity";
@@ -32,8 +32,8 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     database: configService.get<string>('DB_NAME'),
     entities: [
         User,RefreshToken,TokenBlackList,Office,City,
-        Region,Property,Residential,PropertyPost,Tag,
-        PropertyPostTag,Image,UserPost,UserPostSuggestion,
+        Region,Property,Residential,PropertyPost,
+        Image,UserPost,UserPostSuggestion,
         UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
     ],

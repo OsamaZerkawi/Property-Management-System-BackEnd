@@ -1,5 +1,6 @@
 import { IsArray, IsEnum, IsNumber, IsNumberString, IsOptional } from "class-validator";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
 
 export class SearchPropertiesDto {
@@ -20,7 +21,6 @@ export class SearchPropertiesDto {
   status?: PropertyStatus;
 
   @IsOptional()
-  @IsArray()
-  @IsNumber({},{each: true})
-  tagIds: number[];
+  @IsEnum(PropertyPostTag)
+  tag?: PropertyPostTag;
 }

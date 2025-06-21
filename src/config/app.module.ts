@@ -10,7 +10,6 @@ import { PropertyImageModule } from 'src/presentation/http/modules/property-imag
 import { ResidentialOfficeModule } from 'src/presentation/http/modules/residential-office.module';
 import { CityModule } from 'src/presentation/http/modules/city.module';
 import { RegionModule } from 'src/presentation/http/modules/region.module';
-import { TagModule } from 'src/presentation/http/modules/tag.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
 import { OfficeModule } from 'src/presentation/http/modules/office.module';
 import { UserPostModule } from 'src/presentation/http/modules/user-post.module';
@@ -23,22 +22,23 @@ import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from 'src/shared/guards/permission.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { PropertyModule } from 'src/presentation/http/modules/property.module';
 
 @Module({
   imports: [
     RoleModule,
+    ResidentialOfficeModule,
     PermissionModule,
+    PropertyModule,
     UserPostModule,
     ServiceProviderModule,
     UserPostSuggestionModule,
     OfficeModule,
     AuthModule,
-    TagModule,
     CityModule,
     PropertyPostModule,
     RegionModule,
     PropertyImageModule,
-    ResidentialOfficeModule,
     PropertyReservationModule,
     ConfigModule.forRoot({
       isGlobal:true,

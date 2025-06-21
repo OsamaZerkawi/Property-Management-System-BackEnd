@@ -1,13 +1,19 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { basename } from "path";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
+import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
 import { Property } from "src/domain/entities/property.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
+import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
+import { BroadcasterResult } from "typeorm/subscriber/BroadcasterResult";
+import { queryObjects } from "v8";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -73,8 +79,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         kitchen_count:data.room_details.kitchen_count,
     });
     
-    await this.propertyRepo.save(property);
-    return property;
+    return this.propertyRepo.save(property);
   }
 
   async updateProperty(id: number,data: UpdatePropertyDto) {
@@ -105,28 +110,88 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
 
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {
-    const properties = await this.buildPropertyQuery(userId).getMany();
+    const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId });
+    
+    const properties = await query.getMany();
 
-    return properties.map(property => this.formatPropertyDetails(property, baseUrl));
-  }
-
-  async findPropertiesByUserOfficeWithFilters(userId: number, filters: SearchPropertiesDto,baseUrl: string) {
-    const properties = await this.buildPropertyQuery(userId,filters).getMany();
     
     return properties.map(property => this.formatPropertyDetails(property, baseUrl));
   }
 
-  async searchPropertiesByTitle(userId: number,title: string,baseUrl: string) {
-      const properties = await this.buildPropertyQuery(userId)
-      .where('post.title ILIKE :title', { title: `%${title}%` })
-      .getMany();
+  async findPropertyDetailsById(propertyId: number, baseUrl: string) {
+    const query = await this.createBasePropertyDetailsQuery()
+    .andWhere('property.id = :propertyId',{propertyId});
 
-      return properties.map(property => this.formatPropertyDetails(property,baseUrl));
+    query.addSelect([
+      'office.id',
+      'office.name',
+      'office.logo',
+      'office.type',
+    ]);
+
+    // if (userId) {
+    //   query.addSelect(
+    //     subQuery => {
+    //       return subQuery
+    //         .select('1')
+    //         .from('property_favorites', 'pf')
+    //         .where('pf.property_id = property.id')
+    //         .andWhere('pf.user_id = :userId', { userId });
+    //     },
+    //     'is_favorite'
+    //   );
+    // }
+
+    const property = await query.getOne();
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار بهذا المعرف ',404)
+      );  
+    }
+
+    const formatted = this.formatPropertyDetails(property,baseUrl);
+
+    // should chage path of images for office's logo and add rate of office
+    return {
+      ...formatted,
+      // is_favorite: (property as any).is_favorite ? 1 : 0,
+      office: {
+        id: property.office?.id,
+        name: property.office?.name,
+        logo: property.office?.logo
+          ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
+          : null,
+        type: property.office?.type ?? null,
+      },
+    };
+  }
+
+  async findPropertiesByUserOfficeWithFilters(userId: number, filters: SearchPropertiesDto,baseUrl: string) {
+    const query =  await this.createBasePropertyDetailsQuery(filters)
+    .andWhere('office.user_id = :userId', { userId });
+    
+    const properties = await query.getMany();
+
+    
+    return properties.map(property => this.formatPropertyDetails(property, baseUrl));
+  }
+
+  async searchPropertiesForOfficeByTitle(userId: number,title: string,baseUrl: string) {
+    const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId })
+    .andWhere('post.title ILIKE :title', { title: `%${title}%` });
+    
+    const properties =await query.getMany();
+
+    return properties.map(property => this.formatPropertyDetails(property,baseUrl));
   }
 
 
   async findPropertyByPropertyIdAndUserOffice(userId: number,propertyId: number, baseUrl: string) {
-    const property = await this.buildPropertyQuery(userId)
+    const property = await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId })
     .andWhere('property.id = :propertyId', { propertyId })
     .getOne();
 
@@ -167,15 +232,84 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       };
   }
 
+  async getAllProperties(baseUrl: string,page: number,items: number) {
+    const query = await this.buildPropertyQuery(baseUrl);
+
+  const [properties, total] = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getManyAndCount();
+
+  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+  }
+
+  async getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number) {
+    const query = await this.buildPropertyQuery(baseUrl,filters);
+
+  const [properties, total] = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getManyAndCount();
+
+  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+  }
+
+  async searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number) {
+    const query = await this.buildPropertyQuery(baseUrl);
+    query.andWhere('post.title ILIKE :title', { title: `%${title}%` });
+
+  const [properties, total] = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getManyAndCount();
+
+  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+  }
+
+  private formatProperty(property: Property,baseUrl: string){
+    const base = {
+      propertyId:property.id,
+      postTitle: property.post.title,
+      postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+      location: `${property.region?.city?.name}, ${property.region?.name}`,
+      postDate: property.post.date.toISOString().split('T')[0],
+    }
+
+    if (property.residential?.listing_type === ListingType.RENT) {
+      const rentalPeriod = property.residential?.rental_period ?? null;
+      const baseMonthlyPrice = property.residential?.monthly_price ?? null;
+      const adjustedMonthlyPrice = rentalPeriod == RentalPeriod.YEARLY && baseMonthlyPrice !== null
+        ? baseMonthlyPrice * 12
+        : baseMonthlyPrice;
+      
+      return {
+        ...base,
+        listing_type: 'أجار',
+        price: adjustedMonthlyPrice,
+      };
+    } else {
+      return {
+        ...base,
+        listing_type: 'بيع',
+        price: property.residential.selling_price ?? null,
+      };
+    }   
+  }
+
   private formatPropertyDetails(property: Property, baseUrl: string) {
   const base = {
+    postTitle: property.post?.title,
+    postDescription: property.post?.description,
+    postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+    postDate: property.post.created_at.toISOString().split('T')[0],
+    PostStatus: property.post.status,
     id: property.id,
     area: property.area,
     property_type: property.property_type,
     ownership_type: property.residential?.ownership_type ?? null,
     direction: property.residential?.direction ?? null,
     status: property.residential?.status ?? null,
-    location: {
+    coordinates: {
       latitude: property.latitude,
       longitude: property.longitude,
     },
@@ -203,19 +337,22 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       id: image.id,
       image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
     })),
-    tags: property.post?.propertyPostTags?.map(ppt => ({
-      id: ppt.tag?.id,
-      name: ppt.tag?.name,
-    })),
+    tag: property.post?.tag,
   };
 
   if (property.residential?.listing_type === ListingType.RENT) {
+    const rentalPeriod = property.residential?.rental_period ?? null;
+    const baseMonthlyPrice = property.residential?.monthly_price ?? null;
+    const adjustedMonthlyPrice = rentalPeriod == RentalPeriod.YEARLY && baseMonthlyPrice !== null
+      ? baseMonthlyPrice * 12
+      : baseMonthlyPrice;
+    
     return {
       ...base,
       listing_type: 'أجار',
       rent_details: {
-        monthly_price: property.residential?.monthly_price ?? null,
-        rental_period: property.residential?.rental_period ?? null,
+        price: adjustedMonthlyPrice,
+        rental_period: rentalPeriod
       },
     };
   } else {
@@ -231,18 +368,96 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
  }
 
- private buildPropertyQuery(userId: number,filters?: SearchPropertiesDto){
+ private async buildPropertyQuery(baseUrl: string,filters?: PropertiesFiltersDto){
+      const query = this.propertyRepo.createQueryBuilder('property')
+        .leftJoin('property.residential', 'residential')
+        .leftJoin('property.post', 'post')
+        .leftJoin('property.region', 'region')
+        .leftJoin('region.city', 'city')
+        .leftJoin('post.propertyPostTags','ppt')
+        .leftJoin('ppt.tag','tag')
+        .select([
+          'property.id',
+          'property.area',
+          'property.region',
+      
+          'post.id',
+          'post.title',
+          'post.image',
+          'post.status',
+          'post.date',
+    
+          'ppt.id',
+          'tag.id',
+      
+          'residential.listing_type',
+          'residential.selling_price',
+          'residential.monthly_price',
+          'residential.rental_period',
+      
+          'region.id',
+          'region.name',
+      
+          'city.id',
+          'city.name',
+        ])
+        .addSelect(
+          `CASE
+             WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+             WHEN residential.listing_type = :rent THEN residential.monthly_price
+             ELSE residential.selling_price
+           END`,
+          'calculated_price'
+        )
+        .where('property.is_deleted = false')
+        .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED })
+        .setParameters({
+          rent: ListingType.RENT,
+          yearly: RentalPeriod.YEARLY,
+        });
+      
+      if (filters) {
+        if (filters.listing_type) {
+          query.andWhere('residential.listing_type = :listing_type', {
+            listing_type: filters.listing_type,
+          });
+        }
+    
+        if (filters.regionId) {
+          query.andWhere('region.id = :regionId', { regionId: filters.regionId });
+        }
+    
+        if (filters.tags && filters.tags.length > 0) {
+          console.log('inside filter tags')
+          query.andWhere('tag.id IN (:...tagIds)', { tagIds: filters.tags });
+        }
+      
+        if (filters.orderByPrice) {
+          query.orderBy('calculated_price',  'DESC');
+        }
+      
+        if (filters.orderByArea) {
+          query.addOrderBy('property.area', 'DESC');
+        }
+    
+        if (filters.orderByDate) {
+          query.addOrderBy('post.date', 'DESC');
+        }
+      }
+  
+    return query;
+
+ }
+
+ private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto){
   const query = this.propertyRepo.createQueryBuilder('property')
     .leftJoin('property.office', 'office')
     .leftJoin('property.residential', 'residential')
     .leftJoin('property.images', 'images')
     .leftJoin('property.region', 'region')
     .leftJoin('region.city', 'city')
-    .leftJoin('property.post', 'propertyPost')
-    .leftJoin('propertyPost.propertyPostTags', 'propertyPostTag')
-    .leftJoin('propertyPostTag.tag', 'tag')
-    .where('office.user_id = :userId', { userId })
-    .andWhere('property.is_deleted = false')
+    .leftJoin('property.post', 'post')
+    .where('property.is_deleted = false')
     .select([
     'property.id',
     'property.area',
@@ -259,6 +474,14 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     'property.kitchen_count',
     'property.bathroom_count',
     'property.has_furniture',
+
+    'post.id',
+    'post.title',
+    'post.image',
+    'post.created_at',
+    'post.status',
+    'post.description',
+    'post.tag',
 
     'residential.status',
     'residential.monthly_price',
@@ -278,11 +501,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     'city.id',
     'city.name',
-
-    'propertyPost.id',
-    'propertyPostTag.id', 
-    'tag.id',
-    'tag.name',
     ]);
 
   // Apply optional filters
@@ -303,8 +521,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       query.andWhere('residential.status = :status', { status: filters.status });
     }
 
-    if (filters.tagIds?.length) {
-      query.andWhere('tag.id IN (:...tagIds)', { tagIds: filters.tagIds });
+    if (filters.tag) {
+      query.andWhere('post.tag = :tag', { tag: filters.tag });
     }
   }
 

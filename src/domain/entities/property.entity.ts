@@ -9,6 +9,8 @@ import {
   ManyToOne,
   OneToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Office } from './offices.entity';
 import { Region } from './region.entity';
@@ -19,6 +21,7 @@ import { PropertyPost } from './property-posts.entitiy';
 import { Image } from './image.entity';
 import { UserPostSuggestion } from './user-post-suggestions.entity';
 import { UserPropertyInvoice } from './user-property-invoice.entity';
+import { User } from './user.entity';
 
 
 @Entity('properties')
@@ -94,6 +97,14 @@ export class Property {
 
   @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.property)
   invoices: UserPropertyInvoice[];
+
+  @ManyToMany(() => User, user => user.favoriteProperties)
+  @JoinTable({
+    name: 'property_favorites',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  favoritedByUsers: User[];
 
   @CreateDateColumn()
   created_at: Date;

@@ -4,9 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CreatePropertyPostDto } from "src/application/dtos/property/CreatePropertyPost.dto";
 import { UpdatePropertyPostDto } from "src/application/dtos/property/UpdatePropertyPost.dto";
-import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
-import { Tag } from "src/domain/entities/tag.entity";
 import { PropertyPostRepositoryInterface } from "src/domain/repositories/property-post.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { In, Repository } from "typeorm";
@@ -15,14 +13,14 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
     constructor(
         @InjectRepository(PropertyPost)
         private readonly propertyPostRepo: Repository<PropertyPost>,
-        @InjectRepository(PropertyPostTag)
-        private readonly propertyPostTagRepo: Repository<PropertyPostTag>
     ){}
     async createPropertyPostAndSaveIt(data: CreatePropertyPostDto) {
         const propertyPost = await this.propertyPostRepo.create({
             property:data.property,
             title: data.postTitle,
             image: data.postImage,
+            description:data.postDescription,
+            tag:data.postTag,
             date: new Date(),
         });
 
@@ -31,31 +29,31 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
         return propertyPost;
     }
 
-    async attachTagsToPost(post: PropertyPost, tags: Tag[]) {
-        const tagIds = tags.map(tag => tag.id);
+    async attachTagsToPost(post: PropertyPost, tags: any) {
+        // const tagIds = tags.map(tag => tag.id);
       
-        const existingPostTags = await this.propertyPostTagRepo.find({
-          where: {
-            propertyPost: { id: post.id },
-            tag: In(tagIds),
-          },
-          relations: ['tag'],
-        });
+        // const existingPostTags = await this.propertyPostTagRepo.find({
+        //   where: {
+        //     propertyPost: { id: post.id },
+        //     tag: In(tagIds),
+        //   },
+        //   relations: ['tag'],
+        // });
       
-        const existingTagIds = new Set(existingPostTags.map(pt => pt.tag.id));
+        // const existingTagIds = new Set(existingPostTags.map(pt => pt.tag.id));
       
-        const postTagsToSave = tags
-          .filter(tag => !existingTagIds.has(tag.id))
-          .map(tag =>
-            this.propertyPostTagRepo.create({
-              propertyPost: post,
-              tag,
-            })
-          );
+        // const postTagsToSave = tags
+        //   .filter(tag => !existingTagIds.has(tag.id))
+        //   .map(tag =>
+        //     this.propertyPostTagRepo.create({
+        //       propertyPost: post,
+        //       tag,
+        //     })
+        //   );
       
-        if (postTagsToSave.length) {
-          await this.propertyPostTagRepo.save(postTagsToSave);
-        }
+        // if (postTagsToSave.length) {
+        //   await this.propertyPostTagRepo.save(postTagsToSave);
+        // }
     }
 
   async updatePropertyPost(id: number, data: UpdatePropertyPostDto) {
@@ -68,7 +66,6 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
     }
     const updatePayload: Partial<PropertyPost> = {};
 
-    if (data.postTitle !== undefined) updatePayload.title = data.postTitle;
     if (data.postImage !== undefined) updatePayload.image = data.postImage;
 
     

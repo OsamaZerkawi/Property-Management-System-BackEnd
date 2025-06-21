@@ -6,7 +6,6 @@ import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.
 import { PROPERTY_REPOSITORY, PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { UpdatePropertyPostDto } from "src/application/dtos/property/UpdatePropertyPost.dto";
 import { UpdatePropertyPostUseCase } from "../property-post/update-propety-post.use-case";
-import { FindTagsUseCase } from "../tag/find-tags.use-case";
 import { AttachTagsToPostUseCase } from "../property-post/attach-tags-to-post.use-case";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
 import { UpdateResidentialPropertyUseCase } from "./update-residential-property.use-case";
@@ -17,8 +16,6 @@ export class UpdateResidentialPropertyDetailsUseCase{
         private readonly findOneResidentialPropertyUseCase: FindOneResidentialPropertyUseCase,
         private readonly findRegionUseCase: FindRegionUseCase,
         private readonly updatePropertyPostUseCase: UpdatePropertyPostUseCase,
-        private readonly findTagsUseCase: FindTagsUseCase,
-        private readonly attachTagsToPostUseCase: AttachTagsToPostUseCase,
         private readonly updateResidentialPropertyUseCase: UpdateResidentialPropertyUseCase,
         private readonly residentialPropertyAccessService: ResidentialPropertyAccessService,
         @Inject (PROPERTY_REPOSITORY)
@@ -51,17 +48,11 @@ export class UpdateResidentialPropertyDetailsUseCase{
 
         const propertyPostDto: UpdatePropertyPostDto = {
             ...(imageName && { postImage: imageName }),// only adds region if truthy (defined)
-            postTitle: data.postTitle
+            postDescription: data.postDescription,
         }
 
 
         const propertyPost = await this.updatePropertyPostUseCase.execute(property.post.id,propertyPostDto);
-
-        if(data.tags){
-           const tags = await this.findTagsUseCase.execute(data.tags)
-
-            await this.attachTagsToPostUseCase.execute(propertyPost,tags);
-        }
 
         const residentialPropertyDto: UpdateResidentialPropertyDetailsDto = {
           listingType: data.listing_type,
