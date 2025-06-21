@@ -1,6 +1,7 @@
 import { Transform, Type } from "class-transformer";
 import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional } from "class-validator";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 
 export class PropertiesFiltersDto {
     @IsNumber()
@@ -8,11 +9,8 @@ export class PropertiesFiltersDto {
     regionId?: number;
   
     @IsOptional()
-    @IsArray()
-    @Type(() => Number)
-    @IsNumber({}, { each: true })
-    @Transform(({ value }) => Array.isArray(value) ? value : [value])
-    tags?: number[];
+    @IsEnum(PropertyPostTag)
+    tag?:PropertyPostTag;
 
     @IsOptional()
     @IsEnum(ListingType)

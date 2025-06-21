@@ -6,8 +6,10 @@ import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFi
 import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
 import { Property } from "src/domain/entities/property.entity";
+import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
+import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
@@ -60,6 +62,106 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
     return result;
 
+  }
+
+  async findRelatedProperties(id: number, baseUrl: string) {
+    const query = await this.createBasePropertyDetailsQuery().andWhere('property.id =:id',{id});
+
+    const property = await query.getOne();
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار لهذا المعرف',404)
+      );
+    }
+
+    const residential: Residential = property.residential;
+
+    const listingType: ListingType = residential.listing_type;
+
+    let price = 0;
+
+    if(listingType == ListingType.SALE && residential.selling_price){
+      price = residential.selling_price;
+    }
+    else if (listingType == ListingType.RENT && residential.monthly_price){
+      price = residential.rental_period === RentalPeriod.YEARLY
+        ? residential.monthly_price * 12
+        : residential.monthly_price;
+    }
+
+    const minPrice = price * 0.8;
+    const maxPrice = price * 1.2;
+
+  const query2 = this.propertyRepo.createQueryBuilder('property')
+      .leftJoin('property.residential', 'residential')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.images', 'images')
+      .where('property.id != :id', { id })
+      .andWhere('property.is_deleted = false')
+      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
+      .andWhere('post.status = :postStatus', { postStatus: PropertyPostStatus.APPROVED })
+      .andWhere('property.property_type = :type', { type: property.property_type })
+      .andWhere('region.id = :regionId', { regionId: property.region?.id });  
+
+    if (listingType === ListingType.SALE) {
+      query2.andWhere('residential.selling_price BETWEEN :min AND :max', {
+        min: minPrice,
+        max: maxPrice,
+      });
+    } else if (listingType === ListingType.RENT) {
+      query2.andWhere('residential.monthly_price BETWEEN :min AND :max', {
+        min: minPrice,
+        max: maxPrice,
+      });
+    }
+
+    query2
+    .select([
+      'property.id',
+      'property.area',
+      'property.region',
+      'property.rate',
+  
+      'post.id',
+      'post.title',
+      'post.description',
+      'post.tag',
+      'post.image',
+      'post.status',
+      'post.date',
+  
+      'residential.listing_type',
+      'residential.selling_price',
+      'residential.monthly_price',
+      'residential.rental_period',
+  
+      'region.id',
+      'region.name',
+  
+      'city.id',
+      'city.name',
+    ])
+    .addSelect(
+      `CASE
+         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         ELSE residential.selling_price
+       END`,
+      'calculated_price'
+    )
+    .setParameters({
+      rent: ListingType.RENT,
+      yearly: RentalPeriod.YEARLY,
+    })
+    .orderBy('post.date', 'DESC')
+    .take(5);
+
+    const properties = await query2.getMany();
+
+    return properties.map((property) => this.formatProperty(property, baseUrl));
   }
 
   async createPropertyAndSaveIt(data: CreatePropertyDto) {
@@ -115,7 +217,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     
     const properties = await query.getMany();
 
-    
+
     return properties.map(property => this.formatPropertyDetails(property, baseUrl));
   }
 
@@ -286,6 +388,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         ...base,
         listing_type: 'أجار',
         price: adjustedMonthlyPrice,
+        rate:property.rate ?? null,
       };
     } else {
       return {
@@ -374,21 +477,19 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         .leftJoin('property.post', 'post')
         .leftJoin('property.region', 'region')
         .leftJoin('region.city', 'city')
-        .leftJoin('post.propertyPostTags','ppt')
-        .leftJoin('ppt.tag','tag')
         .select([
           'property.id',
           'property.area',
           'property.region',
+          'property.rate',
       
           'post.id',
           'post.title',
+          'post.description',
+          'post.tag',
           'post.image',
           'post.status',
           'post.date',
-    
-          'ppt.id',
-          'tag.id',
       
           'residential.listing_type',
           'residential.selling_price',
@@ -427,9 +528,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           query.andWhere('region.id = :regionId', { regionId: filters.regionId });
         }
     
-        if (filters.tags && filters.tags.length > 0) {
-          console.log('inside filter tags')
-          query.andWhere('tag.id IN (:...tagIds)', { tagIds: filters.tags });
+        if (filters.tag) {
+          query.andWhere('post.tag = :tag', { tag: filters.tag });
         }
       
         if (filters.orderByPrice) {
@@ -474,6 +574,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     'property.kitchen_count',
     'property.bathroom_count',
     'property.has_furniture',
+    'property.rate',
 
     'post.id',
     'post.title',

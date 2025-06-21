@@ -15,6 +15,7 @@ import { SearchPropertiesByTitleUseCase } from "src/application/use-cases/proper
 import { SearchPropertyWithAdvancedFiltersUseCase } from "src/application/use-cases/property/search-property-with-advanced-filter.use-case";
 import { ResidentialOfficeModule } from "./residential-office.module";
 import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/property/find-property-details-by-id.use-case";
+import { FindRelatedPropertiesUseCase } from "src/application/use-cases/property/find-related-properties.use-case";
 
 @Module({
     imports:[
@@ -29,6 +30,7 @@ import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/proper
         SearchPropertiesByTitleUseCase,
         SearchPropertyWithAdvancedFiltersUseCase,
         FindPropertyDetailsByIdUseCase,
+        FindRelatedPropertiesUseCase,
         {
             provide:PROPERTY_REPOSITORY,
             useClass:PropertyRepository

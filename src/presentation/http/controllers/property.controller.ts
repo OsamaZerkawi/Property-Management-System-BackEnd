@@ -4,6 +4,7 @@ import { userInfo } from "os";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/property/find-property-details-by-id.use-case";
+import { FindRelatedPropertiesUseCase } from "src/application/use-cases/property/find-related-properties.use-case";
 import { GetAllPropertiesWithFiltersUseCase } from "src/application/use-cases/property/get-all-properties-with-filters.use-case";
 import { GetAllPropertiesUseCase } from "src/application/use-cases/property/get-all-properties.use-case";
 import { SearchPropertiesByTitleUseCase } from "src/application/use-cases/property/search-properties-by-title.use-case";
@@ -20,6 +21,7 @@ export class PropertyController{
         private readonly searchPropertiesByTitleUseCase: SearchPropertiesByTitleUseCase,
         private readonly searchPropertyWithAdvancedFiltersUseCase: SearchPropertyWithAdvancedFiltersUseCase,
         private readonly findPropertyDetailsByIdUseCase: FindPropertyDetailsByIdUseCase,
+        private readonly findRelatedPropertiesUseCase: FindRelatedPropertiesUseCase,
     ){}
 
     @Get()
@@ -50,6 +52,20 @@ export class PropertyController{
         return successResponse(property,'تم ارجاع تفاصيل العقار',200);
     }
 
+    @Get(':propertyId/related')
+    @HttpCode(HttpStatus.OK)
+    @Public()
+    async getRelatedProperteis(
+        @Param('propertyId',ParseIntPipe) propertyId: number,
+        @Req() request: Request
+    ){
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+        const properties = await this.findRelatedPropertiesUseCase.execute(propertyId,baseUrl);
+
+        return successResponse(properties,'تم ارجاع العقارات ذات صلة',200);
+    }
+
     @Get('filters') 
     @Public()
     @HttpCode(HttpStatus.OK)
@@ -60,7 +76,6 @@ export class PropertyController{
         @Req() request: Request
     ){
 
-         console.log(filters.tags);
         const baseUrl = `${request.protocol}://${request.get('host')}`;
         const [properties, total] = await this.getAllPropertiesWithFiltersUseCase.execute(baseUrl, filters, page, items);
 

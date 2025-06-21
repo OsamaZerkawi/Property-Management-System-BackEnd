@@ -9,6 +9,7 @@ export interface PropertyRepositoryInterface {
     findById(id: number);
     findPropertyDetailsById(propertyId: number,baseUrl: string);
     findByIdWithOwner(propertyId: number);
+    findRelatedProperties(id: number,baseUrl: string);
     createPropertyAndSaveIt(data: CreatePropertyDto);
     updateProperty(id: number,data: UpdatePropertyDto);
     findPropertiesByUserOffice(userId: number,baseUrl: string);
