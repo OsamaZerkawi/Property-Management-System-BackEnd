@@ -7,7 +7,7 @@ export class GetAllPropertiesUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(baseUrl: string,page: number,items: number){
-        return await this.propertyRepo.getAllProperties(baseUrl,page,items);
+    async execute(baseUrl: string,page: number,items: number,userId: number){
+        return await this.propertyRepo.getAllProperties(baseUrl,page,items,userId);
     }
 }

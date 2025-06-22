@@ -8,7 +8,7 @@ export class GetAllPropertiesWithFiltersUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(baseUrl: string,filters: PropertiesFiltersDto,page: number,items: number){
-        return await this.propertyRepo.getAllPropertiesWithFilters(baseUrl,filters,page,items);
+    async execute(baseUrl: string,filters: PropertiesFiltersDto,page: number,items: number,userId: number){
+        return await this.propertyRepo.getAllPropertiesWithFilters(baseUrl,filters,page,items,userId);
     }
 }

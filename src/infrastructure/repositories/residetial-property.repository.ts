@@ -83,8 +83,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       return updatedResidentialProperty;
   }
 
-  async searchFilteredResidentialsProperties(baseUrl: string, filters: ResidentialPropertiesSearchFiltersDto,page = 1,items = 10) {
-    console.log('inside search filter function')
+  async searchFilteredResidentialsProperties(baseUrl: string, filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number) {
     const query = this.buildBaseQuery();
     const filterMap = this.getFilterMap();
 
@@ -98,64 +97,106 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
     this.applyRoomDetailsFilter(query,filters.room_details);
     filters.tag && this.applyTagsFilters(query, filters.tag);
 
-    query.select([
-      'property.id',
+    query.select([      'property.id',
       'property.area',
       'property.region',
+      'property.rate',
+      
       'post.id',
       'post.title',
       'post.image',
       'post.status',
       'post.description',
+
       'residential.id',
       'residential.listing_type',
       'residential.selling_price',
       'residential.monthly_price',
       'residential.rental_period',
+      
       'region.id',
       'region.name',
+      
       'city.id',
       'city.name'
+
     ]);
 
-  const [residentials, total] = await query
-    .skip((page - 1) * items)
-    .take(items)
-    .getManyAndCount();
+    if (userId) {
+      query.addSelect(
+            `CASE
+               WHEN EXISTS(
+                 SELECT 1 FROM property_favorites pf 
+                 WHERE pf.property_id = property.id AND pf.user_id = :userId
+               ) THEN true
+               ELSE false
+             END`,
+            'is_favorite'
+      )
+      .setParameter('userId',userId)
+    }
 
-  const formatted = residentials.map((residential) => this.formatResidential(residential, baseUrl));
+    query.addSelect(
+      `CASE
+         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         ELSE residential.selling_price
+       END`,
+      'calculated_price'
+    ).setParameters({
+      rent: ListingType.RENT,
+      yearly: RentalPeriod.YEARLY,
+    });
+
+
+    
+
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+  const final = entities.map((entity, index) => ({
+    ...entity,
+    property: {
+      ...entity.property,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    },
+  }));
+
+  const formatted = final.map((residential) => this.formatResidential(residential, baseUrl));
 
   return [formatted, total];
   }
   
-  private formatResidential(residential: Residential, baseUrl: string) {
+  private formatResidential(residential,baseUrl: string) {
     const property = residential.property;
   
     const base = {
+      propertyId: property.id,
       postTitle: property.post?.title ?? '',
       postDescription: property.post.description,
       postImage: `${baseUrl}/uploads/properties/posts/images/${property.post?.image ?? 'default.jpg'}`,
       location: `${property.region?.city?.name ?? ''}, ${property.region?.name ?? ''}`,
+      is_favorite: property.is_favorite ? 1 : 0,
     };
   
     if (residential.listing_type === ListingType.RENT) {
-      const rentalPeriod = residential.rental_period ?? null;
-      const baseMonthlyPrice = residential.monthly_price ?? null;
-      const adjustedMonthlyPrice =
-        rentalPeriod === RentalPeriod.YEARLY && baseMonthlyPrice !== null
-          ? baseMonthlyPrice * 12
-          : baseMonthlyPrice;
-  
       return {
         ...base,
         listing_type: 'أجار',
-        price: adjustedMonthlyPrice,
+        price: property.calculated_price,
+        rate:property.rate ?? null,
       };
     } else {
       return {
         ...base,
         listing_type: 'بيع',
-        price: residential.selling_price ?? null,
+        price: property.calculated_price,
       };
     }
   }

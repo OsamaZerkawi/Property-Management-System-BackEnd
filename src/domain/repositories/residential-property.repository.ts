@@ -7,6 +7,6 @@ export const RESIDENTIAL_PROPERTY_REPOSITORY ='RESIDENTIAL_PROPERTY_REPOSITORY_I
 export interface ResidentialPropertyRepositoryInterface{
     createResidentialPropertyAndSaveIt(data: ResidentialPropertyDto);
     updateResidentialProperty(id: number,data: UpdateResidentialPropertyDetailsDto);
-    searchFilteredResidentialsProperties(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page?: number,items?: number);
+    searchFilteredResidentialsProperties(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number);
     findById(id: number);
 }

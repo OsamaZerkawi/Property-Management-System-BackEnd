@@ -7,7 +7,7 @@ export class SearchPropertiesByTitleUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(title: string,baseUrl: string,page: number,items: number){
-        return await this.propertyRepo.searchPropertyByTitle(title,baseUrl,page,items);
+    async execute(title: string,baseUrl: string,page: number,items: number,userId: number){
+        return await this.propertyRepo.searchPropertyByTitle(title,baseUrl,page,items,userId);
     }
 }

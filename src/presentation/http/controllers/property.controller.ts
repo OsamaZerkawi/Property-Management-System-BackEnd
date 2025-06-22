@@ -1,6 +1,5 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
-import { userInfo } from "os";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/property/find-property-details-by-id.use-case";
@@ -9,7 +8,6 @@ import { GetAllPropertiesWithFiltersUseCase } from "src/application/use-cases/pr
 import { GetAllPropertiesUseCase } from "src/application/use-cases/property/get-all-properties.use-case";
 import { SearchPropertiesByTitleUseCase } from "src/application/use-cases/property/search-properties-by-title.use-case";
 import { SearchPropertyWithAdvancedFiltersUseCase } from "src/application/use-cases/property/search-property-with-advanced-filter.use-case";
-import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
 
@@ -32,9 +30,12 @@ export class PropertyController{
         @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
         @Req() request: Request,    
     ){
+        const userId = (request.user as any)?.sub ?? null;
+        console.log(userId);
         const baseUrl = `${request.protocol}://${request.get('host')}`;
-        const [properties,total] = await this.getAllPropertiesUseCase.execute(baseUrl,page,items);
+        const [properties,total] = await this.getAllPropertiesUseCase.execute(baseUrl,page,items,userId);
 
+        return properties;
         return successPaginatedResponse(properties, total, page, items,'تم ارجاع جميع العقارات',200);
     }
 
@@ -46,8 +47,9 @@ export class PropertyController{
         @Req() request: Request,
     ){
         const baseUrl = `${request.protocol}://${request.get('host')}`;
+        const userId = (request.user as any)?.sub ?? null;
 
-        const property = await this.findPropertyDetailsByIdUseCase.execute(propertyId,baseUrl);
+        const property = await this.findPropertyDetailsByIdUseCase.execute(propertyId,baseUrl,userId);
 
         return successResponse(property,'تم ارجاع تفاصيل العقار',200);
     }
@@ -75,9 +77,9 @@ export class PropertyController{
         @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
         @Req() request: Request
     ){
-
+        const userId = (request.user as any)?.sub ?? null;
         const baseUrl = `${request.protocol}://${request.get('host')}`;
-        const [properties, total] = await this.getAllPropertiesWithFiltersUseCase.execute(baseUrl, filters, page, items);
+        const [properties, total] = await this.getAllPropertiesWithFiltersUseCase.execute(baseUrl, filters, page, items,userId);
 
         return successPaginatedResponse(properties, total, page, items, 'تم إرجاع العقارات المفلترة بنجاح', 200);
     }
@@ -86,14 +88,15 @@ export class PropertyController{
     @Public()
     @HttpCode(HttpStatus.OK)
     async search(
-        @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
-        @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
-        @Query('title') title: string,
+        @Query('page', new DefaultValuePipe('1'), ParseIntPipe) page: number,
+        @Query('items', new DefaultValuePipe('10'), ParseIntPipe) items: number,
         @Req() request: Request
     ){
+        const title = 'شي اب راتب'
+        const userId = (request.user as any)?.sub ?? null;
         const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const [properties, total] = await this.searchPropertiesByTitleUseCase.execute(title,baseUrl,page,items);
+        const [properties, total] = await this.searchPropertiesByTitleUseCase.execute(title,baseUrl,page,items,userId);
 
         return successPaginatedResponse(properties, total, page, items,'تمت عملية البحث بنجاح',200);
     }
@@ -107,9 +110,10 @@ export class PropertyController{
         @Body() filters: ResidentialPropertiesSearchFiltersDto,
         @Req() request: Request,
     ){
+        const userId = (request.user as any)?.sub ?? null;
         const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const [data,total] = await this.searchPropertyWithAdvancedFiltersUseCase.execute(baseUrl,filters,page,items);
+        const [data,total] = await this.searchPropertyWithAdvancedFiltersUseCase.execute(baseUrl,filters,page,items,userId);
 
         return successPaginatedResponse(data,total,page,items,'تم جلب العقارات بنجاح.',200);
     }

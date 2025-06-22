@@ -1,4 +1,4 @@
-import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthTokenBlackListService } from "src/application/services/authTokenBlacklist.service"; 
 import { JwtService } from "@nestjs/jwt";
@@ -35,24 +35,34 @@ export class JwtAuthGuard extends AuthGuard('jwt'){
     }
   
     async canActivate(context: ExecutionContext): Promise<boolean> {
-      // 1. Check if route is public
-      if (this.isPublicRoute(context)) {
-        return true;
-      }
-  
-      const request = this.getRequest(context);
-  
-      // 2. Extract and validate token
+  const isPublic = this.isPublicRoute(context);
+  const request = this.getRequest(context);
+
+  const authHeader = request.headers['authorization'];
+
+  if (authHeader) {
+    try {
       const token = this.extractToken(request);
       const payload = this.verifyToken(token);
       const userId = payload.sub;
-  
-      // 3. Check if token is blacklisted
+
+      // Check blacklist
       await this.ensureTokenNotBlacklisted(userId, token);
-  
-      // 5. Proceed with default canActivate (calls passport strategy)
-      return super.canActivate(context) as Promise<boolean>;
+
+      // ✅ Attach user to request
+      (request as any).user = payload;
+    } catch (err) {
+      if (!isPublic) throw err;
     }
+  }
+
+  if (isPublic) {
+    return true;
+  }
+
+  // Continue with default behavior (e.g., passport validation)
+  return super.canActivate(context) as Promise<boolean>;
+}
   
     private isPublicRoute(context: ExecutionContext): boolean {
       return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [

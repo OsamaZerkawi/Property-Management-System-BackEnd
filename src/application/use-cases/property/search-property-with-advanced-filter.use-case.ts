@@ -8,7 +8,7 @@ export class SearchPropertyWithAdvancedFiltersUseCase {
         private readonly residentialPropertyRepo: ResidentialPropertyRepositoryInterface,
     ){}
     
-    async execute(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page?: number,items?: number){
-        return await this.residentialPropertyRepo.searchFilteredResidentialsProperties(baseUrl,filters,page,items);
+    async execute(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number){
+        return await this.residentialPropertyRepo.searchFilteredResidentialsProperties(baseUrl,filters,page,items,userId);
     }
 }

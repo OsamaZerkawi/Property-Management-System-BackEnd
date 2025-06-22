@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { basename } from "path";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
@@ -14,8 +13,6 @@ import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
-import { BroadcasterResult } from "typeorm/subscriber/BroadcasterResult";
-import { queryObjects } from "v8";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -221,7 +218,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return properties.map(property => this.formatPropertyDetails(property, baseUrl));
   }
 
-  async findPropertyDetailsById(propertyId: number, baseUrl: string) {
+  async findPropertyDetailsById(propertyId: number, baseUrl: string,userId: number) {
     const query = await this.createBasePropertyDetailsQuery()
     .andWhere('property.id = :propertyId',{propertyId});
 
@@ -232,18 +229,18 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       'office.type',
     ]);
 
-    // if (userId) {
-    //   query.addSelect(
-    //     subQuery => {
-    //       return subQuery
-    //         .select('1')
-    //         .from('property_favorites', 'pf')
-    //         .where('pf.property_id = property.id')
-    //         .andWhere('pf.user_id = :userId', { userId });
-    //     },
-    //     'is_favorite'
-    //   );
-    // }
+    if (userId) {
+      query.addSelect(
+        subQuery => {
+          return subQuery
+            .select('1')
+            .from('property_favorites', 'pf')
+            .where('pf.property_id = property.id')
+            .andWhere('pf.user_id = :userId', { userId });
+        },
+        'is_favorite'
+      );
+    }
 
     const property = await query.getOne();
 
@@ -258,7 +255,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     // should chage path of images for office's logo and add rate of office
     return {
       ...formatted,
-      // is_favorite: (property as any).is_favorite ? 1 : 0,
+      is_favorite: (property as any).is_favorite ? 1 : 0,
       office: {
         id: property.office?.id,
         name: property.office?.name,
@@ -334,67 +331,90 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       };
   }
 
-  async getAllProperties(baseUrl: string,page: number,items: number) {
-    const query = await this.buildPropertyQuery(baseUrl);
+  async getAllProperties(baseUrl: string,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId);
 
-  const [properties, total] = await query
-    .skip((page - 1) * items)
-    .take(items)
-    .getManyAndCount();
-
-  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
-  async getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number) {
-    const query = await this.buildPropertyQuery(baseUrl,filters);
+  async getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId,filters);
 
-  const [properties, total] = await query
-    .skip((page - 1) * items)
-    .take(items)
-    .getManyAndCount();
-
-  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
-  async searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number) {
-    const query = await this.buildPropertyQuery(baseUrl);
+  async searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId);
     query.andWhere('post.title ILIKE :title', { title: `%${title}%` });
 
-  const [properties, total] = await query
-    .skip((page - 1) * items)
-    .take(items)
-    .getManyAndCount();
-
-  return [properties.map((property) => this.formatProperty(property, baseUrl)), total];
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
-  private formatProperty(property: Property,baseUrl: string){
+  private formatProperty(property,baseUrl: string){
+    
     const base = {
       propertyId:property.id,
       postTitle: property.post.title,
       postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
       location: `${property.region?.city?.name}, ${property.region?.name}`,
       postDate: property.post.date.toISOString().split('T')[0],
+      is_favorite: property.is_favorite ? 1 : 0,
     }
 
     if (property.residential?.listing_type === ListingType.RENT) {
-      const rentalPeriod = property.residential?.rental_period ?? null;
-      const baseMonthlyPrice = property.residential?.monthly_price ?? null;
-      const adjustedMonthlyPrice = rentalPeriod == RentalPeriod.YEARLY && baseMonthlyPrice !== null
-        ? baseMonthlyPrice * 12
-        : baseMonthlyPrice;
-      
       return {
         ...base,
         listing_type: 'أجار',
-        price: adjustedMonthlyPrice,
+        price: property.calculated_price,
         rate:property.rate ?? null,
       };
     } else {
       return {
         ...base,
         listing_type: 'بيع',
-        price: property.residential.selling_price ?? null,
+        price:property.calculated_price,
       };
     }   
   }
@@ -418,7 +438,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     },
     floor_number: property.floor_number,
     notes: property.notes ?? null,
-    rate: property.rate,
     highlighted: property.highlighted,
     room_counts: {
       total: property.room_count,
@@ -428,6 +447,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       bathroom: property.bathroom_count,
     },
     has_furniture: property.has_furniture,
+    location: `${property.region?.city?.name}, ${property.region?.name}`,
     region: {
       id: property.region?.id,
       name: property.region?.name,
@@ -452,6 +472,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     
     return {
       ...base,
+      rate:property.rate ?? null,
       listing_type: 'أجار',
       rent_details: {
         price: adjustedMonthlyPrice,
@@ -471,7 +492,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
  }
 
- private async buildPropertyQuery(baseUrl: string,filters?: PropertiesFiltersDto){
+ private async buildPropertyQuery(userId: number,filters?: PropertiesFiltersDto,){
       const query = this.propertyRepo.createQueryBuilder('property')
         .leftJoin('property.residential', 'residential')
         .leftJoin('property.post', 'post')
@@ -516,6 +537,21 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           rent: ListingType.RENT,
           yearly: RentalPeriod.YEARLY,
         });
+
+    if (userId) {
+      query.addSelect(
+            `CASE
+               WHEN EXISTS(
+                 SELECT 1 FROM property_favorites pf 
+                 WHERE pf.property_id = property.id AND pf.user_id = :userId
+               ) THEN true
+               ELSE false
+             END`,
+            'is_favorite'
+      )
+      .setParameter('userId',userId)
+    }
+
       
       if (filters) {
         if (filters.listing_type) {
@@ -546,7 +582,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       }
   
     return query;
-
  }
 
  private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto){

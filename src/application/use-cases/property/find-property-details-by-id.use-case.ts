@@ -7,7 +7,7 @@ export class FindPropertyDetailsByIdUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(propertyId: number,baseUrl: string,){
-        return await this.propertyRepo.findPropertyDetailsById(propertyId,baseUrl);
+    async execute(propertyId: number,baseUrl: string,userId: number){
+        return await this.propertyRepo.findPropertyDetailsById(propertyId,baseUrl,userId);
     }
 }

@@ -7,7 +7,7 @@ export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
 
 export interface PropertyRepositoryInterface {
     findById(id: number);
-    findPropertyDetailsById(propertyId: number,baseUrl: string);
+    findPropertyDetailsById(propertyId: number,baseUrl: string,uesrId: number);
     findByIdWithOwner(propertyId: number);
     findRelatedProperties(id: number,baseUrl: string);
     createPropertyAndSaveIt(data: CreatePropertyDto);
@@ -18,7 +18,7 @@ export interface PropertyRepositoryInterface {
     searchPropertiesForOfficeByTitle(userId: number,title: string,baseUrl: string);
     findPropertyReservationDetails(id: number);
     getExpectedpPriceInRegion(propertyId: number);
-    getAllProperties(baseUrl: string,page: number,items: number);
-    getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number);
-    searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number);
+    getAllProperties(baseUrl: string,page: number,items: number,userId: number);
+    getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number,userId: number);
+    searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number);
 }
