@@ -49,7 +49,7 @@ export class JwtAuthGuard extends AuthGuard('jwt'){
       // Check blacklist
       await this.ensureTokenNotBlacklisted(userId, token);
 
-      // ✅ Attach user to request
+      // Attach user to request
       (request as any).user = payload;
     } catch (err) {
       if (!isPublic) throw err;

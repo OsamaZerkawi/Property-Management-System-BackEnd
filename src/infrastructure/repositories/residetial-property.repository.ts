@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
+import { Region } from "src/domain/entities/region.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
@@ -15,7 +16,7 @@ import { Repository } from "typeorm";
 export class ResidentialPropertyRepository implements ResidentialPropertyRepositoryInterface{
     constructor(
         @InjectRepository(Residential)
-        private readonly residentialRepo: Repository<Residential>
+        private readonly residentialRepo: Repository<Residential>,
     ){}
     async createResidentialPropertyAndSaveIt(data: ResidentialPropertyDto) {
        const { property, ownership_type, direction, listingType, rent_details, sell_details } = data;

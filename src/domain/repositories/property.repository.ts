@@ -21,4 +21,6 @@ export interface PropertyRepositoryInterface {
     getAllProperties(baseUrl: string,page: number,items: number,userId: number);
     getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number,userId: number);
     searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number);
+    rateProperty(userId: number,propertyId: number,rate: number);
+    compareTwoProperties(propertyId1: number,propertyId2: number,baseUrl: string);
 }

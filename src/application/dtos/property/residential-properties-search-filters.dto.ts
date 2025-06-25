@@ -16,7 +16,8 @@ import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 
 export class ResidentialPropertiesSearchFiltersDto {
-@IsOptional()
+  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   regionId?: number;
 

@@ -22,6 +22,7 @@ import { Image } from './image.entity';
 import { UserPostSuggestion } from './user-post-suggestions.entity';
 import { UserPropertyInvoice } from './user-property-invoice.entity';
 import { User } from './user.entity';
+import { PropertyFeedback } from './property-feedback.entity';
 
 
 @Entity('properties')
@@ -97,6 +98,9 @@ export class Property {
 
   @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.property)
   invoices: UserPropertyInvoice[];
+
+  @OneToMany(() => PropertyFeedback, feedback => feedback.property)
+  feedbacks: PropertyFeedback[];
 
   @ManyToMany(() => User, user => user.favoriteProperties)
   @JoinTable({

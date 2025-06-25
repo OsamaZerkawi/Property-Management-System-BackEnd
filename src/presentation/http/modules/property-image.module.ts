@@ -17,11 +17,12 @@ import { PropertyAccessService } from "src/application/services/propertyAccess.s
 import { PROPERTY_REPOSITORY } from "src/domain/repositories/property.repository";
 import { PropertyRepository } from "src/infrastructure/repositories/property.repository";
 import { Office } from "src/domain/entities/offices.entity";
+import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 
 @Module({
     imports:[
         AuthModule,
-        TypeOrmModule.forFeature([Image,Property,Office]),
+        TypeOrmModule.forFeature([Image,Property,Office,PropertyFeedback]),
     ],
     controllers:[PropertyImageController],
     providers:[

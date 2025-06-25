@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { error } from "console";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
-import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
+import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
+import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
@@ -11,14 +13,19 @@ import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
+import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
   constructor(
-      @InjectRepository(Property)
-      private readonly propertyRepo: Repository<Property>,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryInterface,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,
+    @InjectRepository(PropertyFeedback)
+    private readonly feedbackRepo: Repository<PropertyFeedback>,
   ){}
 
   async findByIdWithOwner(propertyId: number) {
@@ -222,27 +229,44 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const query = await this.createBasePropertyDetailsQuery()
     .andWhere('property.id = :propertyId',{propertyId});
 
+    query.leftJoin('office.feedbacks', 'office_feedbacks');
+
     query.addSelect([
       'office.id',
       'office.name',
       'office.logo',
       'office.type',
+      'office_feedbacks.id',
+      'office_feedbacks.rate',
     ]);
+
+    query.addSelect(
+      `(SELECT COALESCE(AVG(of.rate), 0) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+      'office_average_rating'
+    );
+
+    query.addSelect(
+      `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+      'office_rating_count'
+    );
 
     if (userId) {
       query.addSelect(
-        subQuery => {
-          return subQuery
-            .select('1')
-            .from('property_favorites', 'pf')
-            .where('pf.property_id = property.id')
-            .andWhere('pf.user_id = :userId', { userId });
-        },
-        'is_favorite'
-      );
+       `CASE
+             WHEN EXISTS(
+                 SELECT 1 FROM property_favorites pf 
+                 WHERE pf.property_id = property.id AND pf.user_id = :userId
+             ) THEN true
+             ELSE false
+         END`,
+       'is_favorite'
+      )
+      .setParameter('userId',userId)
     }
 
-    const property = await query.getOne();
+    const { entities, raw } = await query.getRawAndEntities();
+    const property = entities[0];
+    const rawData = raw[0];
 
     if(!property){
       throw new NotFoundException(
@@ -252,10 +276,11 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     const formatted = this.formatPropertyDetails(property,baseUrl);
 
-    // should chage path of images for office's logo and add rate of office
+    console.log((property as any).office_average_rating)
+    
     return {
       ...formatted,
-      is_favorite: (property as any).is_favorite ? 1 : 0,
+      is_favorite: rawData.is_favorite ? 1 : 0,
       office: {
         id: property.office?.id,
         name: property.office?.name,
@@ -263,6 +288,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
           : null,
         type: property.office?.type ?? null,
+        rate:{
+          avreg: parseFloat(rawData.office_average_rating || 0),
+          count: parseInt(rawData.office_rating_count)
+        },
       },
     };
   }
@@ -392,6 +421,98 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
+  async compareTwoProperties(propertyId1: number, propertyId2: number, baseUrl: string) {
+  const query = this.createBasePropertyDetailsQuery()
+    .addSelect(
+      `CASE
+         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         ELSE residential.selling_price
+       END`,
+      'calculated_price'
+    )
+    .setParameters({
+      rent: ListingType.RENT ,
+      yearly: RentalPeriod.YEARLY,
+    });
+
+  const [raw1, raw2] = await Promise.all([
+    query.clone().andWhere('property.id = :id1', { id1: propertyId1 }).getRawAndEntities(),
+    query.clone().andWhere('property.id = :id2', { id2: propertyId2 }).getRawAndEntities()
+  ]);
+
+  const property1 = raw1.entities[0];
+  const rawData1 = raw1.raw[0];
+
+  const property2 = raw2.entities[0];
+  const rawData2 = raw2.raw[0];
+
+  if (!property1 || !property2) {
+    throw new NotFoundException(
+      errorResponse('لم يتم العثور على أحد العقارين أو كلاهما',404)
+    );
+  }
+
+    return {
+      property_1: this.formatPropertyForComparison(property1,rawData1,baseUrl),
+      property_2: this.formatPropertyForComparison(property2,rawData2,baseUrl),
+    }
+  }
+
+  private formatPropertyForComparison(property: Property,rawData: any,baseUrl: string){
+    return {
+      property_details: {
+        id: property.id,
+        area: property.area,
+        property_type: property.property_type,
+        ownership_type: property.residential?.ownership_type ?? null,
+        direction: property.residential?.direction ?? null,
+        status: property.residential?.status ?? null,
+        floor_number: property.floor_number,
+        has_furniture: property.has_furniture,
+        highlighted: property.highlighted,
+        notes: property.notes ?? null,
+        listing_type: property.residential.listing_type,
+        ...(property.residential?.listing_type === ListingType.RENT && {
+          rent_period: property.residential?.rental_period,
+        }),
+        price: Number(rawData?.calculated_price),
+      },
+      room_details: {
+        total: property.room_count,
+        bedroom: property.bedroom_count,
+        living_room: property.living_room_count,
+        kitchen: property.kitchen_count,
+        bathroom: property.bathroom_count,
+      },
+      location: {
+        coordinates: {
+          latitude: property.latitude,
+          longitude: property.longitude,
+        },
+        city: property.region?.city
+          ? {
+              id: property.region.city.id,
+              name: property.region.city.name,
+            }
+          : null,
+        region: property.region
+          ? {
+              id: property.region.id,
+              name: property.region.name,
+            }
+          : null,
+        full_address: property.region?.city && property.region
+          ? `${property.region.city.name}, ${property.region.name}`
+          : null,
+      },
+      images: property.images?.map(img => ({
+        id: img.id,
+        image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
+      })) ?? [],
+    };
+  }
+
   private formatProperty(property,baseUrl: string){
     
     const base = {
@@ -426,7 +547,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
     postDate: property.post.created_at.toISOString().split('T')[0],
     PostStatus: property.post.status,
-    id: property.id,
+    propertyId: property.id,
     area: property.area,
     property_type: property.property_type,
     ownership_type: property.residential?.ownership_type ?? null,
@@ -540,14 +661,14 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     if (userId) {
       query.addSelect(
-            `CASE
-               WHEN EXISTS(
-                 SELECT 1 FROM property_favorites pf 
-                 WHERE pf.property_id = property.id AND pf.user_id = :userId
-               ) THEN true
-               ELSE false
-             END`,
-            'is_favorite'
+        `CASE
+           WHEN EXISTS(
+             SELECT 1 FROM property_favorites pf 
+             WHERE pf.property_id = property.id AND pf.user_id = :userId
+           ) THEN true
+           ELSE false
+         END`,
+        'is_favorite'
       )
       .setParameter('userId',userId)
     }
@@ -663,6 +784,39 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
 
   return query;
+ }
+
+ async rateProperty(userId: number, propertyId: number, rate: number) {
+    const property = await this.propertyRepo.findOne({where:{id:propertyId},relations: ['residential']});
+    const user = await this.userRepo.findById(userId);
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار لهذا المعرف',404)
+      );
+    }
+
+    if(property.residential.listing_type === ListingType.SALE){
+      throw new ForbiddenException(
+        errorResponse ('لا يمكنك تقييم عقار للشراء',403)
+      );
+    }
+
+    let feedback = await this.feedbackRepo.findOne({
+      where: { user : { id: userId},property: {id : property.id}}
+    });
+
+    if(!feedback){
+      feedback = this.feedbackRepo.create({
+        property,
+        user,
+        rate
+      });
+    }else {
+      feedback.rate = rate;
+    }
+
+    return this.feedbackRepo.save(feedback);
  }
 
  private buildUpdatePayload(data: UpdatePropertyDto): Partial<Property> {

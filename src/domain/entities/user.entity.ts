@@ -8,6 +8,8 @@ import { ServiceProvider } from "./service-provider.entity";
 import { ServiceFeedback } from "./service-feedback.entity";
 import { UserRole } from "./user-role.entity";
 import { Property } from "./property.entity";
+import { PropertyFeedback } from "./property-feedback.entity";
+import { OfficeFeedback } from "./office-feedback.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -57,7 +59,13 @@ export class User {
   serviceProvider: ServiceProvider;
 
   @OneToMany(() => ServiceFeedback, (feedback) => feedback.user)
-  feedbacks: ServiceFeedback[];
+  service_feedbacks: ServiceFeedback[];
+
+  @OneToMany(() => PropertyFeedback, feedback => feedback.user)
+  property_feedbacks: PropertyFeedback[];
+
+  @OneToMany(() => OfficeFeedback, (feedback) => feedback.user)
+  office_feedbacks: OfficeFeedback[];
 
   @OneToMany(() => UserRole, ur => ur.user)
   userRoles: UserRole[];

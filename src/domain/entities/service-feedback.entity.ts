@@ -20,7 +20,7 @@ export class ServiceFeedback{
     @JoinColumn({ name: 'service_provider_id' })
     serviceProvider: ServiceProvider;
   
-    @ManyToOne(() => User, (user) => user.feedbacks, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.service_feedbacks, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'user_id' })
     user: User;    
 

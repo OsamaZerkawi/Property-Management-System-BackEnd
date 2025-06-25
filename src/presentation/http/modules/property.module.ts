@@ -16,12 +16,16 @@ import { SearchPropertyWithAdvancedFiltersUseCase } from "src/application/use-ca
 import { ResidentialOfficeModule } from "./residential-office.module";
 import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/property/find-property-details-by-id.use-case";
 import { FindRelatedPropertiesUseCase } from "src/application/use-cases/property/find-related-properties.use-case";
+import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
+import { RatePropertyUseCase } from "src/application/use-cases/property/rate-property.use-case";
+import { CompareTwoPropertiesUseCase } from "src/application/use-cases/property/compare-two-properties.use-case";
+import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
 
 @Module({
     imports:[
         AuthModule,
         forwardRef(() => ResidentialOfficeModule),
-        TypeOrmModule.forFeature([Property,Region,City,Residential,PropertyPost])
+        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback])
     ],
     controllers:[PropertyController],
     providers:[
@@ -31,6 +35,8 @@ import { FindRelatedPropertiesUseCase } from "src/application/use-cases/property
         SearchPropertyWithAdvancedFiltersUseCase,
         FindPropertyDetailsByIdUseCase,
         FindRelatedPropertiesUseCase,
+        RatePropertyUseCase,
+        CompareTwoPropertiesUseCase,
         {
             provide:PROPERTY_REPOSITORY,
             useClass:PropertyRepository

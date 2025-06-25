@@ -14,6 +14,7 @@ import { Region } from './region.entity';
 import { Property } from './property.entity';
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
+import { OfficeFeedback } from './office-feedback.entity';
 
 
 
@@ -100,4 +101,7 @@ export class Office {
 
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
+
+  @OneToMany(() => OfficeFeedback, (feedback) => feedback.office)
+  feedbacks: OfficeFeedback[];
 }

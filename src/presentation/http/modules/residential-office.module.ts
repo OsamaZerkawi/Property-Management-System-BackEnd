@@ -35,6 +35,7 @@ import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cas
 import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/property/get-expected-price.use-case";
 import { PropertyModule } from "./property.module";
 
+
 @Module({
     imports: [
         forwardRef(() => PropertyModule),
