@@ -22,7 +22,7 @@ import {
   
     @IsOptional()
     @IsString()
-    logo: string;
+    logo?: string|null;
   
     @IsOptional()
     @IsEnum(OfficeType, { message: 'type must be one of the following values: touristic, residential, both' })

@@ -11,4 +11,5 @@ export interface OfficeRepositoryInterface {
   createOfficeWithSocials(userId: number, dto: CreateOfficeDto): Promise<{ id: number }>;
   findById(id: number): Promise<Office | null>;
   updateOfficeWithSocials(officeId: number, dto: UpdateOfficeDto): Promise<{ id: number }>;
+  findOfficeByUserId(userId: number): Promise<Office | null>
 }

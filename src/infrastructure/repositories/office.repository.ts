@@ -31,28 +31,30 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       select: ['id', 'commission'],
     });
   }
+ 
+async createOfficeWithSocials(
+  userId: number,
+  dto: CreateOfficeDto,
+): Promise<{ id: number }> {
+  return this.dataSource.transaction(async manager => {
+    const office = manager.create(Office, {
+      user: { id: userId },
+      name: dto.name,
+      logo: dto.logo || undefined, // تحويل null إلى undefined
+      type: dto.type,
+      commission: dto.commission,
+      booking_period: dto.booking_period,
+      deposit_per_m2: dto.deposit_per_m2,
+      tourism_deposit: dto.tourism_deposit,
+      payment_method: dto.payment_method,
+      opening_time: dto.opening_time,
+      closing_time: dto.closing_time,
+      region: { id: dto.region_id } as any,
+    });
 
-  async createOfficeWithSocials(
-    userId: number,
-    dto: CreateOfficeDto,
-  ): Promise<{ id: number }> {
-    return this.dataSource.transaction(async manager => {
-      const office = manager.create(Office, {
-        user: { id: userId },
-        name: dto.name,
-        logo: dto.logo,
-        type: dto.type,
-        commission: dto.commission,
-        booking_period: dto.booking_period,
-        deposit_per_m2: dto.deposit_per_m2,
-        tourism_deposit: dto.tourism_deposit,
-        payment_method: dto.payment_method,
-        opening_time: dto.opening_time,
-        closing_time: dto.closing_time,
-        region: { id: dto.region_id } as any,
-      });
-      await manager.save(office);
-
+    await manager.save(office);
+ 
+    if (dto.socials && dto.socials.length > 0) {
       const socials = dto.socials.map(s =>
         manager.create(OfficeSocial, {
           office,
@@ -61,10 +63,11 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         }),
       );
       await manager.save(socials);
+    }
 
-      return { id: office.id };
-    });
-  }
+    return { id: office.id };
+  });
+}
 
   async findById(id: number): Promise<Office | null> {
     return this.officeRepo.findOne({
@@ -109,5 +112,13 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
       return { id: office.id };
     });
+  }
+  async findOfficeByUserId(userId: number): Promise<Office | null> {
+    return await this.dataSource
+      .getRepository(Office)
+      .findOne({ 
+        where: { user: { id: userId } },
+        select: { id: true } 
+      });
   }
 }

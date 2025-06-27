@@ -2,7 +2,7 @@
 import {
     Controller, Get, Post, Body, Put,Patch,
     Param,
-    HttpCode, HttpStatus, UseGuards,UseInterceptors
+    HttpCode, HttpStatus, UseGuards,UseInterceptors,UploadedFile
   } from "@nestjs/common";
   import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
   import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
@@ -16,7 +16,7 @@ import {
   import { OfficeResource } from 'src/presentation/http/resources/office.resource';
   import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
 import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-method.dto'; 
- 
+ import {OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor";
   @Controller('office')
   export class OfficeController {
     constructor(
@@ -39,15 +39,21 @@ import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-met
     @Post()
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
+    @OfficeLogoInterceptor()
     async createOffice(
       @CurrentUser() user,
-      @Body() dto: CreateOfficeDto
+      @Body() dto: CreateOfficeDto,
+      @UploadedFile() logoFile: Express.Multer.File,
     ) {
-      const userId = user.sub;
-      const result = await this.createOfficeUseCase.execute(userId, dto);
-      return successResponse(result, 'تم إنشاء المكتب بنجاح', 201);
+      // إذا تم رفع صورة، خزّن اسم الملف في الـ DTO
+      if (logoFile) {
+        dto.logo = logoFile.filename;
+      }
+  
+      const result = await this.createOfficeUseCase.execute(user.sub, dto);
+      return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
     }
-
+  
     @Patch(':id')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
