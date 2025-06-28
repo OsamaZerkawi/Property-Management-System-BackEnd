@@ -28,7 +28,7 @@ export class Office {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 500 })
+  @Column({ type: 'varchar', length: 500,nullable: true  })
   logo: string;
 
   @Column({
@@ -41,11 +41,13 @@ export class Office {
     type: 'decimal',
     precision: 5,
     scale: 4,
+    nullable: true 
   })
   commission: number;
 
   @Column({
     type: 'int',
+    nullable: true 
   })
   booking_period: number;
 
@@ -53,6 +55,7 @@ export class Office {
     type: 'decimal',
     precision: 10,
     scale: 2,
+    nullable: true 
   })
   deposit_per_m2: number;
 
@@ -60,6 +63,7 @@ export class Office {
     type: 'decimal',
     precision: 10,
     scale: 2,
+    nullable: true 
   })
   tourism_deposit: number;
 
@@ -76,10 +80,10 @@ export class Office {
   @Column({ type: 'boolean', default: false })
   is_deleted: boolean;
 
-  @Column({ type: 'time' })
+  @Column({ type: 'time',nullable: true })
   opening_time: string;
 
-  @Column({ type: 'time' })
+  @Column({ type: 'time',nullable: true  })
   closing_time: string;
 
   @Column({

@@ -2,6 +2,7 @@ import { UseInterceptors,BadRequestException } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
 
 export function PropertyImagesInterceptor() {
   return UseInterceptors(
@@ -65,7 +66,13 @@ export function OfficeLogoInterceptor() {
   return UseInterceptors(
     FileInterceptor('logo', {
       storage: diskStorage({
-        destination: './uploads/offices/logos',
+        destination: (req, file, cb) => {
+          const dir = './uploads/offices/logos';
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
         filename: (req: any, file, cb) => {
           const userId = (req.user as any)?.sub || 'unknown';
           const timestamp = Date.now();
@@ -84,7 +91,7 @@ export function OfficeLogoInterceptor() {
         }
         cb(null, true);
       },
-      limits: { fileSize: 5 * 1024 * 1024 },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     }),
   );
 }
