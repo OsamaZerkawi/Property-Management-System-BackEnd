@@ -27,13 +27,24 @@ export class RegionRepository implements RegionRepositoryInterface {
     }
 
     async getRegionsByCityId(cityId: any) {
-        return await this.regionRepo.find({
-            where: {
-                city : {id : cityId},
-            },
-            select: ['id','name'],
-            order: { name: 'ASC' },
-        });
+        const regions =  await this.regionRepo
+        .createQueryBuilder('region')
+        .leftJoin('region.city','city')
+        .where('city.id = :cityId',{cityId})
+        .select([
+            'region.id',
+            'region.name',
+            'region.default_meter_price'
+        ])
+        .getMany();
+
+        const result = regions.map(region => ({
+          id: region.id,
+          name: region.name,
+          default_meter_price: parseFloat(region.default_meter_price),
+        }));        
+
+        return result;
     }
 
     async getExpectedpPrice(regionId: number) {
@@ -42,4 +53,5 @@ export class RegionRepository implements RegionRepositoryInterface {
             select:['id','name','default_meter_price']
         });
     }
+
 }

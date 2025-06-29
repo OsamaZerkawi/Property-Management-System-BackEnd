@@ -9,9 +9,9 @@ export interface AuthUser {
 export const CurrentUser = createParamDecorator((_data : unknown, context : ExecutionContext) => {
     const request = context.switchToHttp().getRequest();
     
-    if (!request.user?.sub) {
-        throw new UnauthorizedException('Invalid user payload');
-    }
+    // if (!request.user?.sub) {
+    //     throw new UnauthorizedException('Invalid user payload');
+    // }
     
     return request.user;
 })

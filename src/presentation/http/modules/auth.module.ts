@@ -21,6 +21,8 @@ import { LogoutUseCase } from "src/application/use-cases/auth/logout.use-case";
 import { USER_REPOSITORY } from "src/domain/repositories/user.repository";
 import { UserRepository } from "src/infrastructure/repositories/user.property";
 import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-case";
+import { UserController } from "../controllers/user.controller";
+import { FindUserByPhoneUseCase } from "src/application/use-cases/user/find-user-by-phone.use-case";
 
 @Module({
     imports:[
@@ -31,8 +33,9 @@ import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-
         useFactory: jwtConfig
     }),
     ],
-    controllers:[AuthController],
+    controllers:[AuthController,UserController],
     providers:[
+        FindUserByPhoneUseCase,
         {
            provide: AUTH_REPOSITORY,
            useClass: AuthRepository,
@@ -53,7 +56,7 @@ import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-
         JwtService,
         TokenService,
         AuthTokenBlackListService,],
-    exports:[JwtAuthGuard,JwtService,AuthTokenBlackListService,ValidateUserUseCase,JwtModule]
+    exports:[JwtAuthGuard,JwtService,AuthTokenBlackListService,ValidateUserUseCase,JwtModule,USER_REPOSITORY]
 })
 export class AuthModule {
 

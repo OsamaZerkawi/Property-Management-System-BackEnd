@@ -6,16 +6,14 @@ import { RentDetailsDto } from "./rentDetails.dto";
 import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 
 export class CreateResidentialPropertyDto {
     @IsString()
-    postTitle: string;
+    postDescription: string;
 
-    @IsArray()
-    @ArrayNotEmpty()
-    @IsInt({ each: true })
-    @Type(() => Number)
-    tags: number[];
+    @IsEnum(PropertyPostTag)
+    tag:PropertyPostTag;
 
     @IsInt()
     @Type(() => Number)

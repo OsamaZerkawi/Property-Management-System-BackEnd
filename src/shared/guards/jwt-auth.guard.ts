@@ -1,39 +1,20 @@
-import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { AuthTokenBlackListService } from "src/application/services/authTokenBlacklist.service"; 
 import { JwtService } from "@nestjs/jwt";
-// import { RoleService } from "../services/role.service";
 import { Reflector } from "@nestjs/core";
-// import { RoleResolver, ROLES_KEY } from "src/shared/decorators/roles.decorator";
 import { errorResponse } from "../helpers/response.helper";
+import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt'){
     constructor(
         private tokenBlackListService : AuthTokenBlackListService,
         private jwtService : JwtService,
-        // private readonly roleService: RoleService
+        private reflector: Reflector,
     ){
         super();
     }
-
-    // private async getRequiredRoles(context : ExecutionContext){
-    //     const reflector = new Reflector();
-    //     const rolesMeta =  reflector.get<string | string[] | RoleResolver>(ROLES_KEY, context.getHandler());
-
-    //     if(!rolesMeta){
-    //         return [];
-    //     }
-
-    //     const request = context.switchToHttp().getRequest();
-
-    //     if (typeof rolesMeta === 'function') {
-    //         const resolvedRoles = await rolesMeta(request);
-    //         return Array.isArray(resolvedRoles) ? resolvedRoles : [resolvedRoles];
-    //     }
-
-    //     return Array.isArray(rolesMeta)  ? rolesMeta : [rolesMeta];
-    // }
 
     private extractToken (request : Request) {
         const authHeader = request.headers['authorization'];
@@ -52,42 +33,64 @@ export class JwtAuthGuard extends AuthGuard('jwt'){
 
         return token;
     }
+  
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+  const isPublic = this.isPublicRoute(context);
+  const request = this.getRequest(context);
 
-    async canActivate(context: ExecutionContext):  Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
+  const authHeader = request.headers['authorization'];
 
-        const token = this.extractToken(request);
-        const payload = this.jwtService.verify(token,{
-            secret: process.env.JWT_TOKEN_SECRET,
-            ignoreExpiration: true
+  if (authHeader) {
+    try {
+      const token = this.extractToken(request);
+      const payload = this.verifyToken(token);
+      const userId = payload.sub;
+
+      // Check blacklist
+      await this.ensureTokenNotBlacklisted(userId, token);
+
+      // Attach user to request
+      (request as any).user = payload;
+    } catch (err) {
+      if (!isPublic) throw err;
+    }
+  }
+
+  if (isPublic) {
+    return true;
+  }
+
+  // Continue with default behavior (e.g., passport validation)
+  return super.canActivate(context) as Promise<boolean>;
+}
+  
+    private isPublicRoute(context: ExecutionContext): boolean {
+      return this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
+    }
+  
+    public getRequest(context: ExecutionContext): Request {
+      return context.switchToHttp().getRequest();
+    }
+  
+    private verifyToken(token: string): any {
+      try {
+        return this.jwtService.verify(token, {
+          secret: process.env.JWT_TOKEN_SECRET,
+          ignoreExpiration: true,
         });
-
-        const  userId = payload.sub;
-        
-        if(await this.tokenBlackListService.isTokenBlackListed(userId,token)){
-            throw new UnauthorizedException(
-                errorResponse('تم إلغاء صلاحية التوكن',401)
-            )
-        }
-
-        return super.canActivate(context) as Promise<boolean>;
-
-        // const requiredRoles = await this.getRequiredRoles(context);
-
-        // if (requiredRoles.length > 0) {
-        //     const userId = payload.sub;
-        //     const hasRole = await Promise.any(
-        //         requiredRoles.map(role => this.roleService.userHasRole(userId, role))
-        //     );
-            
-        //     if (!hasRole) {
-        //         throw new ForbiddenException(
-        //             errorResponse(`You don't have permission to access this resource.`, 403)
-        //         );
-        //     }
-        // }
-
-        // return super.canActivate(context) as Promise<boolean>;
+      } catch (err) {
+        throw new UnauthorizedException(errorResponse('توكن غير صالح', 401));
+      }
+    }
+  
+    private async ensureTokenNotBlacklisted(userId: number, token: string): Promise<void> {
+      const isBlacklisted = await this.tokenBlackListService.isTokenBlackListed(userId, token);
+      if (isBlacklisted) {
+        throw new UnauthorizedException(errorResponse('تم إلغاء صلاحية التوكن', 401));
+      }
     }
 
 }

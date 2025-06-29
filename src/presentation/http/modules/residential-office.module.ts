@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { ResidentialOfficeController } from "../controllers/residential-office.controller";
 import { AuthModule } from "./auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -11,9 +11,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { jwtConfig } from "src/infrastructure/config/jwt.config";
 import { CityModule } from "./city.module";
 import { CreateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/create-residential-property-details.use-case";
-import { TagModule } from "./tag.module";
 import { RegionModule } from "./region.module";
-import { Tag } from "src/domain/entities/tag.entity";
 import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
 import { PROPERTY_REPOSITORY } from "src/domain/repositories/property.repository";
 import { PropertyRepository } from "src/infrastructure/repositories/property.repository";
@@ -34,23 +32,22 @@ import { ResidentialPropertyAccessService } from "src/application/services/resid
 import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-office-for-user.use-case";
 import { OfficeModule } from "./office.module";
 import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cases/property/search-residential-property.dto";
+import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/property/get-expected-price.use-case";
+import { PropertyModule } from "./property.module";
+
 
 @Module({
     imports: [
-        TagModule,
+        forwardRef(() => PropertyModule),
         OfficeModule,
         PropertyPostModule,
         RegionModule,
         AuthModule,
         CityModule,
-        TypeOrmModule.forFeature([Property,Region,City,Residential,Tag,PropertyPost,Office]),
+        TypeOrmModule.forFeature([Property,Region,City,Residential,PropertyPost,Office]),
     ],
     controllers:[ResidentialOfficeController],
     providers:[
-        {
-            provide:PROPERTY_REPOSITORY,
-            useClass:PropertyRepository
-        },
         {
             provide:RESIDENTIAL_PROPERTY_REPOSITORY,
             useClass:ResidentialPropertyRepository
@@ -68,6 +65,10 @@ import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cas
         ResidentialPropertyAccessService,
         FindOfficeForUserUseCase,
         SearchResidentialPropertyByTitleUseCase,
+        GetExpectedPricePropertyUseCase,
     ],
+    exports: [
+        RESIDENTIAL_PROPERTY_REPOSITORY,
+    ]
 })
 export class ResidentialOfficeModule {}

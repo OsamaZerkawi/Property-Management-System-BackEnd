@@ -1,19 +1,31 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { error } from "console";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
-import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
+import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
+import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
+import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { Property } from "src/domain/entities/property.entity";
+import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
+import { PropertyStatus } from "src/domain/enums/property-status.enum";
+import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
+import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
   constructor(
-      @InjectRepository(Property)
-      private readonly propertyRepo: Repository<Property>,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryInterface,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,
+    @InjectRepository(PropertyFeedback)
+    private readonly feedbackRepo: Repository<PropertyFeedback>,
   ){}
 
   async findByIdWithOwner(propertyId: number) {
@@ -23,6 +35,137 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           },
           relations: {office: {user: true}},
       });
+  }
+  
+  async findById(id: number) {
+    return await this.propertyRepo.findOne({
+      where:{id}
+    });
+  }
+
+  async findPropertyReservationDetails(id: number) {
+    const result = await this.propertyRepo
+        .createQueryBuilder('property')
+        .leftJoin('property.residential', 'residential')
+        .leftJoin('property.office', 'office')
+        .where('residential.listing_type = :listingType', { listingType: ListingType.SALE })
+        .andWhere('property.id = :id', { id })
+        .select([
+          'residential.selling_price AS residential_selling_price',
+          '(residential.selling_price * office.commission) AS office_commission_amount',
+          '(property.area * office.deposit_per_m2) AS total_deposit',
+          '(residential.selling_price + (residential.selling_price * office.commission)) AS final_price'
+        ])
+        .getRawOne();
+
+    if (!result) {
+      throw new NotFoundException(
+        errorResponse(`لم يتم العثور على العقار بالمعرّف ${id} أو أنه غير معروض للبيع.`,404)
+      );
+    }
+  
+    return result;
+
+  }
+
+  async findRelatedProperties(id: number, baseUrl: string) {
+    const query = await this.createBasePropertyDetailsQuery().andWhere('property.id =:id',{id});
+
+    const property = await query.getOne();
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار لهذا المعرف',404)
+      );
+    }
+
+    const residential: Residential = property.residential;
+
+    const listingType: ListingType = residential.listing_type;
+
+    let price = 0;
+
+    if(listingType == ListingType.SALE && residential.selling_price){
+      price = residential.selling_price;
+    }
+    else if (listingType == ListingType.RENT && residential.monthly_price){
+      price = residential.rental_period === RentalPeriod.YEARLY
+        ? residential.monthly_price * 12
+        : residential.monthly_price;
+    }
+
+    const minPrice = price * 0.8;
+    const maxPrice = price * 1.2;
+
+  const query2 = this.propertyRepo.createQueryBuilder('property')
+      .leftJoin('property.residential', 'residential')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.images', 'images')
+      .where('property.id != :id', { id })
+      .andWhere('property.is_deleted = false')
+      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
+      .andWhere('post.status = :postStatus', { postStatus: PropertyPostStatus.APPROVED })
+      .andWhere('property.property_type = :type', { type: property.property_type })
+      .andWhere('region.id = :regionId', { regionId: property.region?.id });  
+
+    if (listingType === ListingType.SALE) {
+      query2.andWhere('residential.selling_price BETWEEN :min AND :max', {
+        min: minPrice,
+        max: maxPrice,
+      });
+    } else if (listingType === ListingType.RENT) {
+      query2.andWhere('residential.monthly_price BETWEEN :min AND :max', {
+        min: minPrice,
+        max: maxPrice,
+      });
+    }
+
+    query2
+    .select([
+      'property.id',
+      'property.area',
+      'property.region',
+      'property.rate',
+  
+      'post.id',
+      'post.title',
+      'post.description',
+      'post.tag',
+      'post.image',
+      'post.status',
+      'post.date',
+  
+      'residential.listing_type',
+      'residential.selling_price',
+      'residential.monthly_price',
+      'residential.rental_period',
+  
+      'region.id',
+      'region.name',
+  
+      'city.id',
+      'city.name',
+    ])
+    .addSelect(
+      `CASE
+         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         ELSE residential.selling_price
+       END`,
+      'calculated_price'
+    )
+    .setParameters({
+      rent: ListingType.RENT,
+      yearly: RentalPeriod.YEARLY,
+    })
+    .orderBy('post.date', 'DESC')
+    .take(5);
+
+    const properties = await query2.getMany();
+
+    return properties.map((property) => this.formatProperty(property, baseUrl));
   }
 
   async createPropertyAndSaveIt(data: CreatePropertyDto) {
@@ -42,8 +185,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         kitchen_count:data.room_details.kitchen_count,
     });
     
-    await this.propertyRepo.save(property);
-    return property;
+    return this.propertyRepo.save(property);
   }
 
   async updateProperty(id: number,data: UpdatePropertyDto) {
@@ -73,32 +215,111 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return updatedProeprty;
   }
 
-  
-
-
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {
-    const properties = await this.buildPropertyQuery(userId).getMany();
+    const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId });
+    
+    const properties = await query.getMany();
+
 
     return properties.map(property => this.formatPropertyDetails(property, baseUrl));
   }
 
+  async findPropertyDetailsById(propertyId: number, baseUrl: string,userId: number) {
+    const query = await this.createBasePropertyDetailsQuery()
+    .andWhere('property.id = :propertyId',{propertyId});
+
+    query.leftJoin('office.feedbacks', 'office_feedbacks');
+
+    query.addSelect([
+      'office.id',
+      'office.name',
+      'office.logo',
+      'office.type',
+      'office_feedbacks.id',
+      'office_feedbacks.rate',
+    ]);
+
+    query.addSelect(
+      `(SELECT COALESCE(AVG(of.rate), 0) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+      'office_average_rating'
+    );
+
+    query.addSelect(
+      `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+      'office_rating_count'
+    );
+
+    if (userId) {
+      query.addSelect(
+       `CASE
+             WHEN EXISTS(
+                 SELECT 1 FROM property_favorites pf 
+                 WHERE pf.property_id = property.id AND pf.user_id = :userId
+             ) THEN true
+             ELSE false
+         END`,
+       'is_favorite'
+      )
+      .setParameter('userId',userId)
+    }
+
+    const { entities, raw } = await query.getRawAndEntities();
+    const property = entities[0];
+    const rawData = raw[0];
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار بهذا المعرف ',404)
+      );  
+    }
+
+    const formatted = this.formatPropertyDetails(property,baseUrl);
+
+    console.log((property as any).office_average_rating)
+    
+    return {
+      ...formatted,
+      is_favorite: rawData.is_favorite ? 1 : 0,
+      office: {
+        id: property.office?.id,
+        name: property.office?.name,
+        logo: property.office?.logo
+          ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
+          : null,
+        type: property.office?.type ?? null,
+        rate:{
+          avreg: parseFloat(rawData.office_average_rating || 0),
+          count: parseInt(rawData.office_rating_count)
+        },
+      },
+    };
+  }
+
   async findPropertiesByUserOfficeWithFilters(userId: number, filters: SearchPropertiesDto,baseUrl: string) {
-    const properties = await this.buildPropertyQuery(userId,filters).getMany();
+    const query =  await this.createBasePropertyDetailsQuery(filters)
+    .andWhere('office.user_id = :userId', { userId });
+    
+    const properties = await query.getMany();
+
     
     return properties.map(property => this.formatPropertyDetails(property, baseUrl));
   }
 
-  async searchPropertiesByTitle(userId: number,title: string,baseUrl: string) {
-      const properties = await this.buildPropertyQuery(userId)
-      .where('post.title ILIKE :title', { title: `%${title}%` })
-      .getMany();
+  async searchPropertiesForOfficeByTitle(userId: number,title: string,baseUrl: string) {
+    const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId })
+    .andWhere('post.title ILIKE :title', { title: `%${title}%` });
+    
+    const properties =await query.getMany();
 
-      return properties.map(property => this.formatPropertyDetails(property,baseUrl));
+    return properties.map(property => this.formatPropertyDetails(property,baseUrl));
   }
 
 
   async findPropertyByPropertyIdAndUserOffice(userId: number,propertyId: number, baseUrl: string) {
-    const property = await this.buildPropertyQuery(userId)
+    const property = await this.createBasePropertyDetailsQuery()
+    .andWhere('office.user_id = :userId', { userId })
     .andWhere('property.id = :propertyId', { propertyId })
     .getOne();
 
@@ -111,21 +332,233 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return this.formatPropertyDetails(property,baseUrl);
   }
 
+  async getExpectedpPriceInRegion(propertyId: number) {
+      const result = await this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoin('property.region','region')
+      .where('property.id = :propertyId',{propertyId})
+      .select([
+        'property.id',
+        'property.area as area',
+        'region.id',
+        'region.default_meter_price as default_meter_price',
+      ])
+      .getRawOne();
+
+      if(!result){
+        throw new NotFoundException(
+          errorResponse('لم يتم العثور على العقار أو المنطقة',404)
+        );
+      }
+
+      const area = Number(result.area);
+      const pricePerMeter = Number(result.default_meter_price);
+      const expectedPrice = area * pricePerMeter;
+
+      return  {
+        'expected_price': expectedPrice
+      };
+  }
+
+  async getAllProperties(baseUrl: string,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId);
+
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
+  }
+
+  async getAllPropertiesWithFilters(baseUrl: string, filters: PropertiesFiltersDto,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId,filters);
+
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
+  }
+
+  async searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number) {
+    const query = await this.buildPropertyQuery(userId);
+    query.andWhere('post.title ILIKE :title', { title: `%${title}%` });
+
+    const [rawResults, total] = await Promise.all([
+      query.skip((page - 1) * items).take(items).getRawAndEntities(),
+      query.getCount(),
+    ]);
+  
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      calculated_price: Number(raw[index]?.calculated_price),
+      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+    }));
+  
+    return [final.map((p) => this.formatProperty(p, baseUrl)), total];
+  }
+
+  async compareTwoProperties(propertyId1: number, propertyId2: number, baseUrl: string) {
+  const query = this.createBasePropertyDetailsQuery()
+    .addSelect(
+      `CASE
+         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         ELSE residential.selling_price
+       END`,
+      'calculated_price'
+    )
+    .setParameters({
+      rent: ListingType.RENT ,
+      yearly: RentalPeriod.YEARLY,
+    });
+
+  const [raw1, raw2] = await Promise.all([
+    query.clone().andWhere('property.id = :id1', { id1: propertyId1 }).getRawAndEntities(),
+    query.clone().andWhere('property.id = :id2', { id2: propertyId2 }).getRawAndEntities()
+  ]);
+
+  const property1 = raw1.entities[0];
+  const rawData1 = raw1.raw[0];
+
+  const property2 = raw2.entities[0];
+  const rawData2 = raw2.raw[0];
+
+  if (!property1 || !property2) {
+    throw new NotFoundException(
+      errorResponse('لم يتم العثور على أحد العقارين أو كلاهما',404)
+    );
+  }
+
+    return {
+      property_1: this.formatPropertyForComparison(property1,rawData1,baseUrl),
+      property_2: this.formatPropertyForComparison(property2,rawData2,baseUrl),
+    }
+  }
+
+  private formatPropertyForComparison(property: Property,rawData: any,baseUrl: string){
+    return {
+      property_details: {
+        id: property.id,
+        area: property.area,
+        property_type: property.property_type,
+        ownership_type: property.residential?.ownership_type ?? null,
+        direction: property.residential?.direction ?? null,
+        status: property.residential?.status ?? null,
+        floor_number: property.floor_number,
+        has_furniture: property.has_furniture,
+        highlighted: property.highlighted,
+        notes: property.notes ?? null,
+        listing_type: property.residential.listing_type,
+        ...(property.residential?.listing_type === ListingType.RENT && {
+          rent_period: property.residential?.rental_period,
+        }),
+        price: Number(rawData?.calculated_price),
+      },
+      room_details: {
+        total: property.room_count,
+        bedroom: property.bedroom_count,
+        living_room: property.living_room_count,
+        kitchen: property.kitchen_count,
+        bathroom: property.bathroom_count,
+      },
+      location: {
+        coordinates: {
+          latitude: property.latitude,
+          longitude: property.longitude,
+        },
+        city: property.region?.city
+          ? {
+              id: property.region.city.id,
+              name: property.region.city.name,
+            }
+          : null,
+        region: property.region
+          ? {
+              id: property.region.id,
+              name: property.region.name,
+            }
+          : null,
+        full_address: property.region?.city && property.region
+          ? `${property.region.city.name}, ${property.region.name}`
+          : null,
+      },
+      images: property.images?.map(img => ({
+        id: img.id,
+        image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
+      })) ?? [],
+    };
+  }
+
+  private formatProperty(property,baseUrl: string){
+    
+    const base = {
+      propertyId:property.id,
+      postTitle: property.post.title,
+      postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+      location: `${property.region?.city?.name}, ${property.region?.name}`,
+      postDate: property.post.date.toISOString().split('T')[0],
+      is_favorite: property.is_favorite ? 1 : 0,
+    }
+
+    if (property.residential?.listing_type === ListingType.RENT) {
+      return {
+        ...base,
+        listing_type: 'أجار',
+        price: property.calculated_price,
+        rate:property.rate ?? null,
+      };
+    } else {
+      return {
+        ...base,
+        listing_type: 'بيع',
+        price:property.calculated_price,
+      };
+    }   
+  }
+
   private formatPropertyDetails(property: Property, baseUrl: string) {
   const base = {
-    id: property.id,
+    postTitle: property.post?.title,
+    postDescription: property.post?.description,
+    postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+    postDate: property.post.created_at.toISOString().split('T')[0],
+    PostStatus: property.post.status,
+    propertyId: property.id,
     area: property.area,
     property_type: property.property_type,
     ownership_type: property.residential?.ownership_type ?? null,
     direction: property.residential?.direction ?? null,
     status: property.residential?.status ?? null,
-    location: {
+    coordinates: {
       latitude: property.latitude,
       longitude: property.longitude,
     },
     floor_number: property.floor_number,
     notes: property.notes ?? null,
-    rate: property.rate,
     highlighted: property.highlighted,
     room_counts: {
       total: property.room_count,
@@ -135,6 +568,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       bathroom: property.bathroom_count,
     },
     has_furniture: property.has_furniture,
+    location: `${property.region?.city?.name}, ${property.region?.name}`,
     region: {
       id: property.region?.id,
       name: property.region?.name,
@@ -147,19 +581,23 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       id: image.id,
       image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
     })),
-    tags: property.post?.propertyPostTags?.map(ppt => ({
-      id: ppt.tag?.id,
-      name: ppt.tag?.name,
-    })),
+    tag: property.post?.tag,
   };
 
   if (property.residential?.listing_type === ListingType.RENT) {
+    const rentalPeriod = property.residential?.rental_period ?? null;
+    const baseMonthlyPrice = property.residential?.monthly_price ?? null;
+    const adjustedMonthlyPrice = rentalPeriod == RentalPeriod.YEARLY && baseMonthlyPrice !== null
+      ? baseMonthlyPrice * 12
+      : baseMonthlyPrice;
+    
     return {
       ...base,
+      rate:property.rate ?? null,
       listing_type: 'أجار',
       rent_details: {
-        monthly_price: property.residential?.monthly_price ?? null,
-        rental_period: property.residential?.rental_period ?? null,
+        price: adjustedMonthlyPrice,
+        rental_period: rentalPeriod
       },
     };
   } else {
@@ -175,18 +613,107 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
  }
 
- private buildPropertyQuery(userId: number,filters?: SearchPropertiesDto){
+ private async buildPropertyQuery(userId: number,filters?: PropertiesFiltersDto,){
+      const query = this.propertyRepo.createQueryBuilder('property')
+        .leftJoin('property.residential', 'residential')
+        .leftJoin('property.post', 'post')
+        .leftJoin('property.region', 'region')
+        .leftJoin('region.city', 'city')
+        .select([
+          'property.id',
+          'property.area',
+          'property.region',
+          'property.rate',
+      
+          'post.id',
+          'post.title',
+          'post.description',
+          'post.tag',
+          'post.image',
+          'post.status',
+          'post.date',
+      
+          'residential.listing_type',
+          'residential.selling_price',
+          'residential.monthly_price',
+          'residential.rental_period',
+      
+          'region.id',
+          'region.name',
+      
+          'city.id',
+          'city.name',
+        ])
+        .addSelect(
+          `CASE
+             WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
+             WHEN residential.listing_type = :rent THEN residential.monthly_price
+             ELSE residential.selling_price
+           END`,
+          'calculated_price'
+        )
+        .where('property.is_deleted = false')
+        .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED })
+        .setParameters({
+          rent: ListingType.RENT,
+          yearly: RentalPeriod.YEARLY,
+        });
+
+    if (userId) {
+      query.addSelect(
+        `CASE
+           WHEN EXISTS(
+             SELECT 1 FROM property_favorites pf 
+             WHERE pf.property_id = property.id AND pf.user_id = :userId
+           ) THEN true
+           ELSE false
+         END`,
+        'is_favorite'
+      )
+      .setParameter('userId',userId)
+    }
+
+      
+      if (filters) {
+        if (filters.listing_type) {
+          query.andWhere('residential.listing_type = :listing_type', {
+            listing_type: filters.listing_type,
+          });
+        }
+    
+        if (filters.regionId) {
+          query.andWhere('region.id = :regionId', { regionId: filters.regionId });
+        }
+    
+        if (filters.tag) {
+          query.andWhere('post.tag = :tag', { tag: filters.tag });
+        }
+      
+        if (filters.orderByPrice) {
+          query.orderBy('calculated_price',  'DESC');
+        }
+      
+        if (filters.orderByArea) {
+          query.addOrderBy('property.area', 'DESC');
+        }
+    
+        if (filters.orderByDate) {
+          query.addOrderBy('post.date', 'DESC');
+        }
+      }
+  
+    return query;
+ }
+
+ private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto){
   const query = this.propertyRepo.createQueryBuilder('property')
     .leftJoin('property.office', 'office')
     .leftJoin('property.residential', 'residential')
     .leftJoin('property.images', 'images')
     .leftJoin('property.region', 'region')
     .leftJoin('region.city', 'city')
-    .leftJoin('property.post', 'propertyPost')
-    .leftJoin('propertyPost.propertyPostTags', 'propertyPostTag')
-    .leftJoin('propertyPostTag.tag', 'tag')
-    .where('office.user_id = :userId', { userId })
-    .andWhere('property.is_deleted = false')
+    .leftJoin('property.post', 'post')
+    .where('property.is_deleted = false')
     .select([
     'property.id',
     'property.area',
@@ -203,6 +730,15 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     'property.kitchen_count',
     'property.bathroom_count',
     'property.has_furniture',
+    'property.rate',
+
+    'post.id',
+    'post.title',
+    'post.image',
+    'post.created_at',
+    'post.status',
+    'post.description',
+    'post.tag',
 
     'residential.status',
     'residential.monthly_price',
@@ -222,11 +758,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     'city.id',
     'city.name',
-
-    'propertyPost.id',
-    'propertyPostTag.id', 
-    'tag.id',
-    'tag.name',
     ]);
 
   // Apply optional filters
@@ -247,12 +778,45 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       query.andWhere('residential.status = :status', { status: filters.status });
     }
 
-    if (filters.tagIds?.length) {
-      query.andWhere('tag.id IN (:...tagIds)', { tagIds: filters.tagIds });
+    if (filters.tag) {
+      query.andWhere('post.tag = :tag', { tag: filters.tag });
     }
   }
 
   return query;
+ }
+
+ async rateProperty(userId: number, propertyId: number, rate: number) {
+    const property = await this.propertyRepo.findOne({where:{id:propertyId},relations: ['residential']});
+    const user = await this.userRepo.findById(userId);
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار لهذا المعرف',404)
+      );
+    }
+
+    if(property.residential.listing_type === ListingType.SALE){
+      throw new ForbiddenException(
+        errorResponse ('لا يمكنك تقييم عقار للشراء',403)
+      );
+    }
+
+    let feedback = await this.feedbackRepo.findOne({
+      where: { user : { id: userId},property: {id : property.id}}
+    });
+
+    if(!feedback){
+      feedback = this.feedbackRepo.create({
+        property,
+        user,
+        rate
+      });
+    }else {
+      feedback.rate = rate;
+    }
+
+    return this.feedbackRepo.save(feedback);
  }
 
  private buildUpdatePayload(data: UpdatePropertyDto): Partial<Property> {

@@ -5,6 +5,7 @@ import { LoginUseCase } from "src/application/use-cases/auth/login.use-case";
 import { LogoutUseCase } from "src/application/use-cases/auth/logout.use-case";
 import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
+import { Public } from "src/shared/decorators/public.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { RefreshJwtGuard } from "src/shared/guards/refresh-jwt.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
@@ -18,6 +19,7 @@ export class AuthController {
     ){}
 
     @Post('login')
+    @Public()
     @HttpCode(HttpStatus.OK)
     async login(@Request() req ,@Body() loginDto: LoginDto){
       const {user , tokens} =  await this.loginUseCase.execute(loginDto);
@@ -32,7 +34,6 @@ export class AuthController {
       return successResponse(data,'تم تسجيل الدخول بنجاح'); 
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post('logout')
     @HttpCode(HttpStatus.OK)
     logout(@Req() request: requsetExpress,@CurrentUser() user){
@@ -44,6 +45,7 @@ export class AuthController {
       return successResponse([],'تم تسجيل الخروج بنجاح');
     }
 
+    @Public()
     @UseGuards(RefreshJwtGuard)
     @Post('refresh')
     @HttpCode(HttpStatus.OK)

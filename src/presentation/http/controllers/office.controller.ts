@@ -1,7 +1,8 @@
+ 
 // src/presentation/http/controllers/office.controller.ts
 import {
     Controller, Get, Post, Body, Put,Patch,
-    Param,
+    Param,Query,
     HttpCode, HttpStatus, UseGuards,UseInterceptors,UploadedFile,BadRequestException
   } from "@nestjs/common";
   import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
@@ -16,7 +17,12 @@ import {
   import { OfficeResource } from 'src/presentation/http/resources/office.resource';
   import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
   import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-method.dto'; 
-  import {OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor";
+  import {OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor"; 
+  import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
+  import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
+  import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case"; 
+  import { Roles } from "src/shared/decorators/role.decorator";  
+  
   @Controller('office')
   export class OfficeController {
     constructor(
@@ -24,7 +30,9 @@ import {
       private readonly createOfficeUseCase: CreateOfficeUseCase,
       private readonly updateOfficeUseCase: UpdateOfficeUseCase,
       private readonly getOfficeDetailsUseCase: GetOfficeDetailsUseCase,
-      private readonly getPaymentMethodUseCase: GetOfficePaymentMethodUseCase
+      private readonly getPaymentMethodUseCase: GetOfficePaymentMethodUseCase ,
+      private readonly getOfficeFeesUseCase: GetOfficeFeesUseCase,
+      private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase
     ) {}
 
     @Get('/payment-method')
@@ -36,8 +44,7 @@ import {
       const data = await this.getPaymentMethodUseCase.execute(userId);
       return successResponse(data, 'تم ارجاع طريقة الدفع', 200);
     }
-
-
+ 
     @Get('/commission')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
@@ -74,9 +81,9 @@ import {
       const result = await this.updateOfficeUseCase.execute(userId, dto);
       return successResponse(result, 'تم تحديث بيانات المكتب بنجاح', 200);
     }
-
+ 
+ 
     @Get()
-    @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getOfficeDetails(
       @CurrentUser() user, 
@@ -86,5 +93,34 @@ import {
       const data = OfficeResource.toJson(officeEntity);
       return successResponse(data, 'تم جلب بيانات المكتب بنجاح', 200);
     }
-  }
+
+
+    @Roles('صاحب مكتب')
+    @Get('fees')
+    @HttpCode(HttpStatus.OK)
+    async getFees(
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+
+        const data = await this.getOfficeFeesUseCase.execute(userId);
+
+        return successResponse(data,'تم ارجاع رسوم المكتب',200);
+    }
+
+    @Roles('صاحب مكتب')
+    @Put('fees')
+    @HttpCode(HttpStatus.OK)
+    async updateFees(
+        @Query() data: UpdateOfficeFeesDto,
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+
+        await this.updateOfficeFeesUseCase.execute(userId,data);
+
+        return successResponse([],'تم تحديث معلومات الرسوم الخاصة بالمكتب بنجاح',200);
+    }
  
+  }
+   

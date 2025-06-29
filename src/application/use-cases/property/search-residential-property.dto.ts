@@ -8,6 +8,6 @@ export class SearchResidentialPropertyByTitleUseCase {
     ){}
 
     async execute(userId: number,title: string,baseUrl: string){
-        return await this.propertyRepo.searchPropertiesByTitle(userId,title,baseUrl);
+        return await this.propertyRepo.searchPropertiesForOfficeByTitle(userId,title,baseUrl);
     }
 }

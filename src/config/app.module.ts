@@ -10,23 +10,41 @@ import { PropertyImageModule } from 'src/presentation/http/modules/property-imag
 import { ResidentialOfficeModule } from 'src/presentation/http/modules/residential-office.module';
 import { CityModule } from 'src/presentation/http/modules/city.module';
 import { RegionModule } from 'src/presentation/http/modules/region.module';
-import { TagModule } from 'src/presentation/http/modules/tag.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
-import { OfficeModule } from 'src/presentation/http/modules/office.module';
-import { SentryModule } from "@sentry/nestjs/setup";
-import { ServicePriceModule } from 'src/presentation/http/modules/service-price.module';
+import { OfficeModule } from 'src/presentation/http/modules/office.module'; 
+//import { SentryModule } from "@sentry/nestjs/setup";
+import { ServicePriceModule } from 'src/presentation/http/modules/service-price.module'; 
+import { UserPostModule } from 'src/presentation/http/modules/user-post.module';
+import { UserPostSuggestionModule } from 'src/presentation/http/modules/user-post-suggestion.module';
+import { PropertyReservationModule } from 'src/presentation/http/modules/proeprty-reservation.module';
+import { ServiceProviderModule } from 'src/presentation/http/modules/service-provider.module';
+import { RoleModule } from 'src/presentation/http/modules/role.module';
+import { PermissionModule } from 'src/presentation/http/modules/permission.module';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
+import { PermissionsGuard } from 'src/shared/guards/permission.guard';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { PropertyModule } from 'src/presentation/http/modules/property.module';
+ 
 @Module({
   imports: [
+    RoleModule,
+    ResidentialOfficeModule,
+    PermissionModule,
+    PropertyModule,
+    UserPostModule,
+    ServiceProviderModule,
+    UserPostSuggestionModule,
     OfficeModule,
     AuthModule,
-    TagModule,
     CityModule,
     PropertyPostModule,
     RegionModule,
-    PropertyImageModule,
+    PropertyImageModule, 
     ResidentialOfficeModule, 
     ServicePriceModule,
-    SentryModule.forRoot(),
+    //SentryModule.forRoot(), 
+    PropertyReservationModule, 
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env', 
@@ -38,6 +56,20 @@ import { ServicePriceModule } from 'src/presentation/http/modules/service-price.
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // authenticate first, sets request.user
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
+  ],
 })
 export class AppModule {}

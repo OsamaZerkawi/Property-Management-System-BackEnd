@@ -12,7 +12,15 @@ export class UserRepository implements UserRepositoryInterface {
     ){}
     findById(userId: number) {
         return this.userRepo.findOne({
-            where: {id :userId}
+            where: {id :userId},
+            select:['id','first_name','last_name','stripe_customer_id','phone','email'],
         });
+    }
+
+    async findByPhone(phone: string) {
+        return await this.userRepo.findOne({
+            where: {phone},
+            select:['id','first_name','last_name','stripe_customer_id','phone','email'],
+        })
     }
 }

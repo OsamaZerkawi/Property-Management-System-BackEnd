@@ -1,28 +1,24 @@
 import { Type } from "class-transformer";
-import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, IsPositive, IsString, Min, ValidateNested } from "class-validator";
 import { Direction } from "src/domain/enums/direction.enum";
 import { OwnershipType } from "src/domain/enums/ownership-type.enum";
 import { RentDetailsDto } from "./rentDetails.dto";
 import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
-import { PropertyType } from "src/domain/enums/property-type.enum";
 
 export class UpdateResidentialPropertyDto {
     @IsString()
     @IsOptional()
     postTitle?: string;
 
-    @IsArray()
-    @ArrayNotEmpty()
+    @IsString()
     @IsOptional()
-    @IsInt({ each: true })
-    tags?: number[];
+    postDescription?: string;
 
     @IsInt()
     @IsOptional()
     regionId?: number;
-
 
     @IsNumber()
     @IsOptional()

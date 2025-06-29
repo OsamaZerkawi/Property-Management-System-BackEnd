@@ -5,7 +5,6 @@ import { REGION_REPOSITORY, RegionRepositoryInterface } from "src/domain/reposit
 import { CreatePropertyUseCase } from "./create-property.use-case";
 import { CreatePropertyPostUseCase } from "../property-post/create-property-post.use-case";
 import { CreatePropertyPostDto } from "src/application/dtos/property/CreatePropertyPost.dto";
-import { FindTagsUseCase } from "../tag/find-tags.use-case";
 import { AttachTagsToPostUseCase } from "../property-post/attach-tags-to-post.use-case";
 import { createResidentialPropertyUseCase } from "./create-residential-propety.use-case";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
@@ -20,8 +19,6 @@ export class CreateResidentialPropertyDetailsUseCase {
     constructor(
         private readonly createPropertyUseCase: CreatePropertyUseCase,
         private readonly createPropertyPostUseCase: CreatePropertyPostUseCase,
-        private readonly findTagsUseCase: FindTagsUseCase,
-        private readonly attachTagsToPostUseCase: AttachTagsToPostUseCase,
         private readonly createResidentialPropertyUseCase: createResidentialPropertyUseCase,
         private readonly findRegionUseCase: FindRegionUseCase,
         private readonly findOfficeForUserUseCase: FindOfficeForUserUseCase,
@@ -57,14 +54,12 @@ export class CreateResidentialPropertyDetailsUseCase {
         const propertyPostDto: CreatePropertyPostDto = {
             property: property,
             postImage: imageName,
-            postTitle: data.postTitle
+            postDescription:data.postDescription,
+            postTitle: `${data.tag} - ${property.area} متر مربع`,
+            postTag:data.tag
         };
 
         const propertyPost = await this.createPropertyPostUseCase.execute(propertyPostDto);
-
-        const tags = await this.findTagsUseCase.execute(data.tags);
-
-        await this.attachTagsToPostUseCase.execute(propertyPost,tags);
 
         const residentialPropertyDto: ResidentialPropertyDto = {
           listingType: data.listing_type,

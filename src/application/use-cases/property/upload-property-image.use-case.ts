@@ -17,7 +17,11 @@ export class UploadPropertyImagesUseCase {
     ){}
 
     async execute(propertyId: number ,userId: number ,files: Express.Multer.File[]){
-        await this.propertyAccessService.verifyUserIsOwner(propertyId,userId);
+        try{
+            await this.propertyAccessService.verifyUserIsOwner(propertyId,userId);
+        }catch(error){
+            return error;
+        }
         
         const imagePaths = files.map( (file) => ({
             image_path: file.filename,

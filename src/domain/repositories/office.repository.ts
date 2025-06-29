@@ -1,7 +1,9 @@
+ 
 // src/domain/repositories/office.repository.ts
 import { CreateOfficeDto } from 'src/application/dtos/office/create-office.dto';
 import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
 import { Office } from 'src/domain/entities/offices.entity';
+import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto";
 
 export const OFFICE_REPOSITORY = 'OFFICE_REPOSITORY';
 
@@ -11,5 +13,9 @@ export interface OfficeRepositoryInterface {
   createOfficeWithSocials(userId: number, dto: CreateOfficeDto): Promise<{ id: number }>;
   findById(id: number): Promise<Office | null>;
   updateOfficeWithSocials(officeId: number, dto: UpdateOfficeDto): Promise<{ id: number }>;
-  findOfficeByUserId(userId: number): Promise<Office | null>
-}
+  findOfficeByUserId(userId: number): Promise<Office | null>  
+  getOfficeFees(userId: number);
+  updateOfficeFees(userId: number,data:UpdateOfficeFeesDto);
+} 
+ 
+ 

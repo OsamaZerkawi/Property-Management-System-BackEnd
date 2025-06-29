@@ -9,6 +9,8 @@ import {
   ManyToOne,
   OneToOne,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { Office } from './offices.entity';
 import { Region } from './region.entity';
@@ -17,6 +19,10 @@ import { AdminAgreement } from '../enums/admin-agreement.enum';
 import { PropertyType} from '../enums/property-type.enum';
 import { PropertyPost } from './property-posts.entitiy';
 import { Image } from './image.entity';
+import { UserPostSuggestion } from './user-post-suggestions.entity';
+import { UserPropertyInvoice } from './user-property-invoice.entity';
+import { User } from './user.entity';
+import { PropertyFeedback } from './property-feedback.entity';
 
 
 @Entity('properties')
@@ -86,6 +92,23 @@ export class Property {
 
   @OneToMany(() => Image, (image) => image.property)
   images: Image[];
+  
+  @OneToMany(() => UserPostSuggestion,userPostSuggestion => userPostSuggestion.property)
+  userPostSuggestions: UserPostSuggestion[];
+
+  @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.property)
+  invoices: UserPropertyInvoice[];
+
+  @OneToMany(() => PropertyFeedback, feedback => feedback.property)
+  feedbacks: PropertyFeedback[];
+
+  @ManyToMany(() => User, user => user.favoriteProperties)
+  @JoinTable({
+    name: 'property_favorites',
+    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
+  })
+  favoritedByUsers: User[];
 
   @CreateDateColumn()
   created_at: Date;

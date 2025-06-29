@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { PropertyPostStatus } from "../enums/property-post-status.enum";
 import { Property } from "./property.entity";
-import { PropertyPostTag } from "./property-post-tag.entity";
+import { PropertyPostTag } from "../enums/property-post-tag.enum";
 
 @Entity('property_posts')
 export class PropertyPost {
@@ -11,11 +11,17 @@ export class PropertyPost {
     @Column()
     title: string;
 
+    @Column({type: 'text'})
+    description: string;
+
     @Column()
     image: string;
 
-    @Column()
+    @Column() 
     date: Date;
+
+    @Column({type:'enum',enum:PropertyPostTag})
+    tag: PropertyPostTag;
 
     @Column({ type: 'enum', enum: PropertyPostStatus, default: PropertyPostStatus.PENDING })
     status: PropertyPostStatus;
@@ -24,8 +30,8 @@ export class PropertyPost {
     @JoinColumn()
     property: Property;
 
-    @OneToMany(() => PropertyPostTag, (ppt) => ppt.propertyPost)
-    propertyPostTags: PropertyPostTag[];
+    // @OneToMany(() => PropertyPostTag, (ppt) => ppt.propertyPost)
+    // propertyPostTags: PropertyPostTag[];
 
     @CreateDateColumn()
     created_at: Date;  

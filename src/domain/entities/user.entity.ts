@@ -1,13 +1,15 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
 import { RefreshToken } from "./refresh-token.entity";
 import { Office } from "./offices.entity";
 import { UserPost } from "./user-post.entity";
-
-export enum Role {
-  ADMIN = 'admin',
-  USER = 'user',
-  PROPERTY_MANAGER = 'property_manager'
-}
+import { UserPropertyPurchase } from "./user-property-purchase.entity";
+import { UserPropertyInvoice } from "./user-property-invoice.entity";
+import { ServiceProvider } from "./service-provider.entity";
+import { ServiceFeedback } from "./service-feedback.entity";
+import { UserRole } from "./user-role.entity";
+import { Property } from "./property.entity";
+import { PropertyFeedback } from "./property-feedback.entity";
+import { OfficeFeedback } from "./office-feedback.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -32,13 +34,6 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({
-    type: 'enum',
-    enum: Role,
-    default: Role.USER
-  })
-  role: Role;
-
   @Column({ nullable: true })
   photo: string;
 
@@ -53,5 +48,42 @@ export class User {
 
   @OneToMany(() => UserPost,post => post.user)
   userPosts: UserPost[];
+
+  @OneToMany(() => UserPropertyPurchase,(purchase) => purchase.user)
+  propertyPurchases: UserPropertyPurchase[];
+
+  @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.user)
+  invoices: UserPropertyInvoice[];
   
+  @OneToOne(() => ServiceProvider, (sp) => sp.user)
+  serviceProvider: ServiceProvider;
+
+  @OneToMany(() => ServiceFeedback, (feedback) => feedback.user)
+  service_feedbacks: ServiceFeedback[];
+
+  @OneToMany(() => PropertyFeedback, feedback => feedback.user)
+  property_feedbacks: PropertyFeedback[];
+
+  @OneToMany(() => OfficeFeedback, (feedback) => feedback.user)
+  office_feedbacks: OfficeFeedback[];
+
+  @OneToMany(() => UserRole, ur => ur.user)
+  userRoles: UserRole[];
+
+  @ManyToMany(() => Property, property => property.favoritedByUsers)
+  @JoinTable({
+    name: 'property_favorites',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'property_id', referencedColumnName: 'id' },
+  })
+  favoriteProperties: Property[];
+
+  // @OneToMany(() => UserPermission, up => up.user)
+  // userPermissions: UserPermission[];
+ 
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
