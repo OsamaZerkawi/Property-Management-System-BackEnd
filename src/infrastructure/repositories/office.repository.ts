@@ -40,7 +40,7 @@ async createOfficeWithSocials(
     const office = manager.create(Office, {
       user: { id: userId },
       name: dto.name,
-      logo: dto.logo || undefined, // تحويل null إلى undefined
+      logo: dto.logo || undefined,  
       type: dto.type,
       commission: dto.commission,
       booking_period: dto.booking_period,
@@ -85,8 +85,7 @@ async createOfficeWithSocials(
         relations: ['socials'],
       });
       if (!office) throw new Error('Office not found');
-
-      // Assign only defined properties
+ 
       Object.entries(dto).forEach(([key, value]) => {
         if (value !== undefined && key !== 'socials') {
           (office as any)[key] = value;
