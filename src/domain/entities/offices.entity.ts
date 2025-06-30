@@ -15,6 +15,7 @@ import { Property } from './property.entity';
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { OfficeFeedback } from './office-feedback.entity';
+import { OfficeSocial } from './office-social.entity';
 
 
 
@@ -98,6 +99,9 @@ export class Office {
   @ManyToOne(() => Region, region => region.offices, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'region_id' }) 
   region: Region;
+
+  @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
+  socials: OfficeSocial[];
 
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
