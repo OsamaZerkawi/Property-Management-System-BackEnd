@@ -23,4 +23,19 @@ export class UserRepository implements UserRepositoryInterface {
             select:['id','first_name','last_name','stripe_customer_id','phone','email'],
         })
     }
+    async save(user: User): Promise<User> { 
+        const ent = this.userRepo.create({
+          first_name: user.first_name,
+          last_name:  user.last_name,
+          phone:      user.phone,
+          photo:      user.photo,
+          email:      user.email,
+          password:   user.password, 
+        });
+        return this.userRepo.save(ent);
+      }
+    
+      async findByEmail(email: string): Promise<User | null> {
+        return this.userRepo.findOne({ where: { email } });
+      }
 }
