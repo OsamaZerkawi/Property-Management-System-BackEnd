@@ -58,13 +58,38 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
       return { results };
     }
 
+    async findOneWithDetails(id: number, baseUrl: string) {
+      return this.serviceProviderRepo
+        .createQueryBuilder('sp')
+        .leftJoin('sp.region', 'region')
+        .leftJoin('region.city', 'city')
+        .leftJoin('sp.user', 'user')
+        .leftJoin('sp.feedbacks', 'feedback', 'feedback.rate IS NOT NULL')
+        .select([
+          'sp.id AS "id"',
+          'sp.name AS "name"',
+          `CONCAT('${baseUrl}/uploads/providers/logo', sp.logo) AS "logo"`,
+          'sp.details AS "details"',
+          'sp.career AS "career"',
+          `CONCAT(city.name, ', ', region.name) AS "location"`,
+          'user.phone AS "userPhone"',
+          'sp.opening_time AS "openingTime"',
+          'sp.closing_time AS "closingTime"',
+          'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
+          'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"'
+        ])
+        .where('sp.id = :id', { id })
+        .groupBy('sp.id, region.id, city.id, user.id')
+        .getRawOne();
+    }
+
     private async fetchServiceProviders(baseUrl: string,page?:number,items?: number,filters?: ServiceProviderFiltersDto,){
         const query = this.serviceProviderRepo
           .createQueryBuilder('service_provider')
           .leftJoin('service_provider.user', 'user')
           .leftJoin('service_provider.region', 'region')
           .leftJoin('region.city', 'city')
-          .leftJoin('service_provider.feedbacks', 'feedback')
+          .leftJoin('service_provider.feedbacks', 'feedback', 'feedback.rate IS NOT NULL')
           .where('service_provider.active = true');
       
         if (filters?.regionId) {
@@ -85,8 +110,9 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
           `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
           'service_provider.career AS career',
           `CONCAT(city.name, ', ', region.name) AS location`,
-          'user.phone AS user_phone',
-          'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS avg_rate',
+          'user.phone AS "userPhone"',
+          'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
+          'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"'
         ])
         .groupBy(`
           service_provider.id,

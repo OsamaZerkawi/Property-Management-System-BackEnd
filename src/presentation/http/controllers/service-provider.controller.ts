@@ -5,6 +5,7 @@ import { ServiceProviderFiltersDto } from "src/application/dtos/service-provider
 import { CreateOrUpdateServiceProviderFeedbackUseCase } from "src/application/use-cases/service-provider/create-or-update-service-provider-feedback.use-case";
 import { GetAllServiceProvidersWithFiltersUseCase } from "src/application/use-cases/service-provider/get-all-service-provider-with-filters.use-case";
 import { GetAllServiceProvidersUseCase } from "src/application/use-cases/service-provider/get-all-service-provider.use-case";
+import { GetServiceProviderDetailsUseCase } from "src/application/use-cases/service-provider/get-service-provider-details.use-case";
 import { GetTopRatedServiceProvidersUseCase } from "src/application/use-cases/service-provider/get-top-rated-providers.use-case";
 import { SearchServiceProviderUseCase } from "src/application/use-cases/service-provider/search-service-provider.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
@@ -18,6 +19,7 @@ export class ServiceProviderController{
         private readonly searchServiceProviderUseCase: SearchServiceProviderUseCase,
         private readonly getTopRatedServiceProvidersUseCase: GetTopRatedServiceProvidersUseCase,
         private readonly createOrUpdateServiceProviderFeedbackUseCase: CreateOrUpdateServiceProviderFeedbackUseCase,
+        private readonly getServiceProviderDetailsUseCase: GetServiceProviderDetailsUseCase,
     ){}
 
     @Get()
@@ -92,6 +94,18 @@ export class ServiceProviderController{
         const [data,total] = await this.getTopRatedServiceProvidersUseCase.execute(page,items,baseUrl);
 
         return successPaginatedResponse(data,total,page,items,'تم جلب مقدمي الخدمات بنجاح',200);
+    }
+
+    @Get(':id')
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    async getDetails(
+      @Param('id',ParseIntPipe) id:number,
+      @Req() request: Request
+    ){
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+        const data = await this.getServiceProviderDetailsUseCase.execute(id, baseUrl);
+        return successResponse(data, 'تم إرجاع تفاصيل مزود الخدمة', 200);
     }
 
     @Post(':id/feedback')

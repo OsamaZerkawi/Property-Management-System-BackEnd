@@ -7,6 +7,7 @@ export interface ServiceProviderRepositoryInterface{
     getAll(baseUrl: string,page?:number,items?: number);
     getAllWithFilters(baseUrl: string,filters: ServiceProviderFiltersDto,page?:number,items?: number);
     findTopRatedServiceProviders(page: number,items: number);
+    findOneWithDetails(id: number, baseUrl: string);
     searchByName(baseUrl: string,name: string,page?:number,items?: number);
     createOrUpdateFeedback(userId:number,serviceProviderId: number,data:ServiceProviderFeedbackDto);
 }
