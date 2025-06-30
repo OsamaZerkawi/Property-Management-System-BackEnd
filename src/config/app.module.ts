@@ -25,7 +25,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from 'src/shared/guards/permission.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { PropertyModule } from 'src/presentation/http/modules/property.module';
- 
+ import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
 @Module({
   imports: [
     RoleModule,
@@ -43,6 +43,7 @@ import { PropertyModule } from 'src/presentation/http/modules/property.module';
     PropertyImageModule, 
     ResidentialOfficeModule, 
     ServicePriceModule,
+    MobileAuthModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     ConfigModule.forRoot({

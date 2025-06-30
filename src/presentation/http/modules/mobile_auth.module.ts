@@ -1,7 +1,7 @@
 // src/infrastructure/modules/mobile_auth.module.ts
 
 import { Module } from '@nestjs/common';
-import { AuthController } from 'src/presentation/http/controllers/mobile_auth.controller';
+import { MobileAuthController } from 'src/presentation/http/controllers/mobile_auth.controller';
 
 import { CreateUserUseCase } from 'src/application/use-cases/moblie_auth/create-user.usecase';
 import { VerifyOtpUseCase } from 'src/application/use-cases/moblie_auth/verify-otp.use-case';
@@ -11,7 +11,8 @@ import { RedisCacheService } from 'src/application/services/redis-cache.service'
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/domain/entities/user.entity'; 
-import { UserRepository } from 'src/infrastructure/repositories/user.property';
+import { UserRepository } from 'src/infrastructure/repositories/user.property'; 
+import { USER_REPOSITORY } from 'src/domain/repositories/user.repository';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
 
@@ -30,7 +31,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
       }),
     }),
   ],
-  controllers: [AuthController],
+  controllers: [MobileAuthController],
   providers: [
     // UseCases
     CreateUserUseCase,
@@ -42,7 +43,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
 
     // Repository Binding
     {
-      provide: 'UserRepository',
+      provide: USER_REPOSITORY,
       useClass: UserRepository,
     },
   ],
