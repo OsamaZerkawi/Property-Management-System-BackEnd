@@ -40,9 +40,10 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         Image,UserPost,UserPostSuggestion,
         UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
-        PropertyFeedback,OfficeFeedback 
+        PropertyFeedback,OfficeFeedback ,OfficeSocial
     ],
     synchronize: true,
+    //dropSchema: true,
 });
 
 export default OrmConfig;

@@ -18,9 +18,7 @@ import { PaymentMethod } from '../enums/payment-method.enum';
 import { OfficeFeedback } from './office-feedback.entity';
 
 
-
-
-
+ 
 @Entity('offices')
 export class Office {
   @PrimaryGeneratedColumn()
