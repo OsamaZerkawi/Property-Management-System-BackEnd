@@ -1,6 +1,8 @@
 import { InjectRepository } from "@nestjs/typeorm";
 import { waitForDebugger } from "inspector";
+import { ServiceProviderFeedbackDto } from "src/application/dtos/service-provider/service-provider-feedback.dto";
 import { ServiceProviderFiltersDto } from "src/application/dtos/service-provider/service-provider-filters.dto";
+import { ServiceFeedback } from "src/domain/entities/service-feedback.entity";
 import { ServiceProvider } from "src/domain/entities/service-provider.entity";
 import { ServiceProviderRepositoryInterface } from "src/domain/repositories/service-provider.repository";
 import { Repository } from "typeorm";
@@ -9,65 +11,95 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
     constructor(
         @InjectRepository(ServiceProvider)
         private readonly serviceProviderRepo: Repository<ServiceProvider>,
+        @InjectRepository(ServiceFeedback)
+        private readonly feedbackRepo: Repository<ServiceFeedback>,
     ){}
 
-    async getAll() {
-       const query = await this.fetchServiceProviders();
-       return query.getRawMany();
+    async getAll(baseUrl: string, page?: number, items?: number) {
+      const query = await this.fetchServiceProviders(baseUrl);
+    
+      if (page && items) {
+        const countQuery = query.clone();
+        query.skip((page - 1) * items).take(items);
+        const [results, total] = await Promise.all([query.getRawMany(), countQuery.getCount()]);
+        return { results, total, page, items };
+      }
+    
+      const results = await query.getRawMany();
+      return { results };
+    }
+    
+    async getAllWithFilters(baseUrl: string, filters: ServiceProviderFiltersDto, page?: number, items?: number) {
+      const query = await this.fetchServiceProviders(baseUrl,page,items,filters);
+    
+      if (page && items) {
+        const countQuery = query.clone();
+        query.skip((page - 1) * items).take(items);
+        const [results, total] = await Promise.all([query.getRawMany(), countQuery.getCount()]);
+        return { results, total, page, items };
+      }
+    
+      const results = await query.getRawMany();
+      return { results };
+    }
+    
+    async searchByName(name: string, baseUrl: string, page?: number, items?: number) {
+      const query = await this.fetchServiceProviders(baseUrl);
+      query.andWhere('service_provider.name ILIKE :name', { name: `%${name}%` });
+    
+      if (page && items) {
+        const countQuery = query.clone();
+        query.skip((page - 1) * items).take(items);
+        const [results, total] = await Promise.all([query.getRawMany(), countQuery.getCount()]);
+        return { results, total, page, items };
+      }
+    
+      const results = await query.getRawMany();
+      return { results };
     }
 
-    async getAllWithFilters(filters: ServiceProviderFiltersDto) {
-        const query = await this.fetchServiceProviders(filters);
-        return  query.getRawMany();
-    }
-
-    async searchByName(name: string) {
-        const query = await this.fetchServiceProviders();
-        query.andWhere('service_provider.name ILIKE :name', { name: `%${name}%` });
-        return query.getRawMany();
-    }
-
-    private async fetchServiceProviders(filters?: ServiceProviderFiltersDto){
+    private async fetchServiceProviders(baseUrl: string,page?:number,items?: number,filters?: ServiceProviderFiltersDto,){
         const query = this.serviceProviderRepo
-            .createQueryBuilder('service_provider')
-            .leftJoin('service_provider.user','user')
-            .leftJoin('service_provider.region','region')
-            .leftJoin('region.city','city')
-            .leftJoin('service_provider.feedbacks','feedback')
-            .where('service_provider.active = true')
-            
+          .createQueryBuilder('service_provider')
+          .leftJoin('service_provider.user', 'user')
+          .leftJoin('service_provider.region', 'region')
+          .leftJoin('region.city', 'city')
+          .leftJoin('service_provider.feedbacks', 'feedback')
+          .where('service_provider.active = true');
+      
         if (filters?.regionId) {
           query.andWhere('region.id = :regionId', { regionId: filters.regionId });
         }
-    
+      
         if (filters?.cityId) {
           query.andWhere('city.id = :cityId', { cityId: filters.cityId });
         }
-    
+      
         if (filters?.career) {
           query.andWhere('service_provider.career = :career', { career: filters.career });
         }
-
-        query
-        .select([
-            'service_provider.id AS id',
-            'service_provider.name AS name',
-            'service_provider.logo AS logo',
-            'service_provider.career AS career',
-            'region.id AS region_id',
-            'region.name AS region_name',
-            'city.id AS city_id',
-            'city.name AS city_name',
-            'user.phone AS user_phone',
-            'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS avgRating'
+      
+        query.select([
+          'service_provider.id AS id',
+          'service_provider.name AS name',
+          `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
+          'service_provider.career AS career',
+          `CONCAT(city.name, ', ', region.name) AS location`,
+          'user.phone AS user_phone',
+          'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS avg_rate',
         ])
         .groupBy(`
-            service_provider.id,
-            region.id,
-            city.id,
-            user.id
-        `)
-
+          service_provider.id,
+          region.id,
+          city.id,
+          user.id
+        `);
+      
+      
+        if (page && items) {
+          query.skip((page - 1) * items).take(items);
+        }
+      
         return query;
     }
 
@@ -92,5 +124,26 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
             .offset((page - 1) * items)
             .limit(items)
             .getRawMany();
+    }
+
+    async createOrUpdateFeedback(userId: number, serviceProviderId: number, data: ServiceProviderFeedbackDto) {
+        let feedback = await this.feedbackRepo.findOne({
+            where: {
+                user: {id: userId},
+                serviceProvider: {id: serviceProviderId},
+            },
+        });
+
+        if(!feedback){
+            feedback = this.feedbackRepo.create({
+                user: {id: userId},
+                serviceProvider: {id: serviceProviderId},
+            });
+        }
+
+        if (data.rate !== undefined) feedback.rate = data.rate;
+        if (data.complaint !== undefined) feedback.complaint = data.complaint;
+      
+        return await this.feedbackRepo.save(feedback);
     }
 }

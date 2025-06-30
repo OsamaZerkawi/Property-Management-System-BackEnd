@@ -7,7 +7,7 @@ export class SearchServiceProviderUseCase {
         private readonly serviceProviderRepo: ServiceProviderRepositoryInterface,
     ){}
 
-    async execute(name: string){
-        return await this.serviceProviderRepo.searchByName(name);
+    async execute(name: string,baseUrl: string,page?:number,items?: number){
+        return await this.serviceProviderRepo.searchByName(baseUrl,name,page,items);
     }
 }

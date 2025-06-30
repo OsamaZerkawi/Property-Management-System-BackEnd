@@ -8,7 +8,7 @@ export class GetAllServiceProvidersWithFiltersUseCase {
         private readonly serviceProviderRepo: ServiceProviderRepositoryInterface,
     ){}
 
-    async execute(filters: ServiceProviderFiltersDto){
-        return await this.serviceProviderRepo.getAllWithFilters(filters);
+    async execute(baseUrl: string,filters: ServiceProviderFiltersDto,page?:number,items?: number){
+        return await this.serviceProviderRepo.getAllWithFilters(baseUrl,filters,page,items);
     }
 }

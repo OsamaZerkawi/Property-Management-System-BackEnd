@@ -14,7 +14,7 @@ export class ServiceFeedback{
     rate: number;
 
     @Column({type:'text',nullable: true})
-    complait: string;
+    complaint: string;
 
     @ManyToOne(() => ServiceProvider, (sp) => sp.feedbacks, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'service_provider_id' })

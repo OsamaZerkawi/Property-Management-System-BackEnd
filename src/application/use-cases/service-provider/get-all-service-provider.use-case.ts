@@ -7,7 +7,7 @@ export class GetAllServiceProvidersUseCase {
         private readonly serviceProviderRepo: ServiceProviderRepositoryInterface,
     ){}
 
-    async execute(){
-        return await this.serviceProviderRepo.getAll();
+    async execute(baseUrl: string,page?:number,items?: number){
+        return await this.serviceProviderRepo.getAll(baseUrl,page,items);
     }
 }
