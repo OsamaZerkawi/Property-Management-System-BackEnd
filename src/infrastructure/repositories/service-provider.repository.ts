@@ -70,4 +70,27 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
 
         return query;
     }
+
+    async findTopRatedServiceProviders(page: number, items: number) {
+        return await this.serviceProviderRepo
+            .createQueryBuilder('provider')
+            .leftJoin('provider.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
+            .leftJoin('provider.region', 'region')
+            .leftJoin('region.city', 'city')
+            .select([
+              'provider.id AS id',
+              'provider.name AS name',
+              'provider.logo AS logo',
+              'provider.career AS career',
+              `CONCAT(city.name, ', ', region.name) AS location`,
+              'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+              'COUNT(feedbacks.id) AS rating_count',
+              'COUNT(*) OVER() AS total_count',
+            ])
+            .groupBy('provider.id, region.id, city.id')
+            .orderBy('avg_rate', 'DESC')
+            .offset((page - 1) * items)
+            .limit(items)
+            .getRawMany();
+    }
 }

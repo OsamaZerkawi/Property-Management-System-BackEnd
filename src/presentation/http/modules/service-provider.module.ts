@@ -12,6 +12,7 @@ import { City } from "src/domain/entities/city.entity";
 import { GetAllServiceProvidersUseCase } from "src/application/use-cases/service-provider/get-all-service-provider.use-case";
 import { GetAllServiceProvidersWithFiltersUseCase } from "src/application/use-cases/service-provider/get-all-service-provider-with-filters.use-case";
 import { SearchServiceProviderUseCase } from "src/application/use-cases/service-provider/search-service-provider.use-case";
+import { GetTopRatedServiceProvidersUseCase } from "src/application/use-cases/service-provider/get-top-rated-providers.use-case";
 
 @Module({
     imports:[
@@ -23,6 +24,7 @@ import { SearchServiceProviderUseCase } from "src/application/use-cases/service-
         GetAllServiceProvidersUseCase,
         GetAllServiceProvidersWithFiltersUseCase,
         SearchServiceProviderUseCase,
+        GetTopRatedServiceProvidersUseCase,
         {
             provide:SERVICE_PROVIDER_REPOSITORY,
             useClass: ServiceProviderRepository,

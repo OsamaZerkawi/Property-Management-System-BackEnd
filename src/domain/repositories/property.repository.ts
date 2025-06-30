@@ -23,4 +23,5 @@ export interface PropertyRepositoryInterface {
     searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number);
     rateProperty(userId: number,propertyId: number,rate: number);
     compareTwoProperties(propertyId1: number,propertyId2: number,baseUrl: string);
+    // getTopRatedProperty
 }

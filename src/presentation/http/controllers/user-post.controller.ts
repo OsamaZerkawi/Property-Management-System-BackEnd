@@ -2,6 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, Query, UseGuards } from "@nestjs
 import { UserPostFiltersDto } from "src/application/dtos/user-post/user-post-filters.dto";
 import { GetUserPostsWithFiltersUseCase } from "src/application/use-cases/user-post/get-user-posts-with-filters.use-case";
 import { GetUserPostsUseCase } from "src/application/use-cases/user-post/get-user-posts.use-case";
+import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
@@ -16,8 +17,11 @@ export class UserPostController {
     @Roles('صاحب مكتب')
     @Get()
     @HttpCode(HttpStatus.OK)
-    async getAllPosts(){
-        const posts = await this.getUserPostsUseCase.execute();
+    async getAllPosts(
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+        const posts = await this.getUserPostsUseCase.execute(userId);
 
         return successResponse(posts,'تم ارجاع جميع منشورات المستخدمين بنجاح',200);
     }
@@ -27,8 +31,10 @@ export class UserPostController {
     @HttpCode(HttpStatus.OK)
     async getAllPostsWithFilters(
         @Query() filters: UserPostFiltersDto,
+        @CurrentUser() user,
     ){
-        const posts = await this.getUserPostsWithFiltersUseCase.execute(filters);
+        const userId = user.sub;
+        const posts = await this.getUserPostsWithFiltersUseCase.execute(userId,filters);
 
         return successResponse(posts,'تم ارجاع جميع منشورات المستخدمين بنجاح',200);
 

@@ -246,7 +246,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     );
 
     query.addSelect(
-      `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+      `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id AND of.rate IS NOT NULL)`,
       'office_rating_count'
     );
 

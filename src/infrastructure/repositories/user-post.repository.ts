@@ -7,45 +7,63 @@ import { Repository } from "typeorm";
 
 export class UserPostRepository implements UserPostRepositoryInterface {
     constructor(
-        @InjectRepository(UserPost)
-        private readonly userPostRepo: Repository<UserPost>,
+      @InjectRepository(UserPost)
+      private readonly userPostRepo: Repository<UserPost>,
     ) {}
 
     async findById(id: number) {
-        return await this.userPostRepo.findOne({where:{id}});
+      return await this.userPostRepo.findOne({where:{id}});
     }
 
-    async getAll() {
-        return this.fetchPosts();
+    async getAll(officeId: number) {
+      return this.fetchPosts(officeId);
     }
 
-    async getWithFilters(data: UserPostFiltersDto) {
-        return await this.fetchPosts(data);
+    async getWithFilters(officeId: number,data: UserPostFiltersDto) {
+      return await this.fetchPosts(officeId,data);
     }  
 
-    private async fetchPosts(filters?: UserPostFiltersDto) {
+    private async fetchPosts(officeId: number,filters?: UserPostFiltersDto) {
       const query = this.userPostRepo
         .createQueryBuilder('userPost')
-        .leftJoinAndSelect('userPost.region', 'region')
-        .leftJoinAndSelect('region.city', 'city')
+        .innerJoin('userPost.region', 'region')
+        .innerJoin('region.city', 'city')
         .select([
-          'userPost.id',
-          'userPost.title',
-          'userPost.description',
-          'userPost.type',
-          'userPost.budget',
-          'userPost.status',
-          'userPost.created_at',
-          'region.id',
+          'userPost.id AS id',
+          'userPost.title AS title',
+          'userPost.description AS description',
+          'userPost.type AS type',
+          'userPost.budget AS budget',
+          'userPost.created_at AS "createdAt"',
           'region.name',
-          'city.id',
-          'city.name',
+          'city.name ',
+          `CONCAT(city.name, ', ', region.name) AS location`,
+          `
+          EXISTS (
+            SELECT 1
+            FROM user_post_suggestions ups
+            INNER JOIN properties p ON p.id = ups.property_id
+            WHERE ups.user_post_id = "userPost".id
+            AND p.office_id = :officeId
+          ) AS "isProposed"
+          `
         ])
-        .where('userPost.status = :status',{status: UserPostAdminAgreement.ACCEPTED})
+        .where('userPost.status = :status', {
+          status: UserPostAdminAgreement.ACCEPTED,
+        })
+        .andWhere(
+          `city.id = (
+            SELECT c.id
+            FROM offices o
+            INNER JOIN regions r ON r.id = o.region_id
+            INNER JOIN cities c ON c.id = r.city_id
+            WHERE o.id = :officeId
+          )`
+        )
+        .setParameter('officeId', officeId)
         .orderBy('userPost.created_at', 'DESC');
-
-        console.log('Filtering by status:', UserPostAdminAgreement.ACCEPTED);
     
+      // Optional Filters
       if (filters?.regionId) {
         query.andWhere('region.id = :regionId', { regionId: filters.regionId });
       }
@@ -54,17 +72,17 @@ export class UserPostRepository implements UserPostRepositoryInterface {
         query.andWhere('userPost.type = :type', { type: filters.type });
       }
     
-      const userPosts = await query.getMany();
+      const rows = await query.getRawMany();
     
-      return userPosts.map(post => ({
-        id: post.id,
-        title: post.title,
-        description: post.description,
-        type: post.type,
-        budget: post.budget,
-        publishedDate: post.created_at.toISOString().split('T')[0],
-        region: post.region?.name || null,
-        city: post.region?.city?.name || null,
+      return rows.map(row => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        type: row.type,
+        budget: Number(row.budget),
+        publishedDate: new Date(row.createdAt).toLocaleDateString('en-CA'),
+        location: row.location,
+        isProposed: Number(row.isProposed === true || row.isProposed === '1'),
       }));
     }
 }

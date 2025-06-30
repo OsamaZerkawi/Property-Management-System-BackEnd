@@ -14,6 +14,7 @@ import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/g
 import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-office-for-user.use-case";
 import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
 import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
+import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update
         FindOfficeForUserUseCase,
         GetOfficeFeesUseCase,
         UpdateOfficeFeesUseCase,
+        GetTopRatedOfficesUseCase,
         {
             provide: OFFICE_REPOSITORY,
             useClass: OfficeRepository
