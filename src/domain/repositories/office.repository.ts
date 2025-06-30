@@ -1,7 +1,7 @@
 import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto";
+import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
 import { Office } from "../entities/offices.entity";
 import { CreateOfficeDto } from "src/application/dtos/office/create-office.dto";
-import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
 
 export const OFFICE_REPOSITORY = 'OFFICE_REPOSITORY';
 
@@ -14,5 +14,6 @@ export interface OfficeRepositoryInterface {
   findOfficeByUserId(userId: number): Promise<Office | null>  
   getOfficeFees(userId: number);
   updateOfficeFees(userId: number,data:UpdateOfficeFeesDto);
+  findTopRatedOffices(page: number,items: number,baseUrl: string);
 
 }

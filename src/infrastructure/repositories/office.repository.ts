@@ -156,6 +156,49 @@ async createOfficeWithSocials(
         return result;
     }
 
+        async findTopRatedOffices(page: number, items: number,baseUrl: string) {
+        const rawData = await this.officeRepo
+          .createQueryBuilder('office')
+          .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL') // فقط التقييمات الحقيقية
+          .leftJoin('office.region', 'region')
+          .leftJoin('region.city', 'city')
+          .select([
+            'office.id AS id',
+            'office.name AS name',
+            'office.logo AS logo',
+            'office.type AS type',
+            'region.name AS region_name',
+            'city.name AS city_name',
+            `city.name || ', ' || region.name AS location`,
+            'COUNT(*) OVER() AS total_count',
+      
+            'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+      
+            'COUNT(feedbacks.id) AS rating_count',
+          ])
+          .groupBy('office.id, region.id, city.id')
+          .orderBy('avg_rate', 'DESC')
+          .offset((page - 1) * items)
+          .limit(items)
+          .getRawMany();
+      
+        const data = rawData.map(item => ({
+          id: item.id,
+          name: item.name,
+          logo: item.logo
+            ? `${baseUrl}/uploads/offices/logos/${item.logo}`
+            : null,
+          type: item.type,
+          location: item.location,
+          rate: parseFloat(item.avg_rate),
+          rating_count: parseInt(item.rating_count),
+        }));
+        
+        const total = rawData[0]?.total_count ? parseInt(rawData[0].total_count) : 0;
+      
+        return { data, total };
+    }
+
     async updateOfficeFees(userId: number, data: UpdateOfficeFeesDto) {
         const office = await this.officeRepo
         .createQueryBuilder('office')

@@ -15,11 +15,12 @@ import { FindOfficeForUserUseCase } from "src/application/use-cases/office/find-
 import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
 import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
+import { OfficeSocial } from "src/domain/entities/office-social.entity";
 
 @Module({
     imports: [
     AuthModule,
-        TypeOrmModule.forFeature([Office,Region]),
+        TypeOrmModule.forFeature([Office,Region,OfficeSocial]),
     ],
     controllers:[OfficeController],
     providers:[

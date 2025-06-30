@@ -103,6 +103,10 @@ export class Office {
   @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
   socials: OfficeSocial[];
 
+  getPaymentMethod(): PaymentMethod {
+    return this.payment_method;
+  } 
+
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
 
