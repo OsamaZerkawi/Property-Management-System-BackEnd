@@ -11,6 +11,9 @@ import { Office } from "src/domain/entities/offices.entity";
 import { Region } from "src/domain/entities/region.entity";
 import { City } from "src/domain/entities/city.entity";
 import { OfficeModule } from "./office.module";
+import { GetOwnPostsUseCase } from "src/application/use-cases/user-post/get-own-posts.use-case";
+import { GetOwnPostsWithStatusUseCase } from "src/application/use-cases/user-post/get-own-posts-by-status.use-case";
+import { DeleteUserPostUseCase } from "src/application/use-cases/user-post/delete-own-post.use-case";
 
 @Module({
     imports:[
@@ -22,6 +25,9 @@ import { OfficeModule } from "./office.module";
     providers:[
         GetUserPostsUseCase,
         GetUserPostsWithFiltersUseCase,
+        GetOwnPostsUseCase,
+        GetOwnPostsWithStatusUseCase,
+        DeleteUserPostUseCase,
         {
             provide:USER_POST_REPOSITORY,
             useClass: UserPostRepository

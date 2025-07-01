@@ -23,6 +23,7 @@ import { UserPostSuggestion } from './user-post-suggestions.entity';
 import { UserPropertyInvoice } from './user-property-invoice.entity';
 import { User } from './user.entity';
 import { PropertyFeedback } from './property-feedback.entity';
+import { PropertyFavorite } from './property-favorite.entity';
 
 
 @Entity('properties')
@@ -102,13 +103,8 @@ export class Property {
   @OneToMany(() => PropertyFeedback, feedback => feedback.property)
   feedbacks: PropertyFeedback[];
 
-  @ManyToMany(() => User, user => user.favoriteProperties)
-  @JoinTable({
-    name: 'property_favorites',
-    joinColumn: { name: 'property_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'user_id', referencedColumnName: 'id' },
-  })
-  favoritedByUsers: User[];
+  @OneToMany(() => PropertyFavorite, favorite => favorite.property)
+  favoritedByUsers: PropertyFavorite[];
 
   @CreateDateColumn()
   created_at: Date;

@@ -10,6 +10,7 @@ import { UserRole } from "./user-role.entity";
 import { Property } from "./property.entity";
 import { PropertyFeedback } from "./property-feedback.entity";
 import { OfficeFeedback } from "./office-feedback.entity";
+import { PropertyFavorite } from "./property-favorite.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -70,13 +71,8 @@ export class User {
   @OneToMany(() => UserRole, ur => ur.user)
   userRoles: UserRole[];
 
-  @ManyToMany(() => Property, property => property.favoritedByUsers)
-  @JoinTable({
-    name: 'property_favorites',
-    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'property_id', referencedColumnName: 'id' },
-  })
-  favoriteProperties: Property[];
+  @OneToMany(() => PropertyFavorite, favorite => favorite.user)
+  propertyFavorites: PropertyFavorite[];
 
   // @OneToMany(() => UserPermission, up => up.user)
   // userPermissions: UserPermission[];

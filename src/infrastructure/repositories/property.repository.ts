@@ -275,8 +275,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     }
 
     const formatted = this.formatPropertyDetails(property,baseUrl);
-
-    console.log((property as any).office_average_rating)
     
     return {
       ...formatted,

@@ -3,7 +3,7 @@ import { UserPostFiltersDto } from "src/application/dtos/user-post/user-post-fil
 import { UserPost } from "src/domain/entities/user-post.entity";
 import { UserPostAdminAgreement } from "src/domain/enums/user-post-admin-agreement.enum";
 import { UserPostRepositoryInterface } from "src/domain/repositories/user-post.repository";
-import { Repository } from "typeorm";
+import { FindOptionsOrderValue, Repository } from "typeorm";
 
 export class UserPostRepository implements UserPostRepositoryInterface {
     constructor(
@@ -15,6 +15,18 @@ export class UserPostRepository implements UserPostRepositoryInterface {
       return await this.userPostRepo.findOne({where:{id}});
     }
 
+    async findByIdAndUser(id: number, userId: number) {
+      return this.userPostRepo.findOne({
+        where: {
+          id,
+          user: { id: userId }, 
+        },
+      });
+    }
+
+    async deleteById(id: number) {
+      return this.userPostRepo.delete(id);
+    }
     async getAll(officeId: number) {
       return this.fetchPosts(officeId);
     }
@@ -22,6 +34,50 @@ export class UserPostRepository implements UserPostRepositoryInterface {
     async getWithFilters(officeId: number,data: UserPostFiltersDto) {
       return await this.fetchPosts(officeId,data);
     }  
+
+    async getAllByUser(userId: number) {
+      const posts = await this.userPostRepo.find(
+        this.buildFindOptions({ user: { id: userId } })
+      );
+      return this.transformUserPostList(posts);
+    }
+    
+    async getAllByUserWithStatus(userId: number, status: UserPostAdminAgreement) {
+      const posts = await this.userPostRepo.find(
+        this.buildFindOptions({ user: { id: userId }, status })
+      );
+      return this.transformUserPostList(posts);
+    }
+
+    private buildFindOptions(where: object){
+      return {
+        where,
+        relations: ['region', 'region.city'],
+        order: { created_at: 'DESC' as FindOptionsOrderValue },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          type: true,
+          budget: true,
+          created_at: true,
+          status: true,
+        },
+      };
+    }
+
+    private transformUserPostList(posts: any[]) {
+      return posts.map(post => ({
+        id: post.id,
+        title: post.title,
+        description: post.description,
+        type: post.type,
+        location: `${post.region.city.name}, ${post.region.name}`,
+        budget: parseFloat(post.budget as any),
+        createdAt: post.created_at.toISOString().split('T')[0],
+        status: post.status,
+      }));
+    }
 
     private async fetchPosts(officeId: number,filters?: UserPostFiltersDto) {
       const query = this.userPostRepo
