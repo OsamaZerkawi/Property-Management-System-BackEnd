@@ -11,25 +11,12 @@ import { RedisCacheService } from 'src/application/services/redis-cache.service'
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/domain/entities/user.entity'; 
-import { UserRepository } from 'src/infrastructure/repositories/user.property'; 
-import { USER_REPOSITORY } from 'src/domain/repositories/user.repository';
-import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-ioredis-yet';
+import { UserRepository } from 'src/infrastructure/repositories/user.property'; import { USER_REPOSITORY } from 'src/domain/repositories/user.repository'; 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
 
-    // إعداد الكاش باستخدام Redis
-    CacheModule.registerAsync({
-      useFactory: async () => ({
-        store: await redisStore({
-          host: 'localhost',
-          port: 6379,
-        }),
-        ttl: 300, // default TTL
-      }),
-    }),
   ],
   controllers: [MobileAuthController],
   providers: [
