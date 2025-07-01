@@ -1,43 +1,41 @@
-// src/domain/use-cases/verify-otp.use-case.ts
-import { Injectable, Inject } from '@nestjs/common';
+// src/application/use-cases/confirm-signup.use-case.ts
+import { Injectable, BadRequestException,Inject } from '@nestjs/common';
+
+import { AuthRepository } from 'src/infrastructure/repositories/auth.repository';
+import { OtpType }        from 'src/domain/entities/otp.entity';
+import { User }        from 'src/domain/entities/user.entity';
+import { MobileAuthRepository } from 'src/infrastructure/repositories/mobile_auth.repository';
+import { UserRepositoryInterface, USER_REPOSITORY} from 'src/domain/repositories/user.repository';
 import { VerifyOtpDto } from 'src/application/dtos/mobile_auth/verify-otp.dto';
-import { UserRepositoryInterface } from 'src/domain/repositories/user.repository';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { User } from 'src/domain/entities/user.entity';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class VerifyOtpUseCase {
   constructor(
-    @Inject('UserRepository') private readonly userRepo: UserRepositoryInterface,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,  ) {}
+    private repo: MobileAuthRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepo: UserRepositoryInterface,
+  ) {}
 
   async execute(dto: VerifyOtpDto): Promise<void> {
-    const key = `reg:${dto.email}`;
-  
-    const storedOtp = await this.cacheManager.get<string>(`${key}:otp`);
-    if (!storedOtp || storedOtp !== dto.otp) {
-      throw new Error('Invalid or expired OTP');
+    const otp = await this.repo.findOtp(dto.email, 'signup' as OtpType);
+    if (!otp || otp.code !== dto.otp || otp.expires_at < new Date()) {
+      throw new BadRequestException('Invalid or expired OTP');
     }
-  
-    const data = await this.cacheManager.get<string>(key);
-    if (!data) throw new Error('Registration data expired');
-  
-    const { first_name, last_name, phone, photo, email, password } = JSON.parse(data);
-    const hash = await bcrypt.hash(password, 10);
-  
-    const user = new User();
-    user.first_name = first_name;
-    user.last_name = last_name;
-    user.phone = phone;
-    user.photo = photo;
-    user.email = email;
-    user.password = hash;
-  
-    await this.userRepo.save(user);
-    await this.cacheManager.del(key);
-    await this.cacheManager.del(`${key}:otp`);
+
+    const temp = await this.repo.findTempByEmail(dto.email);
+    if (!temp) {
+      throw new BadRequestException('Registration data expired');
+    }
+
+    await this.userRepo.save({
+      first_name: temp.first_name,
+      last_name: temp.last_name,
+      phone: temp.phone,
+      photo: temp.photo,
+      email: temp.email,
+      password: temp.password,
+    } as User);
+
+    await this.repo.deleteTempByEmail(dto.email);
+    await this.repo.deleteOtp(dto.email, 'signup' as OtpType);
   }
-  
 }

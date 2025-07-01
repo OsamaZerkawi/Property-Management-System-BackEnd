@@ -20,6 +20,7 @@ export class MobileAuthController {
     return { message: 'OTP sent. Check your email.' };
   }
 
+  @Public()
   @Post('confirm')
   async confirm(@Body() body: VerifyOtpDto) {
     await this.verifyOtp.execute(body);

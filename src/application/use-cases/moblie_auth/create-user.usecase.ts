@@ -1,29 +1,44 @@
-// src/domain/use-cases/register-user.use-case.ts
-import { Injectable, Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-
+// src/application/use-cases/signup.use-case.ts
+import { Injectable, ConflictException,Inject } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from 'src/application/dtos/mobile_auth/create-user.dto';
+import { MobileAuthRepository } from 'src/infrastructure/repositories/mobile_auth.repository';
+import { OtpService }     from 'src/application/services/otp.service';
+import { OtpType,Otp }        from 'src/domain/entities/otp.entity';
+import { TempUserOrm } from 'src/domain/entities/temp-user.entity';
 import { UserRepositoryInterface, USER_REPOSITORY} from 'src/domain/repositories/user.repository';
-import { OtpService } from 'src/application/services/otp.service';
-
 @Injectable()
 export class CreateUserUseCase {
   constructor(
-    @Inject(USER_REPOSITORY) private readonly userRepo: UserRepositoryInterface,    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    private readonly otpService: OtpService,
+    private repoAuth: MobileAuthRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepo: UserRepositoryInterface, 
+    private otpService: OtpService,
   ) {}
 
   async execute(dto: CreateUserDto): Promise<void> {
-    const exists = await this.userRepo.findByEmail(dto.email);
-    if (exists) throw new Error('Email already in use');
+    const existing = await this.userRepo.findByEmail(dto.email);
+    if (existing) throw new ConflictException('Email already in use');
 
-    const key = `reg:${dto.email}`;
- 
-    await this.cacheManager.set(key, JSON.stringify(dto), 300);
-    const otp = this.otpService.generateOtp();
-    await this.cacheManager.set(`${key}:otp`, otp, 300);
+    const hashed = await bcrypt.hash(dto.password, 10);
+    await this.repoAuth.saveTemp({
+      first_name: dto.first_name,
+      last_name: dto.last_name,
+      phone: dto.phone,
+      photo: dto.photo,
+      email: dto.email,
+      password: hashed,
+    } as Partial<TempUserOrm>);
 
-    await this.otpService.sendOtp(dto.email, otp);
+    const code = this.otpService.generateOtp();
+    const expiresAt = new Date(Date.now() + 5 * 60_000);
+
+    await this.repoAuth.saveOtp({
+      email: dto.email,
+      code,
+      type: 'signup' as OtpType,
+      expires_at: expiresAt,
+    } as Partial<Otp>);
+
+    await this.otpService.sendOtp(dto.email, code);
   }
 }
