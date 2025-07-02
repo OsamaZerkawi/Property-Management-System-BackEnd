@@ -1,4 +1,5 @@
 import { Inject, NotFoundException } from "@nestjs/common";
+import { ListingType } from "src/domain/enums/listing-type.enum";
 import { USER_POST_REPOSITORY, UserPostRepositoryInterface } from "src/domain/repositories/user-post.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 
@@ -23,7 +24,7 @@ export class FindUserPostSuggestionsUseCase {
             image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
             title: row.post_title,
             location: `${row.city_name} - ${row.region_name}`,
-            price: row.listing_type === 'sale' ? row.selling_price : row.rental_price,
+            price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
           };
       
           if (row.listing_type === 'rent') {
