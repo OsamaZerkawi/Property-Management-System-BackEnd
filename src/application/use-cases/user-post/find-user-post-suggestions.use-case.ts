@@ -27,7 +27,7 @@ export class FindUserPostSuggestionsUseCase {
             price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
           };
       
-          if (row.listing_type === 'rent') {
+          if (row.listing_type === ListingType.RENT) {
             return {
               ...suggestion,
               rate: parseFloat(row.avg_rate) || 0,
