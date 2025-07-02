@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
-import { Region } from "src/domain/entities/region.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
@@ -26,7 +25,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
         const listingData =
           listingType === ListingType.RENT
             ? {
-                monthly_price: rent_details?.monthly_price,
+                rentalPrice: rent_details?.rentalPrice,
                 rental_period: rent_details?.rental_period,
               }
             : {
@@ -112,7 +111,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       'residential.id',
       'residential.listing_type',
       'residential.selling_price',
-      'residential.monthly_price',
+      'residential.rentalPrice',
       'residential.rental_period',
       
       'region.id',
@@ -139,8 +138,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
 
     query.addSelect(
       `CASE
-         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
-         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         WHEN residential.listing_type = :rent THEN residential.rentalPrice
          ELSE residential.selling_price
        END`,
       'calculated_price'
@@ -210,8 +208,8 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       ['status', (q, v) => q.andWhere('residential.status = :status', { status: v })],
       ['has_furniture', (q, v) => q.andWhere('property.has_furniture = :has_furniture', { has_furniture: v })],
       ['direction', (q, v) => q.andWhere('residential.direction = :direction', { direction: v })],
-      ['minPrice', (q, v) => q.andWhere('(residential.monthly_price >= :minPrice OR residential.selling_price >= :minPrice)', { minPrice: v })],
-      ['maxPrice', (q, v) => q.andWhere('(residential.monthly_price <= :maxPrice OR residential.selling_price <= :maxPrice)', { maxPrice: v })],
+      ['minPrice', (q, v) => q.andWhere('(residential.rentalPrice >= :minPrice OR residential.selling_price >= :minPrice)', { minPrice: v })],
+      ['maxPrice', (q, v) => q.andWhere('(residential.rentalPrice <= :maxPrice OR residential.selling_price <= :maxPrice)', { maxPrice: v })],
       ['minArea', (q, v) => q.andWhere('property.area >= :minArea', { minArea: v })],
       ['maxArea', (q, v) => q.andWhere('property.area <= :maxArea', { maxArea: v })],
       ['floor_number', (q, v) => q.andWhere('property.floor_number = :floor_number', { floor_number: v })],    

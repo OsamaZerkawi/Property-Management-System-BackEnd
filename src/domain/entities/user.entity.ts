@@ -11,6 +11,8 @@ import { Property } from "./property.entity";
 import { PropertyFeedback } from "./property-feedback.entity";
 import { OfficeFeedback } from "./office-feedback.entity";
 import { PropertyFavorite } from "./property-favorite.entity";
+import { Booking } from "./booking.entity";
+import { RentalContract } from "./rental-contract.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -74,6 +76,11 @@ export class User {
   @OneToMany(() => PropertyFavorite, favorite => favorite.user)
   propertyFavorites: PropertyFavorite[];
 
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
+
+  @OneToMany(() => RentalContract, (rentalContract) => rentalContract.user)
+  rentalContracts: RentalContract[];
   // @OneToMany(() => UserPermission, up => up.user)
   // userPermissions: UserPermission[];
  

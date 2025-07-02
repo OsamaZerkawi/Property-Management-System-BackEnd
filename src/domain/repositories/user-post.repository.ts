@@ -6,6 +6,7 @@ export const USER_POST_REPOSITORY = 'USER_POST_REPOSITORY';
 export interface UserPostRepositoryInterface {
     findById(id: number);
     findByIdAndUser(id: number,userId: number);
+    findSuggestionsByUserPostId(id: number,userId: number);
     deleteById(id: number);
     getAll(officeId: number);
     getWithFilters(officeId: number,data: UserPostFiltersDto);

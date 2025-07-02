@@ -66,6 +66,34 @@ export class UserPostRepository implements UserPostRepositoryInterface {
       };
     }
 
+    async findSuggestionsByUserPostId(id: number,userId: number) {
+      return this.userPostRepo
+        .createQueryBuilder('user_post')
+        .leftJoin('user_post.userPostSuggestions', 'suggestion')
+        .leftJoin('suggestion.property', 'property')
+        .leftJoin('property.post', 'post')
+        .leftJoin('property.region', 'region')
+        .leftJoin('region.city', 'city')
+        .leftJoin('property.residential', 'residential')
+        .leftJoin('property.feedbacks', 'feedback')
+        .where('user_post.id = :id', { id })
+        .where('user_post.user_id = :userId', { userId })
+        .andWhere('property.is_deleted = false')
+        .select([
+          'property.id AS property_id',
+          'post.title AS post_title',
+          'post.image AS post_image',
+          'city.name AS city_name',
+          'region.name AS region_name',
+          'residential.listing_type AS listing_type',
+          'residential.selling_price AS selling_price',
+          'residential.rental_price AS rental_price',
+          'AVG(feedback.rate) AS avg_rate'
+        ])
+        .groupBy('property.id, post.title, post.image, city.name, region.name, residential.listing_type, residential.selling_price, residential.rental_price')
+        .getRawMany();
+    }
+
     private transformUserPostList(posts: any[]) {
       return posts.map(post => ({
         id: post.id,

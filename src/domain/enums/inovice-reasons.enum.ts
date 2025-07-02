@@ -1,7 +1,10 @@
 
 export enum InoviceReasons{
   DEPOSIT = 'عربون',
-  PROPERTY_RENT = 'أجار بيت',
-  PROPERTY_PURCHASE  = 'شراء بيت',
-  INSTALLMENTS = 'أقساط بيت',
+  MONTHLY_RENT = 'أجار شهري',
+  YEARLY_RENT = 'أجار سنوي',
+  INSTALLMENT_PAYMENT = 'دفعة تقسيط',
+  PROPERTY_PURCHASE = 'شراء بيت',
+  TOURISTIC_BOOKING = 'حجز سياحي',
+  CONTRACT_RENEWAL = 'تجديد عقد',
 }

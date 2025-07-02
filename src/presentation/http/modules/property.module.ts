@@ -20,14 +20,21 @@ import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { RatePropertyUseCase } from "src/application/use-cases/property/rate-property.use-case";
 import { CompareTwoPropertiesUseCase } from "src/application/use-cases/property/compare-two-properties.use-case";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
+import { PropertyFavoriteController } from "../controllers/property-favorite.controller";
+import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
+import { PROPERTY_FAVORITE_REPOSITORY } from "src/domain/repositories/property-favorite.repository";
+import { PropertyFavoriteRepository } from "src/infrastructure/repositories/property-favorite.repository";
+import { AddPropertyToFavoriteUseCase } from "src/application/use-cases/property/add-property-to-favorite.use-case";
+import { RemovePropertyFromFavoriteUseCase } from "src/application/use-cases/property/remove-property-from-favorite.use-case";
+import { FindTopRatedResidentialPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
 
 @Module({
     imports:[
         AuthModule,
         forwardRef(() => ResidentialOfficeModule),
-        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback])
+        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback,PropertyFavorite])
     ],
-    controllers:[PropertyController],
+    controllers:[PropertyController,PropertyFavoriteController],
     providers:[
         GetAllPropertiesUseCase,
         GetAllPropertiesWithFiltersUseCase,
@@ -37,10 +44,17 @@ import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
         FindRelatedPropertiesUseCase,
         RatePropertyUseCase,
         CompareTwoPropertiesUseCase,
+        AddPropertyToFavoriteUseCase,
+        RemovePropertyFromFavoriteUseCase,
+        FindTopRatedResidentialPropertiesUseCase,
         {
             provide:PROPERTY_REPOSITORY,
             useClass:PropertyRepository
         },
+        {
+            provide:PROPERTY_FAVORITE_REPOSITORY,
+            useClass: PropertyFavoriteRepository,
+        }
     ],
     exports:[
         PROPERTY_REPOSITORY

@@ -2,6 +2,8 @@ import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
+import { PropertyType } from "../enums/property-type.enum";
+
 
 export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
 
@@ -23,5 +25,5 @@ export interface PropertyRepositoryInterface {
     searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number);
     rateProperty(userId: number,propertyId: number,rate: number);
     compareTwoProperties(propertyId1: number,propertyId2: number,baseUrl: string);
-    // getTopRatedProperty
+    getTopRatedResidentialProperties(page: number,items: number,type: PropertyType,userId: number);
 }

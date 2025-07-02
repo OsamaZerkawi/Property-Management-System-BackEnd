@@ -7,5 +7,5 @@ export class RentDetailsDto {
 
   @IsNumber()
   @Min(0)
-  monthly_price: number;
+  rentalPrice: number;
 }

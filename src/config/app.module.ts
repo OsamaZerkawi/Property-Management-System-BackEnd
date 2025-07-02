@@ -23,6 +23,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from 'src/shared/guards/permission.guard';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { PropertyModule } from 'src/presentation/http/modules/property.module';
+import { UserReservationModule } from 'src/presentation/http/modules/user-reservation.module';
+import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { PropertyModule } from 'src/presentation/http/modules/property.module';
     RegionModule,
     PropertyImageModule,
     PropertyReservationModule,
+    UserReservationModule,
+    UserInvoiceModule,
     ConfigModule.forRoot({
       isGlobal:true,
     }),

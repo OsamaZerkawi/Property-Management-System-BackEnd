@@ -15,6 +15,7 @@ import { PropertyStatus} from '../enums/property-status.enum';
 import { ListingType } from '../enums/listing-type.enum';
 import { OwnershipType } from '../enums/ownership-type.enum';
 import { UserPropertyPurchase } from './user-property-purchase.entity';
+import { RentalContract } from './rental-contract.entity';
 
 
 @Entity('residentials')
@@ -29,7 +30,7 @@ export class Residential {
   direction: Direction;
 
   @Column({ type: 'float',nullable: true })
-  monthly_price: number;
+  rental_price: number;
 
   @Column({ type: 'enum', enum: RentalPeriod ,nullable: true})
   rental_period: RentalPeriod;
@@ -55,6 +56,9 @@ export class Residential {
 
   @OneToMany(() => UserPropertyPurchase, (purchase) => purchase.residential)
   purchases: UserPropertyPurchase[];
+
+  @OneToMany(() => RentalContract, (rentalContract) => rentalContract.residential)
+  rentalContracts: RentalContract[];
 
   @CreateDateColumn()
   created_at: Date;

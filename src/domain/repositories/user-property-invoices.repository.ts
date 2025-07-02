@@ -5,4 +5,5 @@ export interface UserPropertyInvoiceRepositoryInterface{
     findInvoicesByPropertyId(propertyId: number);
     attachInvoiceImage(id: number,documentImage: string);
     createInvoice(data: UploadPropertyReservationDto,image: string);
+    getUserPropertyInvoices(userId: number,propertyId: number);
 }

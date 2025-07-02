@@ -1,6 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { error } from "console";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
@@ -11,6 +10,7 @@ import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
+import { PropertyType } from "src/domain/enums/property-type.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
@@ -88,12 +88,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     if(listingType == ListingType.SALE && residential.selling_price){
       price = residential.selling_price;
     }
-    else if (listingType == ListingType.RENT && residential.monthly_price){
-      price = residential.rental_period === RentalPeriod.YEARLY
-        ? residential.monthly_price * 12
-        : residential.monthly_price;
+    else if (listingType == ListingType.RENT && residential.rental_price){
+      price = residential.rental_price;
     }
-
     const minPrice = price * 0.8;
     const maxPrice = price * 1.2;
 
@@ -139,7 +136,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
       'residential.listing_type',
       'residential.selling_price',
-      'residential.monthly_price',
+      'residential.rental_price',
       'residential.rental_period',
   
       'region.id',
@@ -150,8 +147,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     ])
     .addSelect(
       `CASE
-         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
-         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         WHEN residential.listing_type = :rent THEN residential.rental_price
          ELSE residential.selling_price
        END`,
       'calculated_price'
@@ -423,8 +419,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   const query = this.createBasePropertyDetailsQuery()
     .addSelect(
       `CASE
-         WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
-         WHEN residential.listing_type = :rent THEN residential.monthly_price
+         WHEN residential.listing_type = :rent THEN residential.rental_price
          ELSE residential.selling_price
        END`,
       'calculated_price'
@@ -584,17 +579,14 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   if (property.residential?.listing_type === ListingType.RENT) {
     const rentalPeriod = property.residential?.rental_period ?? null;
-    const baseMonthlyPrice = property.residential?.monthly_price ?? null;
-    const adjustedMonthlyPrice = rentalPeriod == RentalPeriod.YEARLY && baseMonthlyPrice !== null
-      ? baseMonthlyPrice * 12
-      : baseMonthlyPrice;
+    const rentalPrice = property.residential?.rental_price ?? null;
     
     return {
       ...base,
       rate:property.rate ?? null,
       listing_type: 'أجار',
       rent_details: {
-        price: adjustedMonthlyPrice,
+        price: rentalPrice,
         rental_period: rentalPeriod
       },
     };
@@ -633,7 +625,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       
           'residential.listing_type',
           'residential.selling_price',
-          'residential.monthly_price',
+          'residential.rental_price',
           'residential.rental_period',
       
           'region.id',
@@ -644,8 +636,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         ])
         .addSelect(
           `CASE
-             WHEN residential.listing_type = :rent AND residential.rental_period = :yearly THEN residential.monthly_price * 12
-             WHEN residential.listing_type = :rent THEN residential.monthly_price
+             WHEN residential.listing_type = :rent THEN residential.rental_price
              ELSE residential.selling_price
            END`,
           'calculated_price'
@@ -703,6 +694,68 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return query;
  }
 
+ async getTopRatedResidentialProperties(page: number,items: number,type: PropertyType,userId: number) {
+  const offset = (page - 1) * items;
+
+  const query = this.propertyRepo
+    .createQueryBuilder('property')
+    .leftJoin('property.post', 'post')
+    .leftJoin('property.region', 'region')
+    .leftJoin('region.city', 'city')
+    .leftJoin('property.residential', 'residential')
+    .leftJoin('property.feedbacks', 'feedback')
+    .where('property.property_type = :type', { type })
+    .andWhere('residential.listing_type = :listingType',{listingType: ListingType.RENT})
+    .andWhere('property.is_deleted = false')
+    .select([
+      'property.id AS property_id',
+      'post.title AS post_title',
+      'post.image AS post_image',
+      'city.name AS city_name',
+      'region.name AS region_name',
+      'residential.listing_type AS listing_type',
+      'residential.selling_price AS selling_price',
+      'residential.rental_price AS rental_price',
+      'residential.rental_period AS rental_period',
+      'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+      'COUNT(*) OVER() AS total_count',
+    ])
+    .groupBy('property.id')
+    .addGroupBy('post.title')
+    .addGroupBy('post.image')
+    .addGroupBy('city.name')
+    .addGroupBy('region.name')
+    .addGroupBy('residential.listing_type')
+    .addGroupBy('residential.selling_price')
+    .addGroupBy('residential.rental_price')
+    .addGroupBy('residential.rental_period')
+    .orderBy('avg_rate', 'DESC')
+    .offset(offset)
+    .limit(items);
+
+  if (userId) {
+    query.addSelect(`
+      CASE 
+        WHEN EXISTS (
+          SELECT 1 
+          FROM property_favorites pf 
+          WHERE pf.property_id = property.id AND pf.user_id = :userId
+        ) THEN true
+        ELSE false
+      END
+    `, 'is_favorite')
+    .setParameter('userId', userId);
+  } else {
+    query.addSelect('false', 'is_favorite');
+  }
+
+  const raw = await query.getRawMany();
+
+  const total = raw[0]?.total_count ? parseInt(raw[0].total_count, 10) : 0;
+
+  return { raw, total };
+ }
+
  private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto){
   const query = this.propertyRepo.createQueryBuilder('property')
     .leftJoin('property.office', 'office')
@@ -739,7 +792,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     'post.tag',
 
     'residential.status',
-    'residential.monthly_price',
+    'residential.rental_price',
     'residential.rental_period',
     'residential.listing_type',
     'residential.selling_price',

@@ -14,6 +14,7 @@ import { OfficeModule } from "./office.module";
 import { GetOwnPostsUseCase } from "src/application/use-cases/user-post/get-own-posts.use-case";
 import { GetOwnPostsWithStatusUseCase } from "src/application/use-cases/user-post/get-own-posts-by-status.use-case";
 import { DeleteUserPostUseCase } from "src/application/use-cases/user-post/delete-own-post.use-case";
+import { FindUserPostSuggestionsUseCase } from "src/application/use-cases/user-post/find-user-post-suggestions.use-case";
 
 @Module({
     imports:[
@@ -28,6 +29,7 @@ import { DeleteUserPostUseCase } from "src/application/use-cases/user-post/delet
         GetOwnPostsUseCase,
         GetOwnPostsWithStatusUseCase,
         DeleteUserPostUseCase,
+        FindUserPostSuggestionsUseCase,
         {
             provide:USER_POST_REPOSITORY,
             useClass: UserPostRepository

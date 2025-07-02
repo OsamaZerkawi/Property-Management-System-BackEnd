@@ -26,6 +26,10 @@ import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
+import { Booking } from "src/domain/entities/booking.entity";
+import { Touristic } from "src/domain/entities/touristic.entity";
+import { Calendar } from "src/domain/entities/calendar.entity";
+import { RentalContract } from "src/domain/entities/rental-contract.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -41,7 +45,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
         PropertyFeedback,OfficeFeedback,OfficeSocial,PropertyFavorite,
-        
+        Booking,Touristic,Calendar,RentalContract,
     ],
     synchronize: true,
 });

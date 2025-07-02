@@ -19,6 +19,9 @@ export class UserPropertyInvoice{
     @Column({type:'enum', enum: InvoicesStatus})
     status:InvoicesStatus
 
+    @Column({type: 'date',nullable: true})
+    billing_period_start: Date;
+
     @Column({type:'integer',nullable:true})
     stripePaymentIntentId: number;
 

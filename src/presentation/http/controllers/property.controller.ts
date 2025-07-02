@@ -1,7 +1,6 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req } from "@nestjs/common";
 import { Request } from "express";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
-import { RatePropertyDto } from "src/application/dtos/property/RateProperty.dto";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { CompareTwoPropertiesUseCase } from "src/application/use-cases/property/compare-two-properties.use-case";
 import { FindPropertyDetailsByIdUseCase } from "src/application/use-cases/property/find-property-details-by-id.use-case";
@@ -11,9 +10,12 @@ import { GetAllPropertiesUseCase } from "src/application/use-cases/property/get-
 import { RatePropertyUseCase } from "src/application/use-cases/property/rate-property.use-case";
 import { SearchPropertiesByTitleUseCase } from "src/application/use-cases/property/search-properties-by-title.use-case";
 import { SearchPropertyWithAdvancedFiltersUseCase } from "src/application/use-cases/property/search-property-with-advanced-filter.use-case";
+import { FindTopRatedResidentialPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
+import { PropertyType } from "src/domain/enums/property-type.enum";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+
 
 @Controller('properties')
 export class PropertyController{
@@ -26,7 +28,25 @@ export class PropertyController{
         private readonly findRelatedPropertiesUseCase: FindRelatedPropertiesUseCase,
         private readonly ratePropertyUseCase: RatePropertyUseCase,
         private readonly compareTwoPropertiesUseCase: CompareTwoPropertiesUseCase,
+        private readonly findTopRatedResidentialPropertiesUseCase: FindTopRatedResidentialPropertiesUseCase,
     ){}
+
+    @Get('top-rated')
+    @Public()
+    @HttpCode(HttpStatus.OK)
+    async getTopRatedProerties(
+        @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
+        @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,        
+        @Query('type') type: PropertyType,
+        @Req() request: Request,
+    ){
+        const userId = (request.user as any)?.sub ?? null;
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+        const {results,total} = await this.findTopRatedResidentialPropertiesUseCase.execute(page,items,type,baseUrl,userId);
+
+        return successPaginatedResponse(results,total,page,items,'تم إرجاع جميع العقارات المميزة',200);
+    }
 
     @Get('search')
     @Public()
@@ -70,7 +90,7 @@ export class PropertyController{
         @Req() request: Request,    
     ){
         const userId = (request.user as any)?.sub ?? null;
-        console.log(userId);
+
         const baseUrl = `${request.protocol}://${request.get('host')}`;
         const [properties,total] = await this.getAllPropertiesUseCase.execute(baseUrl,page,items,userId);
 
@@ -154,4 +174,6 @@ export class PropertyController{
 
         return successResponse(properties,'تم ارجاع العقارات ذات صلة',200);
     }
+
+
 }

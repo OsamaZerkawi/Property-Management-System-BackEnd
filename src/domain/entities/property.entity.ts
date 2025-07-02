@@ -24,6 +24,7 @@ import { UserPropertyInvoice } from './user-property-invoice.entity';
 import { User } from './user.entity';
 import { PropertyFeedback } from './property-feedback.entity';
 import { PropertyFavorite } from './property-favorite.entity';
+import { Touristic } from './touristic.entity';
 
 
 @Entity('properties')
@@ -105,6 +106,9 @@ export class Property {
 
   @OneToMany(() => PropertyFavorite, favorite => favorite.property)
   favoritedByUsers: PropertyFavorite[];
+
+  @OneToOne(() => Touristic, (touristic) => touristic.property)
+  touristic: Touristic;
 
   @CreateDateColumn()
   created_at: Date;

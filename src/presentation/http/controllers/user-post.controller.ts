@@ -1,6 +1,9 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Query, Req, UseGuards } from "@nestjs/common";
+import { REDIRECT_METADATA } from "@nestjs/common/constants";
+import { Request } from "express";
 import { UserPostFiltersDto } from "src/application/dtos/user-post/user-post-filters.dto";
 import { DeleteUserPostUseCase } from "src/application/use-cases/user-post/delete-own-post.use-case";
+import { FindUserPostSuggestionsUseCase } from "src/application/use-cases/user-post/find-user-post-suggestions.use-case";
 import { GetOwnPostsWithStatusUseCase } from "src/application/use-cases/user-post/get-own-posts-by-status.use-case";
 import { GetOwnPostsUseCase } from "src/application/use-cases/user-post/get-own-posts.use-case";
 import { GetUserPostsWithFiltersUseCase } from "src/application/use-cases/user-post/get-user-posts-with-filters.use-case";
@@ -19,6 +22,7 @@ export class UserPostController {
         private readonly getOwnPostsUseCase: GetOwnPostsUseCase,
         private readonly getOwnPostsWithStatusUseCase: GetOwnPostsWithStatusUseCase,
         private readonly deleteUserPostUseCase: DeleteUserPostUseCase,
+        private readonly findUserPostSuggestionsUseCase: FindUserPostSuggestionsUseCase,
     ){}
 
     @Roles('صاحب مكتب')
@@ -83,5 +87,20 @@ export class UserPostController {
         await this.deleteUserPostUseCase.execute(userId,postId);
 
         return successResponse([],'تم حذف المنشور بنجاح',200);
+    }
+
+    @Get('/:id/suggestions')
+    @HttpCode(HttpStatus.OK)
+    async getSuggestionsForUser(
+        @Param('id',ParseIntPipe) id: number,
+        @Req() request: Request,
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+        const suggestions = await this.findUserPostSuggestionsUseCase.execute(userId,id,baseUrl);
+
+        return successResponse(suggestions,'تم جلب اقتراحات العقارات بنجاح',200);
     }
 }
