@@ -24,34 +24,29 @@ export class VerifyOtpUseCase {
     @Inject(USER_REPOSITORY)
     private readonly userRepo: UserRepositoryInterface,
   ) {}
-
   async execute(dto: VerifyOtpDto): Promise<void> {
     const now = new Date();
- 
-    const otp = await this.repo.findLatestValidOtp(dto.email,'signup', now);
-    if (!otp) {
-      throw new BadRequestException('رمز التحقق غير موجود أو منتهي الصلاحية');
-    }
-  
-    if (otp.code !== dto.otp) {
-      throw new BadRequestException('رمز التحقق غير صحيح');
-    }
-
+   
     const temp = await this.repo.findTempUserByEmail(dto.email);
     if (!temp) {
-      throw new BadRequestException('Registration data expired');
-    }
+      throw new BadRequestException('لم يُسجّل هذا البريد أو لم يُرسل إليه رمز تحقق');    }
 
+    const otp = await this.repo.findLatestValidOtp(dto.email, 'signup', now);
+    if (!otp || otp.code !== dto.otp) {
+      throw new BadRequestException('رمز التحقق غير صالح أو انتهت صلاحيته');
+    }  
+   
     await this.userRepo.save({
       first_name: temp.first_name,
-      last_name: temp.last_name,
-      phone: temp.phone,
-      photo: temp.photo,
-      email: temp.email,
-      password: temp.password,
+      last_name:  temp.last_name,
+      phone:      temp.phone,
+      photo:      temp.photo,
+      email:      temp.email,
+      password:   temp.password,
     } as User);
-
+   
     await this.repo.deleteTempUserByEmail(dto.email);
-    await this.repo.deleteOtp(dto.email, 'signup' as OtpType);
+    await this.repo.deleteOtp(dto.email, 'signup');
   }
+  
 }

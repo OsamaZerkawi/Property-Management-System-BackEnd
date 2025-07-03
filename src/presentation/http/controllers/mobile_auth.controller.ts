@@ -40,7 +40,7 @@ export class MobileAuthController {
       body.photo = file.path;
     }
     await this.createUser.execute(body);
-    return { message: 'OTP sent. Check your email.' };
+    return successResponse( [], 'تم إرسال رمز التحقق. يرجى التحقق من بريدك الإلكتروني.' );
   } 
 
 
@@ -48,7 +48,7 @@ export class MobileAuthController {
   @Post('confirm')
   async confirm(@Body() body: VerifyOtpDto) {
     await this.verifyOtp.execute(body);
-    return { message: 'Account created successfully.' };
+    return successResponse( [], 'تم إنشاء الحساب بنجاح.' );
   }
   @Public()
   @Post('resend-otp')
@@ -95,7 +95,7 @@ export class MobileAuthController {
     const user = req.user;
     const tokens = await this.loginUseCase.execute(user);
     return {
-      message: 'Login successful',
+      message: 'تم تسجيل الدخول بنجاح',
       ...tokens,
     };
   }

@@ -10,15 +10,15 @@ export interface MobileAuthRepositoryInterface {
   // Temp users
   saveTempUser(temp: Partial<TempUser>): Promise<TempUser>;
   findTempUserByEmail(email: string): Promise<TempUser | null>;
+  isTempUserExists(email: string): Promise<boolean> ;
   deleteTempUserByEmail(email: string): Promise<void>;
-
   // OTPs
   saveOtp(otp: Partial<Otp>): Promise<Otp>;
   findLatestValidOtp(email: string, type: OtpType,now: Date): Promise<Otp | null>;
   deleteOtp(email: string, type: OtpType): Promise<void>;
   findValidOtp(email: string, type: OtpType, now: Date): Promise< { code: string; expires_at: Date } | null >;
-
-deleteExpiredOtps(email: string, type: OtpType, now: Date): Promise<void>;
+  deleteExpiredOtps(email: string, type: OtpType, now: Date): Promise<void>;
+  
   // Permanent users
   saveUser(user: Partial<User>): Promise<User>;
   findUserByEmail(email: string): Promise<User | null>;

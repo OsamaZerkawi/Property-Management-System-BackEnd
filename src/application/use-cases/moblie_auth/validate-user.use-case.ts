@@ -18,13 +18,13 @@ export class MobileValidateUserUseCase {
   async execute(email: string, password: string) { 
     const user = await this.authRepo.findUserByEmail(email);
     if (!user) {
-      throw new NotFoundException(errorResponse('User Not Found', 404));
+      throw new NotFoundException(errorResponse('البريد الالكتروني غير موجود', 404));
     }
  
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException(
-        errorResponse('The provided password does not match our records', 401),
+        errorResponse('كلمة المرور غير صحيحة', 401),
       );
     }
 

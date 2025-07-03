@@ -28,11 +28,14 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
   findTempUserByEmail(email: string): Promise<TempUser | null> {
     return this.tempRepo.findOne({ where: { email } });
   }
-
+  async isTempUserExists(email: string): Promise<boolean> {
+    const user = await this.tempRepo.findOne({ where: { email } });
+    return !!user;
+  } 
   deleteTempUserByEmail(email: string): Promise<void> {
     return this.tempRepo.delete({ email }).then(() => undefined);
-  }
-
+  } 
+  
   // OTPs
   saveOtp(otp: Partial<Otp>): Promise<Otp> {
     return this.otpRepo.save(otp);

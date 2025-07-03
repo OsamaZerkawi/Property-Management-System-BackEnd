@@ -21,8 +21,12 @@ export class CreateUserUseCase {
   ) {}
   async execute(dto: CreateUserDto): Promise<void> {
     const existing = await this.userRepo.findByEmail(dto.email);
-    if (existing) throw new ConflictException('Email already in use');
-  
+    if (existing) throw new ConflictException('البريد الإلكتروني مستخدم بالفعل');
+
+    const notActivated = await this.repoAuth.isTempUserExists(dto.email);
+    if (notActivated) {
+      throw new ConflictException('تم إرسال رمز التحقق لهذا البريد مسبقاً. يرجى التحقق من بريدك أو إكمال التفعيل');
+    } 
     const hashed = await bcrypt.hash(dto.password, 10);
     await this.repoAuth.saveTempUser({
       first_name: dto.first_name,

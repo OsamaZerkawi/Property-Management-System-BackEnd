@@ -1,5 +1,5 @@
 // src/application/use-cases/auth/login.usecase.ts
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable,ForbiddenException } from '@nestjs/common';
 import { JwtService } from 'src/application/services/mobileAuthToken.service';
 import {
   MOBILE_AUTH_REPOSITORY,
