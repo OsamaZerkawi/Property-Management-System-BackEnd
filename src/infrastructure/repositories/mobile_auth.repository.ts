@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MoreThan } from 'typeorm';
+import { MoreThan,LessThan } from 'typeorm';
 
 import { MobileAuthRepositoryInterface } from 'src/domain/repositories/mobile_auth.repository';
 
@@ -57,6 +57,13 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
       return { code: otp.code, expires_at: otp.expires_at };
     }
     return null;
+  }
+  async deleteExpiredOtps(email: string, type: OtpType, now: Date): Promise<void> {
+    await this.otpRepo.delete({
+      email,
+      type,
+      expires_at: LessThan(now),
+    });
   }
   // Permanent users
   saveUser(user: Partial<User>): Promise<User> {

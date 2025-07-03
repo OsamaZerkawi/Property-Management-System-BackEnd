@@ -15,14 +15,12 @@ export class ResendOtpUseCase {
 
   async execute(dto: ResendOtpDto): Promise<void> {
     const now = new Date();
-
-    // 1) نتحقّق من عدم وجود OTP صالح حالياً لنفس البريد والنوع
+ 
     const existing = await this.repoAuth.findValidOtp(dto.email, dto.type as OtpType, now);
     if (existing) {
       throw new BadRequestException('رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد');
     }
-
-    // 2) إنشاء رمز جديد وحفظه مع مدة صلاحية 5 دقائق
+    await this.repoAuth.deleteExpiredOtps(dto.email, dto.type, now);
     const code = this.otpService.generateOtp();
     const expiresAt = new Date(now.getTime() + 5 * 60_000);
 
@@ -32,8 +30,7 @@ export class ResendOtpUseCase {
       type:       dto.type,
       expires_at: expiresAt,
     });
-
-    // 3) إرسال الرمز عبر البريد
+ 
     await this.otpService.sendOtp(dto.email, code);
   }
 }
