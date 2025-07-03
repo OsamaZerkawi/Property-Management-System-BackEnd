@@ -1,5 +1,6 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import { SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
@@ -452,6 +453,21 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     }
   }
 
+  async findWithinBounds(bounds: ExploreMapDto) {
+    return this.propertyRepo.createQueryBuilder('property')
+    .select(['property.id','property.latitude', 'property.longitude'])
+    .where('property.latitude BETWEEN :minLat AND :maxLat', {
+      minLat: bounds.minLat,
+      maxLat: bounds.maxLat,
+    })
+    .andWhere('property.longitude BETWEEN :minLng AND :maxLng', {
+      minLng: bounds.minLng,
+      maxLng: bounds.maxLng,
+    })
+    .andWhere('property.is_deleted = false')
+    .getMany();
+  }
+
   private formatPropertyForComparison(property: Property,rawData: any,baseUrl: string){
     return {
       property_details: {
@@ -694,7 +710,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return query;
  }
 
- async getTopRatedResidentialProperties(page: number,items: number,type: PropertyType,userId: number) {
+ async getTopRatedProperties(page: number,items: number,type: PropertyType,userId: number) {
   const offset = (page - 1) * items;
 
   const query = this.propertyRepo
@@ -707,6 +723,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .where('property.property_type = :type', { type })
     .andWhere('residential.listing_type = :listingType',{listingType: ListingType.RENT})
     .andWhere('property.is_deleted = false')
+    .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
     .select([
       'property.id AS property_id',
       'post.title AS post_title',
@@ -765,6 +782,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .leftJoin('region.city', 'city')
     .leftJoin('property.post', 'post')
     .where('property.is_deleted = false')
+    .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
     .select([
     'property.id',
     'property.area',

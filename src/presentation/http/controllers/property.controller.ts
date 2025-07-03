@@ -10,7 +10,7 @@ import { GetAllPropertiesUseCase } from "src/application/use-cases/property/get-
 import { RatePropertyUseCase } from "src/application/use-cases/property/rate-property.use-case";
 import { SearchPropertiesByTitleUseCase } from "src/application/use-cases/property/search-properties-by-title.use-case";
 import { SearchPropertyWithAdvancedFiltersUseCase } from "src/application/use-cases/property/search-property-with-advanced-filter.use-case";
-import { FindTopRatedResidentialPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
+import { FindTopRatedPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
 import { PropertyType } from "src/domain/enums/property-type.enum";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
@@ -28,7 +28,7 @@ export class PropertyController{
         private readonly findRelatedPropertiesUseCase: FindRelatedPropertiesUseCase,
         private readonly ratePropertyUseCase: RatePropertyUseCase,
         private readonly compareTwoPropertiesUseCase: CompareTwoPropertiesUseCase,
-        private readonly findTopRatedResidentialPropertiesUseCase: FindTopRatedResidentialPropertiesUseCase,
+        private readonly findTopRatedPropertiesUseCase: FindTopRatedPropertiesUseCase,
     ){}
 
     @Get('top-rated')
@@ -43,7 +43,7 @@ export class PropertyController{
         const userId = (request.user as any)?.sub ?? null;
         const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const {results,total} = await this.findTopRatedResidentialPropertiesUseCase.execute(page,items,type,baseUrl,userId);
+        const {results,total} = await this.findTopRatedPropertiesUseCase.execute(page,items,type,baseUrl,userId);
 
         return successPaginatedResponse(results,total,page,items,'تم إرجاع جميع العقارات المميزة',200);
     }

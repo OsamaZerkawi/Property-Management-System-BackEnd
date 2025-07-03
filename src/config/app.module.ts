@@ -25,6 +25,7 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { PropertyModule } from 'src/presentation/http/modules/property.module';
 import { UserReservationModule } from 'src/presentation/http/modules/user-reservation.module';
 import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
+import { MapExploreModule } from 'src/presentation/http/modules/map-explore.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.mo
     PropertyReservationModule,
     UserReservationModule,
     UserInvoiceModule,
+    MapExploreModule,
     ConfigModule.forRoot({
       isGlobal:true,
     }),

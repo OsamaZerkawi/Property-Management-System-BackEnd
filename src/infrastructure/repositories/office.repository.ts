@@ -11,6 +11,7 @@ import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
 import { NotFoundException } from "@nestjs/common"; 
 import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
 import { errorResponse } from "src/shared/helpers/response.helper"; 
+import { ExploreMapDto } from 'src/application/dtos/map/explore-map.dto';
  
 
 @Injectable()
@@ -37,42 +38,42 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     });
   }
  
-async createOfficeWithSocials(
-  userId: number,
-  dto: CreateOfficeDto,
-): Promise<{ id: number }> {
-  return this.dataSource.transaction(async manager => {
-    const office = manager.create(Office, {
-      user: { id: userId },
-      name: dto.name,
-      logo: dto.logo || undefined,  
-      type: dto.type,
-      commission: dto.commission,
-      booking_period: dto.booking_period,
-      deposit_per_m2: dto.deposit_per_m2,
-      tourism_deposit: dto.tourism_deposit,
-      payment_method: dto.payment_method,
-      opening_time: dto.opening_time,
-      closing_time: dto.closing_time,
-      region: { id: dto.region_id } as any,
+  async createOfficeWithSocials(
+    userId: number,
+    dto: CreateOfficeDto,
+  ): Promise<{ id: number }> {
+    return this.dataSource.transaction(async manager => {
+      const office = manager.create(Office, {
+        user: { id: userId },
+        name: dto.name,
+        logo: dto.logo || undefined,  
+        type: dto.type,
+        commission: dto.commission,
+        booking_period: dto.booking_period,
+        deposit_per_m2: dto.deposit_per_m2,
+        tourism_deposit: dto.tourism_deposit,
+        payment_method: dto.payment_method,
+        opening_time: dto.opening_time,
+        closing_time: dto.closing_time,
+        region: { id: dto.region_id } as any,
+      });
+  
+      await manager.save(office);
+   
+      if (dto.socials && dto.socials.length > 0) {
+        const socials = dto.socials.map(s =>
+          manager.create(OfficeSocial, {
+            office,
+            platform: s.platform,
+            link: s.link,
+          }),
+        );
+        await manager.save(socials);
+      }
+   
+      return { id: office.id };
     });
-
-    await manager.save(office);
- 
-    if (dto.socials && dto.socials.length > 0) {
-      const socials = dto.socials.map(s =>
-        manager.create(OfficeSocial, {
-          office,
-          platform: s.platform,
-          link: s.link,
-        }),
-      );
-      await manager.save(socials);
-    }
- 
-    return { id: office.id };
-  });
-}
+  }
 
   async findById(id: number): Promise<Office | null> {
     return this.officeRepo.findOne({
@@ -80,6 +81,7 @@ async createOfficeWithSocials(
       relations: ['user', 'socials', 'region','region.city'],
     });
   }
+
   async updateOfficeWithSocials(
     officeId: number,
     dto: UpdateOfficeDto,
@@ -117,6 +119,7 @@ async createOfficeWithSocials(
       return { id: office.id };
     });
   }
+
   async findOfficeByUserId(userId: number): Promise<Office | null> {
     return await this.dataSource
       .getRepository(Office)
@@ -126,37 +129,34 @@ async createOfficeWithSocials(
       });
   }  
 
-    async getOfficeFees(userId: number) {
-        const office = await this.officeRepo
-        .createQueryBuilder('office')
-        .leftJoin('office.user','user')
-        .where('user.id = :userId',{userId})
-        .select([
-            'office.id',
-            'office.type',
-            'office.deposit_per_m2',
-            'office.booking_period',
-            'office.tourism_deposit_percentage',
-        ])
-        .getOne();
+  async getOfficeFees(userId: number) {
+      const office = await this.officeRepo
+      .createQueryBuilder('office')
+      .leftJoin('office.user','user')
+      .where('user.id = :userId',{userId})
+      .select([
+          'office.id',
+          'office.type',
+          'office.deposit_per_m2',
+          'office.booking_period',
+          'office.tourism_deposit_percentage',
+      ])
+      .getOne();      
+      if(!office){
+          throw new NotFoundException(
+              errorResponse('لا يوجد مكتب لهذا المعرف',404)
+          );
+      }      
+      const result = {
+        office_id: office.id,
+        booking_period: office.booking_period,
+        ...(office.deposit_per_m2 != null && { deposit_per_m2: Number(office.deposit_per_m2) }),
+        ...(office.tourism_deposit_percentage != null && { tourism_deposit_percentage: Number(office.tourism_deposit_percentage) }),
+      };      
+      return result;
+  }
 
-        if(!office){
-            throw new NotFoundException(
-                errorResponse('لا يوجد مكتب لهذا المعرف',404)
-            );
-        }
-
-        const result = {
-          office_id: office.id,
-          booking_period: office.booking_period,
-          ...(office.deposit_per_m2 != null && { deposit_per_m2: Number(office.deposit_per_m2) }),
-          ...(office.tourism_deposit_percentage != null && { tourism_deposit_percentage: Number(office.tourism_deposit_percentage) }),
-        };
-
-        return result;
-    }
-
-        async findTopRatedOffices(page: number, items: number,baseUrl: string) {
+    async findTopRatedOffices(page: number, items: number,baseUrl: string) {
         const rawData = await this.officeRepo
           .createQueryBuilder('office')
           .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL') // فقط التقييمات الحقيقية
@@ -219,5 +219,21 @@ async createOfficeWithSocials(
         });
 
         await this.officeRepo.save(office);
+    }
+
+    async findWithinBounds(bounds: ExploreMapDto) {
+        return this.officeRepo.createQueryBuilder('office')
+          .select(['office.latitude', 'office.longitude'])
+          .where('office.latitude BETWEEN :minLat AND :maxLat', {
+            minLat: bounds.minLat,
+            maxLat: bounds.maxLat,
+          })
+          .andWhere('office.longitude BETWEEN :minLng AND :maxLng', {
+            minLng: bounds.minLng,
+            maxLng: bounds.maxLng,
+          })
+          .andWhere('office.is_deleted = false')
+          .andWhere('office.active = true')
+          .getMany();        
     }
 } 

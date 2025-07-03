@@ -24,9 +24,10 @@ import { PropertyFavoriteController } from "../controllers/property-favorite.con
 import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
 import { PROPERTY_FAVORITE_REPOSITORY } from "src/domain/repositories/property-favorite.repository";
 import { PropertyFavoriteRepository } from "src/infrastructure/repositories/property-favorite.repository";
-import { AddPropertyToFavoriteUseCase } from "src/application/use-cases/property/add-property-to-favorite.use-case";
-import { RemovePropertyFromFavoriteUseCase } from "src/application/use-cases/property/remove-property-from-favorite.use-case";
-import { FindTopRatedResidentialPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
+import { AddPropertyToFavoriteUseCase } from "src/application/use-cases/favorite/add-property-to-favorite.use-case";
+import { RemovePropertyFromFavoriteUseCase } from "src/application/use-cases/favorite/remove-property-from-favorite.use-case";
+import { FindTopRatedPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
+import { GetFavoritePropertiesUseCase } from "src/application/use-cases/favorite/get-favorite-properties.use-case";
 
 @Module({
     imports:[
@@ -46,7 +47,8 @@ import { FindTopRatedResidentialPropertiesUseCase } from "src/application/use-ca
         CompareTwoPropertiesUseCase,
         AddPropertyToFavoriteUseCase,
         RemovePropertyFromFavoriteUseCase,
-        FindTopRatedResidentialPropertiesUseCase,
+        FindTopRatedPropertiesUseCase,
+        GetFavoritePropertiesUseCase,
         {
             provide:PROPERTY_REPOSITORY,
             useClass:PropertyRepository

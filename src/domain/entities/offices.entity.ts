@@ -86,6 +86,12 @@ export class Office {
   })
   profits: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 7 })
+  latitude: number;
+  
+  @Column({ type: 'decimal', precision: 10, scale: 7 })
+  longitude: number;
+
   @CreateDateColumn()
   created_at: Date;
 

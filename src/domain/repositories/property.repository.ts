@@ -3,6 +3,7 @@ import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFi
 import {  SearchPropertiesDto } from "src/application/dtos/property/search-properties.dto";
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
 import { PropertyType } from "../enums/property-type.enum";
+import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 
 
 export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
@@ -25,5 +26,6 @@ export interface PropertyRepositoryInterface {
     searchPropertyByTitle(title: string,baseUrl: string,page: number,items: number,userId: number);
     rateProperty(userId: number,propertyId: number,rate: number);
     compareTwoProperties(propertyId1: number,propertyId2: number,baseUrl: string);
-    getTopRatedResidentialProperties(page: number,items: number,type: PropertyType,userId: number);
+    getTopRatedProperties(page: number,items: number,type: PropertyType,userId: number);
+    findWithinBounds(bounds: ExploreMapDto);
 }
