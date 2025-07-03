@@ -27,10 +27,7 @@ export class CreateUserDto {
   last_name: string;
 
   @IsNotEmpty({ message: 'رقم الهاتف مطلوب' })
-  @IsString({ message: 'رقم الهاتف يجب أن يكون نص' })
-  @Matches(/^(\+|00)[1-9]\d{1,14}$/, {
-    message: 'رقم الهاتف غير صحيح، يجب أن يبدأ بـ + أو 00',
-  })
+  @IsString({ message: 'رقم الهاتف يجب أن يكون نص' }) 
   @Transform(({ value }) => value?.replace(/\s+/g, ''))
   phone: string;
 
@@ -50,7 +47,5 @@ export class CreateUserDto {
   password: string;
 
   @IsOptional()
-  @IsString({ message: 'الصورة يجب أن تكون نص' })
-  @MaxLength(1000000, { message: 'الصورة كبيرة جداً' }) // 1MB for base64
-  photo?: string;
+   photo?: string;
 }

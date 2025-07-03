@@ -117,3 +117,37 @@ export function OfficeLogoInterceptor() {
     }),
   );
 }
+
+export function UserProfileImageInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({ 
+        destination: (req, file, cb) => {
+          const dir = './uploads/profile';
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        }, 
+        filename: (req: any, file, cb) => {
+          const userId = (req.user as any)?.sub || 'unknown';
+          const timestamp = Date.now();
+          const baseName = file.originalname
+            .replace(/\s+/g, '-')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9-_]/g, '');
+          const ext = extname(file.originalname);
+          cb(null, `user-${userId}-profile-${baseName}-${timestamp}${ext}`);
+        },
+      }), 
+      fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(new BadRequestException('فقط الصور مسموح بها'), false);
+        }
+        cb(null, true);
+      }, 
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  );
+}

@@ -1,5 +1,5 @@
  
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Request, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Request, UnauthorizedException, UseGuards,UploadedFile } from "@nestjs/common";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { CreateUserDto } from 'src/application/dtos/mobile_auth/create-user.dto';
 import { VerifyOtpDto } from 'src/application/dtos/mobile_auth/verify-otp.dto'; 
@@ -11,6 +11,7 @@ import { LoginUseCase } from 'src/application/use-cases/moblie_auth/login.usecas
 import {LocalAuthGuard} from 'src/shared/guards/local-auth.guard';
 import { RefreshJwtGuard } from "src/shared/guards/refresh-jwt.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
+import { UserProfileImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
@@ -20,12 +21,22 @@ export class MobileAuthController {
     private readonly refreshUseCase: RefreshUseCase,
   ) {}
 
+
   @Public()
   @Post('signup')
-  async signup(@Body() body: CreateUserDto) {
+  @HttpCode(HttpStatus.OK)
+  @ UserProfileImageInterceptor()
+  async signup(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: CreateUserDto,
+  ) { 
+    if (file) {
+      body.photo = file.path;
+    }
     await this.createUser.execute(body);
     return { message: 'OTP sent. Check your email.' };
-  }
+  } 
+
 
   @Public()
   @Post('confirm')
