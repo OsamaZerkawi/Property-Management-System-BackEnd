@@ -33,4 +33,7 @@ export class UserRepository implements UserRepositoryInterface {
       const entity = this.userRepo.create(user);
       return this.userRepo.save(entity);
     }
+    async updatePassword(userId: number, hashedPassword: string): Promise<void> {
+        await this.userRepo.update(userId, { password: hashedPassword });
+      }
   }

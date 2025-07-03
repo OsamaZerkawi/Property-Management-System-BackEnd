@@ -27,7 +27,8 @@ import { RefreshTokenStrategy } from "src/infrastructure/auth/strategies/referes
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RefreshJwtGuard } from 'src/shared/guards/refresh-jwt.guard';   
 import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-otp.use-case';
- 
+import { ResetPasswordUseCase } from 'src/application/use-cases/moblie_auth/reset-password.use-case';
+
 import { jwtConfig } from 'src/infrastructure/config/jwt.config';
 
 @Module({
@@ -55,6 +56,7 @@ import { jwtConfig } from 'src/infrastructure/config/jwt.config';
     LoginUseCase,
     RefreshUseCase,
     ResendOtpUseCase,
+    ResetPasswordUseCase,
     // Strategies
     MobileLocalStrategy,
     JwtStrategy,         

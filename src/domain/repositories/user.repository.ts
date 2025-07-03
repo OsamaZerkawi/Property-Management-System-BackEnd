@@ -7,4 +7,5 @@ export interface UserRepositoryInterface {
     findByEmail(email: string): Promise<User | null>;
     findByPhone(phone: string): Promise<User | null>;
     save(user: User): Promise<User>;
+    updatePassword(userId: number, hashedPassword: string): Promise<void>;
 }

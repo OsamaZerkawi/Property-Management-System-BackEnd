@@ -14,7 +14,8 @@ import { RefreshJwtGuard } from "src/shared/guards/refresh-jwt.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { UserProfileImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-otp.use-case';
-
+import { ResetPasswordUseCase } from 'src/application/use-cases/moblie_auth/reset-password.use-case';
+import {ResetPasswordDto} from 'src/application/dtos/mobile_auth/reset-password.dto';
 @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
@@ -23,6 +24,7 @@ export class MobileAuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshUseCase: RefreshUseCase,
     private readonly resendOtpUseCase: ResendOtpUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase
   ) {}
 
 
@@ -96,5 +98,12 @@ export class MobileAuthController {
       message: 'Login successful',
       ...tokens,
     };
+  }
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.resetPasswordUseCase.execute(dto);
+    return successResponse(null, 'تم تغيير كلمة المرور بنجاح');
   }
 }
