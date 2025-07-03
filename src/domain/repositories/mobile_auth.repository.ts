@@ -14,9 +14,9 @@ export interface MobileAuthRepositoryInterface {
 
   // OTPs
   saveOtp(otp: Partial<Otp>): Promise<Otp>;
-  findOtp(email: string, type: OtpType): Promise<Otp | null>;
+  findLatestValidOtp(email: string, type: OtpType,now: Date): Promise<Otp | null>;
   deleteOtp(email: string, type: OtpType): Promise<void>;
-
+  findValidOtp(email: string, type: OtpType, now: Date): Promise< { code: string; expires_at: Date } | null >;
   // Permanent users
   saveUser(user: Partial<User>): Promise<User>;
   findUserByEmail(email: string): Promise<User | null>;

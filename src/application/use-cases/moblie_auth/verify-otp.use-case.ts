@@ -26,9 +26,15 @@ export class VerifyOtpUseCase {
   ) {}
 
   async execute(dto: VerifyOtpDto): Promise<void> {
-    const otp = await this.repo.findOtp(dto.email, 'signup' as OtpType);
-    if (!otp || otp.code !== dto.otp || otp.expires_at < new Date()) {
-      throw new BadRequestException('Invalid or expired OTP');
+    const now = new Date();
+ 
+    const otp = await this.repo.findLatestValidOtp(dto.email,'signup', now);
+    if (!otp) {
+      throw new BadRequestException('رمز التحقق غير موجود أو منتهي الصلاحية');
+    }
+  
+    if (otp.code !== dto.otp) {
+      throw new BadRequestException('رمز التحقق غير صحيح');
     }
 
     const temp = await this.repo.findTempUserByEmail(dto.email);

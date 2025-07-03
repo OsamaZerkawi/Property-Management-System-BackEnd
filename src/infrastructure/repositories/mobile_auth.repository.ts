@@ -2,7 +2,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
- 
+import { MoreThan } from 'typeorm';
+
 import { MobileAuthRepositoryInterface } from 'src/domain/repositories/mobile_auth.repository';
 
 import { TempUser }     from 'src/domain/entities/temp-user.entity';
@@ -37,14 +38,26 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
     return this.otpRepo.save(otp);
   }
 
-  findOtp(email: string, type: OtpType): Promise<Otp | null> {
-    return this.otpRepo.findOne({ where: { email, type } });
+  async findLatestValidOtp(email: string, type: OtpType, now: Date): Promise<Otp | null> {
+    return await this.otpRepo.findOne({
+      where: { email, type, expires_at: MoreThan(now) },
+      order: { created_at: 'DESC' },
+    });
   }
 
   deleteOtp(email: string, type: OtpType): Promise<void> {
     return this.otpRepo.delete({ email, type }).then(() => undefined);
   }
-
+  async findValidOtp(email: string, type: OtpType, now: Date) {
+    const otp = await this.otpRepo.findOne({
+      where: { email, type },
+      order: { created_at: 'DESC' },
+    });
+    if (otp && otp.expires_at > now) {
+      return { code: otp.code, expires_at: otp.expires_at };
+    }
+    return null;
+  }
   // Permanent users
   saveUser(user: Partial<User>): Promise<User> {
     return this.userRepo.save(user);
