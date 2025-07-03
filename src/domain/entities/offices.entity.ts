@@ -16,7 +16,6 @@ import {OfficeSocial} from './office-social.entity'
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { OfficeFeedback } from './office-feedback.entity';
-import { OfficeSocial } from './office-social.entity';
 
 
  
@@ -131,12 +130,6 @@ export class Office {
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
  
-  @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
-  socials: OfficeSocial[];
-  
-  getPaymentMethod(): PaymentMethod {
-    return this.payment_method;
-  } 
   @OneToMany(() => OfficeFeedback, (feedback) => feedback.office)
   feedbacks: OfficeFeedback[]; 
 }

@@ -9,11 +9,8 @@ import { Region } from "src/domain/entities/region.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
-// import { Tag } from "src/domain/entities/tag.entity";
-// import { PropertyPostTag } from "src/domain/entities/property-post-tag.entity";
 import { Image } from "src/domain/entities/image.entity";
 import { UserPost } from "src/domain/entities/user-post.entity"; 
-import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import {ServicePrice} from "src/domain/entities/service-price.entity"; 
 import { UserPostSuggestion } from "src/domain/entities/user-post-suggestions.entity";
 import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
@@ -26,7 +23,6 @@ import { Permission } from "src/domain/entities/permissions.entity";
 import { RolePermission } from "src/domain/entities/role-permissions";
 import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
-// import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
 import { Booking } from "src/domain/entities/booking.entity";
 import { Touristic } from "src/domain/entities/touristic.entity";
@@ -34,6 +30,7 @@ import { Calendar } from "src/domain/entities/calendar.entity";
 import { RentalContract } from "src/domain/entities/rental-contract.entity";
 import { Otp } from "src/domain/entities/otp.entity";
 import { TempUser } from "src/domain/entities/temp-user.entity";
+import { OfficeSocial } from "src/domain/entities/office-social.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -50,7 +47,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
         PropertyFeedback,OfficeFeedback,OfficeSocial,PropertyFavorite,
         Booking,Touristic,Calendar,RentalContract,
-        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser
+        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice
     ],
     synchronize: true,
     //dropSchema: true,

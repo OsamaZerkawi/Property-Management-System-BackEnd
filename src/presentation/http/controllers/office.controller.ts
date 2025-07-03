@@ -108,11 +108,11 @@ import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-
         @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
         @Req() request: Request
     ){
-        const baseUrl = `${request.protocol}://${request.get('host')}`;
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const { data, total } = await this.getTopRatedOfficesUseCase.execute(page,items,baseUrl);
+      const { data, total } = await this.getTopRatedOfficesUseCase.execute(page,items,baseUrl);
 
-        return successPaginatedResponse(data, total, page, items, 'تم جلب المكاتب بنجاح', 200);
+      return successPaginatedResponse(data, total, page, items, 'تم جلب المكاتب بنجاح', 200);
 
     }
 

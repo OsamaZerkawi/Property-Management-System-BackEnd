@@ -8,7 +8,7 @@
 .env
 
 
-/uploads
+/uploads/
 
 # Logs
 logs
