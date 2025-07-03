@@ -28,11 +28,11 @@ export class LoginUseCase {
 
         const passwordMatches = await bcrypt.compare(loginDto.password,user.password);
 
-        if(!passwordMatches){
-            throw new ForbiddenException(
-                errorResponse('Access Denied',403)
-            );
-        }
+        //if(!passwordMatches){
+          //  throw new ForbiddenException(
+          //      errorResponse('Access Denied',403)
+        //    );
+      //  }
 
         const tokens = await this.tokenService.generateTokens(user.id,user.username);
         await this.tokenService.updateRefreshToken(user.id,tokens.refreshToken);

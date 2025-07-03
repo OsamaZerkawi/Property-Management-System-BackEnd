@@ -12,15 +12,14 @@ import {
 import { User } from './user.entity';
 import { Region } from './region.entity';
 import { Property } from './property.entity';
+import {OfficeSocial} from './office-social.entity'
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { OfficeFeedback } from './office-feedback.entity';
 import { OfficeSocial } from './office-social.entity';
 
 
-
-
-
+ 
 @Entity('offices')
 export class Office {
   @PrimaryGeneratedColumn()
@@ -29,7 +28,7 @@ export class Office {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 500 })
+  @Column({ type: 'varchar', length: 500,nullable: true  })
   logo: string;
 
   @Column({
@@ -39,27 +38,40 @@ export class Office {
   type: OfficeType;
 
   @Column({
-    type: 'decimal',
-    nullable:true
+    type: 'decimal', 
+    precision: 5,
+    scale: 4,
+    nullable: true  
   })
   commission: number;
 
   @Column({
     type: 'int',
+    nullable: true 
   })
   booking_period: number;
 
   @Column({
-    type: 'decimal',
-    nullable:true
+    type: 'decimal', 
+    precision: 10,
+    scale: 2,
+    nullable: true  
   })
   deposit_per_m2: number;
 
-  @Column({
-    type:'decimal',
-    nullable:true,
+  @Column({ 
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true 
   })
-  tourism_deposit_percentage: number;
+  tourism_deposit: number; 
+  
+  @Column({ 
+    type: 'decimal', 
+    nullable: true 
+  })
+  tourism_deposit_percentage: number; 
 
   @Column({
     type: 'enum',
@@ -74,9 +86,12 @@ export class Office {
   @Column({ type: 'boolean', default: false })
   is_deleted: boolean;
 
+  
+  @Column({ type: 'time',nullable: true  }) 
   @Column({type:'text'})
   opening_time: string;
 
+  @Column({ type: 'time',nullable: true  }) 
   @Column({type:'text'})
   closing_time: string;
 
@@ -115,7 +130,13 @@ export class Office {
 
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
-
+ 
+  @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
+  socials: OfficeSocial[];
+  
+  getPaymentMethod(): PaymentMethod {
+    return this.payment_method;
+  } 
   @OneToMany(() => OfficeFeedback, (feedback) => feedback.office)
-  feedbacks: OfficeFeedback[];
+  feedbacks: OfficeFeedback[]; 
 }

@@ -11,7 +11,9 @@ import { ResidentialOfficeModule } from 'src/presentation/http/modules/residenti
 import { CityModule } from 'src/presentation/http/modules/city.module';
 import { RegionModule } from 'src/presentation/http/modules/region.module';
 import { PropertyPostModule } from 'src/presentation/http/modules/property-post.module';
-import { OfficeModule } from 'src/presentation/http/modules/office.module';
+import { OfficeModule } from 'src/presentation/http/modules/office.module'; 
+//import { SentryModule } from "@sentry/nestjs/setup";
+import { ServicePriceModule } from 'src/presentation/http/modules/service-price.module'; 
 import { UserPostModule } from 'src/presentation/http/modules/user-post.module';
 import { UserPostSuggestionModule } from 'src/presentation/http/modules/user-post-suggestion.module';
 import { PropertyReservationModule } from 'src/presentation/http/modules/proeprty-reservation.module';
@@ -26,7 +28,7 @@ import { PropertyModule } from 'src/presentation/http/modules/property.module';
 import { UserReservationModule } from 'src/presentation/http/modules/user-reservation.module';
 import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
 import { MapExploreModule } from 'src/presentation/http/modules/map-explore.module';
-
+ import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
 @Module({
   imports: [
     RoleModule,
@@ -46,9 +48,16 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
     UserReservationModule,
     UserInvoiceModule,
     MapExploreModule,
+    PropertyImageModule, 
+    ResidentialOfficeModule, 
+    ServicePriceModule,
+    MobileAuthModule,
+    //SentryModule.forRoot(), 
+    PropertyReservationModule, 
     ConfigModule.forRoot({
-      isGlobal:true,
-    }),
+      isGlobal: true,
+      envFilePath: '.env', 
+     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => OrmConfig(configService),

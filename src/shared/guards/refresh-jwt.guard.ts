@@ -1,11 +1,10 @@
+
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { errorResponse } from "../helpers/response.helper";
-
 @Injectable()
 export class RefreshJwtGuard extends AuthGuard('jwt-refresh'){
-  handleRequest(err: any, user: any, info: any) {
-    
+  handleRequest(err: any, user: any, info: any) { 
     if (err || !user) {
       const message =
         info?.name === 'TokenExpiredError'
@@ -20,4 +19,5 @@ export class RefreshJwtGuard extends AuthGuard('jwt-refresh'){
     return user;
   }
 }
+
 
