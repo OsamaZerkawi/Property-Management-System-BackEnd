@@ -27,7 +27,7 @@ import { RolePermission } from "src/domain/entities/role-permissions";
 import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
 import { Otp } from "src/domain/entities/otp.entity";
-import { TempUserOrm } from "src/domain/entities/temp-user.entity";
+import { TempUser } from "src/domain/entities/temp-user.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -42,7 +42,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         Image,UserPost,UserPostSuggestion,
         UserPropertyPurchase,UserPropertyInvoice,ServiceProvider,
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
-        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUserOrm
+        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser
     ],
     synchronize: true,
     //dropSchema: true,

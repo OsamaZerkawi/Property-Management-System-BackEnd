@@ -1,18 +1,28 @@
 // src/application/use-cases/confirm-signup.use-case.ts
 import { Injectable, BadRequestException,Inject } from '@nestjs/common';
-
-import { AuthRepository } from 'src/infrastructure/repositories/auth.repository';
+ 
 import { OtpType }        from 'src/domain/entities/otp.entity';
-import { User }        from 'src/domain/entities/user.entity';
-import { MobileAuthRepository } from 'src/infrastructure/repositories/mobile_auth.repository';
-import { UserRepositoryInterface, USER_REPOSITORY} from 'src/domain/repositories/user.repository';
-import { VerifyOtpDto } from 'src/application/dtos/mobile_auth/verify-otp.dto';
+import { User }        from 'src/domain/entities/user.entity';  
+import { VerifyOtpDto } from 'src/application/dtos/mobile_auth/verify-otp.dto'; 
+  
+
+import {
+  MOBILE_AUTH_REPOSITORY,
+  MobileAuthRepositoryInterface,
+} from 'src/domain/repositories/mobile_auth.repository';
+import {
+  USER_REPOSITORY,
+  UserRepositoryInterface,
+} from 'src/domain/repositories/user.repository';
 
 @Injectable()
 export class VerifyOtpUseCase {
   constructor(
-    private repo: MobileAuthRepository,
-    @Inject(USER_REPOSITORY) private readonly userRepo: UserRepositoryInterface,
+    @Inject(MOBILE_AUTH_REPOSITORY)
+    private readonly repo: MobileAuthRepositoryInterface,
+
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryInterface,
   ) {}
 
   async execute(dto: VerifyOtpDto): Promise<void> {
@@ -21,7 +31,7 @@ export class VerifyOtpUseCase {
       throw new BadRequestException('Invalid or expired OTP');
     }
 
-    const temp = await this.repo.findTempByEmail(dto.email);
+    const temp = await this.repo.findTempUserByEmail(dto.email);
     if (!temp) {
       throw new BadRequestException('Registration data expired');
     }
@@ -35,7 +45,7 @@ export class VerifyOtpUseCase {
       password: temp.password,
     } as User);
 
-    await this.repo.deleteTempByEmail(dto.email);
+    await this.repo.deleteTempUserByEmail(dto.email);
     await this.repo.deleteOtp(dto.email, 'signup' as OtpType);
   }
 }

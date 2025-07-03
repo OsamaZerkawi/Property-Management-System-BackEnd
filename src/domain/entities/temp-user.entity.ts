@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 @Entity('temp_users')
-export class TempUserOrm {
+export class TempUser {
   @PrimaryGeneratedColumn('uuid')            id: string;
   @Column()                                 first_name: string;
   @Column()                                 last_name:  string;
