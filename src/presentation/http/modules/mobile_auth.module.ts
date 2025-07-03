@@ -27,7 +27,7 @@ import { RefreshTokenStrategy } from "src/infrastructure/auth/strategies/referes
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RefreshJwtGuard } from 'src/shared/guards/refresh-jwt.guard';   
 import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-otp.use-case';
-
+ 
 import { jwtConfig } from 'src/infrastructure/config/jwt.config';
 
 @Module({
@@ -36,7 +36,7 @@ import { jwtConfig } from 'src/infrastructure/config/jwt.config';
     PassportModule,
     TypeOrmModule.forFeature([User, TempUser, Otp, RefreshToken]),
     PassportModule,
-     JwtModule.registerAsync({
+    JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: jwtConfig,

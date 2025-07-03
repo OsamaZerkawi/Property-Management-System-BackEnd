@@ -12,16 +12,18 @@ export class JwtService {
      @Inject(MOBILE_AUTH_REPOSITORY)
     private readonly authRepo: MobileAuthRepositoryInterface
   ) {}
+ 
+  async generateAccessToken(userId: number,email : string){
+    const accessToken =  this.jwtService.signAsync({
+        sub: userId,
+        email
+    },{
+        secret : process.env.JWT_TOKEN_SECRET,
+        expiresIn : 60 * 60,
+    });
 
-  generateAccessToken(payload: { sub: number; email: string }): Promise<string> {
-    return this.jwtService.signAsync(
-      payload,
-      {
-        secret: process.env.JWT_ACCESS_TOKEN_SECRET,
-        expiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '1h',
-      }
-    );
-  }
+    return accessToken;
+}
 
   async generateRefreshToken(payload: { sub: number; email: string }) {
     const token = await this.jwtService.signAsync(
@@ -38,11 +40,10 @@ export class JwtService {
     async validateRefreshToken(userId: number, incomingToken: string){
    
           const user = await this.authRepo.getUserWithRefreshToken(userId);
-  
+          console.log('token',user?.refreshToken.refreshToken);
           if(!user || !user.refreshToken || new Date() > user.refreshToken.expiredAt){
               return false;
-          }
-   
-          return await bcrypt.compare(incomingToken,user.refreshToken.refreshToken);
+          } 
+          return incomingToken === user.refreshToken.refreshToken;
       }
 }

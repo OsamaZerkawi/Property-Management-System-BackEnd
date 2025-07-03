@@ -33,15 +33,15 @@ async execute(userId: number, refreshToken: string): Promise<string> {
       );
     }
  
-    const newAccessToken = await this.jwtService.generateAccessToken({
-        sub: user.id,
-        email: user.email,
-      });
+    const newAccessToken = await this.jwtService.generateAccessToken(
+        user.id,
+        user.email,
+      );
       
 
      // await this.tokenBlackListService.addToBlackList(oldAccessToken);
 
     return newAccessToken;
-  }
+  }   
+  
 }
-

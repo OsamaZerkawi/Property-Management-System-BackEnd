@@ -17,10 +17,10 @@ export class LoginUseCase {
   ) {}
 
   async execute(user: User) {
-    const accessToken = await this.jwtService.generateAccessToken({
-      sub: user.id,
-      email: user.email,
-    });
+    const accessToken = await this.jwtService.generateAccessToken(
+       user.id,
+       user.email,
+    );
 
     const { token: refreshToken, expiresAt } =
       await this.jwtService.generateRefreshToken({
