@@ -7,8 +7,11 @@ import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { LocalAuthGuard } from "src/shared/guards/local-auth.guard";
 import { RefreshJwtGuard } from "src/shared/guards/refresh-jwt.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
+import { LoginSwaggerDoc } from "../swagger/decorators/auth/auth.decorator";
+import { LogoutSwaggerDoc } from "../swagger/decorators/auth/logout.swagger";
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +23,8 @@ export class AuthController {
 
     @Post('login')
     @Public()
+    @UseGuards(LocalAuthGuard)
+    @LoginSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async login(@Request() req ,@Body() loginDto: LoginDto){
       const {user , tokens} =  await this.loginUseCase.execute(loginDto);
@@ -27,7 +32,7 @@ export class AuthController {
       const { password, ...userWithoutPassword } = user;
 
       const data = {
-        user : userWithoutPassword,
+        // user : userWithoutPassword,
         tokens,
       };
 
@@ -35,6 +40,7 @@ export class AuthController {
     }
 
     @Post('logout')
+    @LogoutSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     logout(@Req() request: requsetExpress,@CurrentUser() user){
       const authHeader = request.headers.authorization;

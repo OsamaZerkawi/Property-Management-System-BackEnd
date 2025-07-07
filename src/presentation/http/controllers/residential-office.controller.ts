@@ -17,6 +17,10 @@ import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { RolesGuard } from "src/shared/guards/roles.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { GetOfficePropertiesSwaggerDoc, GetOfficePropertySwaggerDoc, SearchPropertiesSwaggerDoc, SearchTitlePropertiesSwaggerDoc } from "../swagger/decorators/residential-office/get-properties.decorator";
+import { CreateResidentialPropertySwaggerDoc } from "../swagger/residential-office/create-property.swagger";
+import { GetExpectedPriceSwaggerDoc } from "../swagger/residential-office/get-expected-price.swagger";
+import { UpdateResidentialPropertySwaggerDoc } from "../swagger/residential-office/update-property.swagger";
 
 @Controller('residential-office')
 export class ResidentialOfficeController {
@@ -32,6 +36,7 @@ export class ResidentialOfficeController {
     {}
 
     @Roles('صاحب مكتب')
+    @GetOfficePropertiesSwaggerDoc()
     @Get()
     @HttpCode(HttpStatus.OK)
     async getProperties(
@@ -49,6 +54,7 @@ export class ResidentialOfficeController {
 
     @Roles('صاحب مكتب')
     @Get('/filters')
+    @SearchPropertiesSwaggerDoc()
     async searchProertiesWithFilters(
       @Query() filters: SearchPropertiesDto,
       @CurrentUser() user,
@@ -65,6 +71,7 @@ export class ResidentialOfficeController {
     }
 
     @Roles('صاحب مكتب')
+    @SearchTitlePropertiesSwaggerDoc()
     @Get('/search')
     async seacrhPropertiesByTitle(
       @Query() search: {title: string},
@@ -82,6 +89,7 @@ export class ResidentialOfficeController {
     }
 
     @Roles('صاحب مكتب')
+    @GetOfficePropertySwaggerDoc()
     @Get('/properties/:propertyId')
     async getProperty(
       @Param('propertyId') propertyId: number,
@@ -98,6 +106,7 @@ export class ResidentialOfficeController {
     }
 
     @Roles('صاحب مكتب')
+    @GetExpectedPriceSwaggerDoc()
     @Get('/properties/:propertyId/expected-price')
     @HttpCode(HttpStatus.OK)
     async getExpectedPriceForProperty(
@@ -110,6 +119,7 @@ export class ResidentialOfficeController {
 
     @Roles('صاحب مكتب')
     @Post()
+    @CreateResidentialPropertySwaggerDoc()
     @HttpCode(HttpStatus.CREATED)
     @PropertyPostImageInterceptor()
     async addResidentialProperty(
@@ -128,12 +138,13 @@ export class ResidentialOfficeController {
 
         const residentialPropert = await this.createResidentialPropertyDetailsUseCase.execute(residentialDetails,userId,imageName);
 
-        return successResponse(residentialPropert,'تم إضافة العقار بنجاح',201);
+        return successResponse([],'تم إضافة العقار بنجاح',201);
     }
 
     @Roles('صاحب مكتب')
     @Post(':residentialId')
     @HttpCode(HttpStatus.OK)
+    @UpdateResidentialPropertySwaggerDoc()
     @PropertyPostImageInterceptor()
     async updateResidentialkProeprty(
       @Param('residentialId') residentialId,

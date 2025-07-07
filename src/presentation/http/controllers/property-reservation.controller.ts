@@ -6,8 +6,11 @@ import { FindUserProeprtyReservationWithDetailsUseCase } from "src/application/u
 import { FindUserProeprtyReservationsWithFiltersUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation-with-filters.use-case";
 import { FindUserProeprtyReservationsUseCase } from "src/application/use-cases/user-property-reservation/find-user-property-reservation.use-case";
 import { Roles } from "src/shared/decorators/role.decorator";
-import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetUserPropertyReservationsSwaggerDoc } from "../swagger/property-reservation/get-all-for-office.swagger";
+import { GetUserPropertyReservationsWithFiltersSwaggerDoc } from "../swagger/property-reservation/get-all-for-office-with-filter.swagger";
+import { GetPropertyReservationWithDetailsSwaggerDoc } from "../swagger/property-reservation/get-one-for-office.swagger";
+import { GetPropertyReservationDetailsSwaggerDoc } from "../swagger/property-reservation/get-details-of-reservation-info.swagger";
 
 @Controller('property-reservation')
 export class PropertyReservationController {
@@ -19,6 +22,7 @@ export class PropertyReservationController {
     ){}
     
     @Roles('صاحب مكتب')
+    @GetUserPropertyReservationsSwaggerDoc()
     @Get()
     @HttpCode(HttpStatus.OK)
     async getAll(
@@ -32,6 +36,7 @@ export class PropertyReservationController {
     }
 
     @Roles('صاحب مكتب')
+    @GetUserPropertyReservationsWithFiltersSwaggerDoc()
     @Get('/filters')
     @HttpCode(HttpStatus.OK)
     async getAllWithFilters(
@@ -47,6 +52,7 @@ export class PropertyReservationController {
 
     @Roles('صاحب مكتب')
     @Get(':propertyReservationId')
+    @GetPropertyReservationWithDetailsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getUserPropertyReservationWithDetails(
         @Param('propertyReservationId') propertyReservationId: number,
@@ -61,6 +67,7 @@ export class PropertyReservationController {
 
     @Roles('صاحب مكتب')
     @Get('/properties/:propertyId')
+    @GetPropertyReservationDetailsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getPropetyReservationDetails(
         @Param('propertyId') propertyId: number

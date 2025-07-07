@@ -6,6 +6,8 @@ import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { UserPropertyInvoiceImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { UploadUserPropertyInvoiceDocumentSwaggerDoc } from "../swagger/user-property-invoices/upload-document.swagger";
+import { UploadInvoiceDocumentOfflineSwaggerDoc } from "../swagger/user-property-invoices/upload-document-offline.swagger";
 
 @Controller('user-property-invoices')
 export class UserPropertyInvoiceController {
@@ -15,6 +17,7 @@ export class UserPropertyInvoiceController {
     ){}
 
     @Roles('صاحب مكتب')
+    @UploadUserPropertyInvoiceDocumentSwaggerDoc()
     @UserPropertyInvoiceImageInterceptor()
     @HttpCode(HttpStatus.OK)
     @Post(':invoiceId/upload-docement')
@@ -35,9 +38,10 @@ export class UserPropertyInvoiceController {
 
     @Roles('صاحب مكتب')
     @HttpCode(HttpStatus.CREATED)
+    @UploadInvoiceDocumentOfflineSwaggerDoc()
     @UserPropertyInvoiceImageInterceptor()
     @Post('/upload-docement')
-    async uploadINvoiceDocumentOffline(
+    async uploadInvoiceDocumentOffline(
         @Body() data: UploadPropertyReservationDto,
         @UploadedFile() file: Express.Multer.File
     ){
