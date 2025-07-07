@@ -9,13 +9,14 @@ import {
     MobileAuthRepositoryInterface,
   } from 'src/domain/repositories/mobile_auth.repository';
   
-@Injectable()
-export class MobileLocalStrategy extends PassportStrategy(Strategy,'mobile-local') {
-  constructor(private readonly validateUser: MobileValidateUserUseCase,
-
-  @Inject(MOBILE_AUTH_REPOSITORY)
-  private readonly mobileAuthRepo: MobileAuthRepositoryInterface,
-  ) {
+@Injectable() 
+export class MobileLocalStrategy extends PassportStrategy(Strategy, 'mobile-local') {
+  constructor(
+    private readonly validateUser: MobileValidateUserUseCase,
+    @Inject(MOBILE_AUTH_REPOSITORY)
+    private readonly mobileAuthRepo: MobileAuthRepositoryInterface,
+  ) { 
+    
     super({ usernameField: 'email', passwordField: 'password' });
   }
 
