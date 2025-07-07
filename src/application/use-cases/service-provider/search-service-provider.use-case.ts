@@ -8,6 +8,6 @@ export class SearchServiceProviderUseCase {
     ){}
 
     async execute(name: string,baseUrl: string,page?:number,items?: number){
-        return await this.serviceProviderRepo.searchByName(baseUrl,name,page,items);
+        return await this.serviceProviderRepo.searchByName(name,baseUrl,page,items);
     }
 }

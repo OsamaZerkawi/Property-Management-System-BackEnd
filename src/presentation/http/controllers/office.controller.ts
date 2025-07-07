@@ -28,6 +28,7 @@ import {
 import { Public } from "src/shared/decorators/public.decorator";
 import { Request } from "express";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
+import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
   
   @Controller('office')
   export class OfficeController {
@@ -102,6 +103,7 @@ import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-
     }
 
     @Get('top-rated')
+    @GetTopRatedOfficesSwaggerDoc()
     @Public()
     async getTopRatedOffices(
         @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

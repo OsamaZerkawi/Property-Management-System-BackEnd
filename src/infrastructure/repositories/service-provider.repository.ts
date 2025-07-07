@@ -46,7 +46,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
     async searchByName(name: string, baseUrl: string, page?: number, items?: number) {
       const query = await this.fetchServiceProviders(baseUrl);
       query.andWhere('service_provider.name ILIKE :name', { name: `%${name}%` });
-    
+
       if (page && items) {
         const countQuery = query.clone();
         query.skip((page - 1) * items).take(items);
@@ -55,6 +55,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
       }
     
       const results = await query.getRawMany();
+
       return { results };
     }
 
@@ -130,26 +131,26 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
     }
 
     async findTopRatedServiceProviders(page: number, items: number) {
-        return await this.serviceProviderRepo
-            .createQueryBuilder('provider')
-            .leftJoin('provider.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
-            .leftJoin('provider.region', 'region')
-            .leftJoin('region.city', 'city')
-            .select([
-              'provider.id AS id',
-              'provider.name AS name',
-              'provider.logo AS logo',
-              'provider.career AS career',
-              `CONCAT(city.name, ', ', region.name) AS location`,
-              'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
-              'COUNT(feedbacks.id) AS rating_count',
-              'COUNT(*) OVER() AS total_count',
-            ])
-            .groupBy('provider.id, region.id, city.id')
-            .orderBy('avg_rate', 'DESC')
-            .offset((page - 1) * items)
-            .limit(items)
-            .getRawMany();
+      return await this.serviceProviderRepo
+        .createQueryBuilder('provider')
+        .leftJoin('provider.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
+        .leftJoin('provider.region', 'region')
+        .leftJoin('region.city', 'city')
+        .select([
+          'provider.id AS id',
+          'provider.name AS name',
+          'provider.logo AS logo',
+          'provider.career AS career',
+          `CONCAT(city.name, ', ', region.name) AS location`,
+          'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+          'COUNT(feedbacks.id) AS rating_count',
+          'COUNT(*) OVER() AS total_count',
+        ])
+        .groupBy('provider.id, region.id, city.id')
+        .orderBy('avg_rate', 'DESC')
+        .offset((page - 1) * items)
+        .limit(items)
+        .getRawMany();
     }
 
     async createOrUpdateFeedback(userId: number, serviceProviderId: number, data: ServiceProviderFeedbackDto) {

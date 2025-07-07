@@ -735,6 +735,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       'residential.rental_price AS rental_price',
       'residential.rental_period AS rental_period',
       'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+      'COUNT(DISTINCT feedback.user_id) AS rating_count',
       'COUNT(*) OVER() AS total_count',
     ])
     .groupBy('property.id')

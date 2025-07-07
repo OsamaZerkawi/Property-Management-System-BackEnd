@@ -67,10 +67,10 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
   controllers: [AppController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard, // authenticate first, sets request.user
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtAuthGuard, // authenticate first, sets request.user
+    // },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

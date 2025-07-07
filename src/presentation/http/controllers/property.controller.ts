@@ -15,6 +15,7 @@ import { PropertyType } from "src/domain/enums/property-type.enum";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { GetTopRatedPropertiesSwaggerDoc } from "../swagger/property/get-top-rated";
 
 
 @Controller('properties')
@@ -32,6 +33,7 @@ export class PropertyController{
     ){}
 
     @Get('top-rated')
+    @GetTopRatedPropertiesSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async getTopRatedProerties(

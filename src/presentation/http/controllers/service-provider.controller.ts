@@ -1,4 +1,4 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, Req } from "@nestjs/common";
 import { Request } from "express";
 import { ServiceProviderFeedbackDto } from "src/application/dtos/service-provider/service-provider-feedback.dto";
 import { ServiceProviderFiltersDto } from "src/application/dtos/service-provider/service-provider-filters.dto";
@@ -10,7 +10,14 @@ import { GetTopRatedServiceProvidersUseCase } from "src/application/use-cases/se
 import { SearchServiceProviderUseCase } from "src/application/use-cases/service-provider/search-service-provider.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
-import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { errorResponse, successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { GetTopRatedServiceProvidersSwaggerDoc } from "../swagger/service-provider/get-top-rated";
+import { GetAllServiceProvidersSwaggerDoc } from "../swagger/service-provider/get-all";
+import { GetAllServiceProvidersWithFiltersSwaggerDoc } from "../swagger/service-provider/get-all-with-filter";
+import { SearchServiceProvidersSwaggerDoc } from "../swagger/service-provider/search-by-name";
+import { CreateOrUpdateFeedbackSwaggerDoc } from "../swagger/service-provider/create-or-update-feedback";
+import { NotFoundError } from "rxjs";
+import { GetServiceProviderDetailsSwaggerDoc } from "../swagger/service-provider/get-one";
 @Controller('service-provider')
 export class ServiceProviderController{
     constructor(
@@ -23,6 +30,7 @@ export class ServiceProviderController{
     ){}
 
     @Get()
+    @GetAllServiceProvidersSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async getAll(
@@ -42,6 +50,7 @@ export class ServiceProviderController{
     }    
 
     @Get('filters')
+    @GetAllServiceProvidersWithFiltersSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async getAllWithFilters(
@@ -62,6 +71,7 @@ export class ServiceProviderController{
     }    
 
     @Get('search')
+    @SearchServiceProvidersSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async search(
@@ -70,6 +80,7 @@ export class ServiceProviderController{
       @Query('page') page?: number,
       @Query('items') items?: number,
     ) {
+
       const baseUrl = `${request.protocol}://${request.get('host')}`;    
 
       const { results, total } = await this.searchServiceProviderUseCase.execute(name, baseUrl, page, items);    
@@ -82,6 +93,7 @@ export class ServiceProviderController{
     }
 
     @Get('top-rated')
+    @GetTopRatedServiceProvidersSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     @Public()
     async getTopRatedServiceProviders(
@@ -89,15 +101,16 @@ export class ServiceProviderController{
         @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
         @Req() request: Request,
     ){
-        const baseUrl = `${request.protocol}://${request.get('host')}`;
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const [data,total] = await this.getTopRatedServiceProvidersUseCase.execute(page,items,baseUrl);
+      const [data,total] = await this.getTopRatedServiceProvidersUseCase.execute(page,items,baseUrl);
 
-        return successPaginatedResponse(data,total,page,items,'تم جلب مقدمي الخدمات بنجاح',200);
+      return successPaginatedResponse(data,total,page,items,'تم جلب مقدمي الخدمات بنجاح',200);
     }
 
     @Get(':id')
     @Public()
+    @GetServiceProviderDetailsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getDetails(
       @Param('id',ParseIntPipe) id:number,
@@ -105,10 +118,16 @@ export class ServiceProviderController{
     ){
         const baseUrl = `${request.protocol}://${request.get('host')}`;
         const data = await this.getServiceProviderDetailsUseCase.execute(id, baseUrl);
+        if(!data){
+          throw new NotFoundException(
+            errorResponse('لا يوجد مزود خدمات لهذا المعرف',404)
+          );
+        }
         return successResponse(data, 'تم إرجاع تفاصيل مزود الخدمة', 200);
     }
 
     @Post(':id/feedback')
+    @CreateOrUpdateFeedbackSwaggerDoc()
     @HttpCode(HttpStatus.CREATED)
     async createOrUpdateFeedack(
         @Param('id') serviceProviderId: number,
