@@ -8,8 +8,8 @@ import { CreateUserUseCase } from 'src/application/use-cases/moblie_auth/create-
 import { VerifyOtpUseCase } from 'src/application/use-cases/moblie_auth/verify-otp.use-case';  
 import { Public } from "src/shared/decorators/public.decorator";
 import { LoginUseCase } from 'src/application/use-cases/moblie_auth/login.usecase';
- import { RefreshUseCase } from 'src/application/use-cases/moblie_auth/refresh.usecase'; 
-import {LocalAuthGuard} from 'src/shared/guards/local-auth.guard';
+import { RefreshUseCase } from 'src/application/use-cases/moblie_auth/refresh.usecase'; 
+import { MobileLocalAuthGuard} from 'src/shared/guards/mobile-local.guard';
 import { RefreshJwtGuard } from "src/shared/guards/refresh-jwt.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { UserProfileImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
@@ -89,7 +89,7 @@ export class MobileAuthController {
   }
 
   @Public()
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(MobileLocalAuthGuard)
   @Post('login') 
   async login(@Req() req) {
     const user = req.user;
