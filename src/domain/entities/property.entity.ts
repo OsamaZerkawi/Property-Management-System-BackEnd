@@ -41,7 +41,7 @@ export class Property {
   @Column({ type: 'float' })
   area: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int',nullable:true })
   floor_number: number;
 
   @Column({ type: 'text', nullable: true })

@@ -28,7 +28,9 @@ import { PropertyModule } from 'src/presentation/http/modules/property.module';
 import { UserReservationModule } from 'src/presentation/http/modules/user-reservation.module';
 import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
 import { MapExploreModule } from 'src/presentation/http/modules/map-explore.module';
- import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
+import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
+import { TourismModule } from 'src/presentation/http/modules/tourism.module';
+
 @Module({
   imports: [
     RoleModule,
@@ -52,6 +54,7 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
     ResidentialOfficeModule, 
     ServicePriceModule,
     MobileAuthModule,
+    TourismModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     ConfigModule.forRoot({

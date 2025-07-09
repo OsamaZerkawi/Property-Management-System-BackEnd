@@ -15,14 +15,15 @@ export class Touristic {
    @Column({ length: 255 })
    street: string;
 
-   @Column({ type: 'boolean', default: false })
-   electricity: boolean;
+   @Column({ length: 255 })   
+   electricity: string;
 
-   @Column({ type: 'boolean', default: false })
-   water: boolean;
+   @Column({ length: 255 })
+   water: string;
 
-   @Column({ type: 'boolean', default: false })
-   pool: boolean;
+   @Column({ length: 255 })
+   pool: string;
+
 
    @Column({ type: 'enum', enum: TouristicStatus })
    status: TouristicStatus;

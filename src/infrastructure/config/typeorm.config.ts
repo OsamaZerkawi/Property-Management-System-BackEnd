@@ -31,6 +31,8 @@ import { RentalContract } from "src/domain/entities/rental-contract.entity";
 import { Otp } from "src/domain/entities/otp.entity";
 import { TempUser } from "src/domain/entities/temp-user.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
+import { AdditionalService } from 'src/domain/entities/additional-service.entity';
+import { Service } from 'src/domain/entities/services.entity';
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -47,7 +49,8 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         ServiceFeedback,Role,UserRole,Permission,RolePermission,
         PropertyFeedback,OfficeFeedback,OfficeSocial,PropertyFavorite,
         Booking,Touristic,Calendar,RentalContract,
-        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice
+        PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,AdditionalService,Service
+
     ],
     synchronize: true,
     //dropSchema: true,
