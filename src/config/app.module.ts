@@ -29,8 +29,11 @@ import { UserReservationModule } from 'src/presentation/http/modules/user-reserv
 import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
 import { MapExploreModule } from 'src/presentation/http/modules/map-explore.module';
  import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
+import { NotificationModule } from 'src/presentation/http/modules/notification.module';
+import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
+    NotificationModule,
     RoleModule,
     ResidentialOfficeModule,
     PermissionModule,
@@ -62,6 +65,15 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => OrmConfig(configService),
       inject: [ConfigService],
+    }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'notifications',
     }),
   ],
   controllers: [AppController],
