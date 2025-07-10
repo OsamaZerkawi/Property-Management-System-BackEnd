@@ -22,31 +22,27 @@ export class CreateTourismUseCase {
       if (!office) throw new NotFoundException('المكتب غير موجود');
  
     // 1. إنشاء Property 
-    const property = new Property();
-console.log('office id', office.id); // 2
+    const property = new Property(); 
+    Object.assign(property, {
+      office: office,  
+      region_id: dto.region_id,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      area: dto.area,
+      room_count: dto.room_count,
+      living_room_count: dto.living_room_count,
+      kitchen_count: dto.kitchen_count,
+      bathroom_count: dto.bathroom_count,
+      has_furniture: dto.has_furniture,
+      property_type: "عقار سياحي"
+    });
  
-  
- 
-Object.assign(property, {
-  office: office,  
-  region_id: dto.region_id,
-  latitude: dto.latitude,
-  longitude: dto.longitude,
-  area: dto.area,
-  room_count: dto.room_count,
-  living_room_count: dto.living_room_count,
-  kitchen_count: dto.kitchen_count,
-  bathroom_count: dto.bathroom_count,
-  has_furniture: dto.has_furniture,
-  property_type: "عقار سياحي"
-});
- 
-    const savedProperty = await this.repo.createProperty(property); 
-     const generatedTitle = `${dto.tag} ' ' ${dto.area} متر مربع`;
-   
-    const post = new PropertyPost ();
+    const savedProperty = await this.repo.createProperty(property);
+    const generatedTitle = `${dto.tag} ' ' ${dto.area} متر مربع`;
+    
+    const post = new PropertyPost();
     Object.assign(post, {
-      property_id: savedProperty.id,
+      property: savedProperty,  
       title: generatedTitle,
       description: dto.description,
       tag: dto.tag,
@@ -54,10 +50,10 @@ Object.assign(property, {
       date: new Date(),
     });
     await this.repo.createPost(post);
- 
+    
     const touristic = new Touristic();
     Object.assign(touristic, {
-      property_id: savedProperty.id,
+      property: savedProperty,  
       price: dto.price,
       street: dto.street,
       electricity: dto.electricity,
@@ -66,9 +62,7 @@ Object.assign(property, {
       status: "متوفر"
     });
     const savedTouristic = await this.repo.createTouristicDetails(touristic);
-
-
-    // 4. ربط الخدمات الإضافية
+    
     if (dto.additional_services_ids?.length) {
       await this.repo.addServicesToTouristic(
         savedTouristic.id,
@@ -76,6 +70,6 @@ Object.assign(property, {
       );
     }
 
-    return { property: savedProperty, touristic: savedTouristic };
+     return { property: savedProperty, touristic: savedTouristic };
   }
 }
