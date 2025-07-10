@@ -7,7 +7,7 @@
 #env
 .env
 
-# images
+# images folder
 /uploads/
 
 # firebase config

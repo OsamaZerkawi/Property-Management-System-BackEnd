@@ -11,7 +11,7 @@ export class Region {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({unique:true})
+    @Column()
     name: string;
 
     @ManyToOne(() => City, city => city.regions, { onDelete: 'CASCADE' })

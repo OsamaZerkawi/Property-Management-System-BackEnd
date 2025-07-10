@@ -8,7 +8,7 @@ export class NotificationQueueService {
   private readonly logger = new Logger(NotificationQueueService.name);
 
   constructor(private readonly firebaseService: FirebaseService) {
-    this.queue = new Queue(5, Infinity);
+    this.queue = new Queue(5, Infinity); // 5 notifications only in one 
   }
 
   async sendToDevice(token: string, title: string, body: string, data?: any) {

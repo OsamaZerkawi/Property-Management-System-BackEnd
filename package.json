@@ -21,7 +21,8 @@
     "migration:create": "npm run typeorm -- migration:create ",
     "migration:run": "npm run typeorm -- migration:run -d src/ormdatasource.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/ormdatasource.ts",
-    "migration:show": "npm run typeorm -- migration:show -d src/ormdatasource.ts"
+    "migration:show": "npm run typeorm -- migration:show -d src/ormdatasource.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/infrastructure/database/seeders/main.ts"
   },
   "dependencies": {
     "@nestjs/bull": "^11.0.2",
