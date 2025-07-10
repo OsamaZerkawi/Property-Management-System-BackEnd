@@ -16,7 +16,8 @@ import { OFFICE_REPOSITORY } from "src/domain/repositories/office.repository";
 import { Office } from "src/domain/entities/offices.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { AuthModule } from "./auth.module";
-
+import {UpdateTourismUseCase} from 'src/application/use-cases/tourism/update-tourism.use-case';
+import {ListTourismUseCase}from 'src/application/use-cases/tourism/list-tourism.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -32,6 +33,8 @@ import { AuthModule } from "./auth.module";
   controllers: [TourismController],
   providers: [
     CreateTourismUseCase,
+    UpdateTourismUseCase,
+    ListTourismUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

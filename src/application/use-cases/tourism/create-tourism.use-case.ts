@@ -23,22 +23,27 @@ export class CreateTourismUseCase {
  
     // 1. إنشاء Property 
     const property = new Property();
-    Object.assign(property, {
-      office_id: office.id,
-      region_id: dto.region_id,
-      latitude: dto.latitude,
-      longitude: dto.longitude,
-      area: dto.area,
-      room_count: dto.room_count,
-      living_room_count: dto.living_room_count,
-      kitchen_count: dto.kitchen_count,
-      bathroom_count: dto.bathroom_count,
-      has_furniture: dto.has_furniture,
-      property_type:"عقار سياحي"
-    });
-    const savedProperty = await this.repo.createProperty(property);
-  const generatedTitle = `${dto.tag} ' ' ${dto.area} متر مربع`;
-    // 2. إنشاء Post
+console.log('office id', office.id); // 2
+ 
+  
+ 
+Object.assign(property, {
+  office: office,  
+  region_id: dto.region_id,
+  latitude: dto.latitude,
+  longitude: dto.longitude,
+  area: dto.area,
+  room_count: dto.room_count,
+  living_room_count: dto.living_room_count,
+  kitchen_count: dto.kitchen_count,
+  bathroom_count: dto.bathroom_count,
+  has_furniture: dto.has_furniture,
+  property_type: "عقار سياحي"
+});
+ 
+    const savedProperty = await this.repo.createProperty(property); 
+     const generatedTitle = `${dto.tag} ' ' ${dto.area} متر مربع`;
+   
     const post = new PropertyPost ();
     Object.assign(post, {
       property_id: savedProperty.id,
@@ -49,8 +54,7 @@ export class CreateTourismUseCase {
       date: new Date(),
     });
     await this.repo.createPost(post);
-
-    // 3. إنشاء Tourism Details
+ 
     const touristic = new Touristic();
     Object.assign(touristic, {
       property_id: savedProperty.id,
@@ -62,7 +66,7 @@ export class CreateTourismUseCase {
       status: "متوفر"
     });
     const savedTouristic = await this.repo.createTouristicDetails(touristic);
-console.log('savedTouristic.id:', savedTouristic.id);
+
 
     // 4. ربط الخدمات الإضافية
     if (dto.additional_services_ids?.length) {
