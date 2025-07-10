@@ -4,4 +4,5 @@ export enum PropertyStatus {
   UNDER_MAINTENANCE = 'في الصيانة',
   RESERVED = 'محجوز',
   SOLD = 'تم البيع',
+  Rented = 'تم التأجير',
 }

@@ -47,7 +47,6 @@ export class Property {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-
   @Column({ type: 'float', default: 0 })
   rate: number;
 
