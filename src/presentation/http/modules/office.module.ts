@@ -1,4 +1,3 @@
-// src/presentation/http/modules/office.module.ts
 import { Module } from "@nestjs/common";
 import { AuthModule } from "./auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -17,11 +16,12 @@ import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-offic
 import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
+import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
  
 @Module({
   imports: [
     AuthModule, 
-    TypeOrmModule.forFeature([Office, Region, OfficeSocial]),
+    TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback]),
   ],
   controllers: [OfficeController],
   providers: [

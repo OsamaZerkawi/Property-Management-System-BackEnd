@@ -7,12 +7,11 @@
 #env
 .env
 
-# images
+# images folder
 /uploads/
 
-#firebaes config
-/src/infrastructure/config/firebase/firebase-service-account.json
-
+# firebase config
+src/infrastructure/config/firebase/firebase-service-account.json
 
 # Logs
 logs

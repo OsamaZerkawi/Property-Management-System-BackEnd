@@ -15,7 +15,6 @@ import {
 import { Office } from './offices.entity';
 import { Region } from './region.entity';
 import { Residential } from './residential.entity';
-import { AdminAgreement } from '../enums/admin-agreement.enum';
 import { PropertyType} from '../enums/property-type.enum';
 import { PropertyPost } from './property-posts.entitiy';
 import { Image } from './image.entity';
@@ -46,7 +45,6 @@ export class Property {
 
   @Column({ type: 'text', nullable: true })
   notes: string;
-
 
   @Column({ type: 'float', default: 0 })
   rate: number;

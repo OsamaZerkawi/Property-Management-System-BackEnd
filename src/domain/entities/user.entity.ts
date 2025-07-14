@@ -13,6 +13,7 @@ import { OfficeFeedback } from "./office-feedback.entity";
 import { PropertyFavorite } from "./property-favorite.entity";
 import { Booking } from "./booking.entity";
 import { RentalContract } from "./rental-contract.entity";
+import { FcmToken } from "./fcmToken.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -81,6 +82,9 @@ export class User {
 
   @OneToMany(() => RentalContract, (rentalContract) => rentalContract.user)
   rentalContracts: RentalContract[];
+
+  @OneToMany(() => FcmToken, fcmToken => fcmToken.user)
+  fcmTokens: FcmToken[];
   // @OneToMany(() => UserPermission, up => up.user)
   // userPermissions: UserPermission[];
  

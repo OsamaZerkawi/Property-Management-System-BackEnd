@@ -1,5 +1,5 @@
 export enum AdminAgreement {
-  PENDING = 'pending',
-  APPROVED = 'accepted',
-  REJECTED = 'rejected',
+  PENDING = 'قيد الانتظار',
+  APPROVED = 'مقبول',
+  REJECTED = 'مرفوض',
 }

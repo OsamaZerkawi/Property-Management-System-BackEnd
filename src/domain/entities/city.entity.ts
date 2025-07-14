@@ -9,6 +9,6 @@ export class City {
     @Column({unique: true})
     name: string;
 
-    @OneToMany(() => Region, region => region.city)
+    @OneToMany(() => Region, region => region.city,{cascade: true})
     regions: Region[];
 }

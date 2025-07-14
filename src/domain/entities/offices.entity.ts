@@ -16,8 +16,8 @@ import {OfficeSocial} from './office-social.entity'
 import { OfficeType } from '../enums/office-type.enum';
 import { PaymentMethod } from '../enums/payment-method.enum';
 import { OfficeFeedback } from './office-feedback.entity';
-
-
+import { Advertisement } from './advertisements.entity';
+import { OnlineInvoice } from './online-invoices.entity';
  
 @Entity('offices')
 export class Office {
@@ -39,7 +39,7 @@ export class Office {
   @Column({
     type: 'decimal', 
     precision: 5,
-    scale: 4,
+    scale: 2,
     nullable: true  
   })
   commission: number;
@@ -86,11 +86,11 @@ export class Office {
   is_deleted: boolean;
 
   
-  @Column({ type: 'time',nullable: true  }) 
+  @Column({ type: 'time'}) 
   @Column({type:'text'})
   opening_time: string;
 
-  @Column({ type: 'time',nullable: true  }) 
+  @Column({ type: 'time'}) 
   @Column({type:'text'})
   closing_time: string;
 
@@ -129,7 +129,13 @@ export class Office {
 
   @OneToMany(() => Property, (property) => property.office)
   properties: Property[];
+
+  @OneToMany(() => Advertisement, (advertisement) => advertisement.office)
+  advertisements: Advertisement[];
  
   @OneToMany(() => OfficeFeedback, (feedback) => feedback.office)
   feedbacks: OfficeFeedback[]; 
+
+  @OneToMany(() => OnlineInvoice, (invoice) => invoice.office)
+  invoices: OnlineInvoice[];
 }
