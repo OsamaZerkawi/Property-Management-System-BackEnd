@@ -17,12 +17,20 @@ export const LoginApiBody = ApiBody({
 
 export const LoginSuccessResponse = ApiResponse({
   status: 200,
-  description: 'Successful login',
+  description: 'تم تسجيل الدخول بنجاح',
   schema: {
     example: {
       successful: true,
       message: 'تم تسجيل الدخول بنجاح',
       data: {
+        user: {
+          id: 1,
+          first_name: 'hasan',
+          last_name: 'zaeter',
+          email: 'hzaeter04@gmail.com',
+          role: 'صاحب مكتب',
+          permissions: [] // أو مثال: ["create_post", "edit_post"]
+        },
         tokens: {
           accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
           refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'

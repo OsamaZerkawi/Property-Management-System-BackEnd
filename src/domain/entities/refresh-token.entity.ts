@@ -19,7 +19,7 @@ export class RefreshToken {
     expiredAt: Date;
 
     @Index()
-    @OneToOne(() => User , (user) => user.refreshToken)
+    @OneToOne(() => User , (user) => user.refreshToken, {onDelete: 'CASCADE'})
     @JoinColumn({name : 'user_id'})
     user: User;
 

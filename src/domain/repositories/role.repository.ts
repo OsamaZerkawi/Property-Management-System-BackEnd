@@ -2,6 +2,7 @@
 export const ROLE_REPOSITORY = 'ROLE_REPOSITORY';
 
 export interface RoleRepositoryInterface {
+    findByName(name: string);
     findById(id: number);
     createRole(name: string);
     assignRoleToUser(userId: number,roleId: number);

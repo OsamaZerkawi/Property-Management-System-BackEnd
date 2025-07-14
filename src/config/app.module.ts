@@ -32,8 +32,10 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
 import { NotificationModule } from 'src/presentation/http/modules/notification.module';
 import { BullModule } from '@nestjs/bull';
 import { AdvertisementModule } from 'src/presentation/http/modules/advertisement.module';
+import { AdminModule } from 'src/presentation/http/modules/admin.module';
 @Module({
   imports: [
+    AdminModule,
     AdvertisementModule,
     NotificationModule,
     RoleModule,

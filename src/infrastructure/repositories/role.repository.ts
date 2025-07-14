@@ -1,6 +1,6 @@
 import { Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { RolePermission } from "src/domain/entities/role-permissions";
+import { RolePermission } from "src/domain/entities/role-permissions.entity";
 import { Role } from "src/domain/entities/role.entity";
 import { UserRole } from "src/domain/entities/user-role.entity";
 import { PERMISSION_REPOSITORY, PermissionRepositoryInterface } from "src/domain/repositories/permission.repository";
@@ -22,6 +22,12 @@ export class RoleRepository implements RoleRepositoryInterface {
         @InjectRepository(RolePermission)
         private readonly rolePermissionRepo: Repository<RolePermission>,
     ){}
+    
+    async findByName(name: string) {
+        return await this.roleRepo.findOne({
+            where:{name}
+        });
+    }
 
     async findById(id: number) {
         return await this.roleRepo.findOne({

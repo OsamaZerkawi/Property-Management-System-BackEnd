@@ -19,16 +19,21 @@ export class LoginUseCase {
                 username : loginDto.username
             },
             select:['id','first_name','last_name','password','email'],
-            relations:['userRoles','userRoles.role']
+            relations:['userRoles','userRoles.role','userPermissions','userPermissions.permission']
         }); 
-        
-        const roles = user?.userRoles?.[0]?.role.name;
 
+        
         if(!user){
             throw new ForbiddenException(
                 errorResponse('Access Denied',403)
             );
         }
+        
+        const role = user.userRoles?.[0]?.role.name;
+
+        const permissions = [
+          ...(user.userPermissions?.map(up => up.permission.name) ?? []),
+        ];
 
         const passwordMatches = await bcrypt.compare(loginDto.password,user.password);
 
@@ -46,7 +51,8 @@ export class LoginUseCase {
           first_name: user.first_name,
           last_name: user.last_name,
           email: user.email,
-          role: roles
+          role,
+          permissions
         };
 
         return {

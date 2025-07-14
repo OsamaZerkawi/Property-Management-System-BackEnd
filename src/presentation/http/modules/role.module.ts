@@ -3,7 +3,7 @@ import { AuthModule } from "./auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Role } from "src/domain/entities/role.entity";
 import { Permission } from "src/domain/entities/permissions.entity";
-import { RolePermission } from "src/domain/entities/role-permissions";
+import { RolePermission } from "src/domain/entities/role-permissions.entity";
 import { UserRole } from "src/domain/entities/user-role.entity";
 import { ROLE_REPOSITORY } from "src/domain/repositories/role.repository";
 import { RoleRepository } from "src/infrastructure/repositories/role.repository";
@@ -37,6 +37,6 @@ import { UserHasRoleUseCase } from "src/application/use-cases/role/user-has-role
             useClass: RoleRepository
         }
     ],
-    exports:[UserHasRoleUseCase],
+    exports:[ROLE_REPOSITORY,UserHasRoleUseCase],
 })
 export class RoleModule{}

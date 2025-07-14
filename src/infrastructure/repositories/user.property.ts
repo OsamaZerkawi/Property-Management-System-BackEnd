@@ -1,7 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/domain/entities/user.entity";
 import { UserRepositoryInterface } from "src/domain/repositories/user.repository";
+import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
 
 @Injectable()
@@ -10,11 +11,47 @@ export class UserRepository implements UserRepositoryInterface {
       @InjectRepository(User)
       private readonly userRepo: Repository<User>,
     ) {}
+
+    async deleteUserById(userId: number) {
+      const user = await this.userRepo.findOne({
+        where: {id: userId},
+      });
+
+      if(!user){
+        throw new NotFoundException(
+          errorResponse('المستخدم غير موجود',404)
+        );
+      }
+
+      await this.userRepo.delete(userId);
+    }
+    
+    async findUsersByRoleId(roleId: number) {
+      return this.userRepo
+      .createQueryBuilder('user')
+      .leftJoin('user.userRoles','userRole')
+      .leftJoin('userRole.role','role')
+      .leftJoin('user.userPermissions', 'userPermission')
+      .leftJoin('userPermission.permission', 'permission')
+      .where('role.id = :roleId',{roleId})
+      .select([
+        'user.id',
+        'user.first_name',
+        'user.last_name',
+        'user.username',
+        'user.created_at',
+
+        'userPermission.id',
+        'permission.id',
+        'permission.name',
+      ])
+      .getMany();
+    }
   
     async findById(userId: number) {
       return this.userRepo.findOne({
         where: { id: userId },
-        select: ['id', 'first_name', 'last_name', 'phone', 'email'],
+        select: ['id', 'first_name', 'last_name', 'phone', 'email','username'],
       });
     }
   
@@ -33,7 +70,20 @@ export class UserRepository implements UserRepositoryInterface {
       const entity = this.userRepo.create(user);
       return this.userRepo.save(entity);
     }
+
     async updatePassword(userId: number, hashedPassword: string): Promise<void> {
-        await this.userRepo.update(userId, { password: hashedPassword });
-      }
+      await this.userRepo.update(userId, { password: hashedPassword });
+    }
+    async findByEmailOrPhone(email?: string, phone?: string) {
+      const conditions: { email?: string; phone?: string }[] = [];
+      
+      if (email) conditions.push({ email });
+      if (phone) conditions.push({ phone });
+      if (conditions.length === 0) return undefined;
+      return this.userRepo.findOne({ where: conditions });
+    }
+
+    async update(userId: number, updateData: Partial<User>) {
+      await this.userRepo.update(userId,updateData);
+    }
   }
