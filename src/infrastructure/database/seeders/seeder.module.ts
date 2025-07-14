@@ -11,6 +11,16 @@ import { SeederService } from "./seeder.service";
 import { CityRegionSeeder } from "./city-region.seeder";
 import { PermissionSeeder } from "./permission.seeder";
 import { RoleSeeder } from "./role.seeder";
+import { PropertyFeedbackSeeder } from "./property-feedback.seeder";
+import { OfficePropertySeeder } from "./office-property.seeder";
+import { Office } from "src/domain/entities/offices.entity";
+import { Property } from "src/domain/entities/property.entity";
+import { Residential } from "src/domain/entities/residential.entity";
+import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
+import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
+import { Image } from "src/domain/entities/image.entity";
+import { User } from "src/domain/entities/user.entity";
+import { OfficeSocial } from "src/domain/entities/office-social.entity";
 
 
 @Module({
@@ -24,11 +34,15 @@ import { RoleSeeder } from "./role.seeder";
           useFactory: (configService: ConfigService) => OrmConfig(configService),
           inject: [ConfigService],
         }),
-        TypeOrmModule.forFeature([Role,Permission,City,Region])
+        TypeOrmModule.forFeature([
+            Role,Permission,City,Region,Office,
+            Property,Residential,PropertyPost,
+            PropertyFeedback,Image,User,OfficeSocial
+        ])
     ],
     providers:[
         SeederService,CityRegionSeeder,PermissionSeeder,
-        RoleSeeder,
+        RoleSeeder,PropertyFeedbackSeeder,OfficePropertySeeder,
     ],
     exports:[SeederService]
 })

@@ -33,6 +33,8 @@ import { TempUser } from "src/domain/entities/temp-user.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { Notification } from "src/domain/entities/notification.entity";
 import { FcmToken } from "src/domain/entities/fcmToken.entity";
+import { Advertisement } from "src/domain/entities/advertisements.entity";
+import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
 
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -50,7 +52,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         PropertyFeedback,OfficeFeedback,OfficeSocial,PropertyFavorite,
         Booking,Touristic,Calendar,RentalContract,
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
-        Notification,FcmToken
+        Notification,FcmToken,Advertisement,OnlineInvoice
     ],
     synchronize: true,
     //dropSchema: true,

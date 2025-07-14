@@ -17,8 +17,12 @@ export class LoginUseCase {
         const user = await this.authRepo.findUser({
             where : {
                 username : loginDto.username
-            }
-         });  
+            },
+            select:['id','first_name','last_name','password','email'],
+            relations:['userRoles','userRoles.role']
+        }); 
+        
+        const roles = user?.userRoles?.[0]?.role.name;
 
         if(!user){
             throw new ForbiddenException(
@@ -28,17 +32,25 @@ export class LoginUseCase {
 
         const passwordMatches = await bcrypt.compare(loginDto.password,user.password);
 
-        //if(!passwordMatches){
-          //  throw new ForbiddenException(
-          //      errorResponse('Access Denied',403)
-        //    );
-      //  }
+        if(!passwordMatches){
+           throw new ForbiddenException(
+               errorResponse('Access Denied',403)
+           );
+       }
 
         const tokens = await this.tokenService.generateTokens(user.id,user.username);
         await this.tokenService.updateRefreshToken(user.id,tokens.refreshToken);
 
+        const cleanUser = {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          email: user.email,
+          role: roles
+        };
+
         return {
-            user,
+            cleanUser,
             tokens
         };
     }

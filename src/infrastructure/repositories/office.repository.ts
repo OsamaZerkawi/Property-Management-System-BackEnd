@@ -29,7 +29,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       .getRepository(Office)
       .findOne({ 
         where: { user: { id: userId } },
-        select: { id: true } 
+        // select: { id: true } 
       });
   }
 

@@ -31,8 +31,10 @@ import { MapExploreModule } from 'src/presentation/http/modules/map-explore.modu
  import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
 import { NotificationModule } from 'src/presentation/http/modules/notification.module';
 import { BullModule } from '@nestjs/bull';
+import { AdvertisementModule } from 'src/presentation/http/modules/advertisement.module';
 @Module({
   imports: [
+    AdvertisementModule,
     NotificationModule,
     RoleModule,
     ResidentialOfficeModule,
@@ -79,10 +81,10 @@ import { BullModule } from '@nestjs/bull';
   controllers: [AppController],
   providers: [
     AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard, // authenticate first, sets request.user
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard, // authenticate first, sets request.user
+    },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

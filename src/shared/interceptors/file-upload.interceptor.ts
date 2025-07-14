@@ -151,3 +151,19 @@ export function UserProfileImageInterceptor() {
     }),
   );
 }
+
+
+export function AdvertisementImageInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads/advertisements/images',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `advertisement-${uniqueSuffix}${ext}`);
+        },
+      }),
+    }),
+  );
+}

@@ -6,12 +6,16 @@ import { DataSource, Repository } from "typeorm";
 import { CityRegionSeeder } from "./city-region.seeder";
 import { PermissionSeeder } from "./permission.seeder";
 import { RoleSeeder } from "./role.seeder";
+import { OfficePropertySeeder } from "./office-property.seeder";
+import { PropertyFeedbackSeeder } from "./property-feedback.seeder";
 
 @Injectable()
 export class SeederService {
     constructor(
         private readonly permissionSeeder: PermissionSeeder,
         private readonly roleSeeder: RoleSeeder,
+        private readonly officePropertySeeder: OfficePropertySeeder,
+        private readonly propertyFeedbackSeeder: PropertyFeedbackSeeder,
         @InjectRepository(City)
         private readonly cityRepo: Repository<City>,
         @InjectRepository(Region)
@@ -20,10 +24,20 @@ export class SeederService {
     ){}
 
     async run(){
-        const seeder = new CityRegionSeeder(this.cityRepo,this.regionRepo,this.dataSource);
-        await seeder.seed();
+      // 1. Seed cities and regions
+      const cityRegionSeeder = new CityRegionSeeder(this.cityRepo, this.regionRepo, this.dataSource);
+      await cityRegionSeeder.seed();
+  
+      // 2. Seed permissions and roles
+      await this.permissionSeeder.seed();
+      await this.roleSeeder.seed();
+  
+      // 3. Seed offices, properties, posts, residentials
+      await this.officePropertySeeder.seed();
+  
+      // 4. Seed property feedback (ratings)
+      await this.propertyFeedbackSeeder.seed();
 
-        await this.permissionSeeder.seed();
-        await this.roleSeeder.seed();
+      console.log('✅ All seeders executed successfully.');
     }
 }

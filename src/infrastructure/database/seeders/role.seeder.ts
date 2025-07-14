@@ -2,24 +2,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/domain/entities/role.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class RoleSeeder {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepo: Repository<Role>,
+    private readonly dataSource: DataSource,
   ) {}
 
-  private readonly roles = ['مشرف', 'مدير', 'صاحب-مكتب', 'مستخدم'];
+  private readonly roles = ['مشرف', 'مدير', 'صاحب مكتب', 'مستخدم'];
 
   async seed() {
+    await this.dataSource.query('TRUNCATE TABLE roles RESTART IDENTITY CASCADE');
+
     for (const name of this.roles) {
-      const exists = await this.roleRepo.findOneBy({ name });
-      if (!exists) {
-        await this.roleRepo.save({ name });
-      }
+      await this.roleRepo.save({ name });
     }
+
 
     console.log('✅ Roles have been seeded successfully.');
   }
