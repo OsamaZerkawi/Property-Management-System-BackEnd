@@ -127,19 +127,7 @@ async findPropertyById(id: number): Promise<Property | null> {
 async filterByOffice(
   officeId: number,
   filter: FilterTourismDto,
-): Promise<any[]> { 
-  let statusCondition = '';
-  let statusParams: any = {};
-  
-  if (filter.status) {
-    const mappedStatus = this.mapStatusBetweenEnums(filter.status);
-    statusCondition = `(post.status = :postStatus OR touristic.status = :touristicStatus)`;
-    statusParams = {
-      postStatus: mappedStatus.postStatus,
-      touristicStatus: mappedStatus.touristicStatus
-    };
-  }
-
+): Promise<any[]> {
   const query = this.propRepo
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
@@ -147,20 +135,33 @@ async filterByOffice(
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
     .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
- 
-  if (filter.status) {
-    query.andWhere(statusCondition, statusParams);
-  }
- 
+
+  // فلترة حسب المدينة
   if (filter.city) {
     query.leftJoin('region.city', 'city')
          .andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
   }
 
+  // فلترة حسب المنطقة
   if (filter.region) {
     query.andWhere('region.name LIKE :region', {
       region: `%${filter.region}%`,
     });
+  }
+ 
+  if (filter.status) {
+    if (this.isPostStatus(filter.status)) {
+       query.andWhere('post.status = :postStatus', {
+        postStatus: filter.status
+      });
+    } else {
+       query.andWhere('post.status = :approvedStatus', {
+        approvedStatus: PropertyPostStatus.APPROVED
+      })
+      .andWhere('touristic.status = :touristicStatus', {
+        touristicStatus: filter.status
+      });
+    }
   }
 
   const results = await query
@@ -174,77 +175,26 @@ async filterByOffice(
       'touristic.status as touristic_status'
     ])
     .getRawMany();
+
+  return results.map(item => ({
+    id: item.property_id,
+    title: item.post_title,
+    region: item.region_name,
+    area: item.property_area,
+    price: item.touristic_price,
+    status: item.post_status === PropertyPostStatus.APPROVED 
+            ? item.touristic_status 
+            : item.post_status
+  }));
+}
  
-  return results.map(item => {
-    const finalStatus = item.post_status === PropertyPostStatus.APPROVED 
-      ? item.touristic_status 
-      : item.post_status;
-    
-    return {
-      id: item.property_id,
-      title: item.post_title,
-      region: item.region_name,
-      area: item.property_area,
-      price: item.touristic_price,
-      status: finalStatus
-    };
-  });
+private isPostStatus(status: string): boolean {
+  return [
+    PropertyPostStatus.PENDING,
+    PropertyPostStatus.REJECTED
+  ].includes(status as any);
 }
 
-private mapStatusBetweenEnums(status: string): {
-  postStatus: PropertyPostStatus;
-  touristicStatus: TouristicStatus;
-} {
-  switch (status) {
-    case PropertyPostStatus.PENDING:
-      return {
-        postStatus: PropertyPostStatus.PENDING,
-        touristicStatus: TouristicStatus.UNAVAILABLE  
-      };
-    
-    case PropertyPostStatus.APPROVED:
-      return {
-        postStatus: PropertyPostStatus.APPROVED,
-        touristicStatus: TouristicStatus.AVAILABLE
-      };
-      
-    case PropertyPostStatus.REJECTED:
-      return {
-        postStatus: PropertyPostStatus.REJECTED,
-        touristicStatus: TouristicStatus.UNAVAILABLE
-      };
-      
-    case TouristicStatus.AVAILABLE:
-      return {
-        postStatus: PropertyPostStatus.APPROVED,
-        touristicStatus: TouristicStatus.AVAILABLE
-      };
-      
-    case TouristicStatus.UNAVAILABLE:
-      return {
-        postStatus: PropertyPostStatus.PENDING, // أو REJECTED حسب منطقك
-        touristicStatus: TouristicStatus.UNAVAILABLE
-      };
-      
-    case TouristicStatus.UNDER_MAINTENANCE:
-      return {
-        postStatus: PropertyPostStatus.APPROVED,
-        touristicStatus: TouristicStatus.UNDER_MAINTENANCE
-      };
-      
-    case TouristicStatus.RESERVED:
-      return {
-        postStatus: PropertyPostStatus.APPROVED,
-        touristicStatus: TouristicStatus.RESERVED
-      };
-      
-    default:
-      return {
-        postStatus: PropertyPostStatus.PENDING,
-        touristicStatus: TouristicStatus.UNAVAILABLE
-      };
-  }
-}
   async findRegionById(id: number): Promise<Region | null> {
     if (!id || id <= 0) {
       return null;

@@ -1,8 +1,7 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
 
 export enum UnifiedPropertyStatus {
-  PENDING = 'قيد الانتظار',
-  APPROVED = 'مقبول',
+  PENDING = 'قيد الانتظار', 
   REJECTED = 'مرفوض',
   AVAILABLE = 'متوفر',
   UNAVAILABLE = 'غير متوفر',
