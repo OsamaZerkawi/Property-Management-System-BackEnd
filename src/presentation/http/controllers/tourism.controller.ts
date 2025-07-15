@@ -1,10 +1,13 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
+import { FilterTourismDto } from '../../../application/dtos/tourism/filter-tourism.dto';
 import { UpdateTourismDto } from '../../../application/dtos/tourism/update-tourism.dto';
 import { CreateTourismUseCase } from '../../../application/use-cases/tourism/create-tourism.use-case';
 import { UpdateTourismUseCase } from 'src/application/use-cases/tourism/update-tourism.use-case';
+import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-tourism.use-case';
+
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 
 @Controller('tourism')
@@ -13,6 +16,7 @@ export class TourismController {
     private readonly createTourism: CreateTourismUseCase,
     private readonly updateTourism: UpdateTourismUseCase,
     private readonly listTourism: ListTourismUseCase,
+    private readonly filterTourism: FilterTourismUseCase, 
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -42,5 +46,14 @@ export class TourismController {
   @Get()
   async list(@CurrentUser() user: any) {
     return this.listTourism.execute(user.sub);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('filter')
+  async filter(
+    @CurrentUser() user: any,
+    @Query() filterDto: FilterTourismDto,
+  ) {
+    return this.filterTourism.execute(user.sub, filterDto);
   }
 }

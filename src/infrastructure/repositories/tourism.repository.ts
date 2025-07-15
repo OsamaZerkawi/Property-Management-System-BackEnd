@@ -10,6 +10,10 @@ import { Service } from 'src/domain/entities/services.entity';
 import { AdditionalService } from 'src/domain/entities/additional-service.entity';
 import {UpdateTourismDto} from 'src/application/dtos/tourism/update-tourism.dto';
 import { DataSource } from 'typeorm';
+import { FilterTourismDto } from 'src/application/dtos/tourism/filter-tourism.dto';
+import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
+import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
+import { Region } from 'src/domain/entities/region.entity';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -21,6 +25,8 @@ export class TourismRepository implements ITourismRepository {
     private readonly tourRepo: Repository<Touristic>,
     @InjectRepository(AdditionalService)
     private readonly addServRepo: Repository<AdditionalService>,
+    @InjectRepository(Region)
+    private readonly regionRepo: Repository<Region>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -116,5 +122,141 @@ async findPropertyById(id: number): Promise<Property | null> {
       }
     });
   }
+async filterByOffice(
+  officeId: number,
+  filter: FilterTourismDto,
+): Promise<any[]> { 
+  let statusCondition = '';
+  let statusParams: any = {};
+  
+  if (filter.status) {
+    const mappedStatus = this.mapStatusBetweenEnums(filter.status);
+    statusCondition = `(post.status = :postStatus OR touristic.status = :touristicStatus)`;
+    statusParams = {
+      postStatus: mappedStatus.postStatus,
+      touristicStatus: mappedStatus.touristicStatus
+    };
+  }
 
+  const query = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoin('property.post', 'post')
+    .leftJoin('property.region', 'region')
+    .leftJoin('property.touristic', 'touristic')
+    .where('property.office_id = :officeId', { officeId })
+    .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
+ 
+  if (filter.status) {
+    query.andWhere(statusCondition, statusParams);
+  }
+ 
+  if (filter.city) {
+    query.leftJoin('region.city', 'city')
+         .andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
+  }
+
+  if (filter.region) {
+    query.andWhere('region.name LIKE :region', {
+      region: `%${filter.region}%`,
+    });
+  }
+
+  const results = await query
+    .select([
+      'property.id as property_id',
+      'post.title as post_title',
+      'region.name as region_name',
+      'property.area as property_area',
+      'touristic.price as touristic_price',
+      'post.status as post_status',
+      'touristic.status as touristic_status'
+    ])
+    .getRawMany();
+ 
+  return results.map(item => {
+    const finalStatus = item.post_status === PropertyPostStatus.APPROVED 
+      ? item.touristic_status 
+      : item.post_status;
+    
+    return {
+      id: item.property_id,
+      title: item.post_title,
+      region: item.region_name,
+      area: item.property_area,
+      price: item.touristic_price,
+      status: finalStatus
+    };
+  });
+}
+
+private mapStatusBetweenEnums(status: string): {
+  postStatus: PropertyPostStatus;
+  touristicStatus: TouristicStatus;
+} {
+  switch (status) {
+    case PropertyPostStatus.PENDING:
+      return {
+        postStatus: PropertyPostStatus.PENDING,
+        touristicStatus: TouristicStatus.UNAVAILABLE  
+      };
+    
+    case PropertyPostStatus.APPROVED:
+      return {
+        postStatus: PropertyPostStatus.APPROVED,
+        touristicStatus: TouristicStatus.AVAILABLE
+      };
+      
+    case PropertyPostStatus.REJECTED:
+      return {
+        postStatus: PropertyPostStatus.REJECTED,
+        touristicStatus: TouristicStatus.UNAVAILABLE
+      };
+      
+    case TouristicStatus.AVAILABLE:
+      return {
+        postStatus: PropertyPostStatus.APPROVED,
+        touristicStatus: TouristicStatus.AVAILABLE
+      };
+      
+    case TouristicStatus.UNAVAILABLE:
+      return {
+        postStatus: PropertyPostStatus.PENDING, // أو REJECTED حسب منطقك
+        touristicStatus: TouristicStatus.UNAVAILABLE
+      };
+      
+    case TouristicStatus.UNDER_MAINTENANCE:
+      return {
+        postStatus: PropertyPostStatus.APPROVED,
+        touristicStatus: TouristicStatus.UNDER_MAINTENANCE
+      };
+      
+    case TouristicStatus.RESERVED:
+      return {
+        postStatus: PropertyPostStatus.APPROVED,
+        touristicStatus: TouristicStatus.RESERVED
+      };
+      
+    default:
+      return {
+        postStatus: PropertyPostStatus.PENDING,
+        touristicStatus: TouristicStatus.UNAVAILABLE
+      };
+  }
+}
+  async findRegionById(id: number): Promise<Region | null> {
+    if (!id || id <= 0) {
+      return null;
+    }
+
+    try {
+      const region = await this.regionRepo.findOne({ 
+        where: { id }, 
+      });
+
+      return region || null;
+    } catch (error) {
+      console.error('فشل في البحث عن المنطقة:', error);
+      throw new Error('حدث خطأ أثناء البحث عن المنطقة');
+    }
+  }
 }

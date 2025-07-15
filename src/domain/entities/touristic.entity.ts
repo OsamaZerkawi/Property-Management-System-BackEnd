@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { TouristicStatus } from "../enums/touristic-status.enum";
+import { TouristicStatus } from "src/domain/enums/touristic-status.enum";
 import { Property } from "./property.entity";
 import { Calendar } from "./calendar.entity";
 import { AdditionalService } from './additional-service.entity' 

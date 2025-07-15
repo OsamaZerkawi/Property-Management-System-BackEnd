@@ -18,6 +18,8 @@ import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { AuthModule } from "./auth.module";
 import {UpdateTourismUseCase} from 'src/application/use-cases/tourism/update-tourism.use-case';
 import {ListTourismUseCase}from 'src/application/use-cases/tourism/list-tourism.use-case';
+import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-tourism.use-case';
+import { Region } from 'src/domain/entities/region.entity';
 @Module({
   imports: [
     AuthModule,
@@ -28,6 +30,7 @@ import {ListTourismUseCase}from 'src/application/use-cases/tourism/list-tourism.
       Touristic,
       PropertyPost,
       AdditionalService,
+      Region,
     ]),
   ],
   controllers: [TourismController],
@@ -35,6 +38,7 @@ import {ListTourismUseCase}from 'src/application/use-cases/tourism/list-tourism.
     CreateTourismUseCase,
     UpdateTourismUseCase,
     ListTourismUseCase,
+    FilterTourismUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

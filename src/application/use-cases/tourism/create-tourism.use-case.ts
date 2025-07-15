@@ -20,12 +20,13 @@ export class CreateTourismUseCase {
   async execute(userId: number, dto: CreateTourismDto) {
   const office = await this.officeRepo.findOneByUserId(userId); 
       if (!office) throw new NotFoundException('المكتب غير موجود');
- 
-    // 1. إنشاء Property 
-    const property = new Property(); 
+  
+    const property = new Property();  
+      const region = await this.repo.findRegionById(dto.region_id);
+  if (!region) throw new NotFoundException('المنطقة غير موجودة');
     Object.assign(property, {
       office: office,  
-      region_id: dto.region_id,
+      region: region,
       latitude: dto.latitude,
       longitude: dto.longitude,
       area: dto.area,
