@@ -8,6 +8,7 @@ import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.
 import { PropertyFeedback } from "src/domain/entities/property-feedback.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
+import { CombinedPropertyStatus } from "src/domain/enums/combined-property-status.enum";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
@@ -783,7 +784,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .leftJoin('region.city', 'city')
     .leftJoin('property.post', 'post')
     .where('property.is_deleted = false')
-    .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
+    // .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
     .select([
     'property.id',
     'property.area',
@@ -832,6 +833,30 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   // Apply optional filters
   if (filters) {
+    const postStatuses = [
+      CombinedPropertyStatus.PENDING,
+      CombinedPropertyStatus.REJECTED,      
+    ];
+
+    if(filters.status){
+      if(postStatuses.includes(filters.status)){
+        query.andWhere('post.status = :postStatus', {
+          postStatus: filters.status,
+        });
+      } else{
+        query.andWhere('post.status = :approvedStatus', {
+          approvedStatus: PropertyPostStatus.APPROVED,
+        });
+        query.andWhere('residential.status = :resStatus', {
+          resStatus: filters.status,
+        });
+      }
+    }
+    else {
+      query.andWhere('post.status = :approvedStatus', {
+        approvedStatus: PropertyPostStatus.APPROVED,
+      });
+    }
     if (filters.listing_type) {
       query.andWhere('residential.listing_type = :listing_type', { listing_type: filters.listing_type });
     }
@@ -844,9 +869,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       query.andWhere('city.id = :cityId', { cityId: filters.cityId });
     }
 
-    if (filters.status) {
-      query.andWhere('residential.status = :status', { status: filters.status });
-    }
+    // if (filters.status) {
+    //   query.andWhere('residential.status = :status', { status: filters.status });
+    // }
 
     if (filters.tag) {
       query.andWhere('post.tag = :tag', { tag: filters.tag });

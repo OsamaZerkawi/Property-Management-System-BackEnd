@@ -30,7 +30,7 @@ export class OtpService {
 
   async sendOtp(email: string, otp: string) {
     const mailOptions: nodemailer.SendMailOptions = {
-        from: process.env.SMTP_FROM || '"تطبيقك" <no-reply@yourapp.com>',
+        from: process.env.SMTP_FROM || '"Propoly" <no-reply@yourapp.com>',
         to: email,
         subject: '🔐 رمز التحقق الخاص بك - تأكيد الحساب',
         text: `مرحباً،\n\nرمز التحقق الخاص بك هو: ${otp}\n\nهذا الرمز صالح لمدة 5 دقائق فقط.\n\nإذا لم تطلب هذا الرمز، يرجى تجاهل هذه الرسالة.\n\nشكراً لك،\nفريق التطبيق`,

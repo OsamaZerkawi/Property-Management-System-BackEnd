@@ -20,7 +20,7 @@ export class MailService {
 
     async sendAdminCredentials(email: string, username: string, password: string) {
       const mailOptions: nodemailer.SendMailOptions = {
-        from: process.env.SMTP_FROM || '"تطبيقك" <no-reply@yourapp.com>',
+        from: process.env.SMTP_FROM || '"Propoly" <no-reply@yourapp.com>',
         to: email,
         subject: '🔑 بيانات الدخول للوحة الإدارة - مرحباً بك كمشرف',
         text: `مرحباً،\n\nتم إنشاء حساب إداري جديد لك بنجاح!\n\nبيانات الدخول:\nاسم المستخدم: ${username}\nكلمة المرور: ${password}\n\nشكراً لك،\nفريق التطبيق`,
