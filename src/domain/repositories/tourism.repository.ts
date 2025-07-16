@@ -17,5 +17,6 @@ export interface ITourismRepository {
   updateTourism(propertyId: number, dto: UpdateTourismDto): Promise<void>;
   filterByOffice(officeId: number, filter: FilterTourismDto): Promise<Property[]>;
   findRegionById(id: number): Promise<Region | null>;
-
+  searchByTitleAndOffice(userId: number, title: string): Promise<PropertyPost[]>;
+  findFullPropertyDetails(propertyId: number, officeId: number): Promise<Property | null>;
 }

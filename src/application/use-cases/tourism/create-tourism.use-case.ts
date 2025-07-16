@@ -39,7 +39,7 @@ export class CreateTourismUseCase {
     });
  
     const savedProperty = await this.repo.createProperty(property);
-    const generatedTitle = `${dto.tag} ' ' ${dto.area} متر مربع`;
+    const generatedTitle = `${dto.tag} ${dto.area} متر مربع`;
     
     const post = new PropertyPost();
     Object.assign(post, {
@@ -60,7 +60,7 @@ export class CreateTourismUseCase {
       electricity: dto.electricity,
       water: dto.water,
       pool: dto.pool,
-      status: "متوفر"
+      status: "غير متوفر"
     });
     const savedTouristic = await this.repo.createTouristicDetails(touristic);
     

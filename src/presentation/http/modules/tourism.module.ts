@@ -20,6 +20,8 @@ import {UpdateTourismUseCase} from 'src/application/use-cases/tourism/update-tou
 import {ListTourismUseCase}from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-tourism.use-case';
 import { Region } from 'src/domain/entities/region.entity';
+import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
+import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -39,6 +41,8 @@ import { Region } from 'src/domain/entities/region.entity';
     UpdateTourismUseCase,
     ListTourismUseCase,
     FilterTourismUseCase,
+    SearchByTitleUseCase,
+    ShowTourismUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

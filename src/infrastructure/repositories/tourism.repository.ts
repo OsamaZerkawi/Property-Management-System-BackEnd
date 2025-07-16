@@ -1,18 +1,16 @@
 // infrastructure/repositories/tourism.repository.impl.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository';
 import { Property } from 'src/domain/entities/property.entity';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
 import { Touristic } from 'src/domain/entities/touristic.entity';
-import { Service } from 'src/domain/entities/services.entity';
 import { AdditionalService } from 'src/domain/entities/additional-service.entity';
 import {UpdateTourismDto} from 'src/application/dtos/tourism/update-tourism.dto';
 import { DataSource } from 'typeorm';
 import { FilterTourismDto } from 'src/application/dtos/tourism/filter-tourism.dto';
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
-import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { Region } from 'src/domain/entities/region.entity';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
@@ -26,7 +24,7 @@ export class TourismRepository implements ITourismRepository {
     @InjectRepository(AdditionalService)
     private readonly addServRepo: Repository<AdditionalService>,
     @InjectRepository(Region)
-    private readonly regionRepo: Repository<Region>,
+    private readonly regionRepo: Repository<Region>, 
     private readonly dataSource: DataSource,
   ) {}
 
@@ -135,14 +133,12 @@ async filterByOffice(
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
     .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
-
-  // فلترة حسب المدينة
+ 
   if (filter.city) {
     query.leftJoin('region.city', 'city')
          .andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
   }
-
-  // فلترة حسب المنطقة
+ 
   if (filter.region) {
     query.andWhere('region.name LIKE :region', {
       region: `%${filter.region}%`,
@@ -211,4 +207,38 @@ private isPostStatus(status: string): boolean {
       throw new Error('حدث خطأ أثناء البحث عن المنطقة');
     }
   }
+    async searchByTitleAndOffice(userId: number, title: string): Promise<PropertyPost[]> {
+    const qb: SelectQueryBuilder<PropertyPost> = this.postRepo
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.property', 'property')
+      .innerJoin('property.office', 'office')
+      .where('office.user_id = :userId', { userId }) 
+      .andWhere(
+        `to_tsvector('arabic', post.title) @@ plainto_tsquery('arabic', :title)`,
+        { title },
+      ) 
+      .addSelect(
+        `ts_rank(to_tsvector('arabic', post.title), plainto_tsquery('arabic', :title))`,
+        'rank',
+      )
+      .orderBy('rank', 'DESC')
+      .setParameters({ title });
+
+    return qb.getMany();
+  }
+
+ async findFullPropertyDetails(propertyId: number, officeId: number) {
+  return await this.propRepo.findOne({
+    where: { 
+      id: propertyId,
+      office: { id: officeId } 
+    },
+    relations: [ 
+      'post',
+      'touristic',
+      'touristic.additionalServices',
+      'touristic.additionalServices.service', 
+    ],
+  });
+}
 }

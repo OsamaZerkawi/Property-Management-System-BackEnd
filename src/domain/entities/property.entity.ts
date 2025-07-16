@@ -75,7 +75,7 @@ export class Property {
   @Column({ type: 'enum', enum: PropertyType })
   property_type: PropertyType;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: false,select: false })
   is_deleted: boolean;
 
   @ManyToOne(() => Office, (office) => office.properties, { onDelete: 'CASCADE' })
@@ -110,9 +110,9 @@ export class Property {
   @OneToOne(() => Touristic, (touristic) => touristic.property)
   touristic: Touristic;
 
-  @CreateDateColumn()
+  @CreateDateColumn({select: false})
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({select: false})
   updated_at: Date;
 }

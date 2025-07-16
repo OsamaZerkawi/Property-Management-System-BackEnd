@@ -9,6 +9,8 @@ import { UpdateTourismUseCase } from 'src/application/use-cases/tourism/update-t
 import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-tourism.use-case';
 
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
+import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
+import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 
 @Controller('tourism')
 export class TourismController {
@@ -17,6 +19,8 @@ export class TourismController {
     private readonly updateTourism: UpdateTourismUseCase,
     private readonly listTourism: ListTourismUseCase,
     private readonly filterTourism: FilterTourismUseCase, 
+    private readonly searchByTitleUseCase: SearchByTitleUseCase,
+    private readonly showTourismUseCase: ShowTourismUseCase
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -55,5 +59,22 @@ export class TourismController {
     @Query() filterDto: FilterTourismDto,
   ) {
     return this.filterTourism.execute(user.sub, filterDto);
+  }
+  
+@UseGuards(JwtAuthGuard)
+@Get('search')
+async searchByTitle(
+  @CurrentUser() user: any,
+    @Query('title') title: string,
+  ) {
+  return this.searchByTitleUseCase.execute(user.sub, title);
+}
+
+  @Get(':id')
+  async getPropertyDetails(
+  @CurrentUser() user: any,
+    @Param('id') propertyId: number
+  ) {
+    return this.showTourismUseCase.execute(user.sub, propertyId);
   }
 }
