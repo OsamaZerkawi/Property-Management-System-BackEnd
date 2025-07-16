@@ -8,7 +8,7 @@ import {
 
 export function GetAllServiceProvidersSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'جلب جميع مزودي الخدمات (دون الحاجة لتسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال والداش تبع المكتب' }),
 
     ApiQuery({
       name: 'page',

@@ -9,7 +9,7 @@ import { ServiceProviderType } from 'src/domain/enums/service-provider-type.enum
 
 export function GetAllServiceProvidersWithFiltersSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'جلب مكاتب مزودي الخدمات مع الفلترة (بدون تسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال والداش تبع المكتب'}),
 
     ApiQuery({
       name: 'regionId',

@@ -25,7 +25,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
         const listingData =
           listingType === ListingType.RENT
             ? {
-                rentalPrice: rent_details?.rentalPrice,
+                rental_price: rent_details?.rentalPrice,
                 rental_period: rent_details?.rental_period,
               }
             : {
@@ -111,7 +111,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       'residential.id',
       'residential.listing_type',
       'residential.selling_price',
-      'residential.rentalPrice',
+      'residential.rental_price',
       'residential.rental_period',
       
       'region.id',
@@ -138,7 +138,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
 
     query.addSelect(
       `CASE
-         WHEN residential.listing_type = :rent THEN residential.rentalPrice
+         WHEN residential.listing_type = :rent THEN residential.rental_price
          ELSE residential.selling_price
        END`,
       'calculated_price'
@@ -208,8 +208,8 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       ['status', (q, v) => q.andWhere('residential.status = :status', { status: v })],
       ['has_furniture', (q, v) => q.andWhere('property.has_furniture = :has_furniture', { has_furniture: v })],
       ['direction', (q, v) => q.andWhere('residential.direction = :direction', { direction: v })],
-      ['minPrice', (q, v) => q.andWhere('(residential.rentalPrice >= :minPrice OR residential.selling_price >= :minPrice)', { minPrice: v })],
-      ['maxPrice', (q, v) => q.andWhere('(residential.rentalPrice <= :maxPrice OR residential.selling_price <= :maxPrice)', { maxPrice: v })],
+      ['minPrice', (q, v) => q.andWhere('(residential.rental_price >= :minPrice OR residential.selling_price >= :minPrice)', { minPrice: v })],
+      ['maxPrice', (q, v) => q.andWhere('(residential.rental_price <= :maxPrice OR residential.selling_price <= :maxPrice)', { maxPrice: v })],
       ['minArea', (q, v) => q.andWhere('property.area >= :minArea', { minArea: v })],
       ['maxArea', (q, v) => q.andWhere('property.area <= :maxArea', { maxArea: v })],
       ['floor_number', (q, v) => q.andWhere('property.floor_number = :floor_number', { floor_number: v })],    
@@ -249,6 +249,6 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .leftJoin('region.city', 'city')
       .leftJoin('property.post', 'post')
       .where('property.is_deleted = false')
-      .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED });
+      .andWhere('post.status = :statusPost', { statusPost: PropertyPostStatus.APPROVED });
   }
 }

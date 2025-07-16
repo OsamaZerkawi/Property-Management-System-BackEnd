@@ -16,6 +16,14 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
 import { GetTopRatedPropertiesSwaggerDoc } from "../swagger/property/get-top-rated";
+import { GetAllPropertiesSwaggerDoc } from "../swagger/property/get-all.swagger";
+import { GetFilteredPropertiesSwaggerDoc } from "../swagger/property/get-all-with-filter.swagger";
+import { SearchPropertiesSwaggerDoc } from "../swagger/property/search-by-title.swagger";
+import { SearchPropertiesWithFiltersSwaggerDoc } from "../swagger/property/search-with-filters.swagger";
+import { GetPropertyDetailsSwaggerDoc } from "../swagger/property/get-property-details.swagger";
+import { GetRelatedPropertiesSwaggerDoc } from "../swagger/property/get-related-properties.swagger";
+import { RatePropertySwaggerDoc } from "../swagger/property/rate-property.swagger";
+import { CompareTwoPropertiesSwaggerDoc } from "../swagger/property/compare-two-proerties.swagger";
 
 
 @Controller('properties')
@@ -51,6 +59,7 @@ export class PropertyController{
     }
 
     @Get('search')
+    @SearchPropertiesSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async search(
@@ -67,7 +76,8 @@ export class PropertyController{
         return successPaginatedResponse(properties, total, page, items,'تمت عملية البحث بنجاح',200);
     }
 
-    @Get('filters') 
+    @Get('filters')
+    @GetFilteredPropertiesSwaggerDoc() 
     @Public()
     @HttpCode(HttpStatus.OK)
     async getPropetiesWithFilters(
@@ -84,6 +94,7 @@ export class PropertyController{
     }
 
     @Get()
+    @GetAllPropertiesSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async getProperties(
@@ -101,6 +112,7 @@ export class PropertyController{
     }
 
     @Get('compare')
+    @CompareTwoPropertiesSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async compareTwo(
@@ -117,6 +129,7 @@ export class PropertyController{
     }
 
     @Get(':propertyId')
+    @GetPropertyDetailsSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async getProperty(
@@ -132,6 +145,7 @@ export class PropertyController{
     }
 
     @Post('search/filters')
+    @SearchPropertiesWithFiltersSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async searchWithFilters(
@@ -149,6 +163,7 @@ export class PropertyController{
     }
 
     @Post(':propertyId/rate')
+    @RatePropertySwaggerDoc()   
     @HttpCode(HttpStatus.OK)
     async rateProperty(
         @Param('propertyId',ParseIntPipe) propertyId: number,
@@ -164,6 +179,7 @@ export class PropertyController{
     }
 
     @Get(':propertyId/related')
+    @GetRelatedPropertiesSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     @Public()
     async getRelatedProperteis(

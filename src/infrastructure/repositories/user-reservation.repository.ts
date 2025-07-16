@@ -37,6 +37,7 @@ export class UserReservationRepository implements UserReservationRepositoryInter
       .orderBy('c.start_date', 'DESC')
       .getRawMany();        
     }
+    
     findResidentialReservationsByUser(userId: number, baseUrl: string) {
     return this.rentalContractRepo
       .createQueryBuilder('rc')

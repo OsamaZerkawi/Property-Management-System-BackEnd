@@ -10,7 +10,7 @@ import {
 
 export function CreateOrUpdateFeedbackSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'تقديم تقييم أو شكوى لمزود خدمة (يتطلب تسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال' }),
 
     ApiBearerAuth(),
 

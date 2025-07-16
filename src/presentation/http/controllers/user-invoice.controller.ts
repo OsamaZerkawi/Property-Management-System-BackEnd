@@ -3,6 +3,7 @@ import { Request } from "express";
 import { FindAllUserInvoicesUseCase } from "src/application/use-cases/user-invoices/find-all-user-invoices.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { GetOwnInvoicesSwaggerDoc } from "../swagger/user-invoices/get-own-invoices-for-property.swagger";
 
 @Controller('user-invoice')
 export class UserInvoiceController {
@@ -11,6 +12,7 @@ export class UserInvoiceController {
     ){}
 
     @Get('own/properties/:propertyId')
+    @GetOwnInvoicesSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getOwnInvoices(
         @CurrentUser() user,

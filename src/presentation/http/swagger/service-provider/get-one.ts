@@ -5,13 +5,11 @@ import {
   ApiParam,
   ApiOkResponse,
   ApiNotFoundResponse,
-  ApiTags,
 } from '@nestjs/swagger';
 
 export function GetServiceProviderDetailsSwaggerDoc() {
   return applyDecorators(
-    ApiTags('Service Providers'),
-    ApiOperation({ summary: 'جلب تفاصيل مزود الخدمة بواسطة المعرف (دون الحاجة لتسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال' }),
 
     ApiParam({
       name: 'id',

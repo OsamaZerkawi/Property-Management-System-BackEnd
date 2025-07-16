@@ -8,7 +8,7 @@ import {
 
 export function GetTopRatedServiceProvidersSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'جلب مقدمي الخدمات الأعلى تقييماً (بدون تسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال'}),
 
     ApiQuery({
       name: 'page',

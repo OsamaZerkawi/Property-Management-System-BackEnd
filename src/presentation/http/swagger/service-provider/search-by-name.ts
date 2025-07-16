@@ -8,7 +8,7 @@ import {
 
 export function SearchServiceProvidersSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'البحث عن مكاتب مزودي الخدمات' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال والداش تبع المكتب' }),
 
     ApiQuery({
       name: 'name',

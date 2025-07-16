@@ -1,5 +1,6 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { max, min } from "class-validator";
 import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 import { CreatePropertyDto } from "src/application/dtos/property/CreateProperty.dto";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
@@ -104,7 +105,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .leftJoin('property.images', 'images')
       .where('property.id != :id', { id })
       .andWhere('property.is_deleted = false')
-      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
+      // .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
       .andWhere('post.status = :postStatus', { postStatus: PropertyPostStatus.APPROVED })
       .andWhere('property.property_type = :type', { type: property.property_type })
       .andWhere('region.id = :regionId', { regionId: property.region?.id });  
@@ -115,7 +116,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         max: maxPrice,
       });
     } else if (listingType === ListingType.RENT) {
-      query2.andWhere('residential.monthly_price BETWEEN :min AND :max', {
+      query2.andWhere('residential.rental_price BETWEEN :min AND :max', {
         min: minPrice,
         max: maxPrice,
       });
@@ -225,6 +226,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   async findPropertyDetailsById(propertyId: number, baseUrl: string,userId: number) {
     const query = await this.createBasePropertyDetailsQuery()
+    .andWhere('post.status =:statusPost',{statusPost: PropertyPostStatus.APPROVED})
     .andWhere('property.id = :propertyId',{propertyId});
 
     query.leftJoin('office.feedbacks', 'office_feedbacks');

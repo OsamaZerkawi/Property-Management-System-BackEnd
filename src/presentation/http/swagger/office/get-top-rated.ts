@@ -7,7 +7,7 @@ import {
 
 export function GetTopRatedOfficesSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'جلب أفضل المكاتب تقييماً (بدون تسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال'}),
 
     ApiQuery({
       name: 'page',

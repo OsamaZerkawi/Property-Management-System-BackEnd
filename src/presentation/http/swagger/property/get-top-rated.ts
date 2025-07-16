@@ -9,7 +9,7 @@ import { PropertyType } from 'src/domain/enums/property-type.enum';
 
 export function GetTopRatedPropertiesSwaggerDoc() {
   return applyDecorators(
-    ApiOperation({ summary: 'جلب العقارات الأعلى تقييماً (بدون الحاجة لتسجيل دخول)' }),
+    ApiOperation({ summary: 'خاصة بتطبيق الجوال' }),
 
     ApiQuery({
       name: 'page',
