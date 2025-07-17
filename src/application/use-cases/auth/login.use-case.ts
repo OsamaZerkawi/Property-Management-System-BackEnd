@@ -39,9 +39,9 @@ export class LoginUseCase {
 
         if(!passwordMatches){
            throw new ForbiddenException(
-               errorResponse('Access Denied',403)
+               errorResponse('كلمة المرور غير صحيحة', 401)
            );
-       }
+        }
 
         const tokens = await this.tokenService.generateTokens(user.id,user.username);
         await this.tokenService.updateRefreshToken(user.id,tokens.refreshToken);

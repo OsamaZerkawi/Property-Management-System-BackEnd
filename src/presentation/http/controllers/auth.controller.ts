@@ -23,7 +23,7 @@ export class AuthController {
 
   @Post('login')
   @Public()
-  @UseGuards(LocalAuthGuard)
+  // @UseGuards(LocalAuthGuard)
   @LoginSwaggerDoc()
   @HttpCode(HttpStatus.OK)
   async login(@Request() req ,@Body() loginDto: LoginDto){
