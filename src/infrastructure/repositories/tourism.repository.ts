@@ -207,26 +207,24 @@ private isPostStatus(status: string): boolean {
       throw new Error('حدث خطأ أثناء البحث عن المنطقة');
     }
   }
-    async searchByTitleAndOffice(userId: number, title: string): Promise<PropertyPost[]> {
-    const qb: SelectQueryBuilder<PropertyPost> = this.postRepo
-      .createQueryBuilder('post')
-      .innerJoinAndSelect('post.property', 'property')
-      .innerJoin('property.office', 'office')
-      .where('office.user_id = :userId', { userId }) 
-      .andWhere(
-        `to_tsvector('arabic', post.title) @@ plainto_tsquery('arabic', :title)`,
-        { title },
-      ) 
-      .addSelect(
-        `ts_rank(to_tsvector('arabic', post.title), plainto_tsquery('arabic', :title))`,
-        'rank',
-      )
-      .orderBy('rank', 'DESC')
-      .setParameters({ title });
-
-    return qb.getMany();
-  }
-
+async searchByTitleAndOffice(officeId: number, searchTerm: string) {
+  return await this.propRepo
+    .createQueryBuilder('property')
+    .leftJoin('property.post', 'post')
+    .leftJoin('property.region', 'region')
+    .leftJoin('property.touristic', 'touristic')
+    .where('property.office_id = :officeId', { officeId })
+    .andWhere('post.title LIKE :searchTerm', { searchTerm: `%${searchTerm}%` }) // إضافة شرط البحث
+    .select([
+      'property.id AS id',
+      'post.title AS title',
+      'region.name AS region',
+      'property.area AS area',
+      'touristic.price AS price',
+      'touristic.status AS status'
+    ])
+    .getRawMany();
+}
  async findFullPropertyDetails(propertyId: number, officeId: number) {
   return await this.propRepo.findOne({
     where: { 
@@ -236,6 +234,7 @@ private isPostStatus(status: string): boolean {
     relations: [ 
       'post',
       'touristic',
+      'images',
       'touristic.additionalServices',
       'touristic.additionalServices.service', 
     ],
