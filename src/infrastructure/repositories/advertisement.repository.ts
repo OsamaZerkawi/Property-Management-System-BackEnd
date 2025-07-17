@@ -24,23 +24,13 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         });
     }
 
-    async createWithInvoice(office: Office, period: number, file: Express.Multer.File,amount: number) {
+    async create(office: Office, period: number, file: Express.Multer.File) {
         const advertisement =  this.advertisementRepo.create({
             office,
             day_period:period,
             image:file.filename,
         });
-
-        const invoice = await this.onlineInvoiceRepo.create({
-            office,
-            amount,
-            type:InvoiceType.IMAGE,
-            advertisement,
-            stripe_payment_intent_id: 0,
-        });
-
-        advertisement.invoice = invoice;
-
+        
         await this.advertisementRepo.save(advertisement);
     }
 }

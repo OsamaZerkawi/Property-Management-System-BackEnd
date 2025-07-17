@@ -7,11 +7,14 @@ import {
   ApiNotFoundResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 export function GetPropertyReservationDetailsSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
+    ApiOperation({summary:'خاصة بالداش مكتب'}),
+    
 
     ApiParam({
       name: 'propertyId',

@@ -10,31 +10,31 @@ export class FindUserPostSuggestionsUseCase {
     ){}
 
     async execute(userId: number,userPostId: number,baseUrl: string) {
-        const rows = await this.userPostRepo.findSuggestionsByUserPostId(userPostId,userId);
-        
-        if (!rows || rows.length === 0) {
-          throw new NotFoundException(
-            errorResponse('لا توجد اقتراحات لهذا الطلب',404)
-          );
-        }
-        
-        return rows.map(row => {
-          const suggestion = {
-            property_id: row.property_id,
-            image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
-            title: row.post_title,
-            location: `${row.city_name} - ${row.region_name}`,
-            price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
+      const rows = await this.userPostRepo.findSuggestionsByUserPostId(userPostId,userId);
+      
+      if (!rows || rows.length === 0) {
+        throw new NotFoundException(
+          errorResponse('لا توجد اقتراحات لهذا الطلب',404)
+        );
+      }
+      
+      return rows.map(row => {
+        const suggestion = {
+          property_id: row.property_id,
+          image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
+          title: row.post_title,
+          location: `${row.city_name} - ${row.region_name}`,
+          price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
+        };
+    
+        if (row.listing_type === ListingType.RENT) {
+          return {
+            ...suggestion,
+            rate: parseFloat(row.avg_rate) || 0,
           };
-      
-          if (row.listing_type === ListingType.RENT) {
-            return {
-              ...suggestion,
-              rate: parseFloat(row.avg_rate) || 0,
-            };
-          }
-      
-          return suggestion;
-        });
+        }
+    
+        return suggestion;
+      });
     }
 }

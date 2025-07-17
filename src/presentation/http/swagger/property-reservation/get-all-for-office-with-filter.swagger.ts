@@ -6,11 +6,14 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { PurchaseStatus } from 'src/domain/enums/property-purchases.enum';
 export function GetUserPropertyReservationsWithFiltersSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
+    ApiOperation({summary:'خاصة بالداش مكتب'}),
+    
 
     // ✅ توثيق الفلاتر
     ApiQuery({

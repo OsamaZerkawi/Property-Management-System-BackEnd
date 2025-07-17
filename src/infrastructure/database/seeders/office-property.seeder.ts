@@ -21,6 +21,8 @@ import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { Image } from "src/domain/entities/image.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
+import { UserRole } from "src/domain/entities/user-role.entity";
+import { Role } from "src/domain/entities/role.entity";
 
 const faker = new Faker({ locale: [ar, en], });
 
@@ -34,12 +36,20 @@ export class OfficePropertySeeder {
     @InjectRepository(Region) private regionRepo: Repository<Region>,
     @InjectRepository(User) private userRepo: Repository<User>,    
     @InjectRepository(Image)private imageRepo: Repository<Image>,
-    @InjectRepository(OfficeSocial) private socialRepo: Repository<OfficeSocial>
+    @InjectRepository(OfficeSocial) private socialRepo: Repository<OfficeSocial>,
+    @InjectRepository(UserRole) private userRoleRepo: Repository<UserRole>,
+    @InjectRepository(Role) private roleRepo: Repository<Role>,
         
   ){}
   async seed(){
   const regions = await this.regionRepo.find();
   const socialPlatforms = ['facebook', 'instagram', 'whatsapp', 'twitter'];
+
+  const officeRole = await this.roleRepo.findOne({where: { name: 'صاحب مكتب'}});
+
+  if(!officeRole){
+    throw new Error('officer role did not found');
+  }
 
   for (let i = 0; i < 5; i++) {
     const region = faker.helpers.arrayElement(regions);
@@ -53,10 +63,16 @@ export class OfficePropertySeeder {
       password: password,
     });
     await this.userRepo.save(user);
+
+    const userRole = this.userRoleRepo.create({
+      user,
+      role: officeRole,
+    });
+    
     const office = this.officeRepo.create({
       name: faker.company.name(),
       logo: faker.image.url(), // or a static path like `/uploads/logo.png`
-      type: faker.helpers.arrayElement(Object.values(OfficeType)),
+      type: OfficeType.RESIDENTIAL,
       commission: faker.number.float({ min: 0, max: 20, fractionDigits: 2 }),
       booking_period: faker.number.int({ min: 1, max: 30 }),
       deposit_per_m2: faker.number.float({ min: 10, max: 200, fractionDigits: 2 }),

@@ -4,12 +4,13 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 export function GetUserPropertyReservationsSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
-
+    ApiOperation({summary:'خاصة بالداش مكتب'}),
     ApiOkResponse({
       description: 'تم إرجاع جميع السجلات الخاصة بحجز الأملاك',
       schema: {

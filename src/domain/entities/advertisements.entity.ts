@@ -30,9 +30,9 @@ export class Advertisement {
     @JoinColumn({name: 'office_id'})
     office: Office;
 
-    @OneToOne(() => OnlineInvoice, (invoice) => invoice.advertisement,{cascade: true})
+    @OneToOne(() => OnlineInvoice, (invoice) => invoice.advertisement,{cascade: true,nullable:true})
     @JoinColumn({name: 'online_invoice_id'})
-    invoice: OnlineInvoice;
+    invoice: OnlineInvoice| null;
 
 
     @CreateDateColumn()

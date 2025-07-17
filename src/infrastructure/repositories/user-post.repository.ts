@@ -10,6 +10,11 @@ export class UserPostRepository implements UserPostRepositoryInterface {
       @InjectRepository(UserPost)
       private readonly userPostRepo: Repository<UserPost>,
     ) {}
+    create(userPost: Partial<UserPost>) {
+      const post = this.userPostRepo.create(userPost);
+
+      return this.userPostRepo.save(post);
+    }
 
     async findById(id: number) {
       return await this.userPostRepo.findOne({where:{id}});

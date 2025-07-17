@@ -15,15 +15,19 @@ import { GetOwnPostsUseCase } from "src/application/use-cases/user-post/get-own-
 import { GetOwnPostsWithStatusUseCase } from "src/application/use-cases/user-post/get-own-posts-by-status.use-case";
 import { DeleteUserPostUseCase } from "src/application/use-cases/user-post/delete-own-post.use-case";
 import { FindUserPostSuggestionsUseCase } from "src/application/use-cases/user-post/find-user-post-suggestions.use-case";
+import { CreateUserPostUseCase } from "src/application/use-cases/user-post/create-post.use-case";
+import { RegionModule } from "./region.module";
 
 @Module({
     imports:[
+        RegionModule,
         AuthModule,
         OfficeModule,
         TypeOrmModule.forFeature([UserPost,Office,Region,City])
     ],
     controllers:[UserPostController],
     providers:[
+        CreateUserPostUseCase,
         GetUserPostsUseCase,
         GetUserPostsWithFiltersUseCase,
         GetOwnPostsUseCase,

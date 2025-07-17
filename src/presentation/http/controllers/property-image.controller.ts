@@ -9,6 +9,10 @@ import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
 import { PropertyImageInterceptor, PropertyImagesInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { UploadPropertyImagesSwaggerDoc } from "../swagger/property-image/upload-property-images.swagger";
+import { GetPropertyImagesSwaggerDoc } from "../swagger/property-image/get-property-images.swagger";
+import { UpdatePropertyImageSwaggerDoc } from "../swagger/property-image/update-property-image.swagger";
+import { DeletePropertyImageSwaggerDoc } from "../swagger/property-image/delete-property-image.swagger";
 
 
 @Controller('property-image')
@@ -24,6 +28,7 @@ export class PropertyImageController {
 
     @Roles('صاحب مكتب')
     @Post(':propertyId/images')
+    @UploadPropertyImagesSwaggerDoc()
     @HttpCode(HttpStatus.CREATED)
     @PropertyImagesInterceptor()
     async uploadImages(
@@ -37,6 +42,7 @@ export class PropertyImageController {
     }
 
     @Get(':propertyId/images')
+    @GetPropertyImagesSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getImages(
         @Param('propertyId', ParseIntPipe) propertyId: number,
@@ -50,6 +56,7 @@ export class PropertyImageController {
     @Roles('صاحب مكتب')
     @Put(':propertyId/images/:imageId')
     @HttpCode(HttpStatus.OK)
+    @UpdatePropertyImageSwaggerDoc()
     @PropertyImageInterceptor()
     async updateImge(
         @Param('propertyId',ParseIntPipe) propertyId: number,
@@ -64,6 +71,7 @@ export class PropertyImageController {
 
     @Roles('صاحب مكتب')
     @Delete(':propertyId/images/:imageId')
+    @DeletePropertyImageSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async deleteImage(
         @Param('propertyId',ParseIntPipe) propertyId: number,

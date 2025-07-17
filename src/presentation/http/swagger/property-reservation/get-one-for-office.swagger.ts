@@ -5,11 +5,13 @@ import {
   ApiOkResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 export function GetPropertyReservationWithDetailsSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
+    ApiOperation({summary:'خاصة بالداش مكتب'}),
 
     ApiParam({
       name: 'propertyReservationId',

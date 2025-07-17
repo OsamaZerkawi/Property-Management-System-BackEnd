@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { REDIRECT_METADATA } from "@nestjs/common/constants";
 import { Request } from "express";
 import { UserPostFiltersDto } from "src/application/dtos/user-post/user-post-filters.dto";
@@ -13,6 +13,15 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetOwnPostsSwaggerDoc } from "../swagger/user-post/get-own-posts.swagger";
+import { GetUserPostSuggestionsSwaggerDoc } from "../swagger/user-post/get-suggestions.swagger";
+import { GetOwnPostsWithStatusSwaggerDoc } from "../swagger/user-post/get-own-posts-with-filter.swagger";
+import { DeleteUserPostSwaggerDoc } from "../swagger/user-post/delete-post.swagger";
+import { CreateUserPostDto } from "src/application/dtos/user-post/create-post.dto";
+import { CreateUserPostUseCase } from "src/application/use-cases/user-post/create-post.use-case";
+import { CreateUserPostSwaggerDoc } from "../swagger/user-post/create-post.swagger";
+import { GetAllPostsSwaggerDoc } from "../swagger/user-post/get-all-user-posts.swagger";
+import { GetAllUserPostsWithFiltersSwaggerDoc } from "../swagger/user-post/get-all-user-posts-with-filters.swagger";
 
 @Controller('user-post')
 export class UserPostController {
@@ -23,10 +32,12 @@ export class UserPostController {
         private readonly getOwnPostsWithStatusUseCase: GetOwnPostsWithStatusUseCase,
         private readonly deleteUserPostUseCase: DeleteUserPostUseCase,
         private readonly findUserPostSuggestionsUseCase: FindUserPostSuggestionsUseCase,
+        private readonly createUserPostUseCase: CreateUserPostUseCase,
     ){}
 
     @Roles('صاحب مكتب')
     @Get()
+    @GetAllPostsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getAllPosts(
         @CurrentUser() user,
@@ -39,6 +50,7 @@ export class UserPostController {
 
     @Roles('صاحب مكتب')
     @Get('filters')
+    @GetAllUserPostsWithFiltersSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getAllPostsWithFilters(
         @Query() filters: UserPostFiltersDto,
@@ -51,7 +63,22 @@ export class UserPostController {
 
     }
 
+
+    @Post('own')
+    @CreateUserPostSwaggerDoc()
+    @HttpCode(HttpStatus.CREATED)
+    async createPost(
+        @Body() data: CreateUserPostDto,
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+        const result = await this.createUserPostUseCase.execute(userId,data);
+
+        return successResponse([],'تم إنشاء المنشور بنجاح',201)
+    }
+
     @Get('own')
+    @GetOwnPostsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getOwnPosts(
         @CurrentUser() user,
@@ -64,6 +91,7 @@ export class UserPostController {
     }
 
     @Get('own/filters')
+    @GetOwnPostsWithStatusSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getOwnPostsWithStatus(
         @CurrentUser() user,
@@ -77,6 +105,7 @@ export class UserPostController {
     }
 
     @Delete('own/:id')
+    @DeleteUserPostSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async deletePost(
         @Param('id',ParseIntPipe) postId: number,
@@ -90,6 +119,7 @@ export class UserPostController {
     }
 
     @Get('/:id/suggestions')
+    @GetUserPostSuggestionsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getSuggestionsForUser(
         @Param('id',ParseIntPipe) id: number,

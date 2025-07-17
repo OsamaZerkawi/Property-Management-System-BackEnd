@@ -3,6 +3,7 @@ import { GetExpectedPriceForRegionUseCase } from "src/application/use-cases/regi
 import { getRegionsByCityIdUseCase } from "src/application/use-cases/region/get-regions-by-city-id.use-case";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetRegionsByCitySwaggerDoc } from "../swagger/city-region/get-all-regions-for-city.swagger";
 
 @Controller('region')
 export class RegionController {
@@ -12,6 +13,7 @@ export class RegionController {
     ){}
 
     @Get('/cities/:cityId')
+    @GetRegionsByCitySwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getRegionsByCity(
         @Param('cityId',ParseIntPipe) cityId: number

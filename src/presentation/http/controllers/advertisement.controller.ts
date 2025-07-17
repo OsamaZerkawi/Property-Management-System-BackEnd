@@ -13,29 +13,31 @@ export class AdvertisementController {
         private readonly listOfficeInvoicesUseCase: ListOfficeInvoicesUseCase,
     ){}
 
-    // @Get('/invoices')
+    @Get('/invoices')
     // @Roles('صاحب مكتب')
-    // async getAll(
-    //     @CurrentUser() user,
-    // ){
-    //     const userId = user.sub;
-    //     const data = await this.listOfficeInvoicesUseCase.execute(userId);
+    async getAll(
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
+        const data = await this.listOfficeInvoicesUseCase.execute(userId);
+        console.log(data);
 
-    //     return successResponse(data,'تم إرجاع جميع السجلات الخاصة بالإعلانات ',200);
-    // }
-    // @Post()
-    // @Roles('صاحب مكتب')
-    // @HttpCode(HttpStatus.CREATED)
-    // @AdvertisementImageInterceptor()
-    // async create(
-    //     @UploadedFile() file: Express.Multer.File,
-    //     @Body('day_period') period: number,
-    //     @CurrentUser() user,
-    // ){
-    //     const userId = user.sub;
+        return successResponse(data,'تم إرجاع جميع السجلات الخاصة بالإعلانات ',200);
+    }
+    
+    @Post()
+    @Roles('صاحب مكتب')
+    @HttpCode(HttpStatus.CREATED)
+    @AdvertisementImageInterceptor()
+    async create(
+        @UploadedFile() file: Express.Multer.File,
+        @Body('day_period') period: number,
+        @CurrentUser() user,
+    ){
+        const userId = user.sub;
 
-    //     await this.createAdvertisementUseCase.execute(userId,period,file);
+        await this.createAdvertisementUseCase.execute(userId,period,file);
 
-    //     return successResponse([],'تم ارسال طلب الإعلان بنجاح',201)
-    // }
+        return successResponse([],'تم ارسال طلب الإعلان بنجاح',201)
+    }
 }

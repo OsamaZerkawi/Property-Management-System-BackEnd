@@ -21,8 +21,6 @@ export class CreateAdvertisementUseCase {
             );
         }
 
-        // const amount = Number(office.advertisement_price_per_day) * period;
-
-        // await this.advertisementRepo.createWithInvoice(office,period,file,amount);
+    await this.advertisementRepo.create(office,period,file);
     }
 }

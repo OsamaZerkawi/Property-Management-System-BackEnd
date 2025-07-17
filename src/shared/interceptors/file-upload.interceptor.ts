@@ -53,7 +53,7 @@ export function PropertyImageInterceptor() {
           .replace(/\.[^/.]+$/, '')    // remove original extension
           .replace(/[^a-zA-Z0-9-_]/g, ''); // remove unsafe characters
 
-        const filename = `property-invoice-${safeBaseName}-${timestamp}${ext}`;
+        const filename = `property-image-${safeBaseName}-${timestamp}${ext}`;
         cb(null, filename);
       },
       }),
@@ -76,7 +76,7 @@ export function UserPropertyInvoiceImageInterceptor() {
           .replace(/\.[^/.]+$/, '')    // remove original extension
           .replace(/[^a-zA-Z0-9-_]/g, ''); // remove unsafe characters
 
-        const filename = `property-${propertyId}-${safeBaseName}-${timestamp}${ext}`;
+        const filename = `property-invoice-${propertyId}-${safeBaseName}-${timestamp}${ext}`;
         cb(null, filename);
       },
       }),

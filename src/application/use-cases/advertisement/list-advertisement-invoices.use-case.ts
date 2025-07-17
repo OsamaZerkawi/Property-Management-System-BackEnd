@@ -22,19 +22,18 @@ export class ListOfficeInvoicesUseCase {
     const ads = await this.adRepo.findAllWithInvoicesByOfficeId(office.id);
 
     return ads
-      .filter(ad => ad.invoice)
       .map(ad => ({
         advertisement_id: ad.id,
-        invoice_id: ad.invoice.id,
-        paid_date: ad.invoice.paid_date ? ad.invoice.paid_date.toISOString().split('T')[0] : null,
-        type: ad.invoice.type,
+        invoice_id: ad.invoice?.id,
+        paid_date: ad.invoice?.paid_date?.toISOString().split('T')[0],
+        type: ad.invoice?.type,
         day_period: ad.day_period,
-        amount: ad.invoice.amount,
-        advertisement_status: ad.is_paid
+        amount: ad.invoice?.amount,
+        advertisement_status: ad.invoice
           ? 'مدفوع'
           : ad.admin_agreement === AdminAgreement.PENDING
-          ? 'قيد الموافقة'
-          : 'غير مدفوع',
+          ? 'قيد الانتظار'
+          : 'مرفوض',
       }));
   }
 }

@@ -8,6 +8,7 @@ import { PermissionSeeder } from "./permission.seeder";
 import { RoleSeeder } from "./role.seeder";
 import { OfficePropertySeeder } from "./office-property.seeder";
 import { PropertyFeedbackSeeder } from "./property-feedback.seeder";
+import { ServicePriceSeeder } from "./service-price.seeder";
 
 @Injectable()
 export class SeederService {
@@ -16,6 +17,8 @@ export class SeederService {
         private readonly roleSeeder: RoleSeeder,
         private readonly officePropertySeeder: OfficePropertySeeder,
         private readonly propertyFeedbackSeeder: PropertyFeedbackSeeder,
+        private readonly servicePriceSeeder: ServicePriceSeeder,
+        
         @InjectRepository(City)
         private readonly cityRepo: Repository<City>,
         @InjectRepository(Region)
@@ -37,6 +40,8 @@ export class SeederService {
   
       // 4. Seed property feedback (ratings)
       await this.propertyFeedbackSeeder.seed();
+
+      // await this.servicePriceSeeder.seed();
 
       console.log('✅ All seeders executed successfully.');
     }

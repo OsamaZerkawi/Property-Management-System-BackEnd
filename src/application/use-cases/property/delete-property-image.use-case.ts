@@ -19,9 +19,9 @@ export class DeletePropertyImageUseCase {
     const image = await this.imageRepo.findById(imageId);
 
     if (!image || image.property.id !== propertyId) {
-       throw new NotFoundException(
-            errorResponse('الصورة غير موجودة لهذا العقار', 404)
-        );
+      throw new NotFoundException(
+           errorResponse('الصورة غير موجودة لهذا العقار', 404)
+      );
     }
 
     // حذف من النظام
