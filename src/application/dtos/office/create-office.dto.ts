@@ -59,6 +59,14 @@ import {
     @IsOptional()
     @IsNumber()
     region_id: number;
+
+    @IsOptional()
+    @IsNumber()
+    latitude: number;
+
+    @IsOptional()
+    @IsNumber()
+    longitude: number;
   
     @IsOptional()
     @ValidateNested({ each: true })

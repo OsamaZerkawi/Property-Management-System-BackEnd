@@ -33,9 +33,9 @@ export class PropertyPost {
     // @OneToMany(() => PropertyPostTag, (ppt) => ppt.propertyPost)
     // propertyPostTags: PropertyPostTag[];
 
-    @CreateDateColumn()
+    @CreateDateColumn({select: false})
     created_at: Date;  
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({select: false})
     updated_at: Date;
 }

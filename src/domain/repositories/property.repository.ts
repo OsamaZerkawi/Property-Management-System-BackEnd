@@ -5,7 +5,6 @@ import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.
 import { PropertyType } from "../enums/property-type.enum";
 import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 
-
 export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
 
 export interface PropertyRepositoryInterface {

@@ -28,12 +28,13 @@ import { AddPropertyToFavoriteUseCase } from "src/application/use-cases/favorite
 import { RemovePropertyFromFavoriteUseCase } from "src/application/use-cases/favorite/remove-property-from-favorite.use-case";
 import { FindTopRatedPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
 import { GetFavoritePropertiesUseCase } from "src/application/use-cases/favorite/get-favorite-properties.use-case";
+import { Touristic } from "src/domain/entities/touristic.entity";
 
 @Module({
     imports:[
         AuthModule,
         forwardRef(() => ResidentialOfficeModule),
-        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback,PropertyFavorite])
+        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback,PropertyFavorite,Touristic])
     ],
     controllers:[PropertyController,PropertyFavoriteController],
     providers:[
