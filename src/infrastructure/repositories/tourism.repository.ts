@@ -1,7 +1,7 @@
 // infrastructure/repositories/tourism.repository.impl.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable,NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository';
 import { Property } from 'src/domain/entities/property.entity';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
@@ -71,57 +71,109 @@ async findPropertyById(id: number): Promise<Property | null> {
   return this.propRepo.findOne({ where: { id }, relations: ['office'] });
 }
 
-  async updateTourism(propertyId: number, dto: UpdateTourismDto): Promise<void> {
-    await this.dataSource.transaction(async manager => { 
-      await manager.update(Property, propertyId, {
-        region: { id: dto.region_id } as any,
-        latitude: dto.latitude,
-        longitude: dto.longitude,
-        area: dto.area,
-        room_count: dto.room_count,
-        living_room_count: dto.living_room_count,
-        kitchen_count: dto.kitchen_count,
-        bathroom_count: dto.bathroom_count,
-        has_furniture: dto.has_furniture,
-      });
+ async updateTourism(propertyId: number, dto: UpdateTourismDto): Promise<void> {
+  await this.dataSource.transaction(async manager => { 
+    const [property, post, touristic] = await Promise.all([
+      manager.findOne(Property, { where: { id: propertyId } }),
+      manager.findOne(PropertyPost, { 
+        where: { property: { id: propertyId } },
+        relations: ['property']  
+      }),
+      manager.findOne(Touristic, { 
+        where: { property: { id: propertyId } },
+        relations: ['additionalServices'] 
+      })
+    ]);
+
+    if (!property) throw new NotFoundException('Property not found');
  
-      const post = await manager.findOne(PropertyPost, { where: { property: { id: propertyId } } });
-      if (post) {
-        const generatedTitle = `${dto.tag} ${dto.area} متر مربع`;
-        await manager.update(PropertyPost, post.id, {
-          title: generatedTitle,
-          description: dto.description,
-          tag: dto.tag,
-          image: dto.image,
-          date: new Date(),
-        });
+    const propertyUpdates: Partial<Property> = {};
+    
+    const propertyMappings = {
+      region_id: () => propertyUpdates.region = { id: dto.region_id } as any,
+      latitude: () => propertyUpdates.latitude = dto.latitude,
+      longitude: () => propertyUpdates.longitude = dto.longitude,
+      area: () => propertyUpdates.area = dto.area,
+      room_count: () => propertyUpdates.room_count = dto.room_count,
+      living_room_count: () => propertyUpdates.living_room_count = dto.living_room_count,
+      kitchen_count: () => propertyUpdates.kitchen_count = dto.kitchen_count,
+      bathroom_count: () => propertyUpdates.bathroom_count = dto.bathroom_count,
+      has_furniture: () => propertyUpdates.has_furniture = dto.has_furniture
+    };
+
+    Object.entries(propertyMappings).forEach(([key, updateFn]) => {
+      if (dto[key] !== undefined) updateFn();
+    });
+
+    if (Object.keys(propertyUpdates).length > 0) {
+      await manager.update(Property, propertyId, propertyUpdates);
+    }
+ 
+    if (post) {
+      const postUpdates: Partial<PropertyPost> = { date: new Date() };
+       
+      const currentArea = dto.area !== undefined ? dto.area : property.area;
+      const currentTag = dto.tag !== undefined ? dto.tag : post.tag;
+      
+      if (dto.tag !== undefined || dto.area !== undefined) {
+        postUpdates.title = `${currentTag} ${currentArea} متر مربع`;
+      }
+      
+      if (dto.description !== undefined) postUpdates.description = dto.description;
+      if (dto.tag !== undefined) postUpdates.tag = dto.tag;
+      if (dto.image !== undefined) postUpdates.image = dto.image;
+      
+      await manager.update(PropertyPost, post.id, postUpdates);
+    }
+ 
+    if (touristic) {
+      const touristicUpdates: Partial<Touristic> = {};
+      
+      const touristicMappings = {
+        price: () => touristicUpdates.price = dto.price,
+        street: () => touristicUpdates.street = dto.street,
+        electricity: () => touristicUpdates.electricity = dto.electricity,
+        water: () => touristicUpdates.water = dto.water,
+        pool: () => touristicUpdates.pool = dto.pool,
+        status: () => touristicUpdates.status = dto.status
+      };
+
+      Object.entries(touristicMappings).forEach(([key, updateFn]) => {
+        if (dto[key] !== undefined) updateFn();
+      });
+
+      if (Object.keys(touristicUpdates).length > 0) {
+        await manager.update(Touristic, touristic.id, touristicUpdates);
       }
  
-      const touristic = await manager.findOne(Touristic, { where: { property: { id: propertyId } } });
-      if (touristic) {
-        await manager.update(Touristic, touristic.id, {
-          price: dto.price,
-          street: dto.street,
-          electricity: dto.electricity,
-          water: dto.water,
-          pool: dto.pool,
-          status: dto.status ?? touristic.status,
-        });
+      if (dto.additional_services_ids !== undefined) {
+        const currentServices = touristic.additionalServices?.map(s => s.service.id) || [];
+        const newServices = dto.additional_services_ids;
  
-        await manager.delete(AdditionalService, { touristic: { id: touristic.id } });
-      
-        if (dto.additional_services_ids?.length) {
-          const relations = dto.additional_services_ids.map(serviceId =>
+        const toRemove = currentServices.filter(id => !newServices.includes(id));
+        const toAdd = newServices.filter(id => !currentServices.includes(id));
+
+        if (toRemove.length > 0) {
+          await manager.delete(AdditionalService, {
+            touristic: { id: touristic.id },
+            service: In(toRemove)
+          });
+        }
+
+        if (toAdd.length > 0) {
+          const newRelations = toAdd.map(serviceId =>
             manager.create(AdditionalService, {
-              touristic: { id: touristic.id } as any,
-              service:    { id: serviceId }   as any,
+              touristic: { id: touristic.id },
+              service: { id: serviceId }
             })
           );
-          await manager.save(relations);
+          await manager.save(newRelations);
         }
       }
-    });
-  }
+    }
+  });
+}
+
 async filterByOffice(
   officeId: number,
   filter: FilterTourismDto,

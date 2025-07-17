@@ -9,7 +9,7 @@ import {
   Min,
   IsEnum
 } from 'class-validator';
-import { Type } from 'class-transformer';
+ 
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 export class CreateTourismDto {
   // ========== post ==========
@@ -19,9 +19,9 @@ export class CreateTourismDto {
   description: string;
 
 
-@IsDefined()
-@IsEnum(PropertyPostTag, { message: 'tag يجب أن يكون أحد القيم المحددة' })
-tag: PropertyPostTag;
+  @IsDefined()
+  @IsEnum(PropertyPostTag, { message: 'tag يجب أن يكون أحد القيم المحددة' })
+  tag: PropertyPostTag;
 
   @IsDefined()
   @IsString()

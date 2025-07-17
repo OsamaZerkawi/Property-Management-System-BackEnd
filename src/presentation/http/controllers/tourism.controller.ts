@@ -33,19 +33,19 @@ export class TourismController {
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
     return this.createTourism.execute(user.sub, dto);
   }
-
-  @UseGuards(JwtAuthGuard)
-  @Put(':id')
-  async update(
-    @CurrentUser() user: any,
-    @Param('id') id: number,
-    @Body() body: any,
-  ) {
-    const dto = new UpdateTourismDto();
-    Object.assign(dto, body.post, body.public_information, body.tourism_place);
-    return this.updateTourism.execute(user.sub, +id, dto);
+ 
+@UseGuards(JwtAuthGuard)
+@Put(':id')
+async update(
+  @CurrentUser() user: any,
+  @Param('id') id: number,
+  @Body() dto: UpdateTourismDto
+) { 
+  if (!dto || Object.keys(dto).length === 0) {
+    throw new BadRequestException('لا توجد بيانات للتحديث');
   }
-
+  return this.updateTourism.execute(user.sub, +id, dto);
+}
   @UseGuards(JwtAuthGuard)
   @Get()
   async list(@CurrentUser() user: any) {
@@ -61,14 +61,14 @@ export class TourismController {
     return this.filterTourism.execute(user.sub, filterDto);
   }
   
-@UseGuards(JwtAuthGuard)
-@Get('search')
-async searchByTitle(
-  @CurrentUser() user: any,
-    @Query('title') title: string,
-  ) {
-  return this.searchByTitleUseCase.execute(user.sub, title);
-}
+  @UseGuards(JwtAuthGuard)
+  @Get('search')
+  async searchByTitle(
+    @CurrentUser() user: any,
+      @Query('title') title: string,
+    ) {
+    return this.searchByTitleUseCase.execute(user.sub, title);
+  }
 
   @Get(':id')
   async getPropertyDetails(
