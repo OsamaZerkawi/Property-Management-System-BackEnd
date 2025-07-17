@@ -14,6 +14,10 @@ async function bootstrap() {
   // await cache.set('debug_key', 'hello_from_nest', 60);
   // const val = await cache.get('debug_key');
   // console.log('✅ Cache test value:', val); // ← يجب أن تطبع القيمة
+  app.enableCors({
+    origin: 'http://localhost:3030',
+    credentials: true,
+  });
 
   setupSwagger(app);
 
