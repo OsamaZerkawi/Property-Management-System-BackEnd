@@ -28,11 +28,12 @@ import { PropertyModule } from 'src/presentation/http/modules/property.module';
 import { UserReservationModule } from 'src/presentation/http/modules/user-reservation.module';
 import { UserInvoiceModule } from 'src/presentation/http/modules/user-invoice.module';
 import { MapExploreModule } from 'src/presentation/http/modules/map-explore.module';
- import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
+import { MobileAuthModule } from 'src/presentation/http/modules/mobile_auth.module';
 import { NotificationModule } from 'src/presentation/http/modules/notification.module';
 import { BullModule } from '@nestjs/bull';
 import { AdvertisementModule } from 'src/presentation/http/modules/advertisement.module';
 import { AdminModule } from 'src/presentation/http/modules/admin.module';
+import { TourismModule } from 'src/presentation/http/modules/tourism.module';
 @Module({
   imports: [
     AdminModule,
@@ -59,6 +60,7 @@ import { AdminModule } from 'src/presentation/http/modules/admin.module';
     ResidentialOfficeModule, 
     ServicePriceModule,
     MobileAuthModule,
+    TourismModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     ConfigModule.forRoot({

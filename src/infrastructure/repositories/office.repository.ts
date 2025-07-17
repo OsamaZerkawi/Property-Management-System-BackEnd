@@ -64,6 +64,8 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         payment_method: dto.payment_method,
         opening_time: dto.opening_time,
         closing_time: dto.closing_time,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
         region: { id: dto.region_id } as any,
       });
   

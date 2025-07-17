@@ -36,7 +36,8 @@ import { FcmToken } from "src/domain/entities/fcmToken.entity";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
 import { UserPermission } from "src/domain/entities/user-permission.entity";
-
+import { AdditionalService } from 'src/domain/entities/additional-service.entity';
+import { Service } from 'src/domain/entities/services.entity';
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
@@ -53,7 +54,8 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         PropertyFeedback,OfficeFeedback,OfficeSocial,PropertyFavorite,
         Booking,Touristic,Calendar,RentalContract,
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
-        Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission
+        Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
+        Otp, TempUser,ServicePrice,AdditionalService,Service
     ],
     synchronize: true,
     //dropSchema: true,
