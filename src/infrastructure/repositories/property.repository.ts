@@ -558,7 +558,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     postDescription: property.post?.description,
     postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
     postDate: property.post.created_at.toISOString().split('T')[0],
-    PostStatus: property.post.status,
+    postStatus: property.post.status,
     propertyId: property.id,
     area: property.area,
     property_type: property.property_type,

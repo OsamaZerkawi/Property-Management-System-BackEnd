@@ -13,7 +13,7 @@ export const GetOfficePropertiesSuccessResponse = ApiOkResponse({
           postDescription: "شقة مفروشة بالكامل في وسط المدينة",
           postImage: "http://localhost:3000/uploads/properties/posts/images/1.jpg",
           postDate: "2025-07-08",
-          PostStatus: "مقبول",
+          postStatus: "مقبول",
           propertyId: 12,
           area: 120,
           property_type: "سكني",
