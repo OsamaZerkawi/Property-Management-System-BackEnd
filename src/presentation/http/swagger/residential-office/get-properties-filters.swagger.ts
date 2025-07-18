@@ -1,4 +1,5 @@
 import { ApiQuery } from "@nestjs/swagger";
+import { CombinedPropertyStatus } from "src/domain/enums/combined-property-status.enum";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
@@ -8,7 +9,7 @@ export const SearchPropertiesFiltersSwagger = [
   ApiQuery({ name: 'regionId', type: Number, required: false }),
   ApiQuery({ name: 'cityId', type: Number, required: false }),
   ApiQuery({ name: 'status', enum: PropertyStatus, required: false }),
-  ApiQuery({ name: 'tag', enum: PropertyPostTag, required: false }),
+  ApiQuery({ name: 'tag', enum: CombinedPropertyStatus, required: false }),
 ];
 
 export const SearchPropertiesTitleSwagger = [
