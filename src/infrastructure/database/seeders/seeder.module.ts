@@ -23,6 +23,7 @@ import { User } from "src/domain/entities/user.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { ServicePriceSeeder } from "./service-price.seeder";
 import { ServicePrice } from "src/domain/entities/service-price.entity";
+import { UserRole } from "src/domain/entities/user-role.entity";
 
 
 @Module({
@@ -40,7 +41,7 @@ import { ServicePrice } from "src/domain/entities/service-price.entity";
             Role,Permission,City,Region,Office,
             Property,Residential,PropertyPost,
             PropertyFeedback,Image,User,OfficeSocial,
-            ServicePrice,
+            ServicePrice,UserRole,
         ])
     ],
     providers:[
