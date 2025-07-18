@@ -150,8 +150,8 @@ import {
     @Get(':property_id/commission-and-price')
     async getPropertyFees(
     @CurrentUser() user: any,
-    @Param('id') propertyId: number
-  ) {
+    @Param('property_id') propertyId: number
+  ) { 
     return this.propertyFeeService.getCommissionAndRental(propertyId, user.sub);
   }
   }

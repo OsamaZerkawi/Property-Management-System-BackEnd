@@ -9,12 +9,12 @@ export class PropertyFeeService {
   ) {}
 
   async getCommissionAndRental(propertyId: number, userId: number) { 
-    const commission = await this.getOfficeCommissionUseCase.execute(userId);
-    const rental_price = await this.getRentalPriceUseCase.execute(propertyId);
+    const { commission } = await this.getOfficeCommissionUseCase.execute(userId); 
+    const { rental_price } = await this.getRentalPriceUseCase.execute(propertyId);
      
-    return {  
-      commission:  commission,
-      rental_price: rental_price, 
+    return {    
+       commission,
+       rental_price, 
     };
-  }
+}
 }

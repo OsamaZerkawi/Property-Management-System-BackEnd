@@ -54,6 +54,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
   }
   
   async findOneByPropertyId(propertyId: number): Promise<Residential|null> {
+    console.log('property_id',propertyId);
     return await this.residentialRepo.createQueryBuilder('residential')
       .innerJoinAndSelect('residential.property', 'property')  
       .where('property.id = :propertyId', { propertyId })
