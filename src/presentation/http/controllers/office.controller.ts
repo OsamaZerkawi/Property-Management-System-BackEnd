@@ -19,17 +19,17 @@ import {
   import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
   import { OfficeResource } from 'src/presentation/http/resources/office.resource';
   import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
-  import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-method.dto'; 
   import {OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor"; 
   import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
   import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
   import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case"; 
   import { Roles } from "src/shared/decorators/role.decorator";  
-import { Public } from "src/shared/decorators/public.decorator";
-import { Request } from "express";
-import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
-import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
-  
+  import { Public } from "src/shared/decorators/public.decorator";
+  import { Request } from "express";
+  import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
+  import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
+  import { PropertyFeeService } from "src/application/services/propertyFee.service";
+    
   @Controller('office')
   export class OfficeController {
     constructor(
@@ -41,6 +41,7 @@ import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
       private readonly getOfficeFeesUseCase: GetOfficeFeesUseCase,
       private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase,
       private readonly getTopRatedOfficesUseCase: GetTopRatedOfficesUseCase,
+      private readonly propertyFeeService: PropertyFeeService
     ) {}
 
     @Get('/payment-method')
@@ -145,6 +146,13 @@ import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
 
         return successResponse([],'تم تحديث معلومات الرسوم الخاصة بالمكتب بنجاح',200);
     }
- 
+    @UseGuards(JwtAuthGuard)
+    @Get(':property_id/commission-and-price')
+    async getPropertyFees(
+    @CurrentUser() user: any,
+    @Param('id') propertyId: number
+  ) {
+    return this.propertyFeeService.getCommissionAndRental(propertyId, user.sub);
+  }
   }
    

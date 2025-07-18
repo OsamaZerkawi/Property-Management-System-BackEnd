@@ -10,7 +10,7 @@ import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { ResidentialPropertyRepositoryInterface } from "src/domain/repositories/residential-property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
-import { Repository } from "typeorm";
+import { Repository} from "typeorm";
 
 export class ResidentialPropertyRepository implements ResidentialPropertyRepositoryInterface{
     constructor(
@@ -52,6 +52,13 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
     },
   });
   }
+  
+  async findOneByPropertyId(propertyId: number): Promise<Residential|null> {
+    return await this.residentialRepo.createQueryBuilder('residential')
+      .innerJoinAndSelect('residential.property', 'property')  
+      .where('property.id = :propertyId', { propertyId })
+      .getOne();  
+  } 
 
   async updateResidentialProperty(id: number, data: UpdateResidentialPropertyDetailsDto) {
       const residentialProperty = await this.residentialRepo.findOne({where: {id}});
