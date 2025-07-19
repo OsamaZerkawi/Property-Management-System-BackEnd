@@ -30,7 +30,9 @@ export class MobileLocalStrategy extends PassportStrategy(Strategy, 'mobile-loca
 
     const user = await this.validateUser.execute(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(
+        errorResponse('بيانيات الدخول غير صحيحة',401)
+      );
     }
     return user;
   }

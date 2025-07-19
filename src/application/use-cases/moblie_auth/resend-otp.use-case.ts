@@ -4,6 +4,7 @@ import { ResendOtpDto } from 'src/application/dtos/mobile_auth/resend-otp.dto';
 import { OtpService } from 'src/application/services/otp.service';
 import { MOBILE_AUTH_REPOSITORY, MobileAuthRepositoryInterface } from 'src/domain/repositories/mobile_auth.repository';
 import { OtpType } from 'src/domain/entities/otp.entity';
+import { errorResponse } from 'src/shared/helpers/response.helper';
 
 @Injectable()
 export class ResendOtpUseCase {
@@ -18,7 +19,9 @@ export class ResendOtpUseCase {
  
     const existing = await this.repoAuth.findValidOtp(dto.email, dto.type as OtpType, now);
     if (existing) {
-      throw new BadRequestException('رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد');
+      throw new BadRequestException(
+        errorResponse('رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد',400)
+      );
     }
     await this.repoAuth.deleteExpiredOtps(dto.email, dto.type, now);
     const code = this.otpService.generateOtp();

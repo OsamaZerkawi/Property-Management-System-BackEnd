@@ -17,6 +17,10 @@ import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-o
 import { ResetPasswordUseCase } from 'src/application/use-cases/moblie_auth/reset-password.use-case';
 import {ResetPasswordDto} from 'src/application/dtos/mobile_auth/reset-password.dto';
 import { SignupSwaggerDoc } from "../swagger/mobile-auth/signup.swagger";
+import { ConfirmOtpSwaggerDoc } from "../swagger/mobile-auth/confirm-otp.swagger";
+import { ResendOtpSwaggerDoc } from "../swagger/mobile-auth/resend-otp.swagger";
+import { RefreshTokenSwaggerDoc } from "../swagger/mobile-auth/refresh.swagger";
+import { MobileLoginSwaggerDoc } from "../swagger/mobile-auth/login.swagger";
 @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
@@ -47,6 +51,7 @@ export class MobileAuthController {
 
 
   @Public()
+  @ConfirmOtpSwaggerDoc()
   @Post('confirm')
   async confirm(@Body() body: VerifyOtpDto) {
     await this.verifyOtp.execute(body);
@@ -54,14 +59,16 @@ export class MobileAuthController {
   }
   
   @Public()
+  @ResendOtpSwaggerDoc()
   @Post('resend-otp')
   @HttpCode(HttpStatus.OK)
   async resendOtp(@Body() dto: ResendOtpDto) {
     await this.resendOtpUseCase.execute(dto);
-    return { message: 'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني.' };
+    return successResponse([],'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني.',200)
   }
 
   @Public()
+  @RefreshTokenSwaggerDoc()
   @UseGuards(RefreshJwtGuard) 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
@@ -92,16 +99,16 @@ export class MobileAuthController {
   }
 
   @Public()
+  @MobileLoginSwaggerDoc()
   @UseGuards(MobileLocalAuthGuard)
   @Post('login') 
   async login(@Req() req) {
     const user = req.user;
     const tokens = await this.loginUseCase.execute(user);
-    return {
-      message: 'تم تسجيل الدخول بنجاح',
-      ...tokens,
-    };
+
+    return successResponse(tokens, 'تم تسجيل الدخول بنجاح',200);
   }
+
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
