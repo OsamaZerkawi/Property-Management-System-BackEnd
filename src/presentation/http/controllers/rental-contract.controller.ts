@@ -1,5 +1,5 @@
 // src/infrastructure/controllers/rental-contract.controller.ts
-import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get, Query, ParseIntPipe } from '@nestjs/common';
 import { CreateRentalContractUseCase } from 'src/application/use-cases/rental/create-rental-contract.use-case';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { CreateRentalContractDto } from 'src/application/dtos/rental_contracts/create-rental-contract.dto';
@@ -7,6 +7,8 @@ import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { UserInvoiceImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-rental-contracts.use-case';
 import { Request } from 'express';
+import { ContractStatus } from 'src/domain/enums/rental-contract-status.enum';
+import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 @Controller('rental-contracts')
 export class RentalContractController {
   constructor(
@@ -28,14 +30,16 @@ export class RentalContractController {
     return this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
   }
 
-@Get()
+ @Get()
 @UseGuards(JwtAuthGuard)
 async getRentalContracts(
   @CurrentUser() user: { sub: number },
-   @Req() request: Request,
+  @Req() request: Request,
+  @Query() filters: ContractFiltersDto,   
 ) {
   const baseUrl = `${request.protocol}://${request.get('host')}`;
-  return this.getRentalContractsUseCase.execute(user.sub, baseUrl);
+  return this.getRentalContractsUseCase.execute(user.sub, baseUrl, filters);
 }
+
 
 }

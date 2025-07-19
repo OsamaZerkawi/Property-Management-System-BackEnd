@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { RentalContract } from 'src/domain/entities/rental-contract.entity';
 import { RentalContractRepositoryInterface } from 'src/domain/repositories/rental-contract.repository';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
  
 @Injectable()
 export class RentalContractRepository  
@@ -15,25 +16,43 @@ export class RentalContractRepository
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
   } 
-   async findContractsByOfficeId(officeId: number) {
-    return this.repo.createQueryBuilder('rc')
+  async findContractsByOfficeId(
+    officeId: number,
+    filters: ContractFiltersDto = {},
+  ): Promise<Array<{
+    image: string;
+    title: string;
+    start_date: string;
+    end_date: string;
+    phone: string;
+    status: string;
+  }>> {
+    const qb = this.repo.createQueryBuilder('rc')
       .innerJoin('rc.residential', 'r')
-      .innerJoin('r.property', 'p')
-      .innerJoin('p.office', 'o', 'o.id = :officeId', { officeId })
-      .innerJoin('p.post', 'pp', 'pp.status = :status', {  
-        status: 'مقبول',
-      })
-      .innerJoin('rc.user', 'u')
+      .innerJoin('r.property', 'p', 'p.office_id = :officeId', { officeId })
+      .innerJoin('p.post', 'pp', 'pp.status = :postStatus', { postStatus: 'مقبول' })
+      .innerJoin('rc.user', 'u') 
+      .innerJoin('p.region', 'region')
+      .innerJoin('region.city', 'city')
       .select([
         'pp.image AS image',
         'pp.title AS title',
         'rc.start_date AS start_date',
         'rc.end_date AS end_date',
-        'rc.price_per_period AS price',
         'u.phone AS phone',
-        'rc.status AS status',
+        'r.status AS status',
       ])
-      .orderBy('rc.start_date', 'DESC')
-      .getRawMany();
-}
+      .orderBy('rc.start_date', 'DESC');
+  
+    if (filters.status) {
+    qb.andWhere('rc.status = :status', { status: filters.status }); 
+    }
+  
+    if (filters.cityId) {
+      qb.andWhere('city.id = :cityId', { cityId: filters.cityId });
+    }
+
+    return qb.getRawMany();
+  }
+
 }
