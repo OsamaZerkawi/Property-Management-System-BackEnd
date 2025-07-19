@@ -29,6 +29,7 @@ export class RentalContractRepository
         'pp.title AS title',
         'rc.start_date AS start_date',
         'rc.end_date AS end_date',
+        'rc.price_per_period AS price',
         'u.phone AS phone',
         'r.status AS status',
       ])
