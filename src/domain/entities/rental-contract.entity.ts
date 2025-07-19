@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { User } from './user.entity';
 import { Residential } from './residential.entity';
+import { ContractStatus } from '../enums/rental-contract-status.enum';
 
 @Entity('rental_contracts')
 export class RentalContract {
@@ -30,6 +31,9 @@ export class RentalContract {
 
   @Column({ type: 'date'})
   end_date: string;
+
+  @Column({ type: 'enum', enum: ContractStatus,default:ContractStatus.RENTED })
+  status: ContractStatus;
 
   @Column({ type: 'decimal' })
   price_per_period: number;

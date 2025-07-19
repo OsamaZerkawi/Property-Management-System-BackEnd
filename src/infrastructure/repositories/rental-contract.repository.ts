@@ -31,7 +31,7 @@ export class RentalContractRepository
         'rc.end_date AS end_date',
         'rc.price_per_period AS price',
         'u.phone AS phone',
-        'r.status AS status',
+        'rc.status AS status',
       ])
       .orderBy('rc.start_date', 'DESC')
       .getRawMany();
