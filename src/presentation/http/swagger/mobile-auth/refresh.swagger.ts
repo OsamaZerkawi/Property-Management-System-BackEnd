@@ -18,12 +18,13 @@ export function RefreshTokenSwaggerDoc() {
       description: 'تم تحديث رمز الدخول بنجاح',
       schema: {
         example: {
-          status: true,
+          successful: true,
           message: 'تم تحديث رمز الدخول بنجاح',
           data: {
             user: { id: 1 },
             accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
           },
+          status_code: 200,
         },
       },
     }),
@@ -37,50 +38,53 @@ export function RefreshTokenSwaggerDoc() {
             MissingToken: {
               summary: 'رمز التحديث غير موجود',
               value: {
-                statusCode: 401,
+                successful: false,
                 message: 'رمز التحديث غير موجود',
-                error: 'Unauthorized',
+                status_code: 401,
               },
             },
             InvalidToken: {
               summary: 'رمز التحديث غير صالح',
               value: {
-                statusCode: 401,
+                successful: false,
                 message: 'رمز التحديث غير صالح',
-                error: 'Unauthorized',
+                status_code: 401,
               },
             },
             ExpiredToken: {
               summary: 'رمز التحديث منتهي الصلاحية',
               value: {
-                statusCode: 401,
+                successful: false,
                 message: 'رمز التحديث منتهي الصلاحية',
-                error: 'Unauthorized',
+                status_code: 401,
               },
             },
             RefreshTokenHeaderInvalid: {
               summary: 'رمز التحديث الذي تم إرساله غير صحيح أو منتهي الصلاحية (داخل استراتيجية التحقق)',
               value: {
-                statusCode: 401,
+                successful: false,
                 message: 'رمز التحديث الذي تم إرساله غير صحيح أو منتهي الصلاحية',
-                error: 'Unauthorized',
+                status_code: 401,
               },
             },
           },
         },
       },
     }),
-
+    
     ApiResponse({
       status: HttpStatus.NOT_FOUND,
       description: 'المستخدم غير موجود',
-      schema: {
-        example: {
-          statusCode: 404,
-          message: 'المستخدم غير موجود',
-          error: 'Not Found',
+      content: {
+        'application/json': {
+          example: {
+            successful: false,
+            message: 'المستخدم غير موجود',
+            status_code: 404,
+          },
         },
       },
     }),
+
   );
 }

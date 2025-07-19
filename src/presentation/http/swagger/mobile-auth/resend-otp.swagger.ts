@@ -12,20 +12,24 @@ export function ResendOtpSwaggerDoc() {
       description: 'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني.',
       schema: {
         example: {
-          status: true,
+          successful: true,
           message: 'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني.',
           data: [],
+          status_code: 200,
         },
       },
     }),
+
     ApiResponse({
       status: HttpStatus.BAD_REQUEST,
       description: 'رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد',
-      schema: {
-        example: {
-          statusCode: 400,
-          message: 'رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد',
-          error: 'Bad Request',
+      content: {
+        'application/json': {
+          example: {
+            successful: false,
+            message: 'رمز التحقق قد أُرسل مسبقاً ولم تنتهِ صلاحيته بعد',
+            status_code: 400,
+          },
         },
       },
     }),

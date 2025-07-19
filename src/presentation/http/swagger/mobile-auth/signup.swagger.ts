@@ -57,9 +57,10 @@ export function SignupSwaggerDoc() {
       description: 'تم التسجيل بنجاح وتم إرسال رمز التحقق',
       schema: {
         example: {
-          success: true,
+          succssful: true,
           message: 'تم إرسال رمز التحقق. يرجى التحقق من بريدك الإلكتروني.',
           data: [],
+          status_code: 200,
         },
       },
     }),
@@ -77,26 +78,27 @@ export function SignupSwaggerDoc() {
         },
       },
     }),
+
     ApiResponse({
       status: HttpStatus.CONFLICT,
-      description: 'تعارض في البريد الإلكتروني',
+      description: 'تعارض في البريد الإلكتروني أو رمز التحقق',
       content: {
         'application/json': {
           examples: {
             EmailAlreadyUsed: {
               summary: 'البريد الإلكتروني مستخدم بالفعل',
               value: {
-                statusCode: 409,
+                successful: false,
                 message: 'البريد الإلكتروني مستخدم بالفعل',
-                error: 'Conflict',
+                status_code: 409,
               },
             },
             OtpAlreadySent: {
               summary: 'تم إرسال رمز التحقق مسبقاً',
               value: {
-                statusCode: 409,
+                successful: false,
                 message: 'تم إرسال رمز التحقق لهذا البريد مسبقاً. يرجى التحقق من بريدك أو إكمال التفعيل',
-                error: 'Conflict',
+                status_code: 409,
               },
             },
           },

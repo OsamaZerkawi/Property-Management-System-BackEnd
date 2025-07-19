@@ -52,10 +52,10 @@ export const successResponse = <T>(
 });
 
 export const errorResponse = (
-  error = 'Something went wrong',
+  message = 'Something went wrong',
   statusCode = 500,
 ): ApiResponse<null> => ({
   successful: false,
-  error,
+  message,
   status_code: statusCode,
 });

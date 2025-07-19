@@ -27,9 +27,10 @@ export function ConfirmOtpSwaggerDoc() {
       description: 'تم تأكيد الرمز وإنشاء الحساب بنجاح',
       schema: {
         example: {
-          success: true,
+          successful: true,
           message: 'تم إنشاء الحساب بنجاح.',
           data: [],
+          status_code: 200,
         },
       },
     }),
@@ -42,17 +43,17 @@ export function ConfirmOtpSwaggerDoc() {
             EmailNotRegistered: {
               summary: 'البريد غير مسجل أو لم يُرسل له رمز تحقق',
               value: {
-                statusCode: 400,
+                successful: false,
                 message: 'لم يُسجّل هذا البريد أو لم يُرسل إليه رمز تحقق',
-                error: 'Bad Request',
+                status_code: 400,
               },
             },
             OtpInvalidOrExpired: {
               summary: 'رمز التحقق غير صالح أو منتهي الصلاحية',
               value: {
-                statusCode: 400,
+                successful: false,
                 message: 'رمز التحقق غير صالح أو انتهت صلاحيته',
-                error: 'Bad Request',
+                status_code: 400,
               },
             },
           },
