@@ -17,6 +17,7 @@ import { ApproveAdRequestUseCase } from "src/application/use-cases/advertisement
 import { User } from "src/domain/entities/user.entity";
 import { Notification } from "src/domain/entities/notification.entity";
 import { NotificationModule } from "./notification.module";
+import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisement.scheduler";
 
 @Module({
     imports:[
@@ -27,6 +28,7 @@ import { NotificationModule } from "./notification.module";
     ],
     controllers:[AdvertisementController,FinanceAdsManagementController],
     providers:[
+        AdvertisementScheduler,
         CreateAdvertisementUseCase,
         ListOfficeInvoicesUseCase,
         GetPendingAdvertisementUseCase,

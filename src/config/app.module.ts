@@ -34,8 +34,10 @@ import { BullModule } from '@nestjs/bull';
 import { AdvertisementModule } from 'src/presentation/http/modules/advertisement.module';
 import { AdminModule } from 'src/presentation/http/modules/admin.module';
 import { TourismModule } from 'src/presentation/http/modules/tourism.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     AdminModule,
     AdvertisementModule,
     NotificationModule,

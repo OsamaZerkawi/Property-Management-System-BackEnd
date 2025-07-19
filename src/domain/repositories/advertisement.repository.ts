@@ -9,4 +9,5 @@ export interface AdvertisementRepositoryInterface {
     findPendingAds();
     findById(id: number);
     update(id: number,fields: Partial<Advertisement>);
+    deactivateExpiredAdvertisements(currentDate: Date);
 }

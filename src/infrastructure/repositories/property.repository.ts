@@ -216,7 +216,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {
     const query =  await this.createBasePropertyDetailsQuery()
-    .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
     .andWhere('office.user_id = :userId', { userId });
     
     const properties = await query.getMany();
@@ -854,11 +853,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           resStatus: filters.status,
         });
       }
-    }
-    else {
-      query.andWhere('post.status = :approvedStatus', {
-        approvedStatus: PropertyPostStatus.APPROVED,
-      });
     }
     if (filters.listing_type) {
       query.andWhere('residential.listing_type = :listing_type', { listing_type: filters.listing_type });
