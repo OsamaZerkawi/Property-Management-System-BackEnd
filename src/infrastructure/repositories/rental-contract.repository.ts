@@ -15,4 +15,24 @@ export class RentalContractRepository
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
   } 
+   async findContractsByOfficeId(officeId: number) {
+    return this.repo.createQueryBuilder('rc')
+      .innerJoin('rc.residential', 'r')
+      .innerJoin('r.property', 'p')
+      .innerJoin('p.office', 'o', 'o.id = :officeId', { officeId })
+      .innerJoin('p.post', 'pp', 'pp.status = :status', {  
+        status: 'مقبول',
+      })
+      .innerJoin('rc.user', 'u')
+      .select([
+        'pp.image AS image',
+        'pp.title AS title',
+        'rc.start_date AS start_date',
+        'rc.end_date AS end_date',
+        'u.phone AS phone',
+        'r.status AS status',
+      ])
+      .orderBy('rc.start_date', 'DESC')
+      .getRawMany();
+}
 }

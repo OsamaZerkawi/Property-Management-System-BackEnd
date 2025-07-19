@@ -37,12 +37,12 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
   if (!property) {
     throw new BadRequestException('العقار غير موجود أو لا ينتمي لهذا المكتب');
   }
-const residential = await this.dataSource.getRepository(Residential).findOne({
-    where: { id: dto.residentialId }
-  });
+  const residential = await this.dataSource.getRepository(Residential).findOne({
+      where: { id: dto.residentialId }
+    });
 
   if (!residential) {
-    throw new BadRequestException('العقار السكني غير موجود');
+    throw new NotFoundException('العقار السكني غير موجود');
   }
 
   if (residential.status === PropertyStatus.Rented) {

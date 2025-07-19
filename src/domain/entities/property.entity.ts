@@ -20,7 +20,6 @@ import { PropertyPost } from './property-posts.entitiy';
 import { Image } from './image.entity';
 import { UserPostSuggestion } from './user-post-suggestions.entity';
 import { UserPropertyInvoice } from './user-property-invoice.entity';
-import { User } from './user.entity';
 import { PropertyFeedback } from './property-feedback.entity';
 import { PropertyFavorite } from './property-favorite.entity';
 import { Touristic } from './touristic.entity';

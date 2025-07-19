@@ -1,15 +1,17 @@
 // src/infrastructure/controllers/rental-contract.controller.ts
-import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get } from '@nestjs/common';
 import { CreateRentalContractUseCase } from 'src/application/use-cases/rental/create-rental-contract.use-case';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { CreateRentalContractDto } from 'src/application/dtos/rental_contracts/create-rental-contract.dto';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { UserInvoiceImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
+import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-rental-contracts.use-case';
   
 @Controller('rental-contracts')
 export class RentalContractController {
   constructor(
     private readonly createRentalContractUseCase: CreateRentalContractUseCase,
+     private readonly getRentalContractsUseCase: GetRentalContractsUseCase
   ) {}
 
   @Post()
@@ -24,5 +26,11 @@ export class RentalContractController {
     throw new BadRequestException('يجب ان يكون هناك وثيقة للفاتورة');
   } 
     return this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async getRentalContracts(@CurrentUser() user) {
+    return this.getRentalContractsUseCase.execute(user.sub);
   }
 }

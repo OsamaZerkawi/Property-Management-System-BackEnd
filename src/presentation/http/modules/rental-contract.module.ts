@@ -23,6 +23,7 @@ import { User } from 'src/domain/entities/user.entity';
 import { AuthTokenBlackListService } from 'src/application/services/authTokenBlacklist.service';
 import { AuthModule } from './auth.module';
 import { PropertyModule } from './property.module';
+import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-rental-contracts.use-case';
  
  
 
@@ -43,6 +44,7 @@ import { PropertyModule } from './property.module';
   controllers: [RentalContractController],
   providers: [
     CreateRentalContractUseCase,
+    GetRentalContractsUseCase,
     {
       provide: RENTAL_CONTRACT_REPOSITORY,
       useClass: RentalContractRepository,
