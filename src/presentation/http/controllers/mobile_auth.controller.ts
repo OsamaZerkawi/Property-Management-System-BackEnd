@@ -21,6 +21,7 @@ import { ConfirmOtpSwaggerDoc } from "../swagger/mobile-auth/confirm-otp.swagger
 import { ResendOtpSwaggerDoc } from "../swagger/mobile-auth/resend-otp.swagger";
 import { RefreshTokenSwaggerDoc } from "../swagger/mobile-auth/refresh.swagger";
 import { MobileLoginSwaggerDoc } from "../swagger/mobile-auth/login.swagger";
+import { ResetPasswordSwaggerDoc } from "../swagger/mobile-auth/reset-password.swagger";
 @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
@@ -110,10 +111,11 @@ export class MobileAuthController {
   }
 
   @Public()
+  @ResetPasswordSwaggerDoc()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.resetPasswordUseCase.execute(dto);
-    return successResponse(null, 'تم تغيير كلمة المرور بنجاح');
+    return successResponse([], 'تم تغيير كلمة المرور بنجاح',200);
   }
 }
