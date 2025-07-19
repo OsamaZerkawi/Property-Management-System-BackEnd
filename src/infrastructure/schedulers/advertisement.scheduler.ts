@@ -22,7 +22,7 @@ export class AdvertisementScheduler {
       
       const result = await this.advertisementRepo.deactivateExpiredAdvertisements(today);
       
-      this.logger.log(`✅ Deactivated ${result.affected} expired advertisements.`);
+      this.logger.log(`✅ Deactivated ${result} expired advertisements.`);
 
     }
 }

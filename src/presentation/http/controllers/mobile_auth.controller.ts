@@ -16,6 +16,7 @@ import { UserProfileImageInterceptor } from 'src/shared/interceptors/file-upload
 import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-otp.use-case';
 import { ResetPasswordUseCase } from 'src/application/use-cases/moblie_auth/reset-password.use-case';
 import {ResetPasswordDto} from 'src/application/dtos/mobile_auth/reset-password.dto';
+import { SignupSwaggerDoc } from "../swagger/mobile-auth/signup.swagger";
 @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
@@ -29,6 +30,7 @@ export class MobileAuthController {
 
 
   @Public()
+  @SignupSwaggerDoc()
   @Post('signup')
   @HttpCode(HttpStatus.OK)
   @ UserProfileImageInterceptor()
@@ -50,6 +52,7 @@ export class MobileAuthController {
     await this.verifyOtp.execute(body);
     return successResponse( [], 'تم إنشاء الحساب بنجاح.' );
   }
+  
   @Public()
   @Post('resend-otp')
   @HttpCode(HttpStatus.OK)

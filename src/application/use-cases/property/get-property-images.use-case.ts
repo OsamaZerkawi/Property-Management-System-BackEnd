@@ -14,7 +14,7 @@ export class GetPropertyImagesUseCase {
 
     return images.map((image) => ({
       id: image.id,
-      image_url: `${baseUrl}/uploads/${image.image_path}`,
+      image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
     }));
   }
 }

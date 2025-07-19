@@ -25,7 +25,7 @@ export class DeletePropertyImageUseCase {
     }
 
     // حذف من النظام
-    const imagePath = path.join(process.cwd(), 'uploads', image.image_path);
+    const imagePath = path.join(process.cwd(), 'uploads/properties/images', image.image_path);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }

@@ -24,7 +24,7 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         .set({ is_active: false })
         .where('is_active = :active', { active: true })
         .andWhere('start_date IS NOT NULL')
-        .andWhere(`DATE_ADD(start_date, INTERVAL day_period DAY) <= :today`, { today: currentDate })
+        .andWhere(`start_date + (day_period || ' days')::interval < :today`, { today: currentDate })
         .execute();
   
       return result.affected ?? 0;

@@ -14,6 +14,7 @@ import {
   USER_REPOSITORY,
   UserRepositoryInterface,
 } from 'src/domain/repositories/user.repository';
+import { errorResponse } from 'src/shared/helpers/response.helper';
 
 @Injectable()
 export class VerifyOtpUseCase {
@@ -29,11 +30,15 @@ export class VerifyOtpUseCase {
    
     const temp = await this.repo.findTempUserByEmail(dto.email);
     if (!temp) {
-      throw new BadRequestException('لم يُسجّل هذا البريد أو لم يُرسل إليه رمز تحقق');    }
+      throw new BadRequestException(
+        errorResponse('لم يُسجّل هذا البريد أو لم يُرسل إليه رمز تحقق',400)
+      );    }
 
     const otp = await this.repo.findLatestValidOtp(dto.email, 'signup', now);
     if (!otp || otp.code !== dto.otp) {
-      throw new BadRequestException('رمز التحقق غير صالح أو انتهت صلاحيته');
+      throw new BadRequestException(
+        errorResponse('رمز التحقق غير صالح أو انتهت صلاحيته',400)
+      );
     }  
    
     await this.userRepo.save({
