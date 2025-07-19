@@ -14,7 +14,7 @@ export class AdvertisementController {
     ){}
 
     @Get('/invoices')
-    // @Roles('صاحب مكتب')
+    @Roles('صاحب مكتب')
     async getAll(
         @CurrentUser() user,
     ){

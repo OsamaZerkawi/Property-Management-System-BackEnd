@@ -63,12 +63,10 @@ export class PermissionRepository implements PermissionRepositoryInterface {
     }
 
     async userHasPermission(userId: number, permissionName: string) {
-        const count = await this.rolePermissionRepo
-        .createQueryBuilder('role_permission')
-        .leftJoin('role_permission.role','role')
-        .leftJoin('role.userRoles','user_role')
-        .leftJoin('role_permission.permission','permission')
-        .where('user_role.userId = :userId',{userId})
+        const count = await this.userPermissionRepo
+        .createQueryBuilder('user_permission')
+        .leftJoin('user_permission.permission','permission')
+        .where('user_permission.user = :userId',{userId})
         .andWhere('permission.name = :permissionName',{permissionName})
         .getCount();
 

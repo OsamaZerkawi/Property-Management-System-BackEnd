@@ -10,17 +10,28 @@ import { AdvertisementRepository } from "src/infrastructure/repositories/adverti
 import { OfficeModule } from "./office.module";
 import { CreateAdvertisementUseCase } from "src/application/use-cases/advertisement/create-advertisement.use-case";
 import { ListOfficeInvoicesUseCase } from "src/application/use-cases/advertisement/list-advertisement-invoices.use-case";
+import { FinanceAdsManagementController } from "../controllers/finance-ads-management.controller";
+import { GetPendingAdvertisementUseCase } from "src/application/use-cases/advertisement/get-pending-ads.use-case";
+import { RejectAdRequestUseCase } from "src/application/use-cases/advertisement/reject-ad-request.use-case";
+import { ApproveAdRequestUseCase } from "src/application/use-cases/advertisement/approve-ad-request.use-case";
+import { User } from "src/domain/entities/user.entity";
+import { Notification } from "src/domain/entities/notification.entity";
+import { NotificationModule } from "./notification.module";
 
 @Module({
     imports:[
+        NotificationModule,
         OfficeModule,
         AuthModule,
-        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office])
+        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User])
     ],
-    controllers:[AdvertisementController],
+    controllers:[AdvertisementController,FinanceAdsManagementController],
     providers:[
         CreateAdvertisementUseCase,
         ListOfficeInvoicesUseCase,
+        GetPendingAdvertisementUseCase,
+        RejectAdRequestUseCase,
+        ApproveAdRequestUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,

@@ -4,6 +4,7 @@ import { privateDecrypt } from "crypto";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { Office } from "src/domain/entities/offices.entity";
 import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
+import { AdminAgreement } from "src/domain/enums/admin-agreement.enum";
 import { InvoiceType } from "src/domain/enums/invoice.type.enum";
 import { AdvertisementRepositoryInterface } from "src/domain/repositories/advertisement.repository";
 import { Repository } from "typeorm";
@@ -15,6 +16,24 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         @InjectRepository(OnlineInvoice)
         private readonly onlineInvoiceRepo: Repository<OnlineInvoice>,
     ){}
+    
+    async update(id: number, fields: Partial<Advertisement>) {
+        await this.advertisementRepo.update(id,fields);
+    }
+    
+    async findById(id: number) {
+        return this.advertisementRepo.findOne({
+            where: {id},
+            relations:['office','office.user']
+        });
+    }
+    
+    async findPendingAds() {
+        return this.advertisementRepo.find({
+            where: {admin_agreement: AdminAgreement.PENDING},
+            select:['id','day_period','image']
+        });
+    }
 
     findAllWithInvoicesByOfficeId(officeId: number) {
         return this.advertisementRepo.find({

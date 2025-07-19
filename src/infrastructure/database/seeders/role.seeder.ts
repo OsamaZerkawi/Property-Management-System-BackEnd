@@ -12,7 +12,7 @@ export class RoleSeeder {
     private readonly dataSource: DataSource,
   ) {}
 
-  private readonly roles = ['مشرف', 'مدير', 'صاحب مكتب', 'مستخدم'];
+  private readonly roles = ['مشرف', 'مدير', 'صاحب مكتب', 'مزود خدمة'];
 
   async seed() {
     await this.dataSource.query('TRUNCATE TABLE roles RESTART IDENTITY CASCADE');
