@@ -15,10 +15,6 @@ export class CreateRentalContractDto {
   @IsNotEmpty()
   monthlyRent: number;
 
-  @IsString()
-  @IsNotEmpty()
-  documentImage: string;
-
   @IsInt()
   @IsNotEmpty()
   propertyId: number;

@@ -25,7 +25,7 @@ export class CreateRentalContractUseCase {
     private readonly officeRepo: OfficeRepositoryInterface,
   ) {}
 
-  async execute(userId: number, dto: CreateRentalContractDto) {
+  async execute(userId: number, dto: CreateRentalContractDto,documentImage: string) {
     const office =  await this.officeRepo.findOneByUserId(userId);
     if (!office) throw new NotFoundException('المكتب غير موجود');
  
@@ -55,7 +55,7 @@ export class CreateRentalContractUseCase {
        
       if (i === 0) { 
         invoice.status = InvoicesStatus.PAID;
-        invoice.invoiceImage = dto.documentImage;
+        invoice.invoiceImage = documentImage;
       } else { 
         invoice.status = InvoicesStatus.PENDING; 
       }
