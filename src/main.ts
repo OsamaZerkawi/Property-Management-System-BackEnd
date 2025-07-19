@@ -20,7 +20,8 @@ async function bootstrap() {
   });
 
   setupSwagger(app);
-
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,  // automatically transforms payloads to DTO objects

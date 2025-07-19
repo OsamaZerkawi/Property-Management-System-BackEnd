@@ -22,8 +22,8 @@ export class RentalContract {
   @JoinColumn({ name: 'residential_id' })
   residential: Residential;
 
-  @Column({ type: 'varchar', length: 255})
-  period: string;
+  @Column( )
+  period:number;
 
   @Column({ type: 'date'})
   start_date: string;

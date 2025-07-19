@@ -34,6 +34,7 @@ import { BullModule } from '@nestjs/bull';
 import { AdvertisementModule } from 'src/presentation/http/modules/advertisement.module';
 import { AdminModule } from 'src/presentation/http/modules/admin.module';
 import { TourismModule } from 'src/presentation/http/modules/tourism.module';
+import { RentalContractModule } from 'src/presentation/http/modules/rental-contract.module';
 @Module({
   imports: [
     AdminModule,
@@ -61,6 +62,7 @@ import { TourismModule } from 'src/presentation/http/modules/tourism.module';
     ServicePriceModule,
     MobileAuthModule,
     TourismModule,
+    RentalContractModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     ConfigModule.forRoot({
