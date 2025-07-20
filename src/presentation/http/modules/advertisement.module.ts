@@ -13,7 +13,7 @@ import { ListOfficeInvoicesUseCase } from "src/application/use-cases/advertiseme
 import { FinanceAdsManagementController } from "../controllers/finance-ads-management.controller";
 import { GetPendingAdvertisementUseCase } from "src/application/use-cases/advertisement/get-pending-ads.use-case";
 import { RejectAdRequestUseCase } from "src/application/use-cases/advertisement/reject-ad-request.use-case";
-import { ApproveAdRequestUseCase } from "src/application/use-cases/advertisement/approve-ad-request.use-case";
+import { ApproveAdvertisementRequestUseCase } from "src/application/use-cases/advertisement/approve-ad-request.use-case";
 import { User } from "src/domain/entities/user.entity";
 import { Notification } from "src/domain/entities/notification.entity";
 import { NotificationModule } from "./notification.module";
@@ -33,7 +33,7 @@ import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisem
         ListOfficeInvoicesUseCase,
         GetPendingAdvertisementUseCase,
         RejectAdRequestUseCase,
-        ApproveAdRequestUseCase,
+        ApproveAdvertisementRequestUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,

@@ -5,7 +5,7 @@ import { NOTIFICATION_REPOSITORY, NotificationRepositoryInterface } from "src/do
 import { errorResponse } from "src/shared/helpers/response.helper";
 
 @Injectable()
-export class ApproveAdRequestUseCase {
+export class ApproveAdvertisementRequestUseCase {
     constructor(
         @Inject(ADVERTISEMENT_REPOSITORY)
         private readonly advertisementRepo: AdvertisementRepositoryInterface,
