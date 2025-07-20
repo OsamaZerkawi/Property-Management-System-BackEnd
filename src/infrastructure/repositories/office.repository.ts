@@ -132,30 +132,30 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   }
 
   async getOfficeFees(userId: number) {
-      const office = await this.officeRepo
-      .createQueryBuilder('office')
-      .leftJoin('office.user','user')
-      .where('user.id = :userId',{userId})
-      .select([
-          'office.id',
-          'office.type',
-          'office.deposit_per_m2',
-          'office.booking_period',
-          'office.tourism_deposit_percentage',
-      ])
-      .getOne();      
-      if(!office){
-          throw new NotFoundException(
-              errorResponse('لا يوجد مكتب لهذا المعرف',404)
-          );
-      }      
-      const result = {
-        office_id: office.id,
-        booking_period: office.booking_period,
-        ...(office.deposit_per_m2 != null && { deposit_per_m2: Number(office.deposit_per_m2) }),
-        ...(office.tourism_deposit_percentage != null && { tourism_deposit_percentage: Number(office.tourism_deposit_percentage) }),
-      };      
-      return result;
+    const office = await this.officeRepo
+    .createQueryBuilder('office')
+    .leftJoin('office.user','user')
+    .where('user.id = :userId',{userId})
+    .select([
+        'office.id',
+        'office.type',
+        'office.deposit_per_m2',
+        'office.booking_period',
+        'office.tourism_deposit_percentage',
+    ])
+    .getOne();      
+    if(!office){
+        throw new NotFoundException(
+            errorResponse('لا يوجد مكتب لهذا المعرف',404)
+        );
+    }      
+    const result = {
+      office_id: office.id,
+      booking_period: office.booking_period,
+      ...(office.deposit_per_m2 != null && { deposit_per_m2: Number(office.deposit_per_m2) }),
+      ...(office.tourism_deposit_percentage != null && { tourism_deposit_percentage: Number(office.tourism_deposit_percentage) }),
+    };      
+    return result;
   }
 
     async findTopRatedOffices(page: number, items: number,baseUrl: string) {
@@ -202,41 +202,41 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     }
 
     async updateOfficeFees(userId: number, data: UpdateOfficeFeesDto) {
-        const office = await this.officeRepo
-        .createQueryBuilder('office')
-        .leftJoin('office.user','user')
-        .where('user.id = :userId',{userId})
-        .getOne();
+      const office = await this.officeRepo
+      .createQueryBuilder('office')
+      .leftJoin('office.user','user')
+      .where('user.id = :userId',{userId})
+      .getOne();
 
-        if(!office){
-            throw new NotFoundException(
-                errorResponse('لا يوجد مكتب عقاري مرتبط بهذا المستخدم',404)
-            );
-        }
+      if(!office){
+          throw new NotFoundException(
+              errorResponse('لا يوجد مكتب عقاري مرتبط بهذا المستخدم',404)
+          );
+      }
 
-        Object.assign(office,{
-           ...('booking_period' in data && { booking_period: data.booking_period }),
-           ...('deposit_per_m2' in data && { deposit_per_m2: data.deposit_per_m2 }),
-           ...('tourism_deposit_percentage' in data && { tourism_deposit_percentage: data.tourism_deposit_percentage }),
-        });
+      Object.assign(office,{
+         ...('booking_period' in data && { booking_period: data.booking_period }),
+         ...('deposit_per_m2' in data && { deposit_per_m2: data.deposit_per_m2 }),
+         ...('tourism_deposit_percentage' in data && { tourism_deposit_percentage: data.tourism_deposit_percentage }),
+      });
 
-        await this.officeRepo.save(office);
+      await this.officeRepo.save(office);
     }
 
     async findWithinBounds(bounds: ExploreMapDto) {
-        return this.officeRepo.createQueryBuilder('office')
-          .select(['office.latitude', 'office.longitude'])
-          .where('office.latitude BETWEEN :minLat AND :maxLat', {
-            minLat: bounds.minLat,
-            maxLat: bounds.maxLat,
-          })
-          .andWhere('office.longitude BETWEEN :minLng AND :maxLng', {
-            minLng: bounds.minLng,
-            maxLng: bounds.maxLng,
-          })
-          .andWhere('office.is_deleted = false')
-          .andWhere('office.active = true')
-          .getMany();        
+      return this.officeRepo.createQueryBuilder('office')
+        .select(['office.latitude', 'office.longitude'])
+        .where('office.latitude BETWEEN :minLat AND :maxLat', {
+          minLat: bounds.minLat,
+          maxLat: bounds.maxLat,
+        })
+        .andWhere('office.longitude BETWEEN :minLng AND :maxLng', {
+          minLng: bounds.minLng,
+          maxLng: bounds.maxLng,
+        })
+        .andWhere('office.is_deleted = false')
+        .andWhere('office.active = true')
+        .getMany();        
     }
 } 
 

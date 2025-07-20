@@ -55,7 +55,7 @@ export class CreateResidentialPropertyDetailsUseCase {
             property: property,
             postImage: imageName,
             postDescription:data.postDescription,
-            postTitle: `${data.tag} - ${property.area} متر مربع`,
+            postTitle: `${data.tag} ${property.area} م²`,
             postTag:data.tag
         };
 

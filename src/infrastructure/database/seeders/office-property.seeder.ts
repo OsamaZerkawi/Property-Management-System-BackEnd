@@ -152,7 +152,7 @@ export class OfficePropertySeeder {
       const areaValue = property.area.toFixed(2); 
       const post = this.postRepo.create({
         property,
-        title: `${tagValue} - ${areaValue} متر مربع`,  // العنوان مكون من تاج ومساحة العقار
+        title: `${tagValue} ${areaValue} م²`,  // العنوان مكون من تاج ومساحة العقار
         description: faker.lorem.sentences(2),
         image: faker.image.urlPicsumPhotos(),
         tag: tagValue,

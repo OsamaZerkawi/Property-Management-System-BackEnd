@@ -29,6 +29,7 @@ import { Public } from "src/shared/decorators/public.decorator";
 import { Request } from "express";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
 import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
+import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger";
   
   @Controller('office')
   export class OfficeController {
@@ -54,6 +55,7 @@ import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
     }
  
     @Get('/commission')
+    @CommissionSwaggerDocs()
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
     async getCommissionOfOffice(@CurrentUser() user) {

@@ -21,6 +21,7 @@ export function GetExpectedPriceSwaggerDoc() {
       schema: {
         example: {
           successful: true,
+          message:'تم ارجاع السعر المتوقع للعقار',
           data: { 
             expected_price: 123456,
           },
