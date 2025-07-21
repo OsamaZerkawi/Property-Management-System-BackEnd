@@ -37,7 +37,7 @@ export class RejectAdRequestUseCase {
                 adId: advertisement.id,
                 reason: reason || 'الإعلان لا يطابق الشروط',
             },
-            sentAt: new Date(),
+            sent_at: new Date(),
         })
     }
 }

@@ -515,7 +515,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
             }
           : null,
         full_address: property.region?.city && property.region
-          ? `${property.region.city.name}, ${property.region.name}`
+          ? `${property.region.city.name}، ${property.region.name}`
           : null,
       },
       images: property.images?.map(img => ({

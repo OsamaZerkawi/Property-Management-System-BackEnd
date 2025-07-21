@@ -22,8 +22,6 @@ export class Notification {
     isRead: boolean;
 
     @Column({ type: 'timestamp' })
-    sentAt: Date;
+    sent_at: Date;
 
-    @CreateDateColumn()
-    createdAt: Date;    
 }

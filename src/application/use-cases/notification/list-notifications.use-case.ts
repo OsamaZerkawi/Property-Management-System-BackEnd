@@ -8,7 +8,16 @@ export class ListNotificationsUseCase {
     private readonly notificationRepository: NotificationRepositoryInterface
   ) {}
 
-  execute(userId: number) {
-    return this.notificationRepository.findByUser(userId);
+  async execute(userId: number) {
+    const notifications =  await this.notificationRepository.findByUser(userId);
+
+    return notifications.map((notification) => ({
+      id: notification.id,
+      title: notification.title,
+      body: notification.body,
+      isRead: notification.isRead,
+      sent_at: notification.sent_at?.toISOString().slice(0, 10), 
+      data: notification.data || null,
+    }));
   }
 }

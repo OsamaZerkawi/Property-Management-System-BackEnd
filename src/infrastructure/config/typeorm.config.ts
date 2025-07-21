@@ -38,6 +38,7 @@ import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
 import { UserPermission } from "src/domain/entities/user-permission.entity";
 import { AdditionalService } from 'src/domain/entities/additional-service.entity';
 import { Service } from 'src/domain/entities/services.entity';
+import { AdminCity } from "src/domain/entities/admin-city.entity";
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
@@ -55,7 +56,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         Booking,Touristic,Calendar,RentalContract,
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
         Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
-        Otp, TempUser,ServicePrice,AdditionalService,Service
+        Otp, TempUser,ServicePrice,AdditionalService,Service,AdminCity
     ],
     synchronize: true,
     //dropSchema: true,

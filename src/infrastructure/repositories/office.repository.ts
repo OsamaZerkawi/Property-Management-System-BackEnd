@@ -24,6 +24,40 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     private readonly dataSource: DataSource,
   ) {}
   
+  async findOfficesByCityId(cityId: number) {
+    return this.baseOfficesQuery()
+    .where('city.id = :cityId', { cityId })
+    .getRawMany();
+  }
+  
+  async findAllOffices() {
+    return this.baseOfficesQuery()
+    .getRawMany();    
+  }
+
+  private baseOfficesQuery(){
+    return this.officeRepo
+      .createQueryBuilder('office')
+      .leftJoin('office.region', 'region')
+      .leftJoin('region.city','city')
+      .leftJoin('office.feedbacks', 'feedback')
+      .select([
+      'office.id AS id',
+      'office.logo AS logo',
+      'office.name AS name',
+      'office.type AS type',
+      'office.created_at',
+      'city.name AS city_name',
+      'region.name AS region_name',
+      ])
+      .addSelect('AVG(feedback.rate)', 'avgRate')
+      .addSelect(`COUNT(CASE WHEN feedback.rate IS NOT NULL THEN 1 END)`, 'rateCount')
+      .groupBy('office.id')
+      .addGroupBy('city.name')
+      .addGroupBy('region.name')
+      .orderBy('office.created_at','DESC');
+  }
+  
   async findOfficeByUserId(userId: number): Promise<Office | null> {
     return await this.dataSource
       .getRepository(Office)

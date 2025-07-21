@@ -21,7 +21,7 @@ export class NotificationRepository implements NotificationRepositoryInterface {
     findByUser(userId: number) {
         return this.notificationRepo.find({
             where: {userId},
-            order:{createdAt: 'DESC'}   
+            order:{sent_at: 'DESC'}   
         });
     }
     async markAsRead(id: number) {

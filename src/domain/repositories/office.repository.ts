@@ -18,4 +18,6 @@ export interface OfficeRepositoryInterface {
   updateOfficeFees(userId: number,data:UpdateOfficeFeesDto);
   findTopRatedOffices(page: number,items: number,baseUrl: string);
   findWithinBounds(bounds: ExploreMapDto);
+  findOfficesByCityId(cityId: number);
+  findAllOffices();
 }

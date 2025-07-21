@@ -34,7 +34,7 @@ export class ApproveAdvertisementRequestUseCase {
             data:{
                 adId:advertisement.id,
             },
-            sentAt: new Date(),
+            sent_at: new Date(),
         })
     }
 }

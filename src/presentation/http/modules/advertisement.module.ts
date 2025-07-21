@@ -18,6 +18,8 @@ import { User } from "src/domain/entities/user.entity";
 import { Notification } from "src/domain/entities/notification.entity";
 import { NotificationModule } from "./notification.module";
 import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisement.scheduler";
+import { GetApprovedAdvertisementUseCase } from "src/application/use-cases/advertisement/get-approved-ads.use-case";
+import { GetAllAdvertisementInvoicesUseCase } from "src/application/use-cases/advertisement/get-all-advertisement-invoices.use-case";
 
 @Module({
     imports:[
@@ -34,6 +36,8 @@ import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisem
         GetPendingAdvertisementUseCase,
         RejectAdRequestUseCase,
         ApproveAdvertisementRequestUseCase,
+        GetApprovedAdvertisementUseCase,
+        GetAllAdvertisementInvoicesUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,
@@ -43,6 +47,4 @@ import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisem
         ADVERTISEMENT_REPOSITORY
     ]
 })
-export class AdvertisementModule{
-
-}
+export class AdvertisementModule{}

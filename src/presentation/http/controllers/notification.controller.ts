@@ -24,6 +24,8 @@ import { MarkNotificationReadUseCase } from 'src/application/use-cases/notificat
 import { NotificationQueueService } from 'src/infrastructure/queues/notificatoin-queue.service';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { successPaginatedResponse, successResponse } from 'src/shared/helpers/response.helper';
+import { GetUserNotificationsSwaggerDoc } from '../swagger/notifications/get-user-notification.swagger';
+import { CreateNotificationSwaggerDoc } from '../swagger/notifications/create-notification.swagger';
 
 @Controller('notifications')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -38,6 +40,7 @@ export class NotificationsController {
   ) {}
 
   @Get()
+  @GetUserNotificationsSwaggerDoc()
   async getUserNotifications(
     @CurrentUser() user,
   ){
@@ -46,14 +49,15 @@ export class NotificationsController {
 
     return successResponse(notifications,'تم ارجاع جميع الاشعارات الخاصة بك ',200);
   }
+
   @Post('device')
   @HttpCode(HttpStatus.OK)
   async sendToDevice(@Body() dto: {
-  token: string;
-  title: string;
-  body: string;
-  data?: Record<string, any>;
-}) {
+    token: string;
+    title: string;
+    body: string;
+    data?: Record<string, any>;
+  }){
     const { token, title, body, data } = dto;
     
     this.notificationQueue.sendToDevice(token, title, body, data);
@@ -63,6 +67,7 @@ export class NotificationsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @CreateNotificationSwaggerDoc()
   async createNotification(
     @CurrentUser() user,
     @Body() body: SendNotificationDto,
@@ -77,7 +82,7 @@ export class NotificationsController {
       data,
     );
 
-    return successResponse(notification, 'تم إنشاء الإشعار وإرساله', 201);
+    return successResponse([],'تم إنشاء الإشعار وإرساله', 201);
   }
 
   @Put(':id/read')

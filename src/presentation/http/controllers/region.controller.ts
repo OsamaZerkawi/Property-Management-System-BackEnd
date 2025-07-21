@@ -4,6 +4,7 @@ import { getRegionsByCityIdUseCase } from "src/application/use-cases/region/get-
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successResponse } from "src/shared/helpers/response.helper";
 import { GetRegionsByCitySwaggerDoc } from "../swagger/city-region/get-all-regions-for-city.swagger";
+import { SwaggerGetExpectedPrice } from "../swagger/city-region/get-expected-price-for-region.swagger";
 
 @Controller('region')
 export class RegionController {
@@ -23,7 +24,8 @@ export class RegionController {
         return successResponse(regions,'تم ارجاع المدن الخاصة بالمحافظة بنجاح',200)
     }
 
-    @Get(':regionId')
+    @Get(':regionId/expected-price')
+    @SwaggerGetExpectedPrice()
     @HttpCode(HttpStatus.OK)    
     async getExpectedPriceForRegion(
         @Param('regionId') regionId: number,

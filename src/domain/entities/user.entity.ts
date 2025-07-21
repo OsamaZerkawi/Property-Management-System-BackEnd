@@ -15,6 +15,7 @@ import { Booking } from "./booking.entity";
 import { RentalContract } from "./rental-contract.entity";
 import { FcmToken } from "./fcmToken.entity";
 import { UserPermission } from "./user-permission.entity";
+import { AdminCity } from "./admin-city.entity";
 
 @Entity({name: 'users'})
 export class User {
@@ -89,6 +90,9 @@ export class User {
 
   @OneToMany(() => UserPermission, up => up.user)
   userPermissions: UserPermission[];
+
+  @OneToMany(() => AdminCity, adminCity => adminCity.user)
+  adminCities: AdminCity[];
  
   @CreateDateColumn()
   created_at: Date;

@@ -24,6 +24,10 @@ import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { ServicePriceSeeder } from "./service-price.seeder";
 import { ServicePrice } from "src/domain/entities/service-price.entity";
 import { UserRole } from "src/domain/entities/user-role.entity";
+import { TouristicPropertySeeder } from "./touristic-property.seeder";
+import { Touristic } from "src/domain/entities/touristic.entity";
+import { AdditionalService } from "src/domain/entities/additional-service.entity";
+import { Service } from "src/domain/entities/services.entity";
 
 
 @Module({
@@ -41,13 +45,13 @@ import { UserRole } from "src/domain/entities/user-role.entity";
             Role,Permission,City,Region,Office,
             Property,Residential,PropertyPost,
             PropertyFeedback,Image,User,OfficeSocial,
-            ServicePrice,UserRole,
+            ServicePrice,UserRole,Touristic,AdditionalService,Service,
         ])
     ],
     providers:[
         SeederService,CityRegionSeeder,PermissionSeeder,
         RoleSeeder,PropertyFeedbackSeeder,OfficePropertySeeder,
-        ServicePriceSeeder,
+        ServicePriceSeeder,TouristicPropertySeeder,
     ],
     exports:[SeederService]
 })

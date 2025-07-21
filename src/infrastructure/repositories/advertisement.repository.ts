@@ -16,6 +16,39 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         @InjectRepository(OnlineInvoice)
         private readonly onlineInvoiceRepo: Repository<OnlineInvoice>,
     ){}
+
+    findAllWithInvoices() {
+        return this.onlineInvoiceRepo
+        .createQueryBuilder('invoice')
+        .leftJoin('invoice.office', 'office')
+        .leftJoin('invoice.advertisement', 'advertisement')
+        .select([
+          'invoice.id',
+          'invoice.amount',
+          'invoice.type',
+          'invoice.paid_date',
+          'office.id',
+          'office.name',
+          'advertisement.id',
+          'advertisement.image',          
+        ])
+        .orderBy('invoice.created_at', 'DESC')
+        .getMany();    
+    }
+    
+    async getApprovedAdvertisement() {
+        return this.advertisementRepo.find({
+            where: {admin_agreement: AdminAgreement.APPROVED},
+            select:{
+                id: true,
+                day_period: true,
+                start_date: true,
+                image: true,
+                is_active:true,
+            },
+            order:{'start_date':'DESC'},
+        });
+    }
     
     async deactivateExpiredAdvertisements(currentDate: Date) {
       const result = await this.advertisementRepo

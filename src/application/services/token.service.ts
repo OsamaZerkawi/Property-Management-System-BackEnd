@@ -18,7 +18,7 @@ export class TokenService {
                 username,
             },{
                 secret : process.env.JWT_TOKEN_SECRET,
-                expiresIn : 15 * 60 * 60,
+                expiresIn: 60 * 60 * 24 * 90, // 90 days in seconds
             }),
             this.jwtService.signAsync({
                 sub: userId,

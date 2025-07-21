@@ -35,8 +35,10 @@ import { AdvertisementModule } from 'src/presentation/http/modules/advertisement
 import { AdminModule } from 'src/presentation/http/modules/admin.module';
 import { TourismModule } from 'src/presentation/http/modules/tourism.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AdminPartnersManagementModule } from 'src/presentation/http/modules/admin-partners-management.module';
 @Module({
   imports: [
+    AdminPartnersManagementModule,
     ScheduleModule.forRoot(),
     AdminModule,
     AdvertisementModule,

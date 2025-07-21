@@ -1,10 +1,14 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Request } from "express";
+import { allowedNodeEnvironmentFlags } from "process";
 import { RespondToAdRequestDto } from "src/application/dtos/advertisement/respond-to-ad-request.dto";
 import { ApproveAdvertisementRequestUseCase } from "src/application/use-cases/advertisement/approve-ad-request.use-case";
+import { GetAllAdvertisementInvoicesUseCase } from "src/application/use-cases/advertisement/get-all-advertisement-invoices.use-case";
+import { GetApprovedAdvertisementUseCase } from "src/application/use-cases/advertisement/get-approved-ads.use-case";
 import { GetPendingAdvertisementUseCase } from "src/application/use-cases/advertisement/get-pending-ads.use-case";
 import { RejectAdRequestUseCase } from "src/application/use-cases/advertisement/reject-ad-request.use-case";
+import { RefreshUseCase } from "src/application/use-cases/moblie_auth/refresh.usecase";
 import { Role } from "src/domain/entities/role.entity";
 import { Permissions } from "src/shared/decorators/permission.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
@@ -12,18 +16,20 @@ import { successResponse } from "src/shared/helpers/response.helper";
 
 @ApiTags('Finance & Ads Management')
 
-@Roles('مشرف')
-@Permissions('إدارة المالية والإعلانات')
+
 @Controller('finance-ads-management')
 export class FinanceAdsManagementController {
     constructor(
         private readonly getPendingAdvertisementUseCase: GetPendingAdvertisementUseCase,
         private readonly approveAdRequestUseCase: ApproveAdvertisementRequestUseCase,
         private readonly rejectAdRequestUseCase: RejectAdRequestUseCase,
+        private readonly getApprovedAdvertisementUseCase: GetApprovedAdvertisementUseCase,
+        private readonly getAllAdvertisementInvoicesUseCase: GetAllAdvertisementInvoicesUseCase
     ){}
 
 
-
+    @Roles('مشرف')
+    @Permissions('إدارة المالية والإعلانات')
     @Get('ad-requests')
     @HttpCode(HttpStatus.OK)
     async getAdRequests(
@@ -36,6 +42,8 @@ export class FinanceAdsManagementController {
         return successResponse(ads,'تم إرجاع جميع طلبات الإعلانات',200);
     }
 
+    @Roles('مشرف')
+    @Permissions('إدارة المالية والإعلانات')
     @HttpCode(HttpStatus.OK)
     @Post('ad-request/:id/respond')
     async respondToAdRequest(
@@ -51,9 +59,31 @@ export class FinanceAdsManagementController {
         return successResponse([],'تم الرد على طلب الإعلان',200)
     }
 
+    @Roles('مشرف')
+    @Permissions('إدارة المالية والإعلانات')
     @Get('approved-ads')
     @HttpCode(HttpStatus.OK)
-    async getApprovedAds(){
+    async getApprovedAds(
+        @Req() request: Request,
+    ){
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
 
+        const ads = await this.getApprovedAdvertisementUseCase.execute(baseUrl);
+
+        return successResponse(ads,'تم إرجاع الإعلانات الحالية',200);
     }
+
+    @Roles('مشرف')
+    @Permissions('إدارة المالية والإعلانات')
+    @HttpCode(HttpStatus.OK)
+    @Get('ad-invoices')
+    async getAllAdvertisementInvoices(
+        @Req() request: Request,
+    ){
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+        
+        const data = await this.getAllAdvertisementInvoicesUseCase.execute(baseUrl);
+
+        return successResponse(data,'تم إرجاع جميع فواتير الإعلانات بنجاح',200)
+    }    
 }

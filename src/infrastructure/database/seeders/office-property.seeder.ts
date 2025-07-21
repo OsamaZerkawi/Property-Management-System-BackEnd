@@ -64,10 +64,7 @@ export class OfficePropertySeeder {
     });
     await this.userRepo.save(user);
 
-    const userRole = this.userRoleRepo.create({
-      user,
-      role: officeRole,
-    });
+    await this.userRoleRepo.save({ user, role: officeRole });
     
     const office = this.officeRepo.create({
       name: faker.company.name(),
@@ -116,7 +113,7 @@ export class OfficePropertySeeder {
         bathroom_count: faker.number.int({ min: 1, max: 3 }),
         kitchen_count: 1,
         living_room_count: faker.number.int({ min: 1, max: 2 }),
-        property_type: faker.helpers.arrayElement(Object.values(PropertyType)),
+        property_type: PropertyType.RESIDENTIAL,
         has_furniture: faker.datatype.boolean(),
         notes: faker.lorem.sentence(),
         rate: 0,
