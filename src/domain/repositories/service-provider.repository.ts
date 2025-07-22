@@ -5,6 +5,8 @@ export const SERVICE_PROVIDER_REPOSITORY = 'SERVICE_PROVIDER_REPOSITORY';
 
 export interface ServiceProviderRepositoryInterface{
     getAll(baseUrl: string,page?:number,items?: number);
+    findAllByCityId(cityId: number,baseUrl: string);
+    findAll(baseUrl: string);
     getAllWithFilters(baseUrl: string,filters: ServiceProviderFiltersDto,page?:number,items?: number);
     findTopRatedServiceProviders(page: number,items: number);
     findOneWithDetails(id: number, baseUrl: string);

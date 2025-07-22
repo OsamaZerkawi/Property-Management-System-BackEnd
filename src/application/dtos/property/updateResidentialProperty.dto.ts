@@ -6,6 +6,7 @@ import { RentDetailsDto } from "./rentDetails.dto";
 import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PropertyFurnishingType } from "src/domain/enums/property-furnishing-type.enum";
 
 export class UpdateResidentialPropertyDto {
     @IsString()
@@ -45,8 +46,8 @@ export class UpdateResidentialPropertyDto {
     direction?: Direction;
 
     @IsOptional()
-    @IsBoolean()
-    has_furniture?: boolean;
+    @IsEnum(PropertyFurnishingType)
+    has_furniture?: PropertyFurnishingType;
 
     @IsOptional()
     @ValidateNested()

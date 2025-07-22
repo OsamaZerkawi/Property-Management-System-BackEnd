@@ -9,6 +9,7 @@ import {
   Min,
   IsEnum
 } from 'class-validator';
+import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
  
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 export class CreateTourismDto {
@@ -62,8 +63,8 @@ export class CreateTourismDto {
   bathroom_count: number;
 
   @IsDefined()
-  @IsBoolean()
-  has_furniture: boolean;
+  @IsEnum(PropertyFurnishingType)
+  has_furniture: PropertyFurnishingType;
 
   // ========== tourism_place ==========
   @IsDefined()

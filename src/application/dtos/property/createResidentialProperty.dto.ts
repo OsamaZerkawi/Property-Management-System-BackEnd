@@ -7,6 +7,7 @@ import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
+import { PropertyFurnishingType } from "src/domain/enums/property-furnishing-type.enum";
 
 export class CreateResidentialPropertyDto {
     @IsString()
@@ -42,9 +43,8 @@ export class CreateResidentialPropertyDto {
     @IsEnum(Direction)
     direction: Direction;
 
-    @IsBoolean()
-    @Type(() => Boolean)
-    has_furniture: boolean;
+    @IsEnum(PropertyFurnishingType)
+    has_furniture: PropertyFurnishingType;
 
     @ValidateNested()
     @Type(() => RoomDetailsDto)

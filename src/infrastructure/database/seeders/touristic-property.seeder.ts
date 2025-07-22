@@ -17,6 +17,7 @@ import { OfficeType } from 'src/domain/enums/office-type.enum';
 import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
+import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
 
 @Injectable()
 export class TouristicPropertySeeder {
@@ -86,7 +87,7 @@ export class TouristicPropertySeeder {
           bathroom_count: 2,
           kitchen_count: 1,
           living_room_count: 1,
-          has_furniture: true,
+          has_furniture: faker.helpers.arrayElement(Object.values(PropertyFurnishingType)),
           property_type: PropertyType.TOURISTIC,
           highlighted: faker.datatype.boolean(),
           rate: 0,

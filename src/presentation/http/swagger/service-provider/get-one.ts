@@ -35,6 +35,7 @@ export function GetServiceProviderDetailsSwaggerDoc() {
             userPhone: '0935917557',
             openingTime: '9:00 صباحا',
             closingTime: '5:00 مساءا',
+            active:1,
             avgRate: 4,
             ratingCount: 1,
           },

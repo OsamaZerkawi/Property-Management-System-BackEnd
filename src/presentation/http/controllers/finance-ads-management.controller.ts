@@ -1,15 +1,12 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Request } from "express";
-import { allowedNodeEnvironmentFlags } from "process";
 import { RespondToAdRequestDto } from "src/application/dtos/advertisement/respond-to-ad-request.dto";
 import { ApproveAdvertisementRequestUseCase } from "src/application/use-cases/advertisement/approve-ad-request.use-case";
 import { GetAllAdvertisementInvoicesUseCase } from "src/application/use-cases/advertisement/get-all-advertisement-invoices.use-case";
 import { GetApprovedAdvertisementUseCase } from "src/application/use-cases/advertisement/get-approved-ads.use-case";
 import { GetPendingAdvertisementUseCase } from "src/application/use-cases/advertisement/get-pending-ads.use-case";
 import { RejectAdRequestUseCase } from "src/application/use-cases/advertisement/reject-ad-request.use-case";
-import { RefreshUseCase } from "src/application/use-cases/moblie_auth/refresh.usecase";
-import { Role } from "src/domain/entities/role.entity";
 import { Permissions } from "src/shared/decorators/permission.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";

@@ -10,6 +10,7 @@ import { OfficePropertySeeder } from "./office-property.seeder";
 import { PropertyFeedbackSeeder } from "./property-feedback.seeder";
 import { ServicePriceSeeder } from "./service-price.seeder";
 import { TouristicPropertySeeder } from "./touristic-property.seeder";
+import { ServiceProviderSeeder } from "./service-provider.seeder";
 
 @Injectable()
 export class SeederService {
@@ -19,6 +20,7 @@ export class SeederService {
     private readonly officePropertySeeder: OfficePropertySeeder,
     private readonly propertyFeedbackSeeder: PropertyFeedbackSeeder,
     private readonly touristicPropertySeeder: TouristicPropertySeeder,
+    private readonly serviceProviderSeeder: ServiceProviderSeeder,
     private readonly servicePriceSeeder: ServicePriceSeeder,
     
     @InjectRepository(City)
@@ -44,6 +46,9 @@ export class SeederService {
 
     // 5. Seed property feedback (ratings)
     await this.propertyFeedbackSeeder.seed();
+
+    // 6.Seed Service Providers 
+    await this.serviceProviderSeeder.seed();
     // await this.servicePriceSeeder.seed();
     console.log('✅ All seeders executed successfully.');
   }

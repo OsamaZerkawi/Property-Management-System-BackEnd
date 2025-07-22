@@ -1,8 +1,12 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { User } from "./user.entity";
 import { City } from "./city.entity";
 
+
 @Entity('admin_cities')   
+@Index(['user_id']) 
+@Index(['city_id'])        
+@Index(['user_id', 'city_id'], { unique: true })
 export class AdminCity{
   @PrimaryColumn()
   user_id: number;

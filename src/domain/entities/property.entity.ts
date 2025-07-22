@@ -24,6 +24,7 @@ import { User } from './user.entity';
 import { PropertyFeedback } from './property-feedback.entity';
 import { PropertyFavorite } from './property-favorite.entity';
 import { Touristic } from './touristic.entity';
+import { PropertyFurnishingType } from '../enums/property-furnishing-type.enum';
 
 
 @Entity('properties')
@@ -67,8 +68,8 @@ export class Property {
   @Column({ type: 'int', default: 0 })
   bathroom_count: number;
 
-  @Column({ type: 'boolean', default: false })
-  has_furniture: boolean;
+  @Column({ type: 'enum', enum:PropertyFurnishingType,nullable:true})
+  has_furniture: PropertyFurnishingType;
 
   @Column({ type: 'enum', enum: PropertyType })
   property_type: PropertyType;

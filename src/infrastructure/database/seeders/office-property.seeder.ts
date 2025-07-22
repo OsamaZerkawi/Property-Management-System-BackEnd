@@ -23,6 +23,7 @@ import { Image } from "src/domain/entities/image.entity";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { UserRole } from "src/domain/entities/user-role.entity";
 import { Role } from "src/domain/entities/role.entity";
+import { PropertyFurnishingType } from "src/domain/enums/property-furnishing-type.enum";
 
 const faker = new Faker({ locale: [ar, en], });
 
@@ -114,7 +115,7 @@ export class OfficePropertySeeder {
         kitchen_count: 1,
         living_room_count: faker.number.int({ min: 1, max: 2 }),
         property_type: PropertyType.RESIDENTIAL,
-        has_furniture: faker.datatype.boolean(),
+        has_furniture: faker.helpers.arrayElement(Object.values(PropertyFurnishingType)),
         notes: faker.lorem.sentence(),
         rate: 0,
         highlighted: faker.datatype.boolean(),

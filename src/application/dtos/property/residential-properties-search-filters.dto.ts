@@ -15,6 +15,7 @@ import { RoomDetailsDto } from './roomDetails.dto';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
 
 export class ResidentialPropertiesSearchFiltersDto {
   @ApiPropertyOptional({ description: 'رقم المنطقة', example: 3 })
@@ -55,8 +56,8 @@ export class ResidentialPropertiesSearchFiltersDto {
 
   @ApiPropertyOptional({ description: 'هل يحتوي على أثاث؟', example: true })
   @IsOptional()
-  @IsBoolean()
-  has_furniture?: boolean;
+  @IsEnum(PropertyFurnishingType)
+  has_furniture?: PropertyFurnishingType;
 
   @ApiPropertyOptional({ enum: Direction, description: 'اتجاه العقار' })
   @IsOptional()
