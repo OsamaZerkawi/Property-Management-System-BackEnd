@@ -5,13 +5,17 @@ import { RentalContract } from 'src/domain/entities/rental-contract.entity';
 import { RentalContractRepositoryInterface } from 'src/domain/repositories/rental-contract.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
+import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
  
 @Injectable()
 export class RentalContractRepository  
   implements RentalContractRepositoryInterface 
 {
-  constructor(@InjectRepository(RentalContract)
-    private readonly repo: Repository<RentalContract>,) {}
+  constructor(
+    @InjectRepository(RentalContract)
+    private readonly repo: Repository<RentalContract>,
+    @InjectRepository(UserPropertyInvoice)
+    private readonly Invoicerepo: Repository<UserPropertyInvoice>,) {}
 
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
@@ -54,5 +58,10 @@ export class RentalContractRepository
 
     return qb.getRawMany();
   }
-
+    async findOneById(id: number): Promise<UserPropertyInvoice | null> {
+    return this.Invoicerepo.findOne({ where: { id } });
+  }
+ async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
+    return this.Invoicerepo.save(invoice);
+  }
 }

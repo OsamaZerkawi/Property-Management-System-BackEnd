@@ -20,12 +20,11 @@ import { UserRepository } from 'src/infrastructure/repositories/user.property';
 import { PropertyFeedback } from 'src/domain/entities/property-feedback.entity';
 import { OfficeSocial } from 'src/domain/entities/office-social.entity';
 import { User } from 'src/domain/entities/user.entity';
-import { AuthTokenBlackListService } from 'src/application/services/authTokenBlacklist.service';
 import { AuthModule } from './auth.module';
 import { PropertyModule } from './property.module';
 import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-rental-contracts.use-case';
- 
- 
+import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
+  
 
 @Module({
   imports: [ 
@@ -45,6 +44,7 @@ import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-
   providers: [
     CreateRentalContractUseCase,
     GetRentalContractsUseCase,
+    UploadInvoiceDocumentUseCase,
     {
       provide: RENTAL_CONTRACT_REPOSITORY,
       useClass: RentalContractRepository,

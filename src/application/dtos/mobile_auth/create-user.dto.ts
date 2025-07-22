@@ -40,10 +40,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'كلمة المرور مطلوبة' })
   @IsString({ message: 'كلمة المرور يجب أن تكون نص' })
   @MinLength(8, { message: 'كلمة المرور يجب أن تكون على الأقل 8 أحرف' })
-  @MaxLength(128, { message: 'كلمة المرور طويلة جداً' })
-  //@Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    //message: 'كلمة المرور يجب أن تحتوي على أحرف كبيرة وصغيرة ورقم ورمز خاص',
-  //})
+  @MaxLength(128, { message: 'كلمة المرور طويلة جداً' }) 
   password: string;
 
   @IsOptional()
