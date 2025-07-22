@@ -37,7 +37,7 @@ export class RespondToJoinRequestUseCase {
                 admin_agreement: AdminAgreement.APPROVED
             });
 
-            const username = `${joinRequest.first_name} ${joinRequest.last_name}-${joinRequest.id}`;
+            const username = `${joinRequest.first_name}-${joinRequest.last_name}-${joinRequest.id}`;
             const rawPassword = generatePassword.generate({
                length: 8,
                numbers: true,
