@@ -10,12 +10,15 @@ import { Request } from 'express';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
+import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
  @Controller('rental-contracts')
 export class RentalContractController {
-  constructor(
+   constructor(
     private readonly createRentalContractUseCase: CreateRentalContractUseCase,
     private readonly getRentalContractsUseCase: GetRentalContractsUseCase,
-        private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
+    private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
+        private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
+
   ) {}
 
   @Post()
@@ -61,6 +64,36 @@ export class RentalContractController {
       const statusCode = error.getStatus?.() || 500;
       const message = error.message || 'حدث خطأ غير متوقع';
       return errorResponse(message, statusCode);
+    }
+  }
+
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  async search(
+    @CurrentUser() user,
+    @Req() request: Request,
+    @Query('title') keyword: string,
+  ) { 
+    if (!keyword || !keyword.trim()) {
+      return errorResponse( 
+        'كلمة البحث مطلوبة.',
+        400,
+      );
+    }
+
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+    try { 
+      const results = await this.searchContractsUseCase.execute(
+        user.sub,
+        baseUrl,
+        keyword.trim(),
+      ); 
+      return successResponse(results,'تم جلب العقود بنجاح', 200);
+    } catch (err) { 
+      const statusCode = err.getStatus?.() || 500;
+      const message = err.message || 'حدث خطأ غير متوقع.';
+      return errorResponse( message,statusCode);
     }
   }
 }

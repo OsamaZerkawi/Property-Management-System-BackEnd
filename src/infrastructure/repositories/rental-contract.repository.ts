@@ -15,7 +15,9 @@ export class RentalContractRepository
     @InjectRepository(RentalContract)
     private readonly repo: Repository<RentalContract>,
     @InjectRepository(UserPropertyInvoice)
-    private readonly Invoicerepo: Repository<UserPropertyInvoice>,) {}
+    private readonly Invoicerepo: Repository<UserPropertyInvoice>) {}
+ 
+  
 
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
@@ -61,7 +63,36 @@ export class RentalContractRepository
     async findOneById(id: number): Promise<UserPropertyInvoice | null> {
     return this.Invoicerepo.findOne({ where: { id } });
   }
- async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
+  async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
     return this.Invoicerepo.save(invoice);
   }
+  async searchContractsBytitle(
+  officeId: number,
+  keyword: string,
+): Promise<Array<{
+  image: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  phone: string;
+  status: string;
+}>> {
+  return this.repo.createQueryBuilder('rc') 
+    .innerJoin('rc.residential', 'r')
+    .innerJoin('r.property', 'p', 'p.office_id = :officeId', { officeId })
+    .innerJoin('p.post', 'pp', 'pp.status = :postStatus', { postStatus: 'مقبول' })
+    .innerJoin('rc.user', 'u')
+    .select([
+      'pp.image      AS image',
+      'pp.title      AS title',
+      'rc.start_date AS start_date',
+      'rc.end_date   AS end_date',
+      'u.phone       AS phone',
+      'r.status      AS status',
+    ]) 
+    .where('LOWER(pp.title) LIKE LOWER(:kw)', { kw: `%${keyword}%` })
+    .orderBy('rc.start_date', 'DESC')
+    .getRawMany();
+}
+
 }
