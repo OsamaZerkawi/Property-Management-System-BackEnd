@@ -1,7 +1,5 @@
 import { BadRequestException, Inject, InternalServerErrorException, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { CreateAdminDto } from "src/application/dtos/auth/create-admin.dto";
-import { RoleRepository } from "src/infrastructure/repositories/role.repository";
-import { UserRepository } from "src/infrastructure/repositories/user.property";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import * as generatePassword from 'generate-password';
 import * as bcrypt from 'bcrypt';
@@ -10,7 +8,6 @@ import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositorie
 import { ROLE_REPOSITORY, RoleRepositoryInterface } from "src/domain/repositories/role.repository";
 import { PERMISSION_REPOSITORY, PermissionRepositoryInterface } from "src/domain/repositories/permission.repository";
 import { User } from "src/domain/entities/user.entity";
-import { da } from "@faker-js/faker/.";
 
 export class CreateAdminUseCase {
     constructor(
@@ -69,7 +66,7 @@ export class CreateAdminUseCase {
                 errorResponse('الدور مشرف غير موجود',404)
             );
         }
-        await this.roleRepo.assignRoleToUser(user.id,role.id);
+        await this.roleRepo.assignRole(user,role);
 
         // assign permission to admin
         const permissions = await this.permissionRepo.findByIds(data.permissionIds);

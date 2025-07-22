@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { RolePermission } from "src/domain/entities/role-permissions.entity";
 import { Role } from "src/domain/entities/role.entity";
 import { UserRole } from "src/domain/entities/user-role.entity";
+import { User } from "src/domain/entities/user.entity";
 import { PERMISSION_REPOSITORY, PermissionRepositoryInterface } from "src/domain/repositories/permission.repository";
 import { RoleRepositoryInterface } from "src/domain/repositories/role.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
@@ -22,6 +23,12 @@ export class RoleRepository implements RoleRepositoryInterface {
         @InjectRepository(RolePermission)
         private readonly rolePermissionRepo: Repository<RolePermission>,
     ){}
+    
+    async assignRole(user: User, role: Role) {
+        const userRole = this.userRoleRepo.create({role,user});
+
+        return await this.userRoleRepo.save(userRole);
+    }
     
     async findByName(name: string) {
         return await this.roleRepo.findOne({

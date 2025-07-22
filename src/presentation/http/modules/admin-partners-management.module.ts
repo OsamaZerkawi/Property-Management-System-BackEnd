@@ -18,23 +18,42 @@ import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
 import { ServiceProviderFeedbackDto } from "src/application/dtos/service-provider/service-provider-feedback.dto";
 import { ServiceFeedback } from "src/domain/entities/service-feedback.entity";
 import { GetServiceProviderDetailsUseCase } from "src/application/use-cases/service-provider/get-service-provider-details.use-case";
+import { JOIN_REQUEST_REPOSITORY } from "src/domain/repositories/join-requests.repository";
+import { JoinRequestRepository } from "src/infrastructure/repositories/join-requests.repository";
+import { JoinRequest } from "src/domain/entities/join-request.entity";
+import { RespondToJoinRequestUseCase } from "src/application/use-cases/join-requests/respond-to-join-requests.use-case";
+import { MailService } from "src/application/services/mail.service";
+import { Role } from "src/domain/entities/role.entity";
+import { UserRole } from "src/domain/entities/user-role.entity";
+import { RoleModule } from "./role.module";
 
 @Module({
     imports:[
+        RoleModule,
+        AuthModule,
         OfficeModule,
         ServiceProviderModule,
-        TypeOrmModule.forFeature([Office,User,AdminCity,ServiceProvider,City,Region,OfficeFeedback,ServiceFeedback]),
-        AuthModule,
+        TypeOrmModule.forFeature([
+            Office,User,AdminCity,ServiceProvider,
+            City,Region,OfficeFeedback,ServiceFeedback,
+            JoinRequest,User,Role,UserRole,
+        ]),
     ],
     controllers:[AdminPartnersManagementController],
     providers:[
         GetOfficesByAdminCityUseCase,
         GetServiceProvidersByAdminCityUseCase,
         GetServiceProviderDetailsUseCase,
+        RespondToJoinRequestUseCase,
         {
             provide:ADMIN_CITY_REPOSITORY,
             useClass: AdminCityRepository,
-        }
+        },
+        {
+            provide:JOIN_REQUEST_REPOSITORY,
+            useClass: JoinRequestRepository
+        },
+        MailService,
     ],
     exports:[],
 })

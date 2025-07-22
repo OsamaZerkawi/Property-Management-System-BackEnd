@@ -1,8 +1,10 @@
 import { base } from "@faker-js/faker/.";
-import { Controller, Get, HttpCode, HttpStatus, Param, Req } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { Request } from "express";
 import { raceWith } from "rxjs";
+import { respondToJoinRequestsDto } from "src/application/dtos/auth/respond-to-join-request.dto";
+import { RespondToJoinRequestUseCase } from "src/application/use-cases/join-requests/respond-to-join-requests.use-case";
 import { GetOfficesByAdminCityUseCase } from "src/application/use-cases/office/get-offices-by-admin-city.use-case";
 import { GetServiceProvidersByAdminCityUseCase } from "src/application/use-cases/service-provider/get-service-provider-by-admin-city.use-case";
 import { GetServiceProviderDetailsUseCase } from "src/application/use-cases/service-provider/get-service-provider-details.use-case";
@@ -19,6 +21,7 @@ export class AdminPartnersManagementController {
         private readonly getOfficesByAdminCityUseCase: GetOfficesByAdminCityUseCase,
         private readonly getServiceProvidersByAdminCityUseCase: GetServiceProvidersByAdminCityUseCase,
         private readonly getServiceProviderDetailsUseCase: GetServiceProviderDetailsUseCase,
+        private readonly respondToJoinRequestUseCase: RespondToJoinRequestUseCase,
     ){}
     
     @Roles('مشرف')
@@ -68,4 +71,15 @@ export class AdminPartnersManagementController {
        return successResponse(data,'تم إرجاع تفاصيل مزود الخدمة بنجاح',200);
     }
 
+    @Roles('مشرف')
+    @Permissions('إدارة المكاتب ومزودي الخدمات')
+    @HttpCode(HttpStatus.OK)
+    @Post('join-requests/:id/respond')
+    async respondToJoinRequest(
+        @Param('id') id: number,
+        @Body() data: respondToJoinRequestsDto,
+    ){
+        const message = await this.respondToJoinRequestUseCase.execute(id,data);
+        return successResponse([],message,200);
+    }
 }
