@@ -1,6 +1,5 @@
 import { Inject } from "@nestjs/common";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
-
 export class FindUserByPhoneUseCase {
     constructor(
         @Inject(USER_REPOSITORY)

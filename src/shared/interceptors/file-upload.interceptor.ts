@@ -113,7 +113,7 @@ export function OfficeLogoInterceptor() {
         }
         cb(null, true);
       },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+      limits: { fileSize: 5 * 1024 * 1024 },  
     }),
   );
 }
@@ -164,6 +164,43 @@ export function AdvertisementImageInterceptor() {
           callback(null, `advertisement-${uniqueSuffix}${ext}`);
         },
       }),
+    }),
+  );
+}
+
+export function UserInvoiceImageInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('documentImage', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dir = './uploads/UserRentalInvoices';
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
+        filename: (req: any, file, cb) => {
+          const userId = (req.user as any)?.sub || 'unknown';
+          const timestamp = Date.now();
+          const baseName = file.originalname
+            .replace(/\s+/g, '-')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9-_]/g, '');
+          const ext = extname(file.originalname);
+          cb(null, `user-${userId}-invoice-${baseName}-${timestamp}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(
+            new BadRequestException('فقط صور أو ملفات PDF مسموح بها كفاتورة'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
     }),
   );
 }

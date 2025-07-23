@@ -168,5 +168,7 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         };
       });
     }
-    
+    async saveBulk(invoices: UserPropertyInvoice[]): Promise<UserPropertyInvoice[]> {
+    return this.userPropertyInvoiceRepo.save(invoices);
+  }
 }

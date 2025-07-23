@@ -967,5 +967,12 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   return payload;
 }
+  async findOneByIdAndOffice(propertyId: number, officeId: number): Promise<Property | null> {
+    return this.propertyRepo.createQueryBuilder('property')
+      .innerJoin('property.office', 'office')
+      .where('property.id = :propertyId', { propertyId })
+      .andWhere('office.id = :officeId', { officeId })
+      .getOne();
+  }
 
 }

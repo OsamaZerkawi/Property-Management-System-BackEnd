@@ -4,6 +4,7 @@ import {  SearchPropertiesDto } from "src/application/dtos/property/search-prope
 import { UpdatePropertyDto } from "src/application/dtos/property/UpdateProperty.dto";
 import { PropertyType } from "../enums/property-type.enum";
 import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
+import { Property } from "../entities/property.entity";
 
 export const PROPERTY_REPOSITORY = 'PROPERTY_REPOSITORY';
 
@@ -27,4 +28,5 @@ export interface PropertyRepositoryInterface {
     compareTwoProperties(propertyId1: number,propertyId2: number,baseUrl: string);
     getTopRatedProperties(page: number,items: number,type: PropertyType,userId: number);
     findWithinBounds(bounds: ExploreMapDto);
+    findOneByIdAndOffice(propertyId: number, officeId: number): Promise<Property | null>;
 }
