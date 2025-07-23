@@ -37,6 +37,7 @@ import { TourismModule } from 'src/presentation/http/modules/tourism.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AdminPartnersManagementModule } from 'src/presentation/http/modules/admin-partners-management.module';
 import { RentalContractModule } from 'src/presentation/http/modules/rental-contract.module';
+import { StripeModule } from 'src/presentation/http/modules/stripe.module';
  
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { RentalContractModule } from 'src/presentation/http/modules/rental-contr
     BullModule.registerQueue({
       name: 'notifications',
     }),
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [

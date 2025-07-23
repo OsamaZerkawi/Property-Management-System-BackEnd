@@ -4,7 +4,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express'; 
 import { setupSwagger } from './presentation/http/swagger/swagger.config'; 
- import * as express from 'express'; 
+import * as express from 'express'; 
+import { json, urlencoded } from 'express';
+import Stripe from 'stripe';
+import { ConfigService } from '@nestjs/config';
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -36,6 +40,32 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
   app.use(express.json());   
-   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+   await app.listen(process.env.PORT ?? 3000, '0.0.0.0')
+   
+  const configService = app.get<ConfigService>(ConfigService);
+  const webhookSecret = configService.get<string>('STRIPE_WEBHOOK_SECRET');
+  if (!webhookSecret) throw new Error('Missing STRIPE_WEBHOOK_SECRET');
+
+   const server: express.Application = app.getHttpAdapter().getInstance();
+
+   server.use(
+    '/webhook',
+    express.raw({ type: 'application/json' }),
+  );
+
+   server.post('/webhook', (req, res) => {
+    const sig = req.headers['stripe-signature'] as string;
+    let event: Stripe.Event;
+
+    try {
+      event = Stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err) {
+      console.error('⚠️ Webhook signature verification failed.', err);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+ 
+    res.json({ received: true });
+  });
+
 }
 bootstrap();
