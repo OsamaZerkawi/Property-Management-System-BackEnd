@@ -10,4 +10,9 @@ export interface RentalContractRepositoryInterface {
   findOneById(id: number): Promise<UserPropertyInvoice | null>;
   saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice>;
   searchContractsBytitle(officeId: number,keyword: string);
+  findByIdWithRelations(id: number): Promise<RentalContract | null>;
+  verifyPropertyBelongsToOffice(   propertyId: number,  officeId: number,): Promise<boolean>; 
+  findInvoicesByPropertyAndUser(propertyId: number,userId: number,): Promise<UserPropertyInvoice[]>;
+  
+  
 }

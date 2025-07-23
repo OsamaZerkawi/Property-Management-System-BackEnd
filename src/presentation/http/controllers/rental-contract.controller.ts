@@ -11,13 +11,16 @@ import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter
 import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
+import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
  @Controller('rental-contracts')
 export class RentalContractController {
+    
    constructor(
     private readonly createRentalContractUseCase: CreateRentalContractUseCase,
     private readonly getRentalContractsUseCase: GetRentalContractsUseCase,
     private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
-        private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
+    private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
+    private readonly getContractDetailsUseCase: GetContractDetailsUseCase ,
 
   ) {}
 
@@ -96,4 +99,21 @@ export class RentalContractController {
       return errorResponse( message,statusCode);
     }
   }
+
+@Get(':id/details')
+@UseGuards(JwtAuthGuard)
+async getContractDetails(
+  @Param('id', ParseIntPipe) id: number,
+  @Req() request: Request, 
+  @CurrentUser() user: any,
+) {
+  try {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const result = await this.getContractDetailsUseCase.execute(user.sub, id,baseUrl);
+    return successResponse(result);
+  } catch (error) {
+    return errorResponse(error.message, error.statusCode || 500);
+  }
+}
+
 }

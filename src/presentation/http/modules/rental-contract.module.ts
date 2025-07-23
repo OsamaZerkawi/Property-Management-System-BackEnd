@@ -25,6 +25,7 @@ import { PropertyModule } from './property.module';
 import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-rental-contracts.use-case';
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
+import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
   
 
 @Module({
@@ -47,6 +48,7 @@ import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/s
     GetRentalContractsUseCase,
     UploadInvoiceDocumentUseCase,
     SearchRentalContractsUseCase,
+    GetContractDetailsUseCase,
     {
       provide: RENTAL_CONTRACT_REPOSITORY,
       useClass: RentalContractRepository,

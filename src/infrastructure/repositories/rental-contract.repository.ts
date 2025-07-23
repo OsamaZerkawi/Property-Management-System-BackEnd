@@ -6,6 +6,7 @@ import { RentalContractRepositoryInterface } from 'src/domain/repositories/renta
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
+import { Property } from 'src/domain/entities/property.entity';
  
 @Injectable()
 export class RentalContractRepository  
@@ -15,10 +16,10 @@ export class RentalContractRepository
     @InjectRepository(RentalContract)
     private readonly repo: Repository<RentalContract>,
     @InjectRepository(UserPropertyInvoice)
-    private readonly Invoicerepo: Repository<UserPropertyInvoice>) {}
+    private readonly InvoiceRepo: Repository<UserPropertyInvoice>,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,) {}
  
-  
-
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
   } 
@@ -61,10 +62,10 @@ export class RentalContractRepository
     return qb.getRawMany();
   }
     async findOneById(id: number): Promise<UserPropertyInvoice | null> {
-    return this.Invoicerepo.findOne({ where: { id } });
+    return this.InvoiceRepo.findOne({ where: { id } });
   }
   async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
-    return this.Invoicerepo.save(invoice);
+    return this.InvoiceRepo.save(invoice);
   }
   async searchContractsBytitle(
   officeId: number,
@@ -95,4 +96,36 @@ export class RentalContractRepository
     .getRawMany();
 }
 
+async findByIdWithRelations(id: number): Promise<RentalContract | null> {
+    return this.repo.findOne({
+      where: { id },
+      relations: {
+        user: true,
+        residential: { property: { post: true } },
+      },
+    });
+  }
+
+  async verifyPropertyBelongsToOffice(
+    propertyId: number,
+    officeId: number,
+  ): Promise<boolean> {
+    const count = await this.propertyRepo.count({
+      where: { id: propertyId, office: { id: officeId } },
+    });
+    return count > 0;
+  }
+
+  async findInvoicesByPropertyAndUser(
+    propertyId: number,
+    userId: number,
+  ): Promise<UserPropertyInvoice[]> {
+    return this.InvoiceRepo.find({
+      where: {
+        property: { id: propertyId },
+        user:     { id: userId },
+      },
+      order: { billing_period_start: 'ASC' },
+    });
+  }
 }
