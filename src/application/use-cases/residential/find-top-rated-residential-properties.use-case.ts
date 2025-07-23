@@ -33,11 +33,11 @@ export class FindTopRatedPropertiesUseCase {
         };
       }
 
-            if (type === PropertyType.TOURISTIC) {
+        if (type === PropertyType.TOURISTIC) {
         return {
           ...base,
           type:PropertyType.TOURISTIC,
-          price: Number(row.touristic_price),
+          price: parseInt(row.touristic_price),
           rental_period:'يومي',
           avg_rate: parseFloat(row.avg_rate) || 0,
           rating_count: parseInt(row.rating_count) || 0,
