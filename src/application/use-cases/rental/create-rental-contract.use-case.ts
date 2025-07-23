@@ -52,7 +52,7 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
   const startDate = new Date();
   const endDate = addMonths(startDate, Number(dto.duration));
 
-  return await this.dataSource.transaction(async (manager) => {
+    await this.dataSource.transaction(async (manager) => {
     const rentalContract = new RentalContract();
     rentalContract.user = { id: dto.userId } as any;
     rentalContract.residential = { id: dto.residentialId } as any;
@@ -61,7 +61,7 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
     rentalContract.end_date = format(endDate, 'yyyy-MM-dd');
     rentalContract.price_per_period = dto.monthlyRent;
 
-    const savedContract = await manager.getRepository(RentalContract).save(rentalContract);
+    await manager.getRepository(RentalContract).save(rentalContract);
 
     const invoices: UserPropertyInvoice[] = [];
     for (let i = 0; i < Number(dto.duration); i++) {
@@ -90,15 +90,6 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
        status: PropertyStatus.Rented,
     });
 
-    return {
-      contract: savedContract,
-      invoices: invoices.map(inv => ({
-        id: inv.id,
-        amount: inv.amount,
-        billing_period_start: inv.billing_period_start,
-        status: inv.status
-      }))
-    };
   });
 }
 }

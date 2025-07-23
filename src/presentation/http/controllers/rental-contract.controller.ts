@@ -33,9 +33,17 @@ export class RentalContractController {
     @Body() dto: CreateRentalContractDto
   ) {  
     if (!file) {
-    throw new BadRequestException('يجب ان يكون هناك وثيقة للفاتورة');
+    return errorResponse('يجب ان يكون هناك وثيقة للفاتورة',400);
   } 
-    return this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
+  try{
+      this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
+      return successResponse(null,'تم انشاء العقد بنجاح',201);
+  }
+  catch(error){
+      const statusCode = error.getStatus?.() || 500;
+      const message = error.message || 'حدث خطأ غير متوقع';
+      return errorResponse(message, statusCode);
+  }
   }
 
   @Get()
@@ -46,7 +54,15 @@ export class RentalContractController {
     @Query() filters: ContractFiltersDto,   
   ) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
-    return this.getRentalContractsUseCase.execute(user.sub, baseUrl, filters);
+    try{
+    const data=this.getRentalContractsUseCase.execute(user.sub, baseUrl, filters);
+    return successResponse(data,'تم جلب عقود الايجار بنجاح');
+    }
+    catch(error){
+      const statusCode = error.getStatus?.() || 500;
+      const message = error.message || 'حدث خطأ غير متوقع';
+      return errorResponse(message, statusCode);
+    } 
   }
 
   @Post(':id/document')  
