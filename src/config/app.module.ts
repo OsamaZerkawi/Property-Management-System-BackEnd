@@ -36,6 +36,8 @@ import { AdminModule } from 'src/presentation/http/modules/admin.module';
 import { TourismModule } from 'src/presentation/http/modules/tourism.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AdminPartnersManagementModule } from 'src/presentation/http/modules/admin-partners-management.module';
+import { RentalContractModule } from 'src/presentation/http/modules/rental-contract.module';
+ 
 @Module({
   imports: [
     AdminPartnersManagementModule,
@@ -65,6 +67,7 @@ import { AdminPartnersManagementModule } from 'src/presentation/http/modules/adm
     ServicePriceModule,
     MobileAuthModule,
     TourismModule,
+    RentalContractModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     ConfigModule.forRoot({

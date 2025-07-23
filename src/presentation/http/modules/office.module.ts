@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { AuthModule } from "./auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Office } from "src/domain/entities/offices.entity";
@@ -16,12 +16,16 @@ import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-offic
 import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
 import { OfficeSocial } from "src/domain/entities/office-social.entity";
-import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
- 
+import { OfficeFeedback } from "src/domain/entities/office-feedback.entity"; 
+import { PropertyFeeService } from "src/application/services/propertyFee.service";  
+import { ResidentialOfficeModule } from "./residential-office.module";
+
 @Module({
   imports: [
     AuthModule, 
-    TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback]),
+    forwardRef(() => ResidentialOfficeModule),
+    TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback,
+]),
   ],
   controllers: [OfficeController],
   providers: [
@@ -33,11 +37,12 @@ import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
     UpdateOfficeUseCase,
     GetOfficeDetailsUseCase,
     GetOfficePaymentMethodUseCase,
-    FindOfficeForUserUseCase,
+    FindOfficeForUserUseCase, 
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository
-    }
+    },
+    PropertyFeeService,
   ],
   exports: [
     OFFICE_REPOSITORY,

@@ -8,29 +8,29 @@ import {
     ParseIntPipe,
     Req
   } from "@nestjs/common";
-  import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
-  import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
-  import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-office.usecase";
-  import { CurrentUser } from "src/shared/decorators/current-user.decorator";
-  import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
-  import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
-  import { CreateOfficeDto } from "src/application/dtos/office/create-office.dto";
-  import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
-  import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
-  import { OfficeResource } from 'src/presentation/http/resources/office.resource';
-  import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
-  import { GetPaymentMethodDto } from 'src/application/dtos/office/get-payment-method.dto'; 
-  import {OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor"; 
-  import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
-  import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
-  import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case"; 
-  import { Roles } from "src/shared/decorators/role.decorator";  
+import { GetCommissionOfOfficeUseCase } from "src/application/use-cases/office/get-commission-of-office.use-case";
+import { CreateOfficeUseCase } from "src/application/use-cases/office/create-office.usecase";
+import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-office.usecase";
+import { CurrentUser } from "src/shared/decorators/current-user.decorator";
+import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { CreateOfficeDto } from "src/application/dtos/office/create-office.dto";
+import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
+import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
+import { OfficeResource } from 'src/presentation/http/resources/office.resource';
+import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
+import { OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor"; 
+import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
+import { GetOfficeFeesUseCase } from "src/application/use-cases/office/get-office-fees.use-case";
+import { UpdateOfficeFeesUseCase } from "src/application/use-cases/office/update-office-fees.use-case"; 
+import { Roles } from "src/shared/decorators/role.decorator";  
 import { Public } from "src/shared/decorators/public.decorator";
 import { Request } from "express";
 import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-top-rated-offices.use-case";
 import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
 import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger";
-  
+import { PropertyFeeService } from "src/application/services/propertyFee.service";
+     
   @Controller('office')
   export class OfficeController {
     constructor(
@@ -42,6 +42,7 @@ import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger"
       private readonly getOfficeFeesUseCase: GetOfficeFeesUseCase,
       private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase,
       private readonly getTopRatedOfficesUseCase: GetTopRatedOfficesUseCase,
+      private readonly propertyFeeService: PropertyFeeService
     ) {}
 
     @Get('/payment-method')
@@ -147,6 +148,13 @@ import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger"
 
         return successResponse([],'تم تحديث معلومات الرسوم الخاصة بالمكتب بنجاح',200);
     }
- 
+    @UseGuards(JwtAuthGuard)
+    @Get(':property_id/commission-and-price')
+    async getPropertyFees(
+    @CurrentUser() user: any,
+    @Param('property_id') propertyId: number
+  ) { 
+    return this.propertyFeeService.getCommissionAndRental(propertyId, user.sub);
+  }
   }
    

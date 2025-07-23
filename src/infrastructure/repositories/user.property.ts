@@ -58,7 +58,7 @@ export class UserRepository implements UserRepositoryInterface {
     async findByPhone(phone: string) {
       return this.userRepo.findOne({
         where: { phone },
-        select: ['id', 'first_name', 'last_name', 'phone', 'email'],
+        select: ['id', 'username','first_name', 'last_name', 'phone', 'email'],
       });
     }
   

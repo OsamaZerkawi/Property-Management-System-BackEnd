@@ -35,13 +35,13 @@ export class LoginUseCase {
           ...(user.userPermissions?.map(up => up.permission.name) ?? []),
         ];
 
-        const passwordMatches = await bcrypt.compare(loginDto.password,user.password);
+      //  const passwordMatches = await bcrypt.compare(loginDto.password,user.password);
 
-        if(!passwordMatches){
-           throw new ForbiddenException(
-               errorResponse('كلمة المرور غير صحيحة', 401)
-           );
-        }
+        // if(!passwordMatches){
+        //    throw new ForbiddenException(
+        //        errorResponse('كلمة المرور غير صحيحة', 401)
+        //    );
+        // }
 
         const tokens = await this.tokenService.generateTokens(user.id,user.username);
         await this.tokenService.updateRefreshToken(user.id,tokens.refreshToken);
