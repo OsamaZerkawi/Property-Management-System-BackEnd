@@ -743,7 +743,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'city.name AS city_name',
         'region.name AS region_name',
         'residential.listing_type AS listing_type',
-        'residential.selling_price AS selling_price',
+        // 'residential.selling_price AS selling_price',
         'residential.rental_price AS rental_price',
         'residential.rental_period AS rental_period',
         'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
@@ -756,7 +756,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .addGroupBy('city.name')
       .addGroupBy('region.name')
       .addGroupBy('residential.listing_type')
-      .addGroupBy('residential.selling_price')
+      // .addGroupBy('residential.selling_price')
       .addGroupBy('residential.rental_price')
       .addGroupBy('residential.rental_period');
   } else if (type === PropertyType.TOURISTIC) {

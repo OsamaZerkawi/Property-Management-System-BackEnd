@@ -26,7 +26,7 @@ export class FindTopRatedPropertiesUseCase {
           ...base,
           type:PropertyType.RESIDENTIAL,
           listing_type: row.listing_type,
-          price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
+          price: row.listing_type === ListingType.SALE ? Number(row.selling_price) : Number(row.rental_price),
           rental_period: row.listing_type === ListingType.RENT ? row.rental_period : undefined,
           avg_rate: parseFloat(row.avg_rate) || 0,
           rating_count: parseInt(row.rating_count) || 0,
@@ -37,7 +37,7 @@ export class FindTopRatedPropertiesUseCase {
         return {
           ...base,
           type:PropertyType.TOURISTIC,
-          price: row.touristic_price,
+          price: Number(row.touristic_price),
           rental_period:'يومي',
           avg_rate: parseFloat(row.avg_rate) || 0,
           rating_count: parseInt(row.rating_count) || 0,
