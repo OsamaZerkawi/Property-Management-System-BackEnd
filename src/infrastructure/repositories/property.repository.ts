@@ -15,6 +15,7 @@ import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { PropertyType } from "src/domain/enums/property-type.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
+import { TouristicStatus } from "src/domain/enums/touristic-status.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
@@ -72,7 +73,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
 
   async findRelatedProperties(id: number, baseUrl: string) {
-    const query = await this.createBasePropertyDetailsQuery().andWhere('property.id =:id',{id});
+    const query = await this.createBasePropertyDetailsQuery()
+    .andWhere('property.id =:id',{id});
 
     const property = await query.getOne();
 
@@ -105,7 +107,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .leftJoin('property.images', 'images')
       .where('property.id != :id', { id })
       .andWhere('property.is_deleted = false')
-      // .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
+      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
       .andWhere('post.status = :postStatus', { postStatus: PropertyPostStatus.APPROVED })
       .andWhere('property.property_type = :type', { type: property.property_type })
       .andWhere('region.id = :regionId', { regionId: property.region?.id });  
@@ -662,6 +664,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         )
         .where('property.is_deleted = false')
         .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED })
+        .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
         .setParameters({
           rent: ListingType.RENT,
           yearly: RentalPeriod.YEARLY,
@@ -716,46 +719,76 @@ export class PropertyRepository implements PropertyRepositoryInterface {
  async getTopRatedProperties(page: number,items: number,type: PropertyType,userId: number) {
   const offset = (page - 1) * items;
 
-  const query = this.propertyRepo
+  const baseQuery = this.propertyRepo
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
     .leftJoin('property.region', 'region')
     .leftJoin('region.city', 'city')
-    .leftJoin('property.residential', 'residential')
     .leftJoin('property.feedbacks', 'feedback')
     .where('property.property_type = :type', { type })
-    .andWhere('residential.listing_type = :listingType',{listingType: ListingType.RENT})
     .andWhere('property.is_deleted = false')
-    .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
-    .select([
-      'property.id AS property_id',
-      'post.title AS post_title',
-      'post.image AS post_image',
-      'city.name AS city_name',
-      'region.name AS region_name',
-      'residential.listing_type AS listing_type',
-      'residential.selling_price AS selling_price',
-      'residential.rental_price AS rental_price',
-      'residential.rental_period AS rental_period',
-      'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
-      'COUNT(DISTINCT feedback.user_id) AS rating_count',
-      'COUNT(*) OVER() AS total_count',
-    ])
-    .groupBy('property.id')
-    .addGroupBy('post.title')
-    .addGroupBy('post.image')
-    .addGroupBy('city.name')
-    .addGroupBy('region.name')
-    .addGroupBy('residential.listing_type')
-    .addGroupBy('residential.selling_price')
-    .addGroupBy('residential.rental_price')
-    .addGroupBy('residential.rental_period')
-    .orderBy('avg_rate', 'DESC')
+    .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED });
+
+  if (type === PropertyType.RESIDENTIAL) {
+    baseQuery
+      .leftJoin('property.residential', 'residential')
+      .andWhere('residential.listing_type = :listingType', {
+        listingType: ListingType.RENT,
+      })
+      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
+      .select([
+        'property.id AS property_id',
+        'post.title AS post_title',
+        'post.image AS post_image',
+        'city.name AS city_name',
+        'region.name AS region_name',
+        'residential.listing_type AS listing_type',
+        'residential.selling_price AS selling_price',
+        'residential.rental_price AS rental_price',
+        'residential.rental_period AS rental_period',
+        'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+        'COUNT(DISTINCT feedback.user_id) AS rating_count',
+        'COUNT(*) OVER() AS total_count',
+      ])
+      .groupBy('property.id')
+      .addGroupBy('post.title')
+      .addGroupBy('post.image')
+      .addGroupBy('city.name')
+      .addGroupBy('region.name')
+      .addGroupBy('residential.listing_type')
+      .addGroupBy('residential.selling_price')
+      .addGroupBy('residential.rental_price')
+      .addGroupBy('residential.rental_period');
+  } else if (type === PropertyType.TOURISTIC) {
+    baseQuery
+      .leftJoin('property.touristic', 'touristic')
+      .andWhere('touristic.status = :touristicStatus',{touristicStatus: TouristicStatus.AVAILABLE})
+      .select([
+        'property.id AS property_id',
+        'post.title AS post_title',
+        'post.image AS post_image',
+        'city.name AS city_name',
+        'region.name AS region_name',
+        'touristic.price AS touristic_price',
+        'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+        'COUNT(DISTINCT feedback.user_id) AS rating_count',
+        'COUNT(*) OVER() AS total_count',
+      ])
+      .groupBy('property.id')
+      .addGroupBy('post.title')
+      .addGroupBy('post.image')
+      .addGroupBy('city.name')
+      .addGroupBy('region.name')
+      .addGroupBy('touristic.price')
+      .addGroupBy('touristic.status');
+  } 
+
+    baseQuery.orderBy('avg_rate', 'DESC')
     .offset(offset)
-    .limit(items);
+    .limit(items)
 
   if (userId) {
-    query.addSelect(`
+    baseQuery.addSelect(`
       CASE 
         WHEN EXISTS (
           SELECT 1 
@@ -767,10 +800,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     `, 'is_favorite')
     .setParameter('userId', userId);
   } else {
-    query.addSelect('false', 'is_favorite');
+    baseQuery.addSelect('false', 'is_favorite');
   }
 
-  const raw = await query.getRawMany();
+  const raw = await baseQuery.getRawMany();
 
   const total = raw[0]?.total_count ? parseInt(raw[0].total_count, 10) : 0;
 

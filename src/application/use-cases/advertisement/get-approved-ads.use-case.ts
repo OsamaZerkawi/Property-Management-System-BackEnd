@@ -15,7 +15,7 @@ export class GetApprovedAdvertisementUseCase {
          id: ad.id,
          image: `${baseUrl}/uploads/advertisements/images/${ad.image}`,
          is_active: ad.is_active,
-         start_date: ad.start_date?.toISOString().slice(0, 10),
+         start_date: new Date(ad.start_date).toISOString().slice(0, 10),
          active_days: ad.day_period,
        }));
     }

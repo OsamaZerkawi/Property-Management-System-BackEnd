@@ -5,6 +5,7 @@ export const USER_REPOSITORY = 'USER_REPOSITORY';
 export interface UserRepositoryInterface {
     findById(userId: number); 
     findUsersByRoleId(roleId: number);
+    findAll();
     findByEmailOrPhone(email?: string, phone?: string);
     findByEmail(email: string): Promise<User | null>;
     findByPhone(phone: string): Promise<User | null>;

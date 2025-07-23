@@ -23,6 +23,7 @@ import { UserRepository } from "src/infrastructure/repositories/user.property";
 import { RefreshTokenUseCase } from "src/application/use-cases/auth/refresh.use-case";
 import { UserController } from "../controllers/user.controller";
 import { FindUserByPhoneUseCase } from "src/application/use-cases/user/find-user-by-phone.use-case";
+import { GetAllUsersUseCase } from "src/application/use-cases/user/get-all-users.use-case";
 
 @Module({
     imports:[
@@ -48,6 +49,7 @@ import { FindUserByPhoneUseCase } from "src/application/use-cases/user/find-user
         LogoutUseCase,
         ValidateUserUseCase,
         RefreshTokenUseCase,
+        GetAllUsersUseCase,
         LocalStrategy,
         JwtAuthGuard,
         JwtService,

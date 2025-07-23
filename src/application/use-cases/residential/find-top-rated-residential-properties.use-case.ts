@@ -11,26 +11,41 @@ export class FindTopRatedPropertiesUseCase {
 
     async execute(page: number,items: number,type: PropertyType,baseUrl: string,userId: number){
       const { raw,total} = await this.propertyRepo.getTopRatedProperties(page,items,type,userId);
+
       const results = raw.map(row => {
-        const base = {
-          id: row.property_id,
-          title: row.post_title,
-          image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
-          location: `${row.city_name} - ${row.region_name}`,
+      const base = {
+        id: row.property_id,
+        title: row.post_title,
+        image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
+        location: `${row.city_name} - ${row.region_name}`,
+        is_favorite: row.is_favorite === 'true' || row.is_favorite === true ? 1 : 0,
+      };
+
+            if (type === PropertyType.RESIDENTIAL) {
+        return {
+          ...base,
+          type:PropertyType.RESIDENTIAL,
           listing_type: row.listing_type,
           price: row.listing_type === ListingType.SALE ? row.selling_price : row.rental_price,
           rental_period: row.listing_type === ListingType.RENT ? row.rental_period : undefined,
-          is_favorite: row.is_favorite === 'true' || row.is_favorite === true ? 1 : 0,
+          avg_rate: parseFloat(row.avg_rate) || 0,
+          rating_count: parseInt(row.rating_count) || 0,
         };
-      
-        return row.listing_type === ListingType.RENT
-          ? {
-              ...base,
-              avg_rate: parseFloat(row.avg_rate) || 0,
-              rating_count: parseInt(row.rating_count) || 0,
-            }
-          : base;
-      });
+      }
+
+            if (type === PropertyType.TOURISTIC) {
+        return {
+          ...base,
+          type:PropertyType.TOURISTIC,
+          price: row.touristic_price,
+          rental_period:'يومي',
+          avg_rate: parseFloat(row.avg_rate) || 0,
+          rating_count: parseInt(row.rating_count) || 0,
+        };
+      }
+
+            return base;
+}     );
       return { results , total};
     }
 }

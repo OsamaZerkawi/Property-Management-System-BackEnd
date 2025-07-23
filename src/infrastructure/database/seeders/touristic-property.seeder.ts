@@ -18,6 +18,9 @@ import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
 import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
+import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
+import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
+import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
 
 @Injectable()
 export class TouristicPropertySeeder {
@@ -31,6 +34,7 @@ export class TouristicPropertySeeder {
     @InjectRepository(UserRole) private userRoleRepo: Repository<UserRole>,
     @InjectRepository(Role) private roleRepo: Repository<Role>,
     @InjectRepository(Region) private regionRepo: Repository<Region>,
+    @InjectRepository(PropertyPost) private readonly propertyPostRepo: Repository<PropertyPost>,
   ) {}
 
   async seed() {
@@ -94,6 +98,21 @@ export class TouristicPropertySeeder {
         });
         await this.propertyRepo.save(property);
 
+        const tagValue = faker.helpers.arrayElement(Object.values(PropertyPostTag));
+        const areaValue = property.area.toFixed(2); 
+
+        const post = this.propertyPostRepo.create({
+          property,
+          title: `${tagValue} ${areaValue} م²`,  // العنوان مكون من تاج ومساحة العقار
+          description: faker.lorem.sentences(2),
+          image: 'tourisem.png',
+          tag: tagValue,
+          status: faker.helpers.arrayElement(Object.values(PropertyPostStatus)),
+          date: faker.date.recent(),
+        });
+
+        await this.propertyPostRepo.save(post);
+        
         const touristic = this.touristicRepo.create({
           property,
           price: faker.number.float({ min: 1000, max: 5000 }),

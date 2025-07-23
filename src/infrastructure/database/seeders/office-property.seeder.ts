@@ -152,7 +152,7 @@ export class OfficePropertySeeder {
         property,
         title: `${tagValue} ${areaValue} م²`,  // العنوان مكون من تاج ومساحة العقار
         description: faker.lorem.sentences(2),
-        image: faker.image.urlPicsumPhotos(),
+        image: 'property.png',
         tag: tagValue,
         status: faker.helpers.arrayElement(Object.values(PropertyPostStatus)),
         date: faker.date.recent(),

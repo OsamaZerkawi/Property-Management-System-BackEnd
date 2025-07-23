@@ -37,17 +37,29 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
     }
     
     async getApprovedAdvertisement() {
-        return this.advertisementRepo.find({
-            where: {admin_agreement: AdminAgreement.APPROVED},
-            select:{
-                id: true,
-                day_period: true,
-                start_date: true,
-                image: true,
-                is_active:true,
-            },
-            order:{'start_date':'DESC'},
-        });
+       const currentDate = new Date();
+     
+       return this.advertisementRepo
+        .createQueryBuilder('advertisement')
+        .select([
+           'advertisement.id AS id',
+           'advertisement.day_period AS day_period',
+           'advertisement.start_date AS start_date',
+           'advertisement.image AS image',
+        ])
+        .addSelect(`
+          CASE
+            WHEN advertisement.start_date + (advertisement.day_period || ' days')::interval >= :today
+            THEN true
+            ELSE false
+          END
+        `, 'is_active')
+        .where('advertisement.admin_agreement = :status', {
+          status: AdminAgreement.APPROVED,
+        })
+        .orderBy('advertisement.start_date', 'DESC')
+        .setParameter('today', currentDate)
+        .getRawMany();
     }
     
     async deactivateExpiredAdvertisements(currentDate: Date) {

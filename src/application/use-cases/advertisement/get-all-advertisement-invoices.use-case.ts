@@ -17,6 +17,7 @@ export class GetAllAdvertisementInvoicesUseCase {
     return invoices.map(invoice => {
       const paidDate = invoice.paid_date ? new Date(invoice.paid_date) : null;
     
+      //should to add promoted advertisements in future
       return {
         id: invoice.id,
         amount: invoice.amount,

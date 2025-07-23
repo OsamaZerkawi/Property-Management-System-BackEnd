@@ -7,6 +7,7 @@ import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
+import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { ResidentialPropertyRepositoryInterface } from "src/domain/repositories/residential-property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
@@ -97,7 +98,8 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
     this.applyRoomDetailsFilter(query,filters.room_details);
     filters.tag && this.applyTagsFilters(query, filters.tag);
 
-    query.select([      'property.id',
+    query.select([      
+      'property.id',
       'property.area',
       'property.region',
       'property.rate',
@@ -249,6 +251,8 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .leftJoin('region.city', 'city')
       .leftJoin('property.post', 'post')
       .where('property.is_deleted = false')
-      .andWhere('post.status = :statusPost', { statusPost: PropertyPostStatus.APPROVED });
+      .andWhere('post.status = :statusPost', { statusPost: PropertyPostStatus.APPROVED })
+      .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE});
+      
   }
 }
