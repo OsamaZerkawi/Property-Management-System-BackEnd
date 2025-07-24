@@ -5,40 +5,46 @@ import { Property } from "src/domain/entities/property.entity";
 import { User } from "src/domain/entities/user.entity";
 import { Repository } from "typeorm";
 import { Faker, ar } from '@faker-js/faker';
+import { ListingType } from "src/domain/enums/listing-type.enum";
 
 const faker = new Faker({ locale: [ar] });
 
 @Injectable()
 export class PropertyFeedbackSeeder {
-    constructor(
-      @InjectRepository(PropertyFeedback) private feedbackRepo: Repository<PropertyFeedback>,
-      @InjectRepository(User) private userRepo: Repository<User>,
-      @InjectRepository(Property) private propertyRepo: Repository<Property>,        
-    ){}
+  constructor(
+    @InjectRepository(PropertyFeedback) private feedbackRepo: Repository<PropertyFeedback>,
+    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(Property) private propertyRepo: Repository<Property>,        
+  ){}
+  async seed(){
+    const users = await this.userRepo.find();
+    const properties = await this.propertyRepo.find({
+      relations: ['residential', 'touristic'],
+    });
 
-    async seed(){
-      const users = await this.userRepo.find();
-      const properties = await this.propertyRepo.find();
-  
-      for (const property of properties) {
-        const feedbackCount = faker.number.int({ min: 3, max: 6 });
-        const usedUserIds = new Set<number>();
-  
-        for (let i = 0; i < feedbackCount; i++) {
-          const user = faker.helpers.arrayElement(users);
-  
-          if (usedUserIds.has(user.id)) continue;
-          usedUserIds.add(user.id);
-  
-          const feedback = this.feedbackRepo.create({
-            property,
-            user,
-            rate: faker.number.int({ min: 1, max: 5 }),
-          });
-          await this.feedbackRepo.save(feedback);
-        }
+    for (const property of properties) {
+      
+      if (property.residential && property.residential.listing_type === ListingType.SALE) {
+        continue;
       }
-  
-      console.log('✅ Seeded property feedbacks.');        
+      const feedbackCount = faker.number.int({ min: 3, max: 6 });
+      const usedUserIds = new Set<number>();
+
+      for (let i = 0; i < feedbackCount; i++) {
+        const user = faker.helpers.arrayElement(users);
+
+        if (usedUserIds.has(user.id)) continue;
+        usedUserIds.add(user.id);
+
+        const feedback = this.feedbackRepo.create({
+          property,
+          user,
+          rate: faker.number.int({ min: 1, max: 5 }),
+        });
+        await this.feedbackRepo.save(feedback);
+      }
     }
+
+    console.log('✅ Seeded property feedbacks.');        
+  }
 }

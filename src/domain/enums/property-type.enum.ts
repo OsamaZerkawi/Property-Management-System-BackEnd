@@ -1,4 +1,4 @@
 export enum PropertyType {
-    TOURISTIC = 'عقار سياحي',
-    RESIDENTIAL = 'عقار سكني'
+    TOURISTIC = 'سياحي',
+    RESIDENTIAL = 'عقاري'
 }

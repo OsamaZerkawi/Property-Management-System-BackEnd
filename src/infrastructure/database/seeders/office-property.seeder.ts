@@ -132,17 +132,24 @@ export class OfficePropertySeeder {
 
       await this.imageRepo.save(images);
 
+      const listingType = faker.helpers.arrayElement(Object.values(ListingType));
+
       const residential = this.residentialRepo.create({
         property,
         direction: faker.helpers.arrayElement(Object.values(Direction)),
         ownership_type: faker.helpers.arrayElement(Object.values(OwnershipType)),
-        listing_type: faker.helpers.arrayElement(Object.values(ListingType)),
-        rental_price: faker.number.int({ min: 100000, max: 300000 }),
-        rental_period: faker.helpers.arrayElement(Object.values(RentalPeriod)),
-        selling_price: faker.number.int({ min: 10000000, max: 70000000 }),
+        listing_type: listingType,
         status: faker.helpers.arrayElement(Object.values(PropertyStatus)),
-        installment_allowed: faker.datatype.boolean(),
-        installment_duration: faker.number.int({ min: 1, max: 24 }),
+        ...(listingType === ListingType.SALE && {
+          selling_price: faker.number.int({ min: 10000000, max: 70000000 }),
+          installment_allowed: faker.datatype.boolean(),
+          installment_duration: faker.number.int({ min: 1, max: 24 }),
+        }),
+      
+        ...(listingType === ListingType.RENT && {
+          rental_price: faker.number.int({ min: 100000, max: 300000 }),
+          rental_period: faker.helpers.arrayElement(Object.values(RentalPeriod)),
+        }),
       });
       await this.residentialRepo.save(residential);
 

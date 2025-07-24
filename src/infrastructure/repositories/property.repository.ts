@@ -20,6 +20,7 @@ import { PropertyRepositoryInterface } from "src/domain/repositories/property.re
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Repository } from "typeorm";
+import { queryObjects } from "v8";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -218,68 +219,32 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {
     const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId });
     
-    const properties = await query.getMany();
-
-
-    return properties.map(property => this.formatPropertyDetails(property, baseUrl));
+    const rawProperties = await query.getRawAndEntities();
+    const properties = rawProperties.entities;
+    const raw = rawProperties.raw;
+  
+    return properties.map((property, index) => {
+      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+      return {
+        ...this.formatPropertyDetails(property, baseUrl),
+        rate: avgRate,
+      };
+    });
   }
 
   async findPropertyDetailsById(propertyId: number, baseUrl: string,userId: number) {
-    const query = await this.createBasePropertyDetailsQuery()
-    .andWhere('post.status =:statusPost',{statusPost: PropertyPostStatus.APPROVED})
-    .andWhere('property.id = :propertyId',{propertyId});
+    const {property,rawData } = await this.createBasePropertyQuery(propertyId,userId);
 
-    query.leftJoin('office.feedbacks', 'office_feedbacks');
-
-    query.addSelect([
-      'office.id',
-      'office.name',
-      'office.logo',
-      'office.type',
-      'office_feedbacks.id',
-      'office_feedbacks.rate',
-    ]);
-
-    query.addSelect(
-      `(SELECT COALESCE(AVG(of.rate), 0) FROM office_feedbacks of WHERE of.office_id = office.id)`,
-      'office_average_rating'
-    );
-
-    query.addSelect(
-      `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id AND of.rate IS NOT NULL)`,
-      'office_rating_count'
-    );
-
-    if (userId) {
-      query.addSelect(
-       `CASE
-             WHEN EXISTS(
-                 SELECT 1 FROM property_favorites pf 
-                 WHERE pf.property_id = property.id AND pf.user_id = :userId
-             ) THEN true
-             ELSE false
-         END`,
-       'is_favorite'
-      )
-      .setParameter('userId',userId)
-    }
-
-    const { entities, raw } = await query.getRawAndEntities();
-    const property = entities[0];
-    const rawData = raw[0];
-
-    if(!property){
-      throw new NotFoundException(
-        errorResponse('لا يوجد عقار بهذا المعرف ',404)
-      );  
-    }
 
     const formatted = this.formatPropertyDetails(property,baseUrl);
     
     return {
       ...formatted,
+      avg_rate: parseFloat(rawData.avg_rate) || 0,
+      rating_count: parseInt(rawData.rating_count) || 0,
       is_favorite: rawData.is_favorite ? 1 : 0,
       office: {
         id: property.office?.id,
@@ -298,38 +263,66 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   async findPropertiesByUserOfficeWithFilters(userId: number, filters: SearchPropertiesDto,baseUrl: string) {
     const query =  await this.createBasePropertyDetailsQuery(filters)
+    .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId });
     
-    const properties = await query.getMany();
-
-    
-    return properties.map(property => this.formatPropertyDetails(property, baseUrl));
+    const rawProperties = await query.getRawAndEntities();
+    const properties = rawProperties.entities;
+    const raw = rawProperties.raw;
+  
+    return properties.map((property, index) => {
+      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+      return {
+        ...this.formatPropertyDetails(property, baseUrl),
+        rate: avgRate,
+      };
+    });
   }
 
   async searchPropertiesForOfficeByTitle(userId: number,title: string,baseUrl: string) {
     const query =  await this.createBasePropertyDetailsQuery()
+    .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId })
     .andWhere('post.title ILIKE :title', { title: `%${title}%` });
     
-    const properties =await query.getMany();
-
-    return properties.map(property => this.formatPropertyDetails(property,baseUrl));
+    const rawProperties = await query.getRawAndEntities();
+    const properties = rawProperties.entities;
+    const raw = rawProperties.raw;
+  
+    return properties.map((property, index) => {
+      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+      return {
+        ...this.formatPropertyDetails(property, baseUrl),
+        rate: avgRate,
+      };
+    });
   }
 
 
   async findPropertyByPropertyIdAndUserOffice(userId: number,propertyId: number, baseUrl: string) {
-    const property = await this.createBasePropertyDetailsQuery()
+    const query = await this.createBasePropertyDetailsQuery()
+    .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId })
-    .andWhere('property.id = :propertyId', { propertyId })
-    .getOne();
+    .andWhere('property.id = :propertyId', { propertyId });
 
-    if(!property){
+    const { entities, raw } = await query.getRawAndEntities();
+  
+    if (entities.length === 0) {
       throw new NotFoundException(
-        errorResponse('لا يوجد عقار بهذا المعرف ',404)
-      );  
+        errorResponse('لا يوجد عقار بهذا المعرف', 404)
+      );
     }
+  
+    const property = entities[0];
+    const avgRate = parseFloat(raw[0].avg_rate) || 0;
+  
+    const formatted = this.formatPropertyDetails(property, baseUrl);
+  
+    return {
+      ...formatted,
+      rate: avgRate,
+    };    
 
-    return this.formatPropertyDetails(property,baseUrl);
   }
 
   async getExpectedpPriceInRegion(propertyId: number) {
@@ -555,74 +548,95 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
 
   private formatPropertyDetails(property: Property, baseUrl: string) {
-  const base = {
-    postTitle: property.post?.title,
-    postDescription: property.post?.description,
-    postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
-    postDate: property.post.created_at.toISOString().split('T')[0],
-    postStatus: property.post.status,
-    propertyId: property.id,
-    area: property.area,
-    property_type: property.property_type,
-    ownership_type: property.residential?.ownership_type ?? null,
-    direction: property.residential?.direction ?? null,
-    status: property.residential?.status ?? null,
-    coordinates: {
-      latitude: property.latitude,
-      longitude: property.longitude,
-    },
-    floor_number: property.floor_number,
-    notes: property.notes ?? null,
-    highlighted: property.highlighted,
-    room_counts: {
-      total: property.room_count,
-      bedroom: property.bedroom_count,
-      living_room: property.living_room_count,
-      kitchen: property.kitchen_count,
-      bathroom: property.bathroom_count,
-    },
-    has_furniture: property.has_furniture,
-    location: `${property.region?.city?.name}, ${property.region?.name}`,
-    region: {
-      id: property.region?.id,
-      name: property.region?.name,
-    },
-    city: {
-      id: property.region?.city?.id,
-      name: property.region?.city?.name,
-    },
-    images: property.images.map(image => ({
-      id: image.id,
-      image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
-    })),
-    tag: property.post?.tag,
-  };
 
-  if (property.residential?.listing_type === ListingType.RENT) {
-    const rentalPeriod = property.residential?.rental_period ?? null;
-    const rentalPrice = property.residential?.rental_price ?? null;
-    
-    return {
-      ...base,
-      rate:property.rate ?? null,
-      listing_type: 'أجار',
-      rent_details: {
-        price: rentalPrice,
-        rental_period: rentalPeriod
+    const base = {
+      postTitle: property.post?.title,
+      postDescription: property.post?.description,
+      postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+      postDate: property.post.created_at.toISOString().split('T')[0],
+      postStatus: property.post.status,
+      propertyId: property.id,
+      area: property.area,
+      property_type: property.property_type,
+      coordinates: {
+        latitude: property.latitude,
+        longitude: property.longitude,
       },
-    };
-  } else {
-    return {
-      ...base,
-      listing_type: 'بيع',
-      sell_details: {
-        selling_price: property.residential?.selling_price ?? null,
-        installment_allowed: property.residential?.installment_allowed ?? false,
-        installment_duration: property.residential?.installment_duration ?? null,
+      floor_number: property.floor_number,
+      notes: property.notes ?? null,
+      highlighted: property.highlighted,
+      has_furniture: property.has_furniture,
+      location: `${property.region?.city?.name}, ${property.region?.name}`,
+      region: {
+        id: property.region?.id,
+        name: property.region?.name,
       },
+      city: {
+        id: property.region?.city?.id,
+        name: property.region?.city?.name,
+      },
+      images: property.images.map(image => ({
+        id: image.id,
+        image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+      })),
+      tag: property.post?.tag,
     };
+  
+    if (property.property_type === PropertyType.RESIDENTIAL) {
+      const res = property.residential;
+  
+      return {
+        ...base,
+        ownership_type: res?.ownership_type ?? null,
+        direction: res?.direction ?? null,
+        status: res?.status ?? null,
+        room_counts: {
+          total: property.room_count,
+          bedroom: property.bedroom_count,
+          living_room: property.living_room_count,
+          kitchen: property.kitchen_count,
+          bathroom: property.bathroom_count,
+        },
+        // rate: property.rate ?? null,
+        listing_type: res?.listing_type === ListingType.RENT ? 'أجار' : 'بيع',
+        ...(res?.listing_type === ListingType.RENT
+          ? {
+              rent_details: {
+                price: res.rental_price ?? null,
+                rental_period: res.rental_period ?? null,
+              },
+            }
+          : {
+              sell_details: {
+                selling_price: res.selling_price ?? null,
+                installment_allowed: res.installment_allowed ?? false,
+                installment_duration: res.installment_duration ?? null,
+              },
+            }),
+      };
+    }
+  
+    if (property.property_type === PropertyType.TOURISTIC) {
+      const tour = property.touristic;
+  
+      return {
+        ...base,
+        rate: property.rate ?? null,
+        price: tour?.price,
+        status: tour?.status,
+        touristic_info: {
+          street: tour?.street,
+          electricity: tour?.electricity,
+          water: tour?.water,
+          pool: tour?.pool,
+        },
+        services: tour?.additionalServices?.map(s => s.service.name) ?? [],
+      };
+    }
+  
+    // Add fallback if needed for other types
+    return base;
   }
- }
 
  private async buildPropertyQuery(userId: number,filters?: PropertiesFiltersDto,){
       const query = this.propertyRepo.createQueryBuilder('property')
@@ -810,106 +824,267 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   return { raw, total };
  }
 
- private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto){
-  const query = this.propertyRepo.createQueryBuilder('property')
-    .leftJoin('property.office', 'office')
-    .leftJoin('property.residential', 'residential')
-    .leftJoin('property.images', 'images')
-    .leftJoin('property.region', 'region')
-    .leftJoin('region.city', 'city')
-    .leftJoin('property.post', 'post')
-    .where('property.is_deleted = false')
-    // .andWhere('post.status =:status',{status: PropertyPostStatus.APPROVED})
-    .select([
-    'property.id',
-    'property.area',
-    'property.latitude',
-    'property.longitude',
-    'property.property_type',
-    'property.floor_number',
-    'property.notes',
-    'property.rate',
-    'property.highlighted',
-    'property.room_count',
-    'property.bedroom_count',
-    'property.living_room_count',
-    'property.kitchen_count',
-    'property.bathroom_count',
-    'property.has_furniture',
-    'property.rate',
+  private async createBasePropertyQuery(propertyId: number,userId: number) {
+    const query = await this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoinAndSelect('property.images', 'images')
+      .leftJoinAndSelect('property.region', 'region')
+      .leftJoinAndSelect('region.city', 'city')
+      .leftJoinAndSelect('property.post', 'post')
+      .leftJoin('property.feedbacks', 'feedback')
+      .leftJoinAndSelect('property.office', 'office')
+  
+      // Join both residential and touristic (only one will have data)
+      .leftJoinAndSelect('property.residential', 'residential')
+      .leftJoinAndSelect('property.touristic', 'touristic')
+      .leftJoinAndSelect('touristic.additionalServices', 'additionalServices')
+      .leftJoinAndSelect('additionalServices.service', 'service')
+  
+      .where('property.id = :propertyId', { propertyId })
+      .andWhere('property.is_deleted = false')
+  
+      .select([
+        // Main property fields
+        'property.id',
+        'property.property_type',
+        'property.area',
+        'property.latitude',
+        'property.longitude',
+        'property.floor_number',
+        'property.notes',
+        'property.rate',
+        'property.highlighted',
+        'property.room_count',
+        'property.bedroom_count',
+        'property.living_room_count',
+        'property.kitchen_count',
+        'property.bathroom_count',
+        'property.has_furniture',
 
-    'post.id',
-    'post.title',
-    'post.image',
-    'post.created_at',
-    'post.status',
-    'post.description',
-    'post.tag',
+        //feedback rating
+        'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+        'COUNT(DISTINCT feedback.user_id) AS rating_count',
+  
+        // Images
+        'images.id',
+        'images.image_path',
+  
+        // Post
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.description',
+        'post.tag',
+        'post.status',
+        'post.created_at',
+  
+        // Region & City
+        'region.id',
+        'region.name',
+        'city.id',
+        'city.name',
+  
+        // Office (if needed)
+        'office.id',
+        'office.name',
+  
+        // Residential fields
+        'residential.id',
+        'residential.status',
+        'residential.rental_price',
+        'residential.rental_period',
+        'residential.listing_type',
+        'residential.selling_price',
+        'residential.installment_allowed',
+        'residential.installment_duration',
+        'residential.ownership_type',
+        'residential.direction',
+  
+        // Touristic fields
+        'touristic.id',
+        'touristic.price',
+        'touristic.status',
+        'touristic.pool',
+        'touristic.street',
+        'touristic.electricity',
+        'touristic.water',
 
-    'residential.status',
-    'residential.rental_price',
-    'residential.rental_period',
-    'residential.listing_type',
-    'residential.selling_price',
-    'residential.installment_allowed',
-    'residential.installment_duration',
-    'residential.ownership_type',
-    'residential.direction',
+        
+        // Services
+        'additionalServices.serviceId',
+        'additionalServices.touristicId',
+        'service.id',
+        'service.name',
+      ])
 
-    'images.id',
-    'images.image_path',
+      query.leftJoin('office.feedbacks', 'office_feedbacks');
 
-    'region.id',
-    'region.name',
+      query.addSelect([
+        'office.id',
+        'office.name',
+        'office.logo',
+        'office.type',
+        'office_feedbacks.id',
+        'office_feedbacks.rate',
+      ]);
 
-    'city.id',
-    'city.name',
-    ]);
+      query.addSelect(
+        `(SELECT COALESCE(AVG(of.rate), 0) FROM office_feedbacks of WHERE of.office_id = office.id)`,
+        'office_average_rating'
+      );
 
-  // Apply optional filters
-  if (filters) {
-    const postStatuses = [
-      CombinedPropertyStatus.PENDING,
-      CombinedPropertyStatus.REJECTED,      
-    ];
+      query.addSelect(
+        `(SELECT COUNT(of.id) FROM office_feedbacks of WHERE of.office_id = office.id AND of.rate IS NOT NULL)`,
+        'office_rating_count'
+      );
 
-    if(filters.status){
-      if(postStatuses.includes(filters.status)){
-        query.andWhere('post.status = :postStatus', {
-          postStatus: filters.status,
-        });
-      } else{
-        query.andWhere('post.status = :approvedStatus', {
-          approvedStatus: PropertyPostStatus.APPROVED,
-        });
-        query.andWhere('residential.status = :resStatus', {
-          resStatus: filters.status,
-        });
-      }
+      if (userId) {
+        query.addSelect(
+         `CASE
+               WHEN EXISTS(
+                   SELECT 1 FROM property_favorites pf 
+                   WHERE pf.property_id = property.id AND pf.user_id = :userId
+               ) THEN true
+               ELSE false
+           END`,
+         'is_favorite'
+        )
+        .setParameter('userId',userId)
     }
-    if (filters.listing_type) {
-      query.andWhere('residential.listing_type = :listing_type', { listing_type: filters.listing_type });
+
+    query.groupBy(`
+      property.id,
+      images.id,
+      post.id,
+      region.id,
+      city.id,
+      office.id,
+      residential.id,
+      touristic.id,
+      office.id,
+      office_feedbacks.id,
+      additionalServices.serviceId,
+      additionalServices.touristicId,
+      service.id
+    `);
+
+    const { entities, raw } = await query.getRawAndEntities();
+    const property = entities[0];
+    const rawData = raw[0];
+
+    if(!property){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار بهذا المعرف ',404)
+      );  
     }
 
-    if (filters.regionId) {
-      query.andWhere('region.id = :regionId', { regionId: filters.regionId });
-    }
+    return { property, rawData};
 
-    if (filters.cityId) {
-      query.andWhere('city.id = :cityId', { cityId: filters.cityId });
-    }
-
-    // if (filters.status) {
-    //   query.andWhere('residential.status = :status', { status: filters.status });
-    // }
-
-    if (filters.tag) {
-      query.andWhere('post.tag = :tag', { tag: filters.tag });
-    }
   }
 
-  return query;
- }
+  private createBasePropertyDetailsQuery(filters?: SearchPropertiesDto) {
+    const query = this.propertyRepo.createQueryBuilder('property')
+      .leftJoin('property.office', 'office')
+      .leftJoin('property.residential', 'residential')
+      .leftJoin('property.images', 'images')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.feedbacks', 'feedback')
+      .where('property.is_deleted = false')
+      .select([
+        'property.id',
+        'property.area',
+        'property.latitude',
+        'property.longitude',
+        'property.property_type',
+        'property.floor_number',
+        'property.notes',
+        'property.highlighted',
+        'property.room_count',
+        'property.bedroom_count',
+        'property.living_room_count',
+        'property.kitchen_count',
+        'property.bathroom_count',
+        'property.has_furniture',
+  
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.created_at',
+        'post.status',
+        'post.description',
+        'post.tag',
+  
+        'residential.status',
+        'residential.rental_price',
+        'residential.rental_period',
+        'residential.listing_type',
+        'residential.selling_price',
+        'residential.installment_allowed',
+        'residential.installment_duration',
+        'residential.ownership_type',
+        'residential.direction',
+  
+        'images.id',
+        'images.image_path',
+  
+        'region.id',
+        'region.name',
+  
+        'city.id',
+        'city.name',
+      ])
+      .addSelect('COALESCE(AVG(feedback.rate), 0)', 'avg_rate')
+      .addSelect('COUNT(feedback.id)', 'feedback_count')
+      .groupBy('property.id')
+      .addGroupBy('post.id')
+      .addGroupBy('residential.id')
+      .addGroupBy('images.id')
+      .addGroupBy('region.id')
+      .addGroupBy('city.id')
+      .addGroupBy('office.id');
+  
+    // Apply optional filters 
+    if (filters) {
+      const postStatuses = [
+        CombinedPropertyStatus.PENDING,
+        CombinedPropertyStatus.REJECTED,      
+      ];
+  
+      if(filters.status){
+        if(postStatuses.includes(filters.status)){
+          query.andWhere('post.status = :postStatus', {
+            postStatus: filters.status,
+          });
+        } else{
+          query.andWhere('post.status = :approvedStatus', {
+            approvedStatus: PropertyPostStatus.APPROVED,
+          });
+          query.andWhere('residential.status = :resStatus', {
+            resStatus: filters.status,
+          });
+        }
+      }
+      if (filters.listing_type) {
+        query.andWhere('residential.listing_type = :listing_type', { listing_type: filters.listing_type });
+      }
+  
+      if (filters.regionId) {
+        query.andWhere('region.id = :regionId', { regionId: filters.regionId });
+      }
+  
+      if (filters.cityId) {
+        query.andWhere('city.id = :cityId', { cityId: filters.cityId });
+      }
+  
+      if (filters.tag) {
+        query.andWhere('post.tag = :tag', { tag: filters.tag });
+      }
+    }
+  
+    return query;
+  }
 
  async rateProperty(userId: number, propertyId: number, rate: number) {
     const property = await this.propertyRepo.findOne({where:{id:propertyId},relations: ['residential']});
