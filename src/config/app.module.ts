@@ -37,6 +37,7 @@ import { TourismModule } from 'src/presentation/http/modules/tourism.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AdminPartnersManagementModule } from 'src/presentation/http/modules/admin-partners-management.module';
 import { RentalContractModule } from 'src/presentation/http/modules/rental-contract.module';
+import { UserModule } from 'src/presentation/http/modules/user.module';
  
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { RentalContractModule } from 'src/presentation/http/modules/rental-contr
     RentalContractModule,
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
+    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env', 
