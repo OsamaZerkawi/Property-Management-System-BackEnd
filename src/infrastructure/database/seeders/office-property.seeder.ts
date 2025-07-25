@@ -69,7 +69,7 @@ export class OfficePropertySeeder {
     
     const office = this.officeRepo.create({
       name: faker.company.name(),
-      logo: 'office.jpeg', // or a static path like `/uploads/logo.png`
+      logo: 'office.jpeg', 
       type: OfficeType.RESIDENTIAL,
       commission: faker.number.float({ min: 0, max: 20, fractionDigits: 2 }),
       booking_period: faker.number.int({ min: 1, max: 30 }),

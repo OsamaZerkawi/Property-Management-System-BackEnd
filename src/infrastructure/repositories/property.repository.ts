@@ -242,9 +242,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
 
     const formatted = this.formatPropertyDetails(property,baseUrl);
+
     return {
       ...formatted,
-      avg_rate: parseFloat(rawData.avg_rate) || 0,
+      avg_rate: parseInt(rawData.avg_rate) || 0,
       rating_count: parseInt(rawData.rating_count) || 0,
       is_favorite: rawData.is_favorite ? 1 : 0,
       office: {
@@ -254,7 +255,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
           : null,
         type: property.office?.type ?? null,
-        location: `${property.region?.city?.name}, ${property.region?.name}`,
+        location:  `${property.office.region.city.name}, ${property.office.region.name}`,
         rate: parseFloat(rawData.office_average_rating || 0),
         rating_count:parseInt(rawData.office_rating_count),
       },
@@ -791,6 +792,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .leftJoinAndSelect('property.post', 'post')
       .leftJoin('property.feedbacks', 'feedback')
       .leftJoinAndSelect('property.office', 'office')
+      .leftJoinAndSelect('office.region', 'officeRegion')
+      .leftJoinAndSelect('officeRegion.city', 'officeCity')
   
       // Join both residential and touristic (only one will have data)
       .leftJoinAndSelect('property.residential', 'residential')
@@ -846,6 +849,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'office.id',
         'office.name',
         'office.region',
+        'officeRegion.id',
+        'officeRegion.name',
+        'officeCity.id',
+        'officeCity.name',
   
         // Residential fields
         'residential.id',
@@ -926,7 +933,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       office_feedbacks.id,
       additionalServices.serviceId,
       additionalServices.touristicId,
-      service.id
+      service.id,
+      officeCity.id,
+      officeRegion.id
     `);
 
     const { entities, raw } = await query.getRawAndEntities();
