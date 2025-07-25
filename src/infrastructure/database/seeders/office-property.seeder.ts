@@ -69,7 +69,7 @@ export class OfficePropertySeeder {
     
     const office = this.officeRepo.create({
       name: faker.company.name(),
-      logo: faker.image.url(), // or a static path like `/uploads/logo.png`
+      logo: 'office.jpeg', // or a static path like `/uploads/logo.png`
       type: OfficeType.RESIDENTIAL,
       commission: faker.number.float({ min: 0, max: 20, fractionDigits: 2 }),
       booking_period: faker.number.int({ min: 1, max: 30 }),
@@ -126,7 +126,7 @@ export class OfficePropertySeeder {
       const images = Array.from({ length: imageCount }).map(() => {
         return this.imageRepo.create({
           property: savedProperty,
-          image_path: faker.image.url(), // or use a static URL like `/uploads/fake1.jpg`
+          image_path: 'property.jpeg', 
         });
       });      
 

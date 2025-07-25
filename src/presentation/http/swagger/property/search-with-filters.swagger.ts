@@ -5,7 +5,7 @@ import { ResidentialPropertiesSearchFiltersDto } from 'src/application/dtos/prop
 export function SearchPropertiesWithFiltersSwaggerDoc() {
   return applyDecorators(
 
-    ApiConsumes('application/x-www-form-urlencoded'),
+    // ApiConsumes('multipart/form-data'),
     ApiOperation({ summary: 'خاصة بتطبيق الجوال' }),
 
     ApiQuery({

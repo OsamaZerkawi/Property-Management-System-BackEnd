@@ -242,7 +242,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
 
     const formatted = this.formatPropertyDetails(property,baseUrl);
-    
     return {
       ...formatted,
       avg_rate: parseFloat(rawData.avg_rate) || 0,
@@ -255,10 +254,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
           : null,
         type: property.office?.type ?? null,
-        rate:{
-          avreg: parseFloat(rawData.office_average_rating || 0),
-          count: parseInt(rawData.office_rating_count)
-        },
+        location: `${property.region?.city?.name}, ${property.region?.name}`,
+        rate: parseFloat(rawData.office_average_rating || 0),
+        rating_count:parseInt(rawData.office_rating_count),
       },
     };
   }
@@ -847,6 +845,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         // Office (if needed)
         'office.id',
         'office.name',
+        'office.region',
   
         // Residential fields
         'residential.id',
@@ -882,6 +881,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       query.addSelect([
         'office.id',
         'office.name',
+        'office.region',
+
         'office.logo',
         'office.type',
         'office_feedbacks.id',
