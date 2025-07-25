@@ -21,8 +21,9 @@ export class FindTopRatedPropertiesUseCase {
         is_favorite: row.is_favorite === 'true' || row.is_favorite === true ? 1 : 0,
       };
 
-            if (type === PropertyType.RESIDENTIAL) {
-        return {
+        if (type === PropertyType.RESIDENTIAL) {
+        
+          return {
           ...base,
           type:PropertyType.RESIDENTIAL,
           listing_type: row.listing_type,
@@ -44,8 +45,8 @@ export class FindTopRatedPropertiesUseCase {
         };
       }
 
-            return base;
-}     );
+      return base;
+      });
       return { results , total};
     }
 }

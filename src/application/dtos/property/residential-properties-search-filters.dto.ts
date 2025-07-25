@@ -60,7 +60,7 @@ export class ResidentialPropertiesSearchFiltersDto {
   @IsEnum(PropertyStatus)
   status?: PropertyStatus;
 
-  @ApiPropertyOptional({ description: 'هل يحتوي على أثاث؟', example: true })
+  @ApiPropertyOptional({ description: 'هل يحتوي على أثاث؟', enum: PropertyFurnishingType })
   @IsOptional()
   @IsEnum(PropertyFurnishingType)
   has_furniture?: PropertyFurnishingType;

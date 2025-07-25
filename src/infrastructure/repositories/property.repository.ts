@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ConsoleLogger, ForbiddenException, Inject, Injectable, NotFoundException, ParseIntPipe } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { max, min } from "class-validator";
 import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
@@ -22,6 +22,7 @@ import { errorResponse } from "src/shared/helpers/response.helper";
 import { QueryRunnerAlreadyReleasedError, Repository } from "typeorm";
 import { queryObjects } from "v8";
 import { CityRegionSeeder } from "../database/seeders/city-region.seeder";
+import { find } from "rxjs";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -370,7 +371,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       calculated_price: Number(raw[index]?.calculated_price),
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
-  
+
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
@@ -384,9 +385,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
     const entities = rawResults.entities;
     const raw = rawResults.raw;
-  
+
     const final = entities.map((entity, index) => ({
       ...entity,
+      avg_rate: parseInt(raw[index]?.avg_rate) || 0,
       calculated_price: Number(raw[index]?.calculated_price),
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
@@ -398,6 +400,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const query = await this.buildPropertyQuery(userId);
     query.andWhere('post.title ILIKE :title', { title: `%${title}%` });
 
+    const results = await  query.getRawMany();
+    console.log(results);
+
     const [rawResults, total] = await Promise.all([
       query.skip((page - 1) * items).take(items).getRawAndEntities(),
       query.getCount(),
@@ -408,6 +413,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
     const final = entities.map((entity, index) => ({
       ...entity,
+      avg_rate: parseInt(raw[index]?.avg_rate) || 0,
       calculated_price: Number(raw[index]?.calculated_price),
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
@@ -458,60 +464,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .getMany();
   }
 
-  private formatPropertyForComparison(property: Property,rawData: any,baseUrl: string){
-    return {
-      property_details: {
-        id: property.id,
-        area: property.area,
-        property_type: property.property_type,
-        ownership_type: property.residential?.ownership_type ?? null,
-        direction: property.residential?.direction ?? null,
-        status: property.residential?.status ?? null,
-        floor_number: property.floor_number,
-        has_furniture: property.has_furniture,
-        highlighted: property.highlighted,
-        notes: property.notes ?? null,
-        listing_type: property.residential.listing_type,
-        ...(property.residential?.listing_type === ListingType.RENT && {
-          rent_period: property.residential?.rental_period,
-        }),
-        price: Number(rawData?.calculated_price),
-      },
-      room_details: {
-        total: property.room_count,
-        bedroom: property.bedroom_count,
-        living_room: property.living_room_count,
-        kitchen: property.kitchen_count,
-        bathroom: property.bathroom_count,
-      },
-      location: {
-        coordinates: {
-          latitude: property.latitude,
-          longitude: property.longitude,
-        },
-        city: property.region?.city
-          ? {
-              id: property.region.city.id,
-              name: property.region.city.name,
-            }
-          : null,
-        region: property.region
-          ? {
-              id: property.region.id,
-              name: property.region.name,
-            }
-          : null,
-        full_address: property.region?.city && property.region
-          ? `${property.region.city.name}، ${property.region.name}`
-          : null,
-      },
-      images: property.images?.map(img => ({
-        id: img.id,
-        image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
-      })) ?? [],
-    };
-  }
-
   private formatProperty(property,baseUrl: string){
     
     const base = {
@@ -523,20 +475,23 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       is_favorite: property.is_favorite ? 1 : 0,
     }
 
-    if (property.residential?.listing_type === ListingType.RENT) {
-      return {
-        ...base,
-        listing_type: 'أجار',
-        price: property.calculated_price,
-        rate:property.rate ?? null,
-      };
-    } else {
-      return {
-        ...base,
-        listing_type: 'بيع',
-        price:property.calculated_price,
-      };
-    }   
+      if (property.residential?.listing_type === ListingType.RENT) {
+        return {
+          ...base,
+          type:PropertyType.RESIDENTIAL,
+          listing_type: 'أجار',
+          rental_period: property.residential?.rental_period,
+          price: property.calculated_price,
+          rate:property.avg_rate ?? null,
+        };
+      } else {
+        return {
+          ...base,
+          listing_type: 'بيع',
+          price:property.calculated_price,
+          area: parseInt(property.area) ,
+        };
+      }   
   }
 
   private formatPropertyDetails(property: Property, baseUrl: string) {
@@ -635,12 +590,13 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         .leftJoin('property.residential', 'residential')
         .leftJoin('property.post', 'post')
         .leftJoin('property.region', 'region')
+        .leftJoin('property.feedbacks', 'feedback')
         .leftJoin('region.city', 'city')
         .select([
           'property.id',
           'property.area',
           'property.region',
-          'property.rate',
+          'property.property_type',
       
           'post.id',
           'post.title',
@@ -650,6 +606,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           'post.status',
           'post.date',
       
+          'residential.id',
           'residential.listing_type',
           'residential.selling_price',
           'residential.rental_price',
@@ -657,10 +614,14 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       
           'region.id',
           'region.name',
-      
+
+          'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+          'COUNT(*) OVER() AS total_count',
+          
           'city.id',
           'city.name',
         ])
+
         .addSelect(
           `CASE
              WHEN residential.listing_type = :rent THEN residential.rental_price
@@ -669,6 +630,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           'calculated_price'
         )
         .where('property.is_deleted = false')
+        .andWhere('property.property_type = :type',{type: PropertyType.RESIDENTIAL})
         .andWhere('post.status = :status', { status: PropertyPostStatus.APPROVED })
         .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
         .setParameters({
@@ -723,6 +685,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       }
     }
   
+    query.groupBy('property.id, residential.id, region.id, city.id, post.id')
+
     return query;
  }
 
