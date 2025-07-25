@@ -3,6 +3,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { ListingType } from 'src/domain/enums/listing-type.enum';
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
+import { SortDirection } from 'src/domain/enums/sort-direction.enum';
 
 export function GetFilteredPropertiesSwaggerDoc() {
   return applyDecorators(
@@ -10,6 +11,14 @@ export function GetFilteredPropertiesSwaggerDoc() {
 
     ApiQuery({
       name: 'regionId',
+      required: false,
+      type: Number,
+      example: 1,
+      description: 'رقم المنطقة',
+    }),
+
+    ApiQuery({
+      name: 'cityId',
       required: false,
       type: Number,
       example: 1,
@@ -33,24 +42,24 @@ export function GetFilteredPropertiesSwaggerDoc() {
     ApiQuery({
       name: 'orderByArea',
       required: false,
-      type: Boolean,
-      example: true,
+      enum: SortDirection,
+      example: 'DSEC',
       description: 'ترتيب حسب المساحة',
     }),
 
     ApiQuery({
       name: 'orderByPrice',
       required: false,
-      type: Boolean,
-      example: true,
+      enum: SortDirection,
+      example: 'DSEC',
       description: 'ترتيب حسب السعر',
     }),
 
     ApiQuery({
       name: 'orderByDate',
       required: false,
-      type: Boolean,
-      example: true,
+      enum: SortDirection,
+      example: 'DSEC',
       description: 'ترتيب حسب التاريخ',
     }),
 

@@ -19,8 +19,9 @@ import { TouristicStatus } from "src/domain/enums/touristic-status.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
-import { Repository } from "typeorm";
+import { QueryRunnerAlreadyReleasedError, Repository } from "typeorm";
 import { queryObjects } from "v8";
+import { CityRegionSeeder } from "../database/seeders/city-region.seeder";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -414,40 +415,31 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
   }
 
-  async compareTwoProperties(propertyId1: number, propertyId2: number, baseUrl: string) {
-  const query = this.createBasePropertyDetailsQuery()
-    .addSelect(
-      `CASE
-         WHEN residential.listing_type = :rent THEN residential.rental_price
-         ELSE residential.selling_price
-       END`,
-      'calculated_price'
-    )
-    .setParameters({
-      rent: ListingType.RENT ,
-      yearly: RentalPeriod.YEARLY,
-    });
+  async compareTwoProperties(propertyId1: number, propertyId2: number,userId: number, baseUrl: string) {
+    const {property,rawData } = await this.createBasePropertyQuery(propertyId1,userId);
+    const { property: property2, rawData: rawData2 } = await this.createBasePropertyQuery(propertyId2, userId);
 
-  const [raw1, raw2] = await Promise.all([
-    query.clone().andWhere('property.id = :id1', { id1: propertyId1 }).getRawAndEntities(),
-    query.clone().andWhere('property.id = :id2', { id2: propertyId2 }).getRawAndEntities()
-  ]);
+    if (!property || !property2) {
+      throw new NotFoundException(
+        errorResponse('لم يتم العثور على أحد العقارين أو كلاهما',404)
+      );
+    }
+    const property1Data = {
+      ...this.formatPropertyDetails(property,baseUrl),
+      avg_rate: parseFloat(rawData.avg_rate) || 0,
+      rating_count: parseInt(rawData.rating_count) || 0,
+      is_favorite: rawData.is_favorite ? 1 : 0,
+    }
 
-  const property1 = raw1.entities[0];
-  const rawData1 = raw1.raw[0];
-
-  const property2 = raw2.entities[0];
-  const rawData2 = raw2.raw[0];
-
-  if (!property1 || !property2) {
-    throw new NotFoundException(
-      errorResponse('لم يتم العثور على أحد العقارين أو كلاهما',404)
-    );
-  }
-
+    const property2Data = {
+      ...this.formatPropertyDetails(property2,baseUrl),
+      avg_rate: parseFloat(rawData2.avg_rate) || 0,
+      rating_count: parseInt(rawData2.rating_count) || 0,
+      is_favorite: rawData2.is_favorite ? 1 : 0,
+    }
     return {
-      property_1: this.formatPropertyForComparison(property1,rawData1,baseUrl),
-      property_2: this.formatPropertyForComparison(property2,rawData2,baseUrl),
+      property_1: property1Data,
+      property_2: property2Data,
     }
   }
 
@@ -699,33 +691,37 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     }
 
       
-      if (filters) {
-        if (filters.listing_type) {
-          query.andWhere('residential.listing_type = :listing_type', {
-            listing_type: filters.listing_type,
-          });
-        }
-    
-        if (filters.regionId) {
-          query.andWhere('region.id = :regionId', { regionId: filters.regionId });
-        }
-    
-        if (filters.tag) {
-          query.andWhere('post.tag = :tag', { tag: filters.tag });
-        }
-      
-        if (filters.orderByPrice) {
-          query.orderBy('calculated_price',  'DESC');
-        }
-      
-        if (filters.orderByArea) {
-          query.addOrderBy('property.area', 'DESC');
-        }
-    
-        if (filters.orderByDate) {
-          query.addOrderBy('post.date', 'DESC');
-        }
+    if (filters) {
+      if (filters.listing_type) {
+        query.andWhere('residential.listing_type = :listing_type', {
+          listing_type: filters.listing_type,
+        });
       }
+  
+      if (filters.regionId) {
+        query.andWhere('region.id = :regionId', { regionId: filters.regionId });
+      }
+
+      if(filters.cityId){
+        query.andWhere('city.id = :cityId',{cityId: filters.cityId});
+      }
+  
+      if (filters.tag) {
+        query.andWhere('post.tag = :tag', { tag: filters.tag });
+      }
+    
+      if (filters.orderByPrice) {
+        query.orderBy('calculated_price',  filters.orderByPrice);
+      }
+    
+      if (filters.orderByArea) {
+        query.addOrderBy('property.area', filters.orderByArea);
+      }
+  
+      if (filters.orderByDate) {
+        query.addOrderBy('post.date', filters.orderByDate);
+      }
+    }
   
     return query;
  }

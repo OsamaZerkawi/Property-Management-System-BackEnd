@@ -1,9 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiOkResponse, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiOkResponse, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ResidentialPropertiesSearchFiltersDto } from 'src/application/dtos/property/residential-properties-search-filters.dto';
 
 export function SearchPropertiesWithFiltersSwaggerDoc() {
   return applyDecorators(
+
+    ApiConsumes('application/x-www-form-urlencoded'),
     ApiOperation({ summary: 'خاصة بتطبيق الجوال' }),
 
     ApiQuery({

@@ -7,7 +7,7 @@ export class CompareTwoPropertiesUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(propertyId1: number,propertyId2: number,baseUrl: string){
-        return await this.propertyRepo.compareTwoProperties(propertyId1,propertyId2,baseUrl);
+    async execute(propertyId1: number,propertyId2: number,userId: number,baseUrl: string){
+        return await this.propertyRepo.compareTwoProperties(propertyId1,propertyId2,userId,baseUrl);
     }
 }

@@ -24,6 +24,7 @@ import { GetPropertyDetailsSwaggerDoc } from "../swagger/property/get-property-d
 import { GetRelatedPropertiesSwaggerDoc } from "../swagger/property/get-related-properties.swagger";
 import { RatePropertySwaggerDoc } from "../swagger/property/rate-property.swagger";
 import { CompareTwoPropertiesSwaggerDoc } from "../swagger/property/compare-two-proerties.swagger";
+import { userInfo } from "os";
 
 
 @Controller('properties')
@@ -119,11 +120,13 @@ export class PropertyController{
         @Query('id1',ParseIntPipe) id1: number,
         @Query('id2',ParseIntPipe) id2: number,
         @Req() request: Request,
+        @CurrentUser() user,
 
     ){
         const baseUrl = `${request.protocol}://${request.get('host')}`;
+        const userId = user.sub;
 
-        const data = await this.compareTwoPropertiesUseCase.execute(id1,id2,baseUrl);
+        const data = await this.compareTwoPropertiesUseCase.execute(id1,id2,userId,baseUrl);
 
         return successResponse(data,'تم المقارنة بين العقارين بنجاح',200);
     }

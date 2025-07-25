@@ -213,6 +213,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
   private getFilterMap(){
     return new Map<keyof ResidentialPropertiesSearchFiltersDto, (query: any,value: any) => void>([
       ['regionId', (q, v) => q.andWhere('property.region_id = :regionId', { regionId: v })],
+      ['cityId', (q, v) => q.andWhere('region.city_id = :cityId', { cityId: v })],
       ['listing_type', (q, v) => q.andWhere('residential.listing_type = :listing_type', { listing_type: v })],
       ['ownership_type', (q, v) => q.andWhere('residential.ownership_type = :ownership_type', { ownership_type: v })],
       ['status', (q, v) => q.andWhere('residential.status = :status', { status: v })],

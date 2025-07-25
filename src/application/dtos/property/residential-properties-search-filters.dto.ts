@@ -24,6 +24,12 @@ export class ResidentialPropertiesSearchFiltersDto {
   @IsNumber()
   regionId?: number;
 
+  @ApiPropertyOptional({ description: 'رقم المحافظة', example: 3 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  cityId?: number;
+
   @ApiPropertyOptional({ enum: ListingType, description: 'نوع الإدراج (بيع أو أجار)' })
   @IsOptional()
   @IsEnum(ListingType)
