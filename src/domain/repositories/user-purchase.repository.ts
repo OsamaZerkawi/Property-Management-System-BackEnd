@@ -8,10 +8,12 @@ export interface UserPurchaseRepositoryInterface {
     purchaseId: number;
     status: string;
     date: Date;
-    residentialId: number;
+    propertyId: number;
     postTitle: string;
+    postImage: string;
     regionName: string;
     cityName: string;
+
   }>>;
 
 }

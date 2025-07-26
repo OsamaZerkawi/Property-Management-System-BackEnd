@@ -30,8 +30,9 @@ export class UserPurchaseRepository
         'up.id              AS "purchaseId"',
         'up.status          AS status',
         'up.created_at      AS date',
-        'r.id               AS "residentialId"',
+        'p.id               AS "propertyId"',
         'pp.title           AS "postTitle"',
+        'pp.image           AS "postImage"',
         'region.name        AS "regionName"',
         'city.name          AS "cityName"',
       ])

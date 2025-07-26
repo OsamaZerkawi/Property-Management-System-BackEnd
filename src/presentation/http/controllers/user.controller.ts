@@ -96,9 +96,11 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   async myProperties(
     @CurrentUser() user,
+    @Req() request: Request
   ) {
     try {
-      const data = await this.getUserPurchases.execute(user.sub);
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
+      const data = await this.getUserPurchases.execute(user.sub,baseUrl);
       return successResponse(data, 'تم جلب الممتلكات بنجاح', 200);
     } catch (err) {
       return errorResponse(
