@@ -14,4 +14,5 @@ export interface UserRepositoryInterface {
     update(userId: number,updateData: Partial<User>);
     deleteUserById(userId: number);
     findGlobalInfoById(id: number);
-}
+    findUserInfoById(id: number);  
+ }

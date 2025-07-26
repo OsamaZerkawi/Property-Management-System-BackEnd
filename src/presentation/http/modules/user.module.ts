@@ -10,6 +10,8 @@ import { UserRepository } from 'src/infrastructure/repositories/user.property';
 import { FindUserByPhoneUseCase } from 'src/application/use-cases/user/find-user-by-phone.use-case';
 import { GetAllUsersUseCase } from 'src/application/use-cases/user/get-all-users.use-case';
 import { AuthModule } from './auth.module';
+import { GetProfileUserUseCase } from 'src/application/use-cases/user/get-profile-user.use-case';
+import { UpdateUserInfoUseCase } from 'src/application/use-cases/user/update-profile-user.use-case';
 
 @Module({
   imports: [AuthModule, TypeOrmModule.forFeature([User])],
@@ -18,6 +20,8 @@ import { AuthModule } from './auth.module';
     GetGlobalInfoUseCase,
     FindUserByPhoneUseCase,
     GetAllUsersUseCase,
+    GetProfileUserUseCase,
+    UpdateUserInfoUseCase,
     {
       provide: USER_REPOSITORY,
       useClass: UserRepository,

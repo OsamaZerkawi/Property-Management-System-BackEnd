@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Query, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
 import { FindUserByPhoneUseCase } from "src/application/use-cases/user/find-user-by-phone.use-case";
 import { GetAllUsersUseCase } from "src/application/use-cases/user/get-all-users.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
@@ -8,12 +8,18 @@ import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { Request } from 'express';
 import { GetGlobalInfoUseCase } from "src/application/use-cases/user/get-global-info.use-case";
-@Controller('user')
+import { GetProfileUserUseCase } from "src/application/use-cases/user/get-profile-user.use-case";
+import { UpdateUserInfoUseCase } from "src/application/use-cases/user/update-profile-user.use-case";
+import { UpdateUserInfoDto } from "src/application/dtos/user/update-user-info.dto";
+import { UserProfileImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+ @Controller('user')
 export class UserController {
     constructor(
         private readonly findUserByPhoneUseCase: FindUserByPhoneUseCase,
         private readonly getAllUsersUseCase: GetAllUsersUseCase,
         private readonly getGlobalInfoUseCase: GetGlobalInfoUseCase,
+        private readonly getProfileUserUseCase: GetProfileUserUseCase,
+        private readonly updateUserInfoUseCase: UpdateUserInfoUseCase,
     ){}
 
     // @Roles('مدير')
@@ -51,4 +57,37 @@ export class UserController {
       return errorResponse(err.message, err.getStatus?.() || 500);
     }
   }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  async myInformation(
+    @CurrentUser() user: { sub: number },
+    @Req() request: Request,
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    try {
+      const profile = await this.getProfileUserUseCase.execute(user.sub, baseUrl);
+      return successResponse(profile,'تم جلب معلومات المستخدم');
+    } catch (err) {
+      return errorResponse(err.message, err.getStatus?.() || 500);
+    }
+  }
+
+  @Post('profile')
+  @UseGuards(JwtAuthGuard)
+  @UserProfileImageInterceptor()
+  async updateProfile(
+    @Req() req,
+    @Body() dto: UpdateUserInfoDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+     if (file) {
+      dto.photo = file.filename; 
+    } 
+    const userId = req.user.sub; 
+    
+    const result = await this.updateUserInfoUseCase.execute(userId, dto);
+    return successResponse(result, 'تم تحديث بيانات المستخدم بنجاح');
+  }
+
 }
