@@ -12,9 +12,13 @@ import { GetAllUsersUseCase } from 'src/application/use-cases/user/get-all-users
 import { AuthModule } from './auth.module';
 import { GetProfileUserUseCase } from 'src/application/use-cases/user/get-profile-user.use-case';
 import { UpdateUserInfoUseCase } from 'src/application/use-cases/user/update-profile-user.use-case';
+import { GetUserPurchasesUseCase } from 'src/application/use-cases/user/get-user-purchases.use-case';
+import { USER_PURCHASE_REPOSITORY } from 'src/domain/repositories/user-purchase.repository';
+import { UserPurchaseRepository } from 'src/infrastructure/repositories/user-purchase.repository';
+import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([User])],
+  imports: [AuthModule, TypeOrmModule.forFeature([User,UserPropertyPurchase])],
   controllers: [UserController],
   providers: [
     GetGlobalInfoUseCase,
@@ -22,10 +26,15 @@ import { UpdateUserInfoUseCase } from 'src/application/use-cases/user/update-pro
     GetAllUsersUseCase,
     GetProfileUserUseCase,
     UpdateUserInfoUseCase,
+    GetUserPurchasesUseCase,
     {
       provide: USER_REPOSITORY,
       useClass: UserRepository,
     },
+    {
+      provide: USER_PURCHASE_REPOSITORY,
+      useClass: UserPurchaseRepository,
+    }
   ],
 })
 export class UserModule {}

@@ -12,6 +12,7 @@ import { GetProfileUserUseCase } from "src/application/use-cases/user/get-profil
 import { UpdateUserInfoUseCase } from "src/application/use-cases/user/update-profile-user.use-case";
 import { UpdateUserInfoDto } from "src/application/dtos/user/update-user-info.dto";
 import { UserProfileImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { GetUserPurchasesUseCase } from "src/application/use-cases/user/get-user-purchases.use-case";
  @Controller('user')
 export class UserController {
     constructor(
@@ -20,6 +21,7 @@ export class UserController {
         private readonly getGlobalInfoUseCase: GetGlobalInfoUseCase,
         private readonly getProfileUserUseCase: GetProfileUserUseCase,
         private readonly updateUserInfoUseCase: UpdateUserInfoUseCase,
+        private readonly getUserPurchases: GetUserPurchasesUseCase,
     ){}
 
     // @Roles('مدير')
@@ -90,4 +92,19 @@ export class UserController {
     return successResponse(result, 'تم تحديث بيانات المستخدم بنجاح');
   }
 
+  @Get('myPurchases')
+  @UseGuards(JwtAuthGuard)
+  async myProperties(
+    @CurrentUser() user,
+  ) {
+    try {
+      const data = await this.getUserPurchases.execute(user.sub);
+      return successResponse(data, 'تم جلب الممتلكات بنجاح', 200);
+    } catch (err) {
+      return errorResponse(
+        err.message,
+        err.getStatus?.() || err.statusCode || 500,
+      );
+    }
+  }
 }
