@@ -29,12 +29,20 @@ import { RemovePropertyFromFavoriteUseCase } from "src/application/use-cases/fav
 import { FindTopRatedPropertiesUseCase } from "src/application/use-cases/residential/find-top-rated-residential-properties.use-case";
 import { GetFavoritePropertiesUseCase } from "src/application/use-cases/favorite/get-favorite-properties.use-case";
 import { Touristic } from "src/domain/entities/touristic.entity";
+import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
+import { PROMOTED_PROPERTY_REPOISTORY } from "src/domain/repositories/promoted-property.repository";
+import { PromotedPropertyRepository } from "src/infrastructure/repositories/promoted-property.repository";
+import { GetPromotedPropertiesUseCase } from "src/application/use-cases/property/get-promoted-properties.use-case";
 
 @Module({
     imports:[
         AuthModule,
         forwardRef(() => ResidentialOfficeModule),
-        TypeOrmModule.forFeature([PropertyFeedback,Property,Region,City,Residential,PropertyPost,OfficeFeedback,PropertyFavorite,Touristic])
+        TypeOrmModule.forFeature([
+           PropertyFeedback,Property,Region,City,
+           Residential,PropertyPost,OfficeFeedback,
+           PropertyFavorite,Touristic,PromotedProperty,
+        ])
     ],
     controllers:[PropertyController,PropertyFavoriteController],
     providers:[
@@ -50,6 +58,7 @@ import { Touristic } from "src/domain/entities/touristic.entity";
         RemovePropertyFromFavoriteUseCase,
         FindTopRatedPropertiesUseCase,
         GetFavoritePropertiesUseCase,
+        GetPromotedPropertiesUseCase,
         {
             provide:PROPERTY_REPOSITORY,
             useClass:PropertyRepository
@@ -57,6 +66,10 @@ import { Touristic } from "src/domain/entities/touristic.entity";
         {
             provide:PROPERTY_FAVORITE_REPOSITORY,
             useClass: PropertyFavoriteRepository,
+        },
+        {
+            provide: PROMOTED_PROPERTY_REPOISTORY,
+            useClass: PromotedPropertyRepository
         }
     ],
     exports:[

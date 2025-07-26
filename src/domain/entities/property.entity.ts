@@ -24,6 +24,7 @@ import { PropertyFeedback } from './property-feedback.entity';
 import { PropertyFavorite } from './property-favorite.entity';
 import { Touristic } from './touristic.entity';
 import { PropertyFurnishingType } from '../enums/property-furnishing-type.enum';
+import { PromotedProperty } from './promoted-property.entity';
 
 
 @Entity('properties')
@@ -107,6 +108,9 @@ export class Property {
 
   @OneToOne(() => Touristic, (touristic) => touristic.property)
   touristic: Touristic;
+
+  @OneToMany(() => PromotedProperty, (promo) => promo.property)
+  promoted: PromotedProperty[];
 
   @CreateDateColumn({select: false})
   created_at: Date;

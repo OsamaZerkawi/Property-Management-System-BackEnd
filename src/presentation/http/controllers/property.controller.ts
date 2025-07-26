@@ -25,6 +25,9 @@ import { GetRelatedPropertiesSwaggerDoc } from "../swagger/property/get-related-
 import { RatePropertySwaggerDoc } from "../swagger/property/rate-property.swagger";
 import { CompareTwoPropertiesSwaggerDoc } from "../swagger/property/compare-two-proerties.swagger";
 import { userInfo } from "os";
+import { GetPromotedPropertiesUseCase } from "src/application/use-cases/property/get-promoted-properties.use-case";
+import { use } from "passport";
+import { GetPromotedPropertiesSwaggerDoc } from "../swagger/property/get-promoted-properties.swagger";
 
 
 @Controller('properties')
@@ -39,6 +42,7 @@ export class PropertyController{
         private readonly ratePropertyUseCase: RatePropertyUseCase,
         private readonly compareTwoPropertiesUseCase: CompareTwoPropertiesUseCase,
         private readonly findTopRatedPropertiesUseCase: FindTopRatedPropertiesUseCase,
+        private readonly getPromotedPropertiesUseCase: GetPromotedPropertiesUseCase,
     ){}
 
     @Get('top-rated')
@@ -57,6 +61,25 @@ export class PropertyController{
         const {results,total} = await this.findTopRatedPropertiesUseCase.execute(page,items,type,baseUrl,userId);
 
         return successPaginatedResponse(results,total,page,items,'تم إرجاع جميع العقارات المميزة',200);
+    }
+
+    @Get('promoted')
+    @Public()
+    @GetPromotedPropertiesSwaggerDoc()
+    @HttpCode(HttpStatus.OK)
+    async getPromotedProperties(
+        @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
+        @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number, 
+        @CurrentUser() user,
+        @Req() request: Request        
+    ){
+        const userId = (request.user as any)?.sub ?? null;
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+        const { results , total} = await this.getPromotedPropertiesUseCase.execute(page,items,userId,baseUrl);
+
+        return successPaginatedResponse(results,total,page,items,'تم إرجاع جميع العقارات المروجة',200);
+
     }
 
     @Get('search')

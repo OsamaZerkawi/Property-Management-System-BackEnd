@@ -49,6 +49,7 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         ])
         .addSelect(`
           CASE
+            WHEN advertisement.start_date <= :today
             WHEN advertisement.start_date + (advertisement.day_period || ' days')::interval >= :today
             THEN true
             ELSE false

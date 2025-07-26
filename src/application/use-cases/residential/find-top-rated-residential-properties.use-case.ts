@@ -29,7 +29,7 @@ export class FindTopRatedPropertiesUseCase {
           listing_type: row.listing_type,
           price: row.listing_type === ListingType.SALE ? Number(row.selling_price) : Number(row.rental_price),
           rental_period: row.listing_type === ListingType.RENT ? row.rental_period : undefined,
-          avg_rate: parseFloat(row.avg_rate) || 0,
+          avg_rate: parseInt(row.avg_rate) || 0,
           rating_count: parseInt(row.rating_count) || 0,
         };
       }
