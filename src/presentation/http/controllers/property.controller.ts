@@ -143,11 +143,9 @@ export class PropertyController{
         @Query('id1',ParseIntPipe) id1: number,
         @Query('id2',ParseIntPipe) id2: number,
         @Req() request: Request,
-        @CurrentUser() user,
-
     ){
         const baseUrl = `${request.protocol}://${request.get('host')}`;
-        const userId = user.sub;
+        const userId = (request.user as any)?.sub ?? null;
 
         const data = await this.compareTwoPropertiesUseCase.execute(id1,id2,userId,baseUrl);
 
