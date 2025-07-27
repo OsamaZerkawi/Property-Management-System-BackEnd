@@ -15,8 +15,8 @@ export class GetPromotedPropertiesUseCase {
       const results = raw.map(row => {
         const base = {
           propertyId: row.property_id,
-          postTitle: row.post_title,
-          postImage: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
+          title: row.post_title,
+          image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
           location: `${row.city_name}, ${row.region_name}`,
           postDate: row.post_date ? new Date(row.post_date).toISOString().split('T')[0] : null,
           is_favorite: row.is_favorite === 'true' || row.is_favorite === true ? 1 : 0,
