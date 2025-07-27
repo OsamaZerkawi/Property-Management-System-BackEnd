@@ -70,7 +70,6 @@ export class PropertyController{
     async getPromotedProperties(
         @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
         @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number, 
-        @CurrentUser() user,
         @Req() request: Request        
     ){
         const userId = (request.user as any)?.sub ?? null;

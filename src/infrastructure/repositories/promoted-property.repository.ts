@@ -37,6 +37,7 @@ export class PromotedPropertyRepository implements PromotedPropertyRepositoryInt
           .andWhere(`(promoted.start_date + (promoted.period || ' days')::interval) >= CURRENT_DATE`)
           .select([
             'property.id AS property_id',
+            'property.area AS area',
             'post.id',
             'post.title AS post_title',
             'post.image AS post_image',
