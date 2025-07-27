@@ -434,6 +434,17 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       avg_rate: parseFloat(rawData.avg_rate) || 0,
       rating_count: parseInt(rawData.rating_count) || 0,
       is_favorite: rawData.is_favorite ? 1 : 0,
+      office: {
+        id: property.office?.id,
+        name: property.office?.name,
+        logo: property.office?.logo
+          ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
+          : null,
+        type: property.office?.type ?? null,
+        location:  `${property.office.region.city.name}, ${property.office.region.name}`,
+        rate: parseFloat(rawData.office_average_rating || 0),
+        rating_count:parseInt(rawData.office_rating_count),
+      },      
     }
 
     const property2Data = {
@@ -441,6 +452,17 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       avg_rate: parseFloat(rawData2.avg_rate) || 0,
       rating_count: parseInt(rawData2.rating_count) || 0,
       is_favorite: rawData2.is_favorite ? 1 : 0,
+      office: {
+        id: property2.office?.id,
+        name: property2.office?.name,
+        logo: property2.office?.logo
+          ? `${baseUrl}/uploads/offices/logos/${property2.office.logo}`
+          : null,
+        type: property2.office?.type ?? null,
+        location:  `${property2.office.region.city.name}, ${property2.office.region.name}`,
+        rate: parseFloat(rawData2.office_average_rating || 0),
+        rating_count:parseInt(rawData2.office_rating_count),
+      },
     }
     return {
       property_1: property1Data,
