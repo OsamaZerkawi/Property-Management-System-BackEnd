@@ -99,4 +99,13 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
       relations: ['user'],
     });
   }
+  async hasRefreshToken(userId: number): Promise<boolean> {
+  const count = await this.refreshRepo.count({
+    where: {
+      user: { id: userId },
+    },
+  });
+  return count > 0;
+}
+ 
 }
