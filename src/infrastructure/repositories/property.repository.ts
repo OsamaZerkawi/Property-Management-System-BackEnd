@@ -711,10 +711,13 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE})
       .select([
         'property.id AS property_id',
+        'post.id',
         'post.title AS post_title',
         'post.image AS post_image',
+        'post.created_at AS post_date',
         'city.name AS city_name',
         'region.name AS region_name',
+        'residential.id',
         'residential.listing_type AS listing_type',
         // 'residential.selling_price AS selling_price',
         'residential.rental_price AS rental_price',
@@ -724,14 +727,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'COUNT(*) OVER() AS total_count',
       ])
       .groupBy('property.id')
-      .addGroupBy('post.title')
-      .addGroupBy('post.image')
+      .addGroupBy('post.id')
       .addGroupBy('city.name')
       .addGroupBy('region.name')
-      .addGroupBy('residential.listing_type')
-      // .addGroupBy('residential.selling_price')
-      .addGroupBy('residential.rental_price')
-      .addGroupBy('residential.rental_period');
+      .addGroupBy('residential.id');
   } else if (type === PropertyType.TOURISTIC) {
     baseQuery
       .leftJoin('property.touristic', 'touristic')
