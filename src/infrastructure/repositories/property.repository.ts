@@ -153,13 +153,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       'city.id',
       'city.name',
     ])
-    .addSelect(
-      `CASE
-         WHEN residential.listing_type = :rent THEN residential.rental_price
-         ELSE residential.selling_price
-       END`,
-      'calculated_price'
-    )
     .setParameters({
       rent: ListingType.RENT,
       yearly: RentalPeriod.YEARLY,
@@ -486,7 +479,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   }
 
   private formatProperty(property,baseUrl: string){
-    
     const base = {
       propertyId:property.id,
       postTitle: property.post.title,
@@ -502,14 +494,14 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           type:PropertyType.RESIDENTIAL,
           listing_type: 'أجار',
           rental_period: property.residential?.rental_period,
-          price: property.calculated_price,
+          price: property.residential.rental_price,
           rate:property.avg_rate ?? null,
         };
       } else {
         return {
           ...base,
           listing_type: 'بيع',
-          price:property.calculated_price,
+          price:property.residential.selling_price,
           area: parseInt(property.area) ,
         };
       }   
