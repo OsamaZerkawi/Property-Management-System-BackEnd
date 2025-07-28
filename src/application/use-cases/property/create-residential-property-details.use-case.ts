@@ -70,6 +70,8 @@ export class CreateResidentialPropertyDetailsUseCase {
           sell_details: data.sell_details,
         };
 
-        return await this.createResidentialPropertyUseCase.execute(residentialPropertyDto);
+        await this.createResidentialPropertyUseCase.execute(residentialPropertyDto);
+
+        return property.id;
     }
 }

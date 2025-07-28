@@ -9,6 +9,5 @@ export class UpdateRentDetailsDto {
 
   @IsOptional()
   @IsNumber()
-  @Min(0)
   rentalPrice?: number;
 }

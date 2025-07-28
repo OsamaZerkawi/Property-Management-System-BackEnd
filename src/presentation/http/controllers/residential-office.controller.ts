@@ -133,9 +133,12 @@ export class ResidentialOfficeController {
 
         const imageName = file?.filename;
 
-        const residentialPropert = await this.createResidentialPropertyDetailsUseCase.execute(residentialDetails,userId,imageName);
+        const propertyId = await this.createResidentialPropertyDetailsUseCase.execute(residentialDetails,userId,imageName);
 
-        return successResponse([],'تم إضافة العقار بنجاح',201);
+        const data = {
+          id: propertyId,
+        }
+        return successResponse(data,'تم إضافة العقار بنجاح',201);
     }
 
     @Roles('صاحب مكتب')
