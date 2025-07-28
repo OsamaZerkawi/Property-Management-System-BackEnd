@@ -1,4 +1,4 @@
-import { Inject, InternalServerErrorException } from "@nestjs/common";
+import { ConsoleLogger, Inject, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { UpdateResidentialPropertyDto } from "src/application/dtos/property/updateResidentialProperty.dto";
 import { FindOneResidentialPropertyUseCase } from "./find-one-residential-property.use-case";
 import { FindRegionUseCase } from "../region/find-region-by-id.use-case";
@@ -10,6 +10,8 @@ import { AttachTagsToPostUseCase } from "../property-post/attach-tags-to-post.us
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
 import { UpdateResidentialPropertyUseCase } from "./update-residential-property.use-case";
 import { ResidentialPropertyAccessService } from "src/application/services/residentialPropertyAccess.service";
+import { NotFoundError } from "rxjs";
+import { errorResponse } from "src/shared/helpers/response.helper";
 
 export class UpdateResidentialPropertyDetailsUseCase{
     constructor(
@@ -22,15 +24,22 @@ export class UpdateResidentialPropertyDetailsUseCase{
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(userId: number,residentialpropertyId: number,data: UpdateResidentialPropertyDto,imageName?: string){
+    async execute(userId: number,propertyId: number,data: UpdateResidentialPropertyDto,imageName?: string){
+        
         let region;
         if(data.regionId){
             region = await this.findRegionUseCase.execute(data.regionId);
         }
 
-        const residentialProperty = await this.findOneResidentialPropertyUseCase.execute(residentialpropertyId);
+        const propertyData =  await this.propertyRepo.findById(propertyId);
 
-        await this.residentialPropertyAccessService.assertUserOwnsResidentialProperty(userId,residentialProperty);
+        if(!propertyData){
+            throw new NotFoundException(
+                errorResponse('العقار غير موجود',404)
+            );
+        }
+
+        await this.residentialPropertyAccessService.assertUserOwnsResidentialProperty(userId,propertyData);
 
         const propertyDto: UpdatePropertyDto = {
             ...(region && { region }),// only adds region if truthy (defined)
@@ -42,15 +51,14 @@ export class UpdateResidentialPropertyDetailsUseCase{
             room_details:data.room_details
         }
 
-        const propertyId = residentialProperty.property.id;
-
         const property = await this.propertyRepo.updateProperty(propertyId,propertyDto);
 
         const propertyPostDto: UpdatePropertyPostDto = {
             ...(imageName && { postImage: imageName }),// only adds region if truthy (defined)
             postDescription: data.postDescription,
+            postTag: data.postTag,
+            ...(data.postTag && {postTitle: `${data.postTag} ${property.area.toFixed(2)} م²`}),
         }
-
 
         const propertyPost = await this.updatePropertyPostUseCase.execute(property.post.id,propertyPostDto);
 
@@ -62,6 +70,6 @@ export class UpdateResidentialPropertyDetailsUseCase{
           sell_details: data.sell_details,
         };
 
-        return await this.updateResidentialPropertyUseCase.execute(residentialpropertyId,residentialPropertyDto);
+        return await this.updateResidentialPropertyUseCase.execute(propertyId,residentialPropertyDto);
     }
 }

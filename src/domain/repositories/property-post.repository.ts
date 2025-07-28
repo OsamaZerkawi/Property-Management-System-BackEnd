@@ -8,6 +8,5 @@ export const PROPERTY_POST_REPOSITORY = 'PROPERTY_POST_REPOSITORY';
 
 export interface PropertyPostRepositoryInterface {
     createPropertyPostAndSaveIt(data: CreatePropertyPostDto);
-    attachTagsToPost(post: PropertyPost,tags: any);
     updatePropertyPost(id: number,data: UpdatePropertyPostDto);
 }

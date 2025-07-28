@@ -13,6 +13,7 @@ import { OwnershipType } from 'src/domain/enums/ownership-type.enum';
 import { Direction } from 'src/domain/enums/direction.enum';
 import { ListingType } from 'src/domain/enums/listing-type.enum';
 import { RentalPeriod } from 'src/domain/enums/rental-period.enum';
+import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
 
 export function UpdateResidentialPropertySwaggerDoc() {
   return applyDecorators(
@@ -20,7 +21,7 @@ export function UpdateResidentialPropertySwaggerDoc() {
     ApiConsumes('multipart/form-data'),
 
     ApiQuery({
-      name: 'residentialId',
+      name: 'propertyId',
       type: Number,
       required: true,
       description: 'معرّف العقار المراد تحديثه',
@@ -46,7 +47,7 @@ export function UpdateResidentialPropertySwaggerDoc() {
           area: { type: 'number', example: 120 },
           ownership_type: { type: 'string', enum: Object.values(OwnershipType) },
           direction: { type: 'string', enum: Object.values(Direction) },
-          has_furniture: { type: 'boolean', example: true },
+          has_furniture: { type: 'enum', enum: Object.values(PropertyFurnishingType) },
           listing_type: { type: 'string', enum: Object.values(ListingType) },
           room_details: {
             type: 'object',

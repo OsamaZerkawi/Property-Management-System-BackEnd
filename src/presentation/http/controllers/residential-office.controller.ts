@@ -11,10 +11,7 @@ import { GetPropertyForOfficeUseCase } from "src/application/use-cases/property/
 import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cases/property/search-residential-property.dto";
 import { UpdateResidentialPropertyDetailsUseCase } from "src/application/use-cases/property/update-residential-property-details.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
-import { Public } from "src/shared/decorators/public.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
-import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
-import { RolesGuard } from "src/shared/guards/roles.guard";
 import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
 import { PropertyPostImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
 import { GetOfficePropertiesSwaggerDoc, GetOfficePropertySwaggerDoc, SearchPropertiesSwaggerDoc, SearchTitlePropertiesSwaggerDoc } from "../swagger/decorators/residential-office/get-properties.decorator";
@@ -142,12 +139,12 @@ export class ResidentialOfficeController {
     }
 
     @Roles('صاحب مكتب')
-    @Post(':residentialId')
+    @Post(':propertyId')
     @HttpCode(HttpStatus.OK)
     @UpdateResidentialPropertySwaggerDoc()
     @PropertyPostImageInterceptor()
     async updateResidentialkProeprty(
-      @Param('residentialId') residentialId,
+      @Param('propertyId') propertyId: number,
       @UploadedFile() file: Express.Multer.File,
       @Body() residentialDetails: UpdateResidentialPropertyDto,
       @CurrentUser() user,
@@ -162,7 +159,7 @@ export class ResidentialOfficeController {
   
       await this.updateResidentialPropertyDetailsUseCase.execute(
         userId,
-        residentialId,
+        propertyId,
         residentialDetails,
         imageName,
       );

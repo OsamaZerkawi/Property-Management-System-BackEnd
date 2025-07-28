@@ -7,11 +7,15 @@ import { SellDetailsDto } from "./sellDetails.dto";
 import { RoomDetailsDto } from "./roomDetails.dto";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyFurnishingType } from "src/domain/enums/property-furnishing-type.enum";
+import { RoomDetailsSearchDto } from "./room-details-search.dto";
+import { UpdateRentDetailsDto } from "./update-rent-details.dto";
+import { UpdateSellDetailsDto } from "./update-sell-details.dto";
+import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
 
 export class UpdateResidentialPropertyDto {
-    @IsString()
+    @IsEnum(PropertyPostTag)
     @IsOptional()
-    postTitle?: string;
+    postTag?: PropertyPostTag;
 
     @IsString()
     @IsOptional()
@@ -51,20 +55,20 @@ export class UpdateResidentialPropertyDto {
 
     @IsOptional()
     @ValidateNested()
-    @Type(() => RoomDetailsDto)
-    room_details?: RoomDetailsDto;
+    @Type(() => RoomDetailsSearchDto)
+    room_details?: RoomDetailsSearchDto;
     
     @IsOptional()
     @ValidateNested()
-    @Type(() => RentDetailsDto)
+    @Type(() => UpdateRentDetailsDto)
     @IsOptional()
-    rent_details?: RentDetailsDto;
+    rent_details?: UpdateRentDetailsDto;
   
     @IsOptional()
     @ValidateNested()
-    @Type(() => SellDetailsDto)
+    @Type(() => UpdateSellDetailsDto)
     @IsOptional()
-    sell_details?: SellDetailsDto;
+    sell_details?: UpdateSellDetailsDto;
 
     @IsEnum(ListingType)
     @IsOptional()

@@ -29,73 +29,59 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
         return propertyPost;
     }
 
-    async attachTagsToPost(post: PropertyPost, tags: any) {
-        // const tagIds = tags.map(tag => tag.id);
-      
-        // const existingPostTags = await this.propertyPostTagRepo.find({
-        //   where: {
-        //     propertyPost: { id: post.id },
-        //     tag: In(tagIds),
-        //   },
-        //   relations: ['tag'],
-        // });
-      
-        // const existingTagIds = new Set(existingPostTags.map(pt => pt.tag.id));
-      
-        // const postTagsToSave = tags
-        //   .filter(tag => !existingTagIds.has(tag.id))
-        //   .map(tag =>
-        //     this.propertyPostTagRepo.create({
-        //       propertyPost: post,
-        //       tag,
-        //     })
-        //   );
-      
-        // if (postTagsToSave.length) {
-        //   await this.propertyPostTagRepo.save(postTagsToSave);
-        // }
-    }
-
   async updatePropertyPost(id: number, data: UpdatePropertyPostDto) {
-    const propertyPost = await this.propertyPostRepo.findOne({where: {id}});
 
-    if(!propertyPost){
-      throw new NotFoundException(
-        errorResponse('لا يوجد منشور لهذا العقار',404)
-      );
+    const propertyPost = await this.propertyPostRepo.findOne({ where: { id } });
+  
+    if (!propertyPost) {
+      throw new NotFoundException(errorResponse('لا يوجد منشور لهذا العقار', 404));
     }
-    const updatePayload: Partial<PropertyPost> = {};
+  
+    const updatePayload = this.buildUpdatePayload(data);
 
-    if (data.postImage !== undefined) updatePayload.image = data.postImage;
-
-    
     if (Object.keys(updatePayload).length === 0) {
       return propertyPost;
     }
-
+  
     const oldImage = propertyPost.image;
+  
+    const shouldDeleteOldImage =
+    data.postImage &&
+    propertyPost.image &&
+    data.postImage !== propertyPost.image;
 
     await this.propertyPostRepo
-      .createQueryBuilder()
-      .update(PropertyPost)
-      .set(updatePayload)
-      .where("id = :id", { id })
-      .execute();
-        
-      
-    if (data.postImage && oldImage) {
-      const oldImagePath = path.join(process.cwd(), 'uploads/properties/posts/images', oldImage);
+    .createQueryBuilder()
+    .update(PropertyPost)
+    .set(updatePayload)
+    .where("id = :id", { id })
+    .execute();
+  
+    if (shouldDeleteOldImage) {
+      const oldImagePath = path.join(
+        process.cwd(),
+        'uploads/properties/posts/images',
+        oldImage
+      );
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
     }
-
-    const updatedPropertyPost = await this.propertyPostRepo
-    .createQueryBuilder('post')
-    .where("post.id = :id", { id })
-    .getOne();
+  
+    const updatedPropertyPost = await this.propertyPostRepo.findOne({ where: { id } });
 
     return updatedPropertyPost;
+  }
 
+  private buildUpdatePayload(data: UpdatePropertyPostDto): Partial<PropertyPost> {
+    const payload: Partial<PropertyPost> = {};
+  
+    if (data.postDescription !== undefined) payload.description = data.postDescription;
+    if (data.postTag !== undefined) payload.tag = data.postTag;
+    if (data.postImage !== undefined) payload.image = data.postImage;
+    if (data.postTitle !== undefined) payload.title = data.postTitle;
+
+  
+    return payload;
   }
 }

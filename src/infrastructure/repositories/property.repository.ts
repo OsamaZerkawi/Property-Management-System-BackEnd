@@ -46,7 +46,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
   async findById(id: number) {
     return await this.propertyRepo.findOne({
-      where:{id}
+      where:{id},
+      relations:['office','office.user']
     });
   }
 
@@ -203,13 +204,18 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .where("id = :id", { id })
     .execute();
 
-    const updatedProeprty = await this.propertyRepo
-    .createQueryBuilder('property')
-    .leftJoinAndSelect('property.post','post')
-    .where("property.id = :id", { id })
-    .getOne();
+    const updatedProperty = await this.propertyRepo.findOne({
+      where: { id },
+      relations: ['post'],
+    });
+  
+    if (!updatedProperty) {
+      throw new NotFoundException(
+        errorResponse('حدث خطأ أثناء جلب العقار بعد التحديث', 404)
+      );
+    }
 
-    return updatedProeprty;
+    return updatedProperty;
   }
 
   async findPropertiesByUserOffice(userId: number,baseUrl: string) {

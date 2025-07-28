@@ -10,6 +10,6 @@ export class AttachTagsToPostUseCase {
     ){}
 
     async execute (post: PropertyPost,tags: any){
-        return await this.propertyPostRepo.attachTagsToPost(post,tags);
+        // return await this.propertyPostRepo.attachTagsToPost(post,tags);
     }
 }

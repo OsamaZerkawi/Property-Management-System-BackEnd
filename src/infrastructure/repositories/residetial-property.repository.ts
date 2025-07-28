@@ -62,34 +62,33 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .getOne();  
   } 
 
-  async updateResidentialProperty(id: number, data: UpdateResidentialPropertyDetailsDto) {
-      const residentialProperty = await this.residentialRepo.findOne({where: {id}});
+  async updateResidentialProperty(propertyId: number, data: UpdateResidentialPropertyDetailsDto) {
+    const residentialProperty = await this.residentialRepo.findOne({where: { property: {id: propertyId}}});
+    
+    if(!residentialProperty){
+      throw new NotFoundException(
+        errorResponse('لا يوجد عقار سكني بهذا المعرف ',404)
+      );
+    }
+    
+    const id = residentialProperty.id;
+    const updatePayload = this.buildUpdatePayload(data);
 
-      if(!residentialProperty){
-        throw new NotFoundException(
-          errorResponse('لا يوجد عقار سكني بهذا المعرف ',404)
-        );
-      }
-
-      const hasValidData = Object.values(data).some(value => value !== undefined && value !== null);
-      
-      if(!hasValidData){
-        return residentialProperty;
-      }
-
-      await this.residentialRepo
+    console.log(updatePayload)
+    
+    await this.residentialRepo
       .createQueryBuilder()
       .update(Residential)
-      .set(data)
+      .set(updatePayload)
       .where("id = :id", { id })
       .execute();
-
-      const updatedResidentialProperty = await this.residentialRepo
-      .createQueryBuilder("residential")
-      .where("residential.id = :id", { id })
-      .getOne();
-
-      return updatedResidentialProperty;
+    
+    const updatedResidentialProperty = await this.residentialRepo
+    .createQueryBuilder("residential")
+    .where("residential.id = :id", { id })
+    .getOne();
+    
+    return updatedResidentialProperty;
   }
 
   async searchFilteredResidentialsProperties(baseUrl: string, filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number) {
@@ -263,5 +262,30 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .andWhere('post.status = :statusPost', { statusPost: PropertyPostStatus.APPROVED })
       .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE});
       
+  }
+
+  private buildUpdatePayload(data: UpdateResidentialPropertyDetailsDto): Partial<Residential> {
+    const payload: Partial<Residential> = {};
+  
+    if (data.listingType !== undefined) payload.listing_type = data.listingType;
+    if (data.ownership_type !== undefined) payload.ownership_type = data.ownership_type;
+    if (data.direction !== undefined) payload.direction = data.direction;
+
+    // Rent details
+    if (data.rent_details) {
+      const rent = data.rent_details;
+      if (rent.rental_period !== undefined) payload.rental_period = rent.rental_period;
+      if (rent.rentalPrice !== undefined) payload.rental_price = rent.rentalPrice;
+    }
+  
+    // Sell details
+    if (data.sell_details) {
+      const sell = data.sell_details;
+      if (sell.selling_price !== undefined) payload.selling_price = sell.selling_price;
+      if (sell.installment_allowed !== undefined) payload.installment_allowed = sell.installment_allowed;
+      if (sell.installment_duration !== undefined) payload.installment_duration = sell.installment_duration;
+    }
+
+    return payload;
   }
 }
