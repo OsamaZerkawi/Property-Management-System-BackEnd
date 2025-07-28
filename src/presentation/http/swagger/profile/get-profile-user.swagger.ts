@@ -10,14 +10,6 @@ import {
   ApiInternalServerErrorResponse
 } from '@nestjs/swagger';
 
-export class ProfileResponseDto {
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  photo_url: string | null;
-}
-
 export function ProfileSwaggerDoc() {
   return applyDecorators(
     ApiTags('User'),
@@ -28,8 +20,7 @@ export function ProfileSwaggerDoc() {
     }),
 
     ApiOkResponse({
-      description: 'تم جلب بيانات الملف الشخصي بنجاح',
-      type: ProfileResponseDto,
+      description: 'تم جلب بيانات الملف الشخصي بنجاح', 
       schema: {
         example: {
           first_name: 'محمد',

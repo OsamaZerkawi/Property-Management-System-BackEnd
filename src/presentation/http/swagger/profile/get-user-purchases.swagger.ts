@@ -9,16 +9,6 @@ import {
   ApiInternalServerErrorResponse
 } from '@nestjs/swagger';
 
-export class PurchaseItemDto {
-  id: number;
-  status: string;
-  date: string;
-  property_id: number;
-  title: string;
-  image: string | null;
-  address: string;
-}
-
 export function MyPurchasesSwaggerDoc() {
   return applyDecorators(
     ApiTags('User Purchases'),
@@ -29,8 +19,7 @@ export function MyPurchasesSwaggerDoc() {
     }),
 
     ApiOkResponse({
-      description: 'قائمة المشتريات',
-      type: [PurchaseItemDto],
+      description: 'قائمة المشتريات', 
       schema: {
         example: [
           {
