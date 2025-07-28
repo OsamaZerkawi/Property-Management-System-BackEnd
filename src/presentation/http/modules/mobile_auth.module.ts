@@ -28,14 +28,18 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RefreshJwtGuard } from 'src/shared/guards/refresh-jwt.guard';   
 import { ResendOtpUseCase } from 'src/application/use-cases/moblie_auth/resend-otp.use-case';
 import { ResetPasswordUseCase } from 'src/application/use-cases/moblie_auth/reset-password.use-case';
-
+import { AuthTokenBlackListService } from 'src/application/services/authTokenBlacklist.service';
 import { jwtConfig } from 'src/infrastructure/config/jwt.config';
+import { LogoutUseCase } from "src/application/use-cases/moblie_auth/logout.usecase";
+import { TokenBlackList } from 'src/domain/entities/token-blacklist.entity';
+import { AUTH_REPOSITORY } from 'src/domain/repositories/auth.repository';
+import { AuthRepository } from 'src/infrastructure/repositories/auth.repository';
 
 @Module({
   imports: [
     ConfigModule,  
     PassportModule,
-    TypeOrmModule.forFeature([User, TempUser, Otp, RefreshToken]),
+    TypeOrmModule.forFeature([User, TempUser, Otp, RefreshToken,TokenBlackList]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -48,7 +52,7 @@ import { jwtConfig } from 'src/infrastructure/config/jwt.config';
     // Repositories
     { provide: MOBILE_AUTH_REPOSITORY, useClass: MobileAuthRepository },
     { provide: USER_REPOSITORY, useClass: UserRepository },
-
+    { provide: AUTH_REPOSITORY, useClass: AuthRepository },
     // Use Cases
     CreateUserUseCase,
     VerifyOtpUseCase,
@@ -57,6 +61,7 @@ import { jwtConfig } from 'src/infrastructure/config/jwt.config';
     RefreshUseCase,
     ResendOtpUseCase,
     ResetPasswordUseCase,
+    LogoutUseCase,
     // Strategies
     MobileLocalStrategy,
     JwtStrategy,         
@@ -67,13 +72,15 @@ import { jwtConfig } from 'src/infrastructure/config/jwt.config';
     RefreshJwtGuard,     
     // Services
     OtpService,
-    JwtService,              
+    JwtService,      
+    AuthTokenBlackListService
   ],
   exports: [
     PassportModule,
     JwtModule,
     JwtAuthGuard,
     RefreshJwtGuard, 
+    AuthTokenBlackListService
   ],
 })
 export class MobileAuthModule {}

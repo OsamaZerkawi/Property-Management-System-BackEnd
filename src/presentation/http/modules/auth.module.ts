@@ -34,7 +34,7 @@ import { GetAllUsersUseCase } from "src/application/use-cases/user/get-all-users
         useFactory: jwtConfig
     }),
     ],
-    controllers:[AuthController,UserController],
+    controllers:[AuthController],
     providers:[
         FindUserByPhoneUseCase,
         {

@@ -13,9 +13,9 @@ export class AuthTokenBlackListService {
 
     async addToBlackList(token: string , expiresIn: number , userId : number){
         const expiresAt = new Date(Date.now() + (expiresIn * 1000)); // should correct it based on access_token expires at time
-        const hashToken = await bcrypt.hash(token,10)
+        //const hashToken = await bcrypt.hash(token,10)
 
-       await this.authRepo.updateOrInsertTokenInBlackList(userId,expiresAt,hashToken);
+       await this.authRepo.updateOrInsertTokenInBlackList(userId,expiresAt,token);
 
        //Schedule cleanup
        //    setTimeout( () => this.cleanExpired() , expiresIn * 1000) // should correct expiresIn time unit
@@ -23,10 +23,8 @@ export class AuthTokenBlackListService {
 
     async isTokenBlackListed(userId: number ,token: string){
         const blackedTokens = await this.authRepo.getBlackedTokensForUser(userId);
-
-        for (const blackedToken of blackedTokens) {
-            const isMatch = await bcrypt.compare(token, blackedToken.token);
-            if (isMatch) return true;
+         for (const blackedToken of blackedTokens) { 
+            if (token==blackedToken.token){ return true;}
         }
         return false;
         

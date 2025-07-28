@@ -13,4 +13,6 @@ export interface UserRepositoryInterface {
     updatePassword(userId: number, hashedPassword: string): Promise<void>;
     update(userId: number,updateData: Partial<User>);
     deleteUserById(userId: number);
-}
+    findGlobalInfoById(id: number);
+    findUserInfoById(id: number);  
+ }

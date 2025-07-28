@@ -22,7 +22,9 @@ import { ResendOtpSwaggerDoc } from "../swagger/mobile-auth/resend-otp.swagger";
 import { RefreshTokenSwaggerDoc } from "../swagger/mobile-auth/refresh.swagger";
 import { MobileLoginSwaggerDoc } from "../swagger/mobile-auth/login.swagger";
 import { ResetPasswordSwaggerDoc } from "../swagger/mobile-auth/reset-password.swagger";
-@Controller('mobile-auth')
+import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { LogoutUseCase } from "src/application/use-cases/moblie_auth/logout.usecase";
+ @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
     private readonly createUser: CreateUserUseCase,
@@ -30,7 +32,8 @@ export class MobileAuthController {
     private readonly loginUseCase: LoginUseCase,
     private readonly refreshUseCase: RefreshUseCase,
     private readonly resendOtpUseCase: ResendOtpUseCase,
-    private readonly resetPasswordUseCase: ResetPasswordUseCase
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly logoutUseCase: LogoutUseCase
   ) {}
 
 
@@ -117,5 +120,15 @@ export class MobileAuthController {
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.resetPasswordUseCase.execute(dto);
     return successResponse([], 'تم تغيير كلمة المرور بنجاح',200);
+  }
+
+  @Post('logout') 
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async logout(@Req() req: any) { 
+    const authHeader = req.headers.authorization || '';
+    const accessToken = authHeader.split(' ')[1];
+    await this.logoutUseCase.execute(req.user.sub, accessToken);
+    return successResponse([], 'تم تسجيل الخروج بنجاح');
   }
 }
