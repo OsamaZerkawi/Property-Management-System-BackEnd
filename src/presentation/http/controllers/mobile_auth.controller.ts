@@ -123,6 +123,7 @@ export class MobileAuthController {
   }
 
   @Post('logout') 
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Req() req: any) { 
     const authHeader = req.headers.authorization || '';

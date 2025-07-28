@@ -16,27 +16,18 @@ export class LogoutUseCase {
  
   async execute(userId: number, accessToken: string) {
   
-    const payload = this.jwtService.decode(accessToken) as { exp?: number };
+    const payload = this.jwtService.decode(accessToken) as { exp: number };
     if (!payload?.exp) {
       throw new UnauthorizedException(
         errorResponse('Invalid token payload', 401),
       );
     }
  
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    const expiresIn = payload.exp - nowSeconds;
-    if (expiresIn <= 0) { 
-      throw new UnauthorizedException(
-        errorResponse('Token already expired', 401),
-      );
-    }
- 
-    await this.tokenBlackListService.addToBlackList(
-      accessToken,
-      expiresIn,
-      userId,
-    );
- 
+    const expiresIn = payload.exp - Math.floor(Date.now() / 1000);
+
+    await this.tokenBlackListService.addToBlackList(accessToken,expiresIn,userId)
+
     await this.mobileAuthRepo.deleteRefreshToken(userId);
-  }
+  }    
+   
 }

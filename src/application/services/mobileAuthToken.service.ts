@@ -2,6 +2,7 @@
 import { Injectable,Inject } from '@nestjs/common';
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { randomUUID } from 'crypto';
 import {
     MOBILE_AUTH_REPOSITORY,
     MobileAuthRepositoryInterface,
@@ -13,16 +14,16 @@ export class JwtService {
     private readonly authRepo: MobileAuthRepositoryInterface
   ) {}
  
-  async generateAccessToken(userId: number,email : string){
-    const accessToken =  this.jwtService.signAsync({
-        sub: userId,
-        email
-    },{
-        secret : process.env.JWT_TOKEN_SECRET,
-        expiresIn : 60 * 60,
-    });
-
-    return accessToken;
+   async generateAccessToken(userId: number, email: string): Promise<string> {
+  const accessToken = await this.jwtService.signAsync(
+    { sub: userId, email },
+    {
+      secret: process.env.JWT_TOKEN_SECRET,
+      expiresIn: 60 * 60 *24 * 90,
+      jwtid: randomUUID()
+    },
+  );
+  return accessToken;
 }
 
   async generateRefreshToken(payload: { sub: number; email: string }) {
