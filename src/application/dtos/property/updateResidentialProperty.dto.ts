@@ -11,6 +11,7 @@ import { RoomDetailsSearchDto } from "./room-details-search.dto";
 import { UpdateRentDetailsDto } from "./update-rent-details.dto";
 import { UpdateSellDetailsDto } from "./update-sell-details.dto";
 import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
+import { PropertyStatus } from "src/domain/enums/property-status.enum";
 
 export class UpdateResidentialPropertyDto {
     @IsEnum(PropertyPostTag)
@@ -72,5 +73,9 @@ export class UpdateResidentialPropertyDto {
 
     @IsEnum(ListingType)
     @IsOptional()
-    listing_type: ListingType;
+    listing_type?: ListingType;
+
+    @IsEnum(PropertyStatus)
+    @IsOptional()
+    status?: PropertyStatus;
 }

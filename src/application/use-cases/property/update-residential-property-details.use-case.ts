@@ -68,6 +68,7 @@ export class UpdateResidentialPropertyDetailsUseCase{
           direction: data.direction,
           rent_details: data.rent_details,
           sell_details: data.sell_details,
+          status: data.status,
         };
 
         return await this.updateResidentialPropertyUseCase.execute(propertyId,residentialPropertyDto);

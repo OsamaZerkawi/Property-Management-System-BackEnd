@@ -73,6 +73,16 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
     
     const id = residentialProperty.id;
     const updatePayload = this.buildUpdatePayload(data);
+
+    const allowedStatuses = [
+      PropertyStatus.AVAILABLE,
+      PropertyStatus.UNAVAILABLE,
+      PropertyStatus.UNDER_MAINTENANCE,
+    ];
+    
+    if (data.status && allowedStatuses.includes(data.status)) {
+      updatePayload.status = data.status;
+    }
     
     await this.residentialRepo
       .createQueryBuilder()

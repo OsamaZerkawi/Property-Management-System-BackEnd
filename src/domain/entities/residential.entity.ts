@@ -41,7 +41,7 @@ export class Residential {
   @Column({ type: 'int', nullable: true })
   installment_duration: number;
 
-  @Column({ type: 'enum', enum: PropertyStatus,default:PropertyStatus.AVAILABLE })
+  @Column({ type: 'enum', enum: PropertyStatus,default:PropertyStatus.UNAVAILABLE })
   status: PropertyStatus;
 
   @Column({ type: 'enum', enum: ListingType })

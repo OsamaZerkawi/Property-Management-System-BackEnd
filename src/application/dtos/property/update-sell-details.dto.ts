@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { IsBoolean, IsInt, IsNumber, IsOptional, Min } from "class-validator";
 
 export class UpdateSellDetailsDto {
@@ -9,6 +9,7 @@ export class UpdateSellDetailsDto {
   selling_price?: number;
 
   @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
   @Type(() => Boolean)
   installment_allowed?: boolean;
