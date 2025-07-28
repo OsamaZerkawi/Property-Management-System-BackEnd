@@ -223,15 +223,20 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId });
     
-    const rawProperties = await query.getRawAndEntities();
-    const properties = rawProperties.entities;
-    const raw = rawProperties.raw;
+    const { entities: properties, raw } = await query.getRawAndEntities();
+
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+    });
   
-    return properties.map((property, index) => {
-      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+    // Build final response
+    return properties.map(property => {
+      const rate = avgRateMap.get(property.id) || 0;
       return {
         ...this.formatPropertyDetails(property, baseUrl),
-        rate: avgRate,
+        rate,
       };
     });
   }
@@ -266,15 +271,20 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .andWhere('property.property_type = :type', { type: PropertyType.RESIDENTIAL })
     .andWhere('office.user_id = :userId', { userId });
     
-    const rawProperties = await query.getRawAndEntities();
-    const properties = rawProperties.entities;
-    const raw = rawProperties.raw;
+    const { entities: properties, raw } = await query.getRawAndEntities();
+
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+    });
   
-    return properties.map((property, index) => {
-      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+    // Build final response
+    return properties.map(property => {
+      const rate = avgRateMap.get(property.id) || 0;
       return {
         ...this.formatPropertyDetails(property, baseUrl),
-        rate: avgRate,
+        rate,
       };
     });
   }
@@ -285,15 +295,20 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     .andWhere('office.user_id = :userId', { userId })
     .andWhere('post.title ILIKE :title', { title: `%${title}%` });
     
-    const rawProperties = await query.getRawAndEntities();
-    const properties = rawProperties.entities;
-    const raw = rawProperties.raw;
+    const { entities: properties, raw } = await query.getRawAndEntities();
+
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+    });
   
-    return properties.map((property, index) => {
-      const avgRate = parseFloat(raw[index].avg_rate) || 0;
+    // Build final response
+    return properties.map(property => {
+      const rate = avgRateMap.get(property.id) || 0;
       return {
         ...this.formatPropertyDetails(property, baseUrl),
-        rate: avgRate,
+        rate,
       };
     });
   }
