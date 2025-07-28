@@ -33,7 +33,7 @@ export class UserRepository implements UserRepositoryInterface {
   async findById(userId: number) {
     return this.userRepo.findOne({
       where: { id: userId },
-      select: ['id', 'first_name', 'last_name', 'phone', 'email','username'],
+      select: ['id', 'first_name', 'last_name', 'phone', 'email','username','photo'],
     });
   }
 
@@ -90,4 +90,18 @@ export class UserRepository implements UserRepositoryInterface {
     async updatePassword(userId: number, hashedPassword: string): Promise<void> {
       await this.userRepo.update(userId, { password: hashedPassword });
     }
+    async findGlobalInfoById(id: number) {
+    return this.userRepo.findOne({
+      where: { id },
+      select: ['first_name', 'last_name', 'phone', 'photo'],
+    });
+  }
+    async findUserInfoById(id: number) {
+    return this.userRepo.findOne({
+      where: { id },
+      select: ['first_name', 'last_name', 'phone', 'photo','email'],
+    });
+  }
+    
+
   }
