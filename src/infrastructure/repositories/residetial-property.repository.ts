@@ -73,8 +73,6 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
     
     const id = residentialProperty.id;
     const updatePayload = this.buildUpdatePayload(data);
-
-    console.log(updatePayload)
     
     await this.residentialRepo
       .createQueryBuilder()
