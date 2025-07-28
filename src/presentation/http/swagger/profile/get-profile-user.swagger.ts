@@ -13,7 +13,7 @@ import {
 export function ProfileSwaggerDoc() {
   return applyDecorators(
     ApiTags('User'),
-    ApiBearerAuth('JWT'),
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'خاصة بتطبيق الجوال',
       description: 'يحصل على جميع معلومات المستخدم بما فيها الصورة الشخصية'

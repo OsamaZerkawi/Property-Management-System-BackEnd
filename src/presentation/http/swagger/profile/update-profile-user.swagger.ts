@@ -15,7 +15,7 @@ import {
 export function UpdateProfileSwaggerDoc() {
   return applyDecorators(
     ApiTags('User Profile'),
-    ApiBearerAuth('JWT'),
+     ApiBearerAuth(),
     ApiConsumes('multipart/form-data'),
     ApiOperation({
       summary: 'خاصة بتطبيق الجوال',

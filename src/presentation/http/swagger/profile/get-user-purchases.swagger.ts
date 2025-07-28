@@ -12,7 +12,7 @@ import {
 export function MyPurchasesSwaggerDoc() {
   return applyDecorators(
     ApiTags('User Purchases'),
-    ApiBearerAuth('JWT'),
+     ApiBearerAuth(),
     ApiOperation({
       summary: 'خاصة بتطبيق الجوال',
       description: 'ترجع جميع العقارات التي قام المستخدم بشرائها'
