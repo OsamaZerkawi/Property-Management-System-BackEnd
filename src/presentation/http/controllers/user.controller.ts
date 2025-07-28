@@ -13,6 +13,10 @@ import { UpdateUserInfoUseCase } from "src/application/use-cases/user/update-pro
 import { UpdateUserInfoDto } from "src/application/dtos/user/update-user-info.dto";
 import { UserProfileImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
 import { GetUserPurchasesUseCase } from "src/application/use-cases/user/get-user-purchases.use-case";
+import { GetGlobalInfoSwaggerDoc } from "../swagger/profile/get-global-user-info.swagger";
+import { MyPurchasesSwaggerDoc } from "../swagger/profile/get-user-purchases.swagger";
+import { UpdateProfileSwaggerDoc } from "../swagger/profile/update-profile-user.swagger";
+import { ProfileSwaggerDoc } from "../swagger/profile/get-profile-user.swagger";
  @Controller('user')
 export class UserController {
     constructor(
@@ -46,6 +50,7 @@ export class UserController {
     }
 
   @Get('me')
+  @GetGlobalInfoSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async me(
     @CurrentUser() user: { sub: number },
@@ -61,6 +66,7 @@ export class UserController {
   }
 
   @Get('profile')
+  @ProfileSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async myInformation(
     @CurrentUser() user: { sub: number },
@@ -76,6 +82,7 @@ export class UserController {
   }
 
   @Post('profile')
+  @UpdateProfileSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   @UserProfileImageInterceptor()
   async updateProfile(
@@ -93,6 +100,7 @@ export class UserController {
   }
 
   @Get('myPurchases')
+  @MyPurchasesSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async myProperties(
     @CurrentUser() user,
