@@ -36,5 +36,8 @@ import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase
       useClass: UserPurchaseRepository,
     }
   ],
+  exports:[
+    USER_PURCHASE_REPOSITORY,
+  ]
 })
 export class UserModule {}

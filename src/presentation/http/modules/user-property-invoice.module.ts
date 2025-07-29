@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, Post } from "@nestjs/common";
 import { AuthModule } from "./auth.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
@@ -12,12 +12,20 @@ import { Residential } from "src/domain/entities/residential.entity";
 import { User } from "src/domain/entities/user.entity";
 import { CreateUserProeprtyInvoiceUseCase } from "src/application/use-cases/user-property-reservation/create-user-property-invoice.use-case";
 import { PropertyModule } from "./property.module";
+import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
+import { RegionModule } from "./region.module";
+import { Region } from "src/domain/entities/region.entity";
+import { UserModule } from "./user.module";
+import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
 
 @Module({
     imports:[
+        UserModule,
         AuthModule,
         PropertyModule,
-        TypeOrmModule.forFeature([UserPropertyInvoice,Property,Residential,User])
+        RegionModule,
+        ResidentialOfficeModule,
+        TypeOrmModule.forFeature([UserPropertyInvoice,Property,Residential,User,PropertyPost,Region,UserPropertyPurchase])
     ],
     controllers:[UserPropertyInvoiceController],
     providers:[

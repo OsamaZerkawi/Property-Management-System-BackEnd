@@ -1,8 +1,10 @@
 import { NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { stat } from "fs";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
+import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
 import { ListingType } from "src/domain/enums/listing-type.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
@@ -18,6 +20,22 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
         @InjectRepository(Residential)
         private readonly residentialRepo: Repository<Residential>,
     ){}
+    
+    async updateStatusOfProperty(propertyId: number, status: PropertyStatus) {
+      const residentialProperty = await this.residentialRepo.findOne({where : {property : {id : propertyId}}});
+
+      if(!residentialProperty){
+        throw new NotFoundException(
+          errorResponse('العقار السكني غير موجود',404)
+        );
+      }
+      
+      residentialProperty.status = status;
+      
+      return this.residentialRepo.save(residentialProperty);
+
+    }
+
     async createResidentialPropertyAndSaveIt(data: ResidentialPropertyDto) {
        const { property, ownership_type, direction, listingType, rent_details, sell_details } = data;
        

@@ -47,7 +47,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   async findById(id: number) {
     return await this.propertyRepo.findOne({
       where:{id},
-      relations:['office','office.user']
+      relations:['office','office.user','region']
     });
   }
 
@@ -303,7 +303,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
     });
   
-    // Build final response
+    // Build final responsetr
     return properties.map(property => {
       const rate = avgRateMap.get(property.id) || 0;
       return {

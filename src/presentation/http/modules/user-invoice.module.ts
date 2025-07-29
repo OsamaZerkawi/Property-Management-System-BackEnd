@@ -10,12 +10,21 @@ import { UserInvoiceController } from "../controllers/user-invoice.controller";
 import { Residential } from "src/domain/entities/residential.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { PropertyModule } from "./property.module";
+import { ResidentialOfficeModule } from "./residential-office.module";
+import { PropertyPost } from "src/domain/entities/property-posts.entitiy";
+import { RegionModule } from "./region.module";
+import { Region } from "src/domain/entities/region.entity";
+import { UserModule } from "./user.module";
+import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
 
 @Module({
     imports:[
         AuthModule,
+        UserModule,
+        RegionModule,
+        ResidentialOfficeModule,
         PropertyModule,
-        TypeOrmModule.forFeature([UserPropertyInvoice,RentalContract,Residential,Property])
+        TypeOrmModule.forFeature([UserPropertyInvoice,RentalContract,Residential,Property,PropertyPost,Region,UserPropertyPurchase])
     ],
     controllers:[UserInvoiceController],
     providers:[

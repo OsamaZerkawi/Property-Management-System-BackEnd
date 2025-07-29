@@ -19,6 +19,7 @@ export function GetUserPropertyReservationsSwaggerDoc() {
           message: 'تم إرجاع جميع السجلات الخاصة بحجز الأملاك',
           data: [
             {
+              id: 1,
               status: 'محجوز',
               buyer_phone: '0934123456',
               region_name: 'مشروع دمر',

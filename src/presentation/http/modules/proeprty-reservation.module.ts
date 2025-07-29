@@ -18,13 +18,19 @@ import { FindUserProeprtyReservationWithDetailsUseCase } from "src/application/u
 import { ResidentialOfficeModule } from "./residential-office.module";
 import { FindPropertyReservationDetails } from "src/application/use-cases/user-property-reservation/find-property-reservation-details.use-case";
 import { PropertyModule } from "./property.module";
+import { RegionModule } from "./region.module";
+import { UserPurchaseRepository } from "src/infrastructure/repositories/user-purchase.repository";
+import { UserModule } from "./user.module";
 
 @Module({
     imports:[
         PropertyModule,
+        RegionModule,
+        UserModule,
         UserPropertyInvoiceModule,
+        ResidentialOfficeModule,
         AuthModule,
-        TypeOrmModule.forFeature([UserPropertyPurchase,Office,PropertyPost,Region,City,Residential,Property]),
+        TypeOrmModule.forFeature([UserPropertyPurchase,Office,PropertyPost,Region,City,Residential,Property,UserPropertyPurchase]),
     ],
     controllers:[PropertyReservationController],
     providers:[

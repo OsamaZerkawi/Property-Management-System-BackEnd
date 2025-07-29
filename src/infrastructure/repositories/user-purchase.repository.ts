@@ -1,12 +1,15 @@
 // src/infrastructure/repositories/typeorm-user-purchase.repository.ts
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { 
   UserPurchaseRepositoryInterface,
 } from 'src/domain/repositories/user-purchase.repository';
 import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
+import { Residential } from 'src/domain/entities/residential.entity';
+import { User } from 'src/domain/entities/user.entity';
+import { PurchaseStatus } from 'src/domain/enums/property-purchases.enum';
 
 @Injectable()
 export class UserPurchaseRepository
@@ -14,8 +17,18 @@ export class UserPurchaseRepository
 {
   constructor(
     @InjectRepository(UserPropertyPurchase)
-    private readonly repo: Repository<UserPropertyPurchase>,
+    private readonly repo: Repository<UserPropertyPurchase>
   ) {}
+
+  async reversePropertyForUser(residential: Residential, user: User){
+    const purchase = await this.repo.create({
+      residential,
+      user,
+      status: PurchaseStatus.RESERVED
+    });
+
+    await this.repo.save(purchase);
+  }
 
   async findByUserId(userId: number) {
     return this.repo

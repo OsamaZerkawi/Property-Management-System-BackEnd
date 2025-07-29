@@ -30,7 +30,8 @@ import { GetExpectedPriceForRegionUseCase } from "src/application/use-cases/regi
     ],
     exports: [
         REGION_REPOSITORY,
-        FindRegionUseCase
+        FindRegionUseCase,
+        GetExpectedPriceForRegionUseCase
     ]
 })
 export class RegionModule{}

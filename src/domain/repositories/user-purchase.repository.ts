@@ -1,3 +1,6 @@
+import { Residential } from "../entities/residential.entity";
+import { User } from "../entities/user.entity";
+
  
 
 
@@ -16,4 +19,5 @@ export interface UserPurchaseRepositoryInterface {
 
   }>>;
 
+  reversePropertyForUser(residential: Residential, user: User);
 }

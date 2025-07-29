@@ -26,12 +26,21 @@ import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
 import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
+import { ResidentialOfficeModule } from './residential-office.module';
+import { Residential } from 'src/domain/entities/residential.entity';
+import { RegionModule } from './region.module';
+import { Region } from 'src/domain/entities/region.entity';
+import { UserModule } from './user.module';
+import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
   
 
 @Module({
   imports: [ 
     AuthModule,
     PropertyModule,
+    UserModule,
+    RegionModule,
+    ResidentialOfficeModule,
     TypeOrmModule.forFeature([
       RentalContract, 
       UserPropertyInvoice,
@@ -39,7 +48,10 @@ import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-
       Office,
       PropertyFeedback,
       OfficeSocial,
-      User
+      Residential,
+      User,
+      Region,
+      UserPropertyPurchase
     ]),
   ],
   controllers: [RentalContractController],

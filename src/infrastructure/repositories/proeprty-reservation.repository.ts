@@ -1,7 +1,9 @@
 import { Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { title } from "process";
 import { PropertyReservationFiltersDto } from "src/application/dtos/user-property-reservation/PropertyReservationFilters.dto";
 import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
+import { PurchaseStatus } from "src/domain/enums/property-purchases.enum";
 import { PropertyReservationRepositoryInterface } from "src/domain/repositories/property-reservation.repository";
 import { PROPERTY_REPOSITORY, PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { USER_PROPERTY_INVOICES_REPOSITORY, UserPropertyInvoiceRepositoryInterface } from "src/domain/repositories/user-property-invoices.repository";
@@ -38,13 +40,14 @@ export class PropertyReservationRepository implements PropertyReservationReposit
   
     const invoices = await this.userProeprtyInvoicesRepo.findInvoicesByPropertyId(propertyId);
   
-    const isReserved = result.status === 'محجوز';
+    const isReserved = result.status === PurchaseStatus.RESERVED; 
   
     const formattedResult: any = {
+      id: result.purchase_id,
       status: result.status,
       buyer_phone: result.buyer_phone,
-      region_name: result.region_name,
-      city_name: result.city_name,
+      title: result.post_title,
+      location:`${result.city_name}, ${result.region_name}`,
       selling_price: result.selling_price,
       image_url: result.image_url,
     };
@@ -88,13 +91,14 @@ export class PropertyReservationRepository implements PropertyReservationReposit
     const results = await query.getRawMany();
     
     const formattedResults = results.map(result => {
-      const isReserved = result.status === 'محجوز';      
+      const isReserved = result.status === PurchaseStatus.RESERVED;      
 
       const base = {
+        id: result.purchase_id,
         status: result.status,
         buyer_phone: result.buyer_phone,
-        region_name: result.region_name,
-        city_name: result.city_name,
+        title: result.post_title,
+        location:`${result.city_name}, ${result.region_name}`,
         selling_price: result.selling_price,
         image_url: result.image_url,
       };      
@@ -137,9 +141,11 @@ export class PropertyReservationRepository implements PropertyReservationReposit
         .leftJoin('region.city', 'city')
         .leftJoin('property.post', 'post')
         .select([
+          'purchase.id as purchase_id',
           'purchase.end_booking AS end_booking',
           'purchase.status AS status',
           'user.phone AS buyer_phone',
+          'post.title AS post_title',
           'region.name AS region_name',
           'city.name AS city_name',
           'residential.selling_price AS selling_price',

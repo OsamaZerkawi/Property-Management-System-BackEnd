@@ -1,12 +1,17 @@
 import { Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
+import { Region } from "src/domain/entities/region.entity";
 import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
 import { InoviceReasons } from "src/domain/enums/inovice-reasons.enum";
 import { InvoicesStatus } from "src/domain/enums/invoices-status.enum";
 import { PaymentMethod } from "src/domain/enums/payment-method.enum";
+import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { PROPERTY_REPOSITORY, PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
+import { REGION_REPOSITORY, RegionRepositoryInterface } from "src/domain/repositories/region.repository";
+import { RESIDENTIAL_PROPERTY_REPOSITORY, ResidentialPropertyRepositoryInterface } from "src/domain/repositories/residential-property.repository";
 import { UserPropertyInvoiceRepositoryInterface } from "src/domain/repositories/user-property-invoices.repository";
+import { USER_PURCHASE_REPOSITORY, UserPurchaseRepositoryInterface } from "src/domain/repositories/user-purchase.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
 import { Brackets, Repository } from "typeorm";
@@ -17,8 +22,14 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         private readonly userRepo: UserRepositoryInterface,
         @Inject(PROPERTY_REPOSITORY)
         private readonly propertyRepo: PropertyRepositoryInterface,
+        @Inject(RESIDENTIAL_PROPERTY_REPOSITORY)
+        private readonly residentialPropertyRepo: ResidentialPropertyRepositoryInterface,
         @InjectRepository(UserPropertyInvoice)  
         private readonly userPropertyInvoiceRepo: Repository<UserPropertyInvoice>,
+        @Inject(REGION_REPOSITORY)
+        private readonly regionRepo: RegionRepositoryInterface,
+        @Inject(USER_PURCHASE_REPOSITORY)
+        private readonly userPurchaseRepo: UserPurchaseRepositoryInterface,
     ){}
 
 
@@ -82,32 +93,38 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
     }
 
     async createInvoice(data: UploadPropertyReservationDto, image: string) {
-        const property = await this.propertyRepo.findById(data.propertyId);
+      const property = await this.propertyRepo.findById(data.propertyId);
+      if(!property){
+          throw new NotFoundException(
+              errorResponse('لا يوجد عقار لهذا المعرف',404)
+          );
+      }
+      
+      const user = await this.userRepo.findByPhone(data.phone);
+      if(!user){
+          throw new NotFoundException(
+              errorResponse('لا يوجد مستخدم لهذا الرقم',404)
+          );
+      }
 
-        if(!property){
-            throw new NotFoundException(
-                errorResponse('لا يوجد عقار لهذا المعرف',404)
-            );
-        }
+      const residential = await this.residentialPropertyRepo.updateStatusOfProperty(property.id,PropertyStatus.RESERVED);
+      
+      // const regionWithMeterPrice = await this.regionRepo.getExpectedpPrice(property.region.id);
 
-        const user = await this.userRepo.findByPhone(data.phone);
+      const amount = property.area * property.office.deposit_per_m2;
 
-        if(!user){
-            throw new NotFoundException(
-                errorResponse('لا يوجد مستخدم لهذا الرقم',404)
-            );
-        }
+      await this.userPurchaseRepo.reversePropertyForUser(residential,user);
 
-        const invoice = this.userPropertyInvoiceRepo.create({
-            user,
-            property,
-            invoiceImage:image,
-            paymentMethod:PaymentMethod.CASH,
-            status:InvoicesStatus.PAID,
-            reason:InoviceReasons.PROPERTY_PURCHASE
-        });
-
-        await this.userPropertyInvoiceRepo.save(invoice);
+      const invoice = this.userPropertyInvoiceRepo.create({
+          user,
+          property,
+          invoiceImage:image,
+          amount,
+          paymentMethod:PaymentMethod.CASH,
+          status:InvoicesStatus.PAID,
+          reason:InoviceReasons.DEPOSIT
+      });
+      await this.userPropertyInvoiceRepo.save(invoice);
     }
 
     private async getInvoicesByPeriod(
