@@ -182,25 +182,39 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       yearly: RentalPeriod.YEARLY,
     });
 
-
+    query.addSelect('COALESCE(AVG(feedback.rate), 0)', 'avg_rate')
+      .groupBy('property.id')
+      .addGroupBy('post.id')
+      .addGroupBy('region.id')
+      .addGroupBy('city.id')
+      .addGroupBy('residential.id');
     
-
     const [rawResults, total] = await Promise.all([
       query.skip((page - 1) * items).take(items).getRawAndEntities(),
       query.getCount(),
     ]);
   
+
     const entities = rawResults.entities;
     const raw = rawResults.raw;
   
-  const final = entities.map((entity, index) => ({
-    ...entity,
-    property: {
-      ...entity.property,
-      calculated_price: Number(raw[index]?.calculated_price),
-      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
-    },
-  }));
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+    });
+
+    const final = entities.map((entity, index) => ({
+      ...entity,
+      property: {
+        ...entity.property,
+        avgRate : avgRateMap.get(entity.id) || 0,  
+        calculated_price: Number(raw[index]?.calculated_price),
+        is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+      },
+    }));
 
   const formatted = final.map((residential) => this.formatResidential(residential, baseUrl));
 
@@ -224,7 +238,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
         ...base,
         listing_type: 'أجار',
         price: property.calculated_price,
-        rate:property.rate ?? null,
+        rate:property.avgRate
       };
     } else {
       return {
@@ -284,6 +298,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       .leftJoin('property.region', 'region')
       .leftJoin('region.city', 'city')
       .leftJoin('property.post', 'post')
+      .leftJoin('property.feedbacks', 'feedback')
       .where('property.is_deleted = false')
       .andWhere('post.status = :statusPost', { statusPost: PropertyPostStatus.APPROVED })
       .andWhere('residential.status = :resStatus',{resStatus: PropertyStatus.AVAILABLE});

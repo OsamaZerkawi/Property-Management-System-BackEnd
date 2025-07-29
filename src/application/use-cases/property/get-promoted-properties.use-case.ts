@@ -29,7 +29,7 @@ export class GetPromotedPropertiesUseCase {
             listing_type: 'أجار',
             rental_period: row.rental_period,
             price: row.rental_price,
-            rate: parseInt(row.avg_rate) ?? null,
+            rate:  parseFloat(parseFloat(row.avg_rate).toFixed(1))  ?? null,
           };
         } else {
           return {
@@ -37,7 +37,7 @@ export class GetPromotedPropertiesUseCase {
             type: PropertyType.RESIDENTIAL,
             listing_type: 'بيع',
             price: row.selling_price,
-            area: parseInt(row.area, 10) || 0,
+            area: parseFloat(parseFloat(row.avg_rate).toFixed(1))  || 0,
           };
         }
       });

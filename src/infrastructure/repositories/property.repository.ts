@@ -228,7 +228,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
     raw.forEach(row => {
-      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
     });
   
     // Build final response
@@ -249,7 +251,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     return {
       ...formatted,
-      avg_rate: parseInt(rawData.avg_rate) || 0,
+      avg_rate: parseFloat(parseFloat(rawData.avg_rate).toFixed(1)) || 0,
       rating_count: parseInt(rawData.rating_count) || 0,
       is_favorite: rawData.is_favorite ? 1 : 0,
       office: {
@@ -276,7 +278,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
     raw.forEach(row => {
-      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
     });
   
     // Build final response
@@ -297,10 +301,11 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     
     const { entities: properties, raw } = await query.getRawAndEntities();
 
-    // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
     raw.forEach(row => {
-      avgRateMap.set(row.property_id, parseFloat(row.avg_rate) || 0);
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
     });
   
     // Build final responsetr
@@ -308,7 +313,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       const rate = avgRateMap.get(property.id) || 0;
       return {
         ...this.formatPropertyDetails(property, baseUrl),
-        rate,
+        rate: rate.toFixed(1),
       };
     });
   }
@@ -329,8 +334,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     }
   
     const property = entities[0];
-    const avgRate = parseFloat(raw[0].avg_rate) || 0;
-  
+    const avgRate = parseFloat(parseFloat(raw[0].avg_rate).toFixed(1)) || 0;
+   
     const formatted = this.formatPropertyDetails(property, baseUrl);
   
     return {
@@ -378,9 +383,17 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
     const entities = rawResults.entities;
     const raw = rawResults.raw;
+
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+    });
   
     const final = entities.map((entity, index) => ({
       ...entity,
+      avg_rate : avgRateMap.get(entity.id) || 0,  
       calculated_price: Number(raw[index]?.calculated_price),
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
@@ -399,10 +412,16 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const entities = rawResults.entities;
     const raw = rawResults.raw;
 
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+    });
+
     const final = entities.map((entity, index) => ({
       ...entity,
-      avg_rate: parseInt(raw[index]?.avg_rate) || 0,
-      calculated_price: Number(raw[index]?.calculated_price),
+      avg_rate :avgRateMap.get(entity.id) || 0,
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
   
@@ -413,9 +432,6 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const query = await this.buildPropertyQuery(userId);
     query.andWhere('post.title ILIKE :title', { title: `%${title}%` });
 
-    const results = await  query.getRawMany();
-    console.log(results);
-
     const [rawResults, total] = await Promise.all([
       query.skip((page - 1) * items).take(items).getRawAndEntities(),
       query.getCount(),
@@ -423,10 +439,17 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
     const entities = rawResults.entities;
     const raw = rawResults.raw;
+
+    const avgRateMap = new Map<number, number>();
+    raw.forEach(row => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+    });
   
     const final = entities.map((entity, index) => ({
       ...entity,
-      avg_rate: parseInt(raw[index]?.avg_rate) || 0,
+      avg_rate: avgRateMap.get(entity.id)  || 0,
       calculated_price: Number(raw[index]?.calculated_price),
       is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
     }));
@@ -443,9 +466,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         errorResponse('لم يتم العثور على أحد العقارين أو كلاهما',404)
       );
     }
+      
     const property1Data = {
       ...this.formatPropertyDetails(property,baseUrl),
-      avg_rate: parseFloat(rawData.avg_rate) || 0,
+      avg_rate: parseFloat(parseFloat(rawData.avg_rate).toFixed(1)) || 0,
       rating_count: parseInt(rawData.rating_count) || 0,
       is_favorite: rawData.is_favorite ? 1 : 0,
       office: {
@@ -463,7 +487,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     const property2Data = {
       ...this.formatPropertyDetails(property2,baseUrl),
-      avg_rate: parseFloat(rawData2.avg_rate) || 0,
+      avg_rate: parseFloat(parseFloat(rawData2.avg_rate).toFixed(1)) || 0,
       rating_count: parseInt(rawData2.rating_count) || 0,
       is_favorite: rawData2.is_favorite ? 1 : 0,
       office: {

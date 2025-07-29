@@ -30,18 +30,17 @@ export class FindTopRatedPropertiesUseCase {
           listing_type: row.listing_type,
           price: row.listing_type === ListingType.SALE ? Number(row.selling_price) : Number(row.rental_price),
           rental_period: row.listing_type === ListingType.RENT ? row.rental_period : undefined,
-          rate: parseInt(row.avg_rate) || 0,
+          rate:  parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0,
           rating_count: parseInt(row.rating_count) || 0,
         };
       }
-
         if (type === PropertyType.TOURISTIC) {
         return {
           ...base,
           type:PropertyType.TOURISTIC,
           price: parseInt(row.touristic_price),
           rental_period:'يومي',
-          rate: parseFloat(row.avg_rate) || 0,
+          rate:  parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0,
           rating_count: parseInt(row.rating_count) || 0,
         };
       }

@@ -71,6 +71,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
     return { results };
   }
   async findOneWithDetails(id: number, baseUrl: string) {
+    console.log(baseUrl)
     return this.serviceProviderRepo
       .createQueryBuilder('sp')
       .leftJoin('sp.region', 'region')
