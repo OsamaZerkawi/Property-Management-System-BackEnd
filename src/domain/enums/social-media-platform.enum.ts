@@ -1,0 +1,15 @@
+export enum SocialMediaPlatform {
+  FACEBOOK = 'Facebook',
+  INSTAGRAM = 'Instagram',
+  TWITTER = 'Twitter',
+  LINKEDIN = 'LinkedIn',
+  SNAPCHAT = 'Snapchat',
+  TIKTOK = 'TikTok',
+  YOUTUBE = 'YouTube',
+  WHATSAPP = 'WhatsApp',
+  TELEGRAM = 'Telegram',
+  REDDIT = 'Reddit',
+  PINTEREST = 'Pinterest',
+  DISCORD = 'Discord',
+  THREADS = 'Threads',
+}

@@ -50,6 +50,7 @@ export class PropertyReservationRepository implements PropertyReservationReposit
       location:`${result.city_name}, ${result.region_name}`,
       selling_price: result.selling_price,
       image_url: result.image_url,
+      created_at: result.created_at,
     };
   
     if (isReserved && result.end_booking) {
@@ -101,6 +102,7 @@ export class PropertyReservationRepository implements PropertyReservationReposit
         location:`${result.city_name}, ${result.region_name}`,
         selling_price: result.selling_price,
         image_url: result.image_url,
+        created_at: result.created_at,
       };      
 
       if (isReserved && result.end_booking) {
@@ -144,6 +146,7 @@ export class PropertyReservationRepository implements PropertyReservationReposit
           'purchase.id as purchase_id',
           'purchase.end_booking AS end_booking',
           'purchase.status AS status',
+          'purchase.created_at AS created_at',
           'user.phone AS buyer_phone',
           'post.title AS post_title',
           'region.name AS region_name',

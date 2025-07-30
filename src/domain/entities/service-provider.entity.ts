@@ -3,6 +3,7 @@ import { User } from "./user.entity";
 import { Region } from "./region.entity";
 import { ServiceFeedback } from "./service-feedback.entity";
 import { ServiceProviderType } from "../enums/service-provider-type.enum";
+import { ServiceProviderSocial } from "./service-providers-social.entity";
 
 @Entity('service_providers')
 @Index(['user', 'region'],{unique:true})
@@ -38,6 +39,13 @@ export class ServiceProvider {
 
   @OneToMany(() => ServiceFeedback, (feedback) => feedback.serviceProvider)
   feedbacks: ServiceFeedback[];
+
+  // @OneToMany(
+  //   () => ServiceProviderSocial,
+  //   (social) => social.serviceProvider,
+  //   { cascade: true },
+  // )
+  // socials: ServiceProviderSocial[];
 
   @Column()
   opening_time: string;

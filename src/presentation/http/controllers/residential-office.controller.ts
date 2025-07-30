@@ -170,5 +170,4 @@ export class ResidentialOfficeController {
       return successResponse([],'تم تحديث تفاصيل العقار بنجاح',200);
 
     }
-
 }
