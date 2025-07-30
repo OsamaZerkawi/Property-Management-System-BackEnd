@@ -19,5 +19,5 @@ export interface UserPurchaseRepositoryInterface {
 
   }>>;
 
-  reversePropertyForUser(residential: Residential, user: User);
+  bookPropertyForUser(residential: Residential, user: User);
 }

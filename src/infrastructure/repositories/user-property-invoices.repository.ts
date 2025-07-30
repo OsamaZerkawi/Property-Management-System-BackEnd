@@ -113,7 +113,7 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
 
       const amount = property.area * property.office.deposit_per_m2;
 
-      await this.userPurchaseRepo.reversePropertyForUser(residential,user);
+      await this.userPurchaseRepo.bookPropertyForUser(residential,user);
 
       const invoice = this.userPropertyInvoiceRepo.create({
           user,

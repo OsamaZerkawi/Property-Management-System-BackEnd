@@ -10,6 +10,7 @@ import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase
 import { Residential } from 'src/domain/entities/residential.entity';
 import { User } from 'src/domain/entities/user.entity';
 import { PurchaseStatus } from 'src/domain/enums/property-purchases.enum';
+import { addDays } from 'date-fns';
 
 @Injectable()
 export class UserPurchaseRepository
@@ -20,10 +21,16 @@ export class UserPurchaseRepository
     private readonly repo: Repository<UserPropertyPurchase>
   ) {}
 
-  async reversePropertyForUser(residential: Residential, user: User){
+  async bookPropertyForUser(residential: Residential, user: User){
+
+    const bookingPeriod = residential.property.office.booking_period;
+
+    const endBooking = addDays(new Date(), bookingPeriod);
+
     const purchase = await this.repo.create({
       residential,
       user,
+      end_booking:endBooking,
       status: PurchaseStatus.RESERVED
     });
 

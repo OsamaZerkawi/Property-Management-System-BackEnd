@@ -32,7 +32,12 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       
       residentialProperty.status = status;
       
-      return this.residentialRepo.save(residentialProperty);
+      await this.residentialRepo.save(residentialProperty);
+
+      return this.residentialRepo.findOne({
+        where: { property: { id: propertyId } },
+        relations: ['property','property.office']
+      });
 
     }
 
