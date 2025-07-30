@@ -61,7 +61,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
         Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
         Otp, TempUser,ServicePrice,AdditionalService,Service,AdminCity,
-        JoinRequest,PromotedProperty,
+        JoinRequest,PromotedProperty,ServiceProviderSocial
     ],
     synchronize: true,
     //dropSchema: true,

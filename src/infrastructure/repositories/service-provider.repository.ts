@@ -74,6 +74,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
     console.log(baseUrl)
     return this.serviceProviderRepo
       .createQueryBuilder('sp')
+      .leftJoin('sp.socials','social')
       .leftJoin('sp.region', 'region')
       .leftJoin('region.city', 'city')
       .leftJoin('sp.user', 'user')
@@ -90,7 +91,16 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         'sp.closing_time AS "closingTime"',
         'sp.active::int AS active',
         'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
-        'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"'
+        'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
+                `COALESCE(
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'platform', social.platform,
+              'link', social.link
+            )
+          ) FILTER (WHERE social.id IS NOT NULL),
+          '[]'
+        ) AS "socials"`
       ])
       .where('sp.id = :id', { id })
       .groupBy('sp.id, region.id, city.id, user.id')
@@ -125,7 +135,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         `CONCAT(city.name, ' ، ', region.name) AS location`,
         'user.phone AS "userPhone"',
         'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
-        'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"'
+        'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
       ])
       .groupBy(`
         service_provider.id,

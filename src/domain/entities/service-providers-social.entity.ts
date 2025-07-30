@@ -8,19 +8,19 @@ export class ServiceProviderSocial {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type: 'enum'})
+    @Column({type: 'enum',enum: SocialMediaPlatform})
     platform: SocialMediaPlatform;
 
-    @Column({type: 'string'})
+    @Column()
     link: string;
 
-    // @ManyToOne(
-    //   () => ServiceProvider,
-    //   (serviceProvider) => serviceProvider.socials,
-    //   { onDelete: 'CASCADE' },
-    // )
-    // @JoinColumn({ name: 'service_provider_id' })
-    // serviceProvider: ServiceProvider;    
+    @ManyToOne(
+      () => ServiceProvider,
+      (serviceProvider) => serviceProvider.socials,
+      { onDelete: 'CASCADE' },
+    )
+    @JoinColumn({ name: 'service_provider_id' })
+    serviceProvider: ServiceProvider;    
 
     @CreateDateColumn()
     created_at: Date;

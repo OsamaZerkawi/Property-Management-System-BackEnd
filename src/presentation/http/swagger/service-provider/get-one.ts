@@ -38,6 +38,20 @@ export function GetServiceProviderDetailsSwaggerDoc() {
             active:1,
             avgRate: 4,
             ratingCount: 1,
+            socials: [
+              {
+                link: "h.fackbook.com",
+                platform: "Facebook"
+              },
+              {
+                link: "tt.telegram.com",
+                platform: "Telegram"
+              },
+              {
+                link: "whatsapp.com",
+                platform: "WhatsApp"
+              }
+            ]
           },
           status_code: 200,
         },

@@ -50,7 +50,7 @@ export class PropertyReservationRepository implements PropertyReservationReposit
       location:`${result.city_name}, ${result.region_name}`,
       selling_price: result.selling_price,
       image_url: result.image_url,
-      created_at: result.created_at,
+      created_at: new Date(result.created_at).toISOString().split('T')[0],
     };
   
     if (isReserved && result.end_booking) {
@@ -102,7 +102,7 @@ export class PropertyReservationRepository implements PropertyReservationReposit
         location:`${result.city_name}, ${result.region_name}`,
         selling_price: result.selling_price,
         image_url: result.image_url,
-        created_at: result.created_at,
+        created_at: new Date(result.created_at).toISOString().split('T')[0],
       };      
 
       if (isReserved && result.end_booking) {

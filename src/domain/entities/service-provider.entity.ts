@@ -40,12 +40,12 @@ export class ServiceProvider {
   @OneToMany(() => ServiceFeedback, (feedback) => feedback.serviceProvider)
   feedbacks: ServiceFeedback[];
 
-  // @OneToMany(
-  //   () => ServiceProviderSocial,
-  //   (social) => social.serviceProvider,
-  //   { cascade: true },
-  // )
-  // socials: ServiceProviderSocial[];
+  @OneToMany(
+    () => ServiceProviderSocial,
+    (social) => social.serviceProvider,
+    { cascade: true },
+  )
+  socials: ServiceProviderSocial[];
 
   @Column()
   opening_time: string;
