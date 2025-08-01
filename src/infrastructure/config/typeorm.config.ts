@@ -41,7 +41,6 @@ import { Service } from 'src/domain/entities/services.entity';
 import { AdminCity } from "src/domain/entities/admin-city.entity";
 import { JoinRequest } from "src/domain/entities/join-request.entity";
 import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
-import { SocialMediaPlatform } from "src/domain/enums/social-media-platform.enum";
 import { ServiceProviderSocial } from "src/domain/entities/service-providers-social.entity";
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
@@ -61,7 +60,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
         Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
         Otp, TempUser,ServicePrice,AdditionalService,Service,AdminCity,
-        JoinRequest,PromotedProperty,ServiceProviderSocial
+        JoinRequest,PromotedProperty,ServiceProviderSocial,
     ],
     synchronize: true,
     //dropSchema: true,

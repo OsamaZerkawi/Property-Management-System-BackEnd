@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsNumber, IsString } from "class-validator";
 
 export class UploadPropertyReservationDto {
     @IsNumber()
@@ -6,4 +6,7 @@ export class UploadPropertyReservationDto {
 
     @IsString()
     phone: string;
+
+    @IsBoolean()
+    installment: boolean;
 }

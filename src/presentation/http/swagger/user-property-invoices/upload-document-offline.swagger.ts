@@ -18,10 +18,11 @@ export function UploadInvoiceDocumentOfflineSwaggerDoc() {
       description: 'رفع وثيقة الدفع مع بيانات الحجز',
       schema: {
         type: 'object',
-        required: ['propertyId', 'phone', 'document'],
+        required: ['propertyId', 'phone', 'document','installment'],
         properties: {
           propertyId: { type: 'integer', example: 123, description: 'معرّف العقار' },
           phone: { type: 'string', example: '0934123456', description: 'رقم هاتف المستخدم' },
+          installment: { type: 'boolean', example: true },
           document: {
             type: 'string',
             format: 'binary',

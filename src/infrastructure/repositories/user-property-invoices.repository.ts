@@ -1,9 +1,10 @@
 import { Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
-import { Region } from "src/domain/entities/region.entity";
 import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
 import { InoviceReasons } from "src/domain/enums/inovice-reasons.enum";
+import { InstallmentPlanStatus } from "src/domain/enums/installment-plan-status.enum";
 import { InvoicesStatus } from "src/domain/enums/invoices-status.enum";
 import { PaymentMethod } from "src/domain/enums/payment-method.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
@@ -65,11 +66,14 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         'invoice.reason',
         'invoice.status',
         'invoice.paymentMethod',
+        'invoice.payment_deadline',
         'invoice.invoiceImage',
+        'invoice.billing_period_start',
         'invoice.created_at',
         ])
         .where('invoice.property_id = :propertyId',{propertyId})
-        .orderBy('invoice.created_at','DESC')
+        .orderBy('invoice.billing_period_start', 'ASC')
+        .addOrderBy('invoice.created_at','ASC')
         .getMany();
 
     }
@@ -109,22 +113,79 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
 
       const residential = await this.residentialPropertyRepo.updateStatusOfProperty(property.id,PropertyStatus.RESERVED);
       
-      // const regionWithMeterPrice = await this.regionRepo.getExpectedpPrice(property.region.id);
+      // Book property to user
+      const purchase = await this.userPurchaseRepo.bookPropertyForUser(residential,user);
 
-      const amount = property.area * property.office.deposit_per_m2;
+      // === Calculate amounts ===
+      const depositAmount = property.area * property.office.deposit_per_m2;
 
-      await this.userPurchaseRepo.bookPropertyForUser(residential,user);
+      const fullPrice = residential.selling_price;
 
-      const invoice = this.userPropertyInvoiceRepo.create({
+      const remainingAmount = fullPrice - depositAmount;
+
+      // === Create Deposit Invoice ===
+      const depositInvoice  = this.userPropertyInvoiceRepo.create({
           user,
           property,
           invoiceImage:image,
-          amount,
+          amount:  depositAmount,
           paymentMethod:PaymentMethod.CASH,
           status:InvoicesStatus.PAID,
-          reason:InoviceReasons.DEPOSIT
+          reason:InoviceReasons.DEPOSIT,
+          billing_period_start: startOfMonth(new Date()),
       });
-      await this.userPropertyInvoiceRepo.save(invoice);
+
+      await this.userPropertyInvoiceRepo.save(depositInvoice);
+
+      if(data.installment == false || residential.installment_allowed == false){
+        // === Create Purchase (remaining) Invoice ===
+        const purchaseInvoice = this.userPropertyInvoiceRepo.create({
+          user,
+          property,
+          invoiceImage: image,
+          status: InvoicesStatus.PENDING,
+          reason:InoviceReasons.PROPERTY_PURCHASE,
+          amount: remainingAmount,
+          payment_deadline: purchase.end_booking
+        });
+  
+        await this.userPropertyInvoiceRepo.save(purchaseInvoice);
+        return;
+      }
+
+      // === INstallment Invoices ===
+
+      const duration = residential.installment_duration;
+      const monthlyAmount   = Math.floor((remainingAmount / duration) * 100) / 100;
+      let accumulated = 0;
+
+      const endBooking: Date = purchase.end_booking;
+
+      let firstInstallmentPeriod = startOfMonth(endBooking);
+
+      for(let i = 1; i <= duration; i++){
+        let amount = monthlyAmount ;
+        if(i === duration){
+          amount = parseFloat((remainingAmount - accumulated).toFixed(2));
+        }
+        accumulated += amount;
+        
+        const invoicePeriod = addMonths(firstInstallmentPeriod, i - 1);
+
+        const payment_deadline = i === 1 ? endBooking : endOfMonth(invoicePeriod) ;
+
+        const installmentInvoice = this.userPropertyInvoiceRepo.create({
+          user,
+          property,
+          amount,
+          status: InvoicesStatus.PENDING,
+          reason: InoviceReasons.INSTALLMENT_PAYMENT,
+          billing_period_start: invoicePeriod,
+          payment_deadline
+        });
+
+        await this.userPropertyInvoiceRepo.save(installmentInvoice);
+      }
     }
 
     private async getInvoicesByPeriod(

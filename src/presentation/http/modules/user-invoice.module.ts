@@ -24,7 +24,10 @@ import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase
         RegionModule,
         ResidentialOfficeModule,
         PropertyModule,
-        TypeOrmModule.forFeature([UserPropertyInvoice,RentalContract,Residential,Property,PropertyPost,Region,UserPropertyPurchase])
+        TypeOrmModule.forFeature([
+            UserPropertyInvoice,RentalContract,Residential,
+            Property,PropertyPost,Region,UserPropertyPurchase,
+        ])
     ],
     controllers:[UserInvoiceController],
     providers:[

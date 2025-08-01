@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, NotFoundException, Param, Post, UploadedFile, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, HttpStatus, NotFoundException, Param, ParseBoolPipe, Post, UploadedFile, UseGuards } from "@nestjs/common";
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
 import { CreateUserProeprtyInvoiceUseCase } from "src/application/use-cases/user-property-reservation/create-user-property-invoice.use-case";
 import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-property-reservation/upload-document-invoice.use-case";
@@ -42,9 +42,15 @@ export class UserPropertyInvoiceController {
     @UserPropertyInvoiceImageInterceptor()
     @Post('/upload-docement')
     async uploadInvoiceDocumentOffline(
-        @Body() data: UploadPropertyReservationDto,
-        @UploadedFile() file: Express.Multer.File
+        @Body() dto: UploadPropertyReservationDto,
+        @UploadedFile() file: Express.Multer.File,
+        @Body('installment', ParseBoolPipe) installment: boolean
     ){
+        const data = {
+            ...dto,
+            installment
+        }
+
         if(!file){
             throw new NotFoundException(
                 errorResponse('لم يتم رفع صورة الوثيقة',404)

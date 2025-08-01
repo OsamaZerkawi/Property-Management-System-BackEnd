@@ -34,7 +34,7 @@ export class UserPurchaseRepository
       status: PurchaseStatus.RESERVED
     });
 
-    await this.repo.save(purchase);
+    return await this.repo.save(purchase);
   }
 
   async findByUserId(userId: number) {

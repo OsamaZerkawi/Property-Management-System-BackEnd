@@ -44,6 +44,7 @@ export function GetPropertyReservationWithDetailsSwaggerDoc() {
                 paymentMethod: 'تحويل بنكي',
                 invoiceImage: 'http://localhost:3000/uploads/properties/users/invoices/images/invoice1.jpg',
                 created_at: '2025-07-08',
+                deadline: "2025-08-19"
               },
               {
                 id: 2,

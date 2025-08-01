@@ -28,7 +28,7 @@ export class UserPropertyInvoice{
     @Column({nullable:true})
     invoiceImage: string;
 
-    @Column({type:'enum',enum:PaymentMethod})
+    @Column({type:'enum',enum:PaymentMethod,nullable: true})
     paymentMethod: PaymentMethod;
 
     @ManyToOne(() => User, (user) => user.invoices)
@@ -38,6 +38,9 @@ export class UserPropertyInvoice{
     @ManyToOne(() => Property, (property) => property.invoices)
     @JoinColumn({ name: 'property_id' })
     property: Property;
+
+    @Column({type: 'date',nullable: true})
+    payment_deadline: Date;
 
     @CreateDateColumn()
     created_at: Date;

@@ -64,7 +64,9 @@ export class PropertyReservationRepository implements PropertyReservationReposit
       status: invoice.status,
       paymentMethod: invoice.paymentMethod,
       invoiceImage: invoice.invoiceImage ? `${baseUrl}/uploads/properties/users/invoices/images/${invoice.invoiceImage}` : null,
+      billing_period_start: invoice.billing_period_start ? new Date(invoice.billing_period_start).toISOString().split('T')[0] : null,
       created_at: invoice.created_at.toISOString().split('T')[0],
+      deadline: invoice.payment_deadline
     }));
   
     return formattedResult;
