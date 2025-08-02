@@ -14,10 +14,13 @@ import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { DataSource } from 'typeorm';
 import { Residential } from 'src/domain/entities/residential.entity';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
+import { USER_REPOSITORY, UserRepositoryInterface } from 'src/domain/repositories/user.repository';
 
 @Injectable()
 export class CreateRentalContractUseCase {
   constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryInterface,
     @Inject(RENTAL_CONTRACT_REPOSITORY)
     private readonly rentalContractRepo: RentalContractRepositoryInterface,
     @Inject(USER_PROPERTY_INVOICES_REPOSITORY)
@@ -44,17 +47,20 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
   if (!residential) {
     throw new NotFoundException('العقار السكني غير موجود');
   }
-
+ const user = await this.userRepo.findByPhone(dto.phone);
+  if(!user){  
+    throw new NotFoundException('لا يوجد مستخدم لهذا الرقم');   
+  }
   if (residential.status === PropertyStatus.Rented) {
     throw new BadRequestException('العقار مؤجر بالفعل');
-  }
-
+  } 
+  
   const startDate = new Date();
   const endDate = addMonths(startDate, Number(dto.duration));
 
     await this.dataSource.transaction(async (manager) => {
     const rentalContract = new RentalContract();
-    rentalContract.user = { id: dto.userId } as any;
+    rentalContract.user = { id: user.id } as any;
     rentalContract.residential = { id: dto.residentialId } as any;
     rentalContract.period = dto.duration;
     rentalContract.start_date = format(startDate, 'yyyy-MM-dd');
@@ -78,7 +84,7 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
 
       invoice.billing_period_start = startOfMonth(addMonths(startDate, i));
       invoice.paymentMethod = PaymentMethod.CASH;
-      invoice.user = { id: dto.userId } as any;
+      invoice.user = { id: user.id } as any;
       invoice.property = { id: dto.propertyId } as any;
 
       invoices.push(invoice);
