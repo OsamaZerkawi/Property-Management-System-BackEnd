@@ -19,7 +19,7 @@ export class GetRentalContractsUseCase {
   )  {
     const office = await this.officeRepo.findOneByUserId(userId);
     if (!office) throw new NotFoundException('المكتب غير موجود');
-
+console.log(office.id);
     const raws = await this.rentalContractRepo.findContractsByOfficeId(
       office.id,
       filters,
