@@ -3,9 +3,9 @@ import { IsInt, IsDecimal, IsDateString, IsEnum, IsNotEmpty, IsString, IsNumber 
 import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 
 export class CreateRentalContractDto {
-  @IsInt()
+  @IsString()
   @IsNotEmpty()
-  userId: number;
+  phone: string;
 
   @IsInt()
   @IsNotEmpty()

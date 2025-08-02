@@ -26,7 +26,7 @@ export function CreateRentalContractSwaggerDoc() {
       schema: {
         type: 'object',
         properties: {
-          userId: { type: 'integer', example: 42, description: 'معرف المستخدم المستأجر' },
+          phone: { type: 'string', example: "0969090711", description: 'رقم المستخدم المستأجر' },
           duration: { type: 'integer', example: 10, description: 'مدة العقد بالأشهر' },
           monthlyRent: { type: 'number', example: 2500, description: 'سعر الإيجار الشهري' },
           propertyId: { type: 'integer', example: 7, description: 'معرف العقار' },
@@ -37,7 +37,7 @@ export function CreateRentalContractSwaggerDoc() {
             description: 'صورة وثيقة الفاتورة (تنسيق ملف صالح)',
           },
         },
-        required: ['userId', 'duration', 'monthlyRent', 'propertyId', 'residentialId', 'document'],
+        required: ['phone', 'duration', 'monthlyRent', 'propertyId', 'residentialId', 'document'],
       },
     }),
  
@@ -64,6 +64,16 @@ export function CreateRentalContractSwaggerDoc() {
       },
     }),
  
+     ApiNotFoundResponse({
+      description: 'التحقق من وجود المستخدم',
+      schema: {
+        example: {
+          successful: false,
+          error: 'لا يوجد مستخدم لهذا الرقم',
+          status_code: 404,
+        },
+      },
+    }),
     ApiNotFoundResponse({
       description: 'المكتب أو الوحدة السكنية غير موجودة.',
       schema: {
