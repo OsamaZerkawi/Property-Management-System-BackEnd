@@ -32,10 +32,15 @@ import { RegionModule } from './region.module';
 import { Region } from 'src/domain/entities/region.entity';
 import { UserModule } from './user.module';
 import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
+import { ReminderService } from 'src/application/services/reminder.service';
+import { InvoiceReminderLog } from 'src/domain/entities/invoice-reminder-log.entity';
+import { NotificationModule } from './notification.module';
+import { ReminderModule } from './reminder.module';
   
 
 @Module({
   imports: [ 
+    ReminderModule,
     AuthModule,
     PropertyModule,
     UserModule,
@@ -44,7 +49,7 @@ import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase
     TypeOrmModule.forFeature([
       RentalContract,UserPropertyInvoice,Property,
       Office,PropertyFeedback,OfficeSocial,Residential,
-      User,Region,UserPropertyPurchase,
+      User,Region,UserPropertyPurchase,InvoiceReminderLog,
     ]),
   ],
   controllers: [RentalContractController],
@@ -74,7 +79,6 @@ import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase
       provide: USER_REPOSITORY,  
       useClass: UserRepository,
     },
-    
   ],
 })
 export class RentalContractModule {}

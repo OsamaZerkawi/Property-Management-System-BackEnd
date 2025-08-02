@@ -26,6 +26,7 @@ import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { successPaginatedResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { GetUserNotificationsSwaggerDoc } from '../swagger/notifications/get-user-notification.swagger';
 import { CreateNotificationSwaggerDoc } from '../swagger/notifications/create-notification.swagger';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @Controller('notifications')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -50,6 +51,7 @@ export class NotificationsController {
     return successResponse(notifications,'تم ارجاع جميع الاشعارات الخاصة بك ',200);
   }
 
+  @Public()
   @Post('device')
   @HttpCode(HttpStatus.OK)
   async sendToDevice(@Body() dto: {

@@ -1,0 +1,6 @@
+export enum ReminderType {
+  BEFORE_3_DAYS = 'BEFORE_3_DAYS',
+  BEFORE_1_DAY = 'BEFORE_1_DAY',
+  DUE_TODAY = 'DUE_TODAY',
+  OVERDUE = 'OVERDUE',
+}

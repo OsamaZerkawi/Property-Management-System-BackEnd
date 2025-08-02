@@ -54,7 +54,7 @@ export class UserReservationRepository implements UserReservationRepositoryInter
         "TO_CHAR(rc.start_date, 'YYYY-MM-DD') AS start_date",
         "TO_CHAR(rc.end_date, 'YYYY-MM-DD') AS end_date",
         `CONCAT(city.name, ', ', region.name) AS location`,
-        // 'rc.status AS status',
+        'rc.status AS status',
       ])
       .where('rc.user_id = :userId', { userId })
       .orderBy('rc.start_date', 'DESC')

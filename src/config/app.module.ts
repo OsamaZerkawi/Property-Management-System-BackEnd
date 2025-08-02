@@ -38,9 +38,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AdminPartnersManagementModule } from 'src/presentation/http/modules/admin-partners-management.module';
 import { RentalContractModule } from 'src/presentation/http/modules/rental-contract.module';
 import { UserModule } from 'src/presentation/http/modules/user.module';
+import { ReminderScheduler } from 'src/infrastructure/schedulers/reminder.scheduler';
+import { ReminderModule } from 'src/presentation/http/modules/reminder.module';
  
 @Module({
   imports: [
+    ReminderModule,
     AdminPartnersManagementModule,
     ScheduleModule.forRoot(),
     AdminModule,

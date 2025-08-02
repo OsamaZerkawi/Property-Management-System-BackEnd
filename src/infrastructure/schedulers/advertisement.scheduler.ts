@@ -1,10 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { InjectRepository } from "@nestjs/typeorm";
-import { AsapScheduler } from "rxjs/internal/scheduler/AsapScheduler";
-import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { ADVERTISEMENT_REPOSITORY, AdvertisementRepositoryInterface } from "src/domain/repositories/advertisement.repository";
-import { Repository } from "typeorm";
 
 @Injectable()
 export class AdvertisementScheduler {

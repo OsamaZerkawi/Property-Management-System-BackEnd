@@ -16,9 +16,15 @@ import { RegionModule } from "./region.module";
 import { Region } from "src/domain/entities/region.entity";
 import { UserModule } from "./user.module";
 import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
+import { ReminderType } from "src/domain/enums/reminder-type.enum";
+import { InvoiceReminderLog } from "src/domain/entities/invoice-reminder-log.entity";
+import { ReminderService } from "src/application/services/reminder.service";
+import { NotificationModule } from "./notification.module";
+import { ReminderModule } from "./reminder.module";
 
 @Module({
     imports:[
+        ReminderModule,
         AuthModule,
         UserModule,
         RegionModule,
@@ -27,6 +33,7 @@ import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase
         TypeOrmModule.forFeature([
             UserPropertyInvoice,RentalContract,Residential,
             Property,PropertyPost,Region,UserPropertyPurchase,
+            InvoiceReminderLog,
         ])
     ],
     controllers:[UserInvoiceController],

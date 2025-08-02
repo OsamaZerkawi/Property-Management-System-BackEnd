@@ -1,5 +1,6 @@
 import { NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { retry } from "rxjs";
 import { FcmToken } from "src/domain/entities/fcmToken.entity";
 import { Notification } from "src/domain/entities/notification.entity";
 import { NotificationRepositoryInterface } from "src/domain/repositories/notification.repository";
@@ -42,5 +43,13 @@ export class NotificationRepository implements NotificationRepositoryInterface {
         });
         
         return tokens.map(tokenEntity => tokenEntity.fcmToken);
+    }
+
+    async getFcmTokenByUserId(userId: number) {
+        const token =  await this.fcmTokenRepo.findOne({
+            where: {user :{id: userId}}
+        });
+
+        return token?.fcmToken;
     }
 }

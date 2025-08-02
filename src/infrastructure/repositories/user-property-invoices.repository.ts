@@ -2,6 +2,7 @@ import { Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
+import { ReminderService } from "src/application/services/reminder.service";
 import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
 import { InoviceReasons } from "src/domain/enums/inovice-reasons.enum";
 import { InstallmentPlanStatus } from "src/domain/enums/installment-plan-status.enum";
@@ -27,10 +28,9 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         private readonly residentialPropertyRepo: ResidentialPropertyRepositoryInterface,
         @InjectRepository(UserPropertyInvoice)  
         private readonly userPropertyInvoiceRepo: Repository<UserPropertyInvoice>,
-        @Inject(REGION_REPOSITORY)
-        private readonly regionRepo: RegionRepositoryInterface,
         @Inject(USER_PURCHASE_REPOSITORY)
         private readonly userPurchaseRepo: UserPurchaseRepositoryInterface,
+        private readonly reminderService: ReminderService,
     ){}
 
 
@@ -150,6 +150,8 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         });
   
         await this.userPropertyInvoiceRepo.save(purchaseInvoice);
+
+        await this.reminderService.scheduleRemindersForInvoice(purchaseInvoice);
         return;
       }
 
@@ -185,6 +187,8 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         });
 
         await this.userPropertyInvoiceRepo.save(installmentInvoice);
+
+        await this.reminderService.scheduleRemindersForInvoice(installmentInvoice);
       }
     }
 

@@ -7,4 +7,5 @@ export interface NotificationRepositoryInterface {
     findByUser(userId: number);
     markAsRead(id: number);
     getFcmTokensByUserId(userId: number);
+    getFcmTokenByUserId(userId: number);
 }

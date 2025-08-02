@@ -42,6 +42,7 @@ import { AdminCity } from "src/domain/entities/admin-city.entity";
 import { JoinRequest } from "src/domain/entities/join-request.entity";
 import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
 import { ServiceProviderSocial } from "src/domain/entities/service-providers-social.entity";
+import { InvoiceReminderLog } from "src/domain/entities/invoice-reminder-log.entity";
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
@@ -60,7 +61,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         PropertyFeedback,OfficeFeedback ,OfficeSocial,Otp, TempUser,ServicePrice,
         Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
         Otp, TempUser,ServicePrice,AdditionalService,Service,AdminCity,
-        JoinRequest,PromotedProperty,ServiceProviderSocial,
+        JoinRequest,PromotedProperty,ServiceProviderSocial,InvoiceReminderLog,
     ],
     synchronize: true,
     //dropSchema: true,

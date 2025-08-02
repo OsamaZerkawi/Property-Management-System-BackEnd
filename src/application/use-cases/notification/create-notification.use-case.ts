@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { combineLatest } from "rxjs";
 import { NOTIFICATION_REPOSITORY, NotificationRepositoryInterface } from "src/domain/repositories/notification.repository";
 import { NotificationQueueService } from "src/infrastructure/queues/notificatoin-queue.service";
 
@@ -26,15 +27,15 @@ export class CreateNotificationUseCase {
       sent_at: new Date(),
     });
 
-    const tokens = await this.notificationRepo.getFcmTokensByUserId(userId);
+    const token = await this.notificationRepo.getFcmTokensByUserId(userId);
     
-    if (tokens.length > 0) {
-      const fullData = {
-        ...data,
-        notification_id: notification.id,
-      };
+    if (token) {
+      // const fullData = {
+      //   ...data,
+      //   notification_id: notification.id,
+      // };
 
-      this.notificationQueue.sendToDevices(tokens, title, body, fullData);
+      this.notificationQueue.sendToDevice(token, title, body);
     }
 
     return notification;

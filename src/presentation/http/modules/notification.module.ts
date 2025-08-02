@@ -33,6 +33,7 @@ import { NotificationQueueService } from "src/infrastructure/queues/notificatoin
     ],
     exports:[
       FirebaseService,
+      CreateNotificationUseCase,
       NOTIFICATION_REPOSITORY
     ],
 })
