@@ -3,7 +3,7 @@ import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 import { RentalContractRepository } from 'src/infrastructure/repositories/rental-contract.repository';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
-
+import { format } from 'date-fns';
 @Injectable()
 export class GetRentalContractsUseCase {
   constructor(
@@ -18,17 +18,17 @@ export class GetRentalContractsUseCase {
     filters: ContractFiltersDto,
   )  {
     const office = await this.officeRepo.findOneByUserId(userId);
-    if (!office) throw new NotFoundException('المكتب غير موجود');
-console.log(office.id);
+    if (!office) throw new NotFoundException('المكتب غير موجود'); 
     const raws = await this.rentalContractRepo.findContractsByOfficeId(
       office.id,
       filters,
-    );
+    ); 
 
     return raws.map(r => ({
-      title:     r.title,
-      startDate: r.start_date,
-      endDate:   r.end_date,
+      id:        r.id,
+      title:     r.title, 
+      startDate: format(new Date(r.start_date), 'yyyy-MM-dd'),
+      endDate:   format(new Date(r.end_date),   'yyyy-MM-dd'),
       phone:     r.phone,
       status:    r.status,
       imageUrl:  `${baseUrl}/uploads/UserRentalInvoices/${r.image}`,

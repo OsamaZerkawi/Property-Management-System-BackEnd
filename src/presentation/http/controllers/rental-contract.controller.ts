@@ -16,6 +16,7 @@ import { CreateRentalContractSwaggerDoc } from '../swagger/rental-contract/creat
 import { UploadInvoiceDocumentSwaggerDoc } from '../swagger/rental-contract/upload-document.swagger';
 import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-contract.swagger';
 import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
+import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-rental-contracts.swagger';
  @Controller('rental-contracts')
 export class RentalContractController {
     
@@ -41,7 +42,7 @@ export class RentalContractController {
     return errorResponse('يجب ان يكون هناك وثيقة للفاتورة',400);
   } 
   try{
-      this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
+      await this.createRentalContractUseCase.execute(user.sub, dto, file.filename);
       return successResponse(null,'تم انشاء العقد بنجاح',201);
   }
   catch(error){
@@ -52,6 +53,7 @@ export class RentalContractController {
   }
 
   @Get()
+  @GetRentalContractsSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async getRentalContracts(
     @CurrentUser() user: { sub: number },
@@ -60,7 +62,7 @@ export class RentalContractController {
   ) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
     try{
-    const data=this.getRentalContractsUseCase.execute(user.sub, baseUrl, filters);
+    const data= await this.getRentalContractsUseCase.execute(user.sub, baseUrl, filters);
     return successResponse(data,'تم جلب عقود الايجار بنجاح');
     }
     catch(error){

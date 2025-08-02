@@ -12,4 +12,9 @@ export class ContractFiltersDto {
   @IsInt({ message: 'معرّف المحافظة يجب أن يكون رقماً صحيحاً' })
   @IsOptional()
   cityId?: number;
+
+  @Type(() => Number)
+  @IsInt({ message: 'معرّف المنطقة يجب أن يكون رقماً صحيحاً' })
+  @IsOptional()
+  regionId?: number;
 }

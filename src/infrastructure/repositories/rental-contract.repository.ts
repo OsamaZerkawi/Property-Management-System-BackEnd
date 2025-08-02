@@ -23,44 +23,50 @@ export class RentalContractRepository
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
   } 
-  async findContractsByOfficeId(
-    officeId: number,
-    filters: ContractFiltersDto = {},
-  ): Promise<Array<{
-    image: string;
-    title: string;
-    start_date: string;
-    end_date: string;
-    phone: string;
-    status: string;
-  }>> {
-    const qb = this.repo.createQueryBuilder('rc')
-      .innerJoin('rc.residential', 'r')
-      .innerJoin('r.property', 'p', 'p.office_id = :officeId', { officeId })
-      .innerJoin('p.post', 'pp', 'pp.status = :postStatus', { postStatus: 'مقبول' })
-      .innerJoin('rc.user', 'u') 
-      .innerJoin('p.region', 'region')
-      .innerJoin('region.city', 'city')
-      .select([
-        'pp.image AS image',
-        'pp.title AS title',
-        'rc.start_date AS start_date',
-        'rc.end_date AS end_date',
-        'u.phone AS phone',
-        'r.status AS status',
-      ])
-      .orderBy('rc.start_date', 'DESC');
-  
-    if (filters.status) {
-    qb.andWhere('rc.status = :status', { status: filters.status }); 
-    }
-  
-    if (filters.cityId) {
-      qb.andWhere('city.id = :cityId', { cityId: filters.cityId });
-    }
+async findContractsByOfficeId(
+  officeId: number,
+  filters: ContractFiltersDto = {},
+): Promise<Array<{
+  id:  number,
+  image: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  phone: string;
+  status: string;
+}>> {
+  const qb = this.repo.createQueryBuilder('rc')
+    .innerJoin('rc.residential', 'r')
+    .innerJoin('r.property', 'p', 'p.office_id = :officeId', { officeId })
+    .innerJoin('p.post', 'pp', 'pp.status = :postStatus', { postStatus: 'مقبول' })
+    .innerJoin('rc.user', 'u')
+    .innerJoin('p.region', 'region')
+    .innerJoin('region.city', 'city')
+    .select([
+      'pp.image AS image',
+      'pp.title AS title',
+      'rc.start_date AS start_date',
+      'rc.end_date AS end_date',
+      'u.phone AS phone',
+      'r.status AS status',
+    ])
+    .orderBy('rc.start_date', 'DESC');
 
-    return qb.getRawMany();
+  if (filters.status) {
+    qb.andWhere('rc.status = :status', { status: filters.status });
   }
+
+  if (filters.cityId) {
+    qb.andWhere('city.id = :cityId', { cityId: filters.cityId });
+  }
+
+  if (filters.regionId) {
+    qb.andWhere('region.id = :regionId', { regionId: filters.regionId });
+  }
+
+  return qb.getRawMany();
+}
+  
     async findOneById(id: number): Promise<UserPropertyInvoice | null> {
     return this.InvoiceRepo.findOne({ where: { id } });
   }
