@@ -33,6 +33,8 @@ import { ServiceProviderSeeder } from "./service-provider.seeder";
 import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
 import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
 import { PromotedPropertySeeder } from "./promoted-properties.seeder";
+import { UserPostSeeder } from "./user-post.seeder";
+import { UserPost } from "src/domain/entities/user-post.entity";
 
 
 @Module({
@@ -51,14 +53,15 @@ import { PromotedPropertySeeder } from "./promoted-properties.seeder";
             Property,Residential,PropertyPost,
             PropertyFeedback,Image,User,OfficeSocial,
             ServicePrice,UserRole,Touristic,AdditionalService,
-            Service,ServiceProvider,PromotedProperty,OnlineInvoice
+            Service,ServiceProvider,PromotedProperty,OnlineInvoice,
+            UserPost,
         ])
     ],
     providers:[
         SeederService,CityRegionSeeder,PermissionSeeder,
         RoleSeeder,PropertyFeedbackSeeder,OfficePropertySeeder,
         ServicePriceSeeder,TouristicPropertySeeder,ServiceProviderSeeder,
-        PromotedPropertySeeder,
+        PromotedPropertySeeder,UserPostSeeder,
     ],
     exports:[SeederService]
 })

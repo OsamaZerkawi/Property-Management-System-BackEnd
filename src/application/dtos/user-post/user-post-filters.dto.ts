@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional } from "class-validator";
+import { IsEnum, IsNumber, IsOptional, isValidationOptions } from "class-validator";
 import { UserPostPropertyType } from "src/domain/enums/user-post-property-type.enum";
 
 export class UserPostFiltersDto {
