@@ -12,6 +12,10 @@ import { errorResponse, successResponse } from 'src/shared/helpers/response.help
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
 import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
+import { CreateRentalContractSwaggerDoc } from '../swagger/rental-contract/create-contract.swagger';
+import { UploadInvoiceDocumentSwaggerDoc } from '../swagger/rental-contract/upload-document.swagger';
+import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-contract.swagger';
+import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
  @Controller('rental-contracts')
 export class RentalContractController {
     
@@ -25,6 +29,7 @@ export class RentalContractController {
   ) {}
 
   @Post()
+  @CreateRentalContractSwaggerDoc()
   @UserInvoiceImageInterceptor()
   @UseGuards(JwtAuthGuard)  
   async create(
@@ -66,6 +71,7 @@ export class RentalContractController {
   }
 
   @Post(':id/document')  
+  @UploadInvoiceDocumentSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   @UserInvoiceImageInterceptor()
   async uploadDocument(
@@ -87,6 +93,7 @@ export class RentalContractController {
   }
 
   @Get('search')
+  @SearchContractsSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async search(
     @CurrentUser() user,
@@ -117,6 +124,7 @@ export class RentalContractController {
   }
 
 @Get(':id/details')
+@GetContractDetailsSwaggerDoc()
 @UseGuards(JwtAuthGuard)
 async getContractDetails(
   @Param('id', ParseIntPipe) id: number,
