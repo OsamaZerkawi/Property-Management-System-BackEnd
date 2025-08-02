@@ -7,7 +7,7 @@ export class FindRelatedPropertiesUseCase {
         private readonly propertyRepo: PropertyRepositoryInterface,
     ){}
 
-    async execute(propertyId: number,baseUrl: string){
-        return await this.propertyRepo.findRelatedProperties(propertyId,baseUrl);
+    async execute(propertyId: number,userId: number,baseUrl: string){
+        return await this.propertyRepo.findRelatedProperties(propertyId,userId,baseUrl);
     }
 }

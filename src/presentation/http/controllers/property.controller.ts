@@ -209,9 +209,13 @@ export class PropertyController{
         @Param('propertyId',ParseIntPipe) propertyId: number,
         @Req() request: Request
     ){
+        const userId = (request.user as any)?.sub ?? null;
+
+        console.log(userId);
+        
         const baseUrl = `${request.protocol}://${request.get('host')}`;
 
-        const properties = await this.findRelatedPropertiesUseCase.execute(propertyId,baseUrl);
+        const properties = await this.findRelatedPropertiesUseCase.execute(propertyId,userId,baseUrl);
 
         return successResponse(properties,'تم ارجاع العقارات ذات صلة',200);
     }

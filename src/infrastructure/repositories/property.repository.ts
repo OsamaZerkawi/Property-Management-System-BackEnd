@@ -19,10 +19,7 @@ import { TouristicStatus } from "src/domain/enums/touristic-status.enum";
 import { PropertyRepositoryInterface } from "src/domain/repositories/property.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
-import { QueryRunnerAlreadyReleasedError, Repository } from "typeorm";
-import { queryObjects } from "v8";
-import { CityRegionSeeder } from "../database/seeders/city-region.seeder";
-import { find } from "rxjs";
+import { Repository } from "typeorm";
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -76,7 +73,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   }
 
-  async findRelatedProperties(id: number, baseUrl: string) {
+  async findRelatedProperties(id: number,userId: number, baseUrl: string) {
     const query = await this.createBasePropertyDetailsQuery()
     .andWhere('property.id =:id',{id});
 
@@ -104,6 +101,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const maxPrice = price * 1.2;
 
   const query2 = this.propertyRepo.createQueryBuilder('property')
+      .leftJoin('property.feedbacks','feedback')
       .leftJoin('property.residential', 'residential')
       .leftJoin('property.region', 'region')
       .leftJoin('region.city', 'city')
@@ -158,12 +156,55 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       rent: ListingType.RENT,
       yearly: RentalPeriod.YEARLY,
     })
-    .orderBy('post.date', 'DESC')
-    .take(5);
 
-    const properties = await query2.getMany();
+    if (userId) {
+      console.log('inside check of favorites')
+      query2.addSelect(
+            `CASE
+               WHEN EXISTS(
+                 SELECT 1 FROM property_favorites pf 
+                 WHERE pf.property_id = property.id AND pf.user_id = :userId
+               ) THEN true
+               ELSE false
+             END`,
+            'is_favorite'
+      )
+      .setParameter('userId',userId)
+    }else {
+      query2.addSelect('false', 'is_favorite');
+    }
 
-    return properties.map((property) => this.formatProperty(property, baseUrl));
+    query2.addSelect('COALESCE(AVG(feedback.rate), 0)', 'avg_rate')
+      .groupBy('property.id')
+      .addGroupBy('post.id')
+      .addGroupBy('region.id')
+      .addGroupBy('city.id')
+      .addGroupBy('residential.id')
+      .orderBy('post.date', 'DESC')
+      .take(5);
+
+    const rawResults = await query2.getRawAndEntities();
+
+    const entities = rawResults.entities;
+    const raw = rawResults.raw;
+  
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    const favorite = new Map<number,boolean>();
+    raw.forEach(row => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+      favorite.set(propertyId,row.is_favorite);
+    });
+
+    const final = entities.map((entity, index) => ({
+      ...entity,
+        avg_rate : avgRateMap.get(entity.id) || 0,  
+        is_favorite: favorite.get(entity.id),
+    }));
+
+    return final.map((property) => this.formatProperty(property, baseUrl));
   }
 
   async createPropertyAndSaveIt(data: CreatePropertyDto) {
@@ -262,7 +303,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           : null,
         type: property.office?.type ?? null,
         location:  `${property.office.region.city.name}, ${property.office.region.name}`,
-        rate: parseFloat(rawData.office_average_rating || 0),
+        rate: parseFloat(rawData.office_average_rating).toFixed(1) || 0,
         rating_count:parseInt(rawData.office_rating_count),
       },
     };
@@ -384,18 +425,20 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const entities = rawResults.entities;
     const raw = rawResults.raw;
 
+    // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
+    const favorite = new Map<number,boolean>();
     raw.forEach(row => {
       const propertyId = Number(row.property_id);
       const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
       avgRateMap.set(propertyId, avgRate);
+      favorite.set(propertyId,row.is_favorite);
     });
-  
+
     const final = entities.map((entity, index) => ({
       ...entity,
       avg_rate : avgRateMap.get(entity.id) || 0,  
-      calculated_price: Number(raw[index]?.calculated_price),
-      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+      is_favorite: favorite.get(entity.id),
     }));
 
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
@@ -412,17 +455,20 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const entities = rawResults.entities;
     const raw = rawResults.raw;
 
+    // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
+    const favorite = new Map<number,boolean>();
     raw.forEach(row => {
       const propertyId = Number(row.property_id);
       const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
       avgRateMap.set(propertyId, avgRate);
+      favorite.set(propertyId,row.is_favorite);
     });
 
     const final = entities.map((entity, index) => ({
       ...entity,
-      avg_rate :avgRateMap.get(entity.id) || 0,
-      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+      avg_rate : avgRateMap.get(entity.id) || 0,  
+      is_favorite: favorite.get(entity.id),
     }));
   
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
@@ -440,18 +486,21 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     const entities = rawResults.entities;
     const raw = rawResults.raw;
 
+
+    // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
+    const favorite = new Map<number,boolean>();
     raw.forEach(row => {
       const propertyId = Number(row.property_id);
       const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
       avgRateMap.set(propertyId, avgRate);
+      favorite.set(propertyId,row.is_favorite);
     });
-  
+
     const final = entities.map((entity, index) => ({
       ...entity,
-      avg_rate: avgRateMap.get(entity.id)  || 0,
-      calculated_price: Number(raw[index]?.calculated_price),
-      is_favorite: raw[index]?.is_favorite === true || raw[index]?.is_favorite === 'true' ? 1 : 0,
+      avg_rate : avgRateMap.get(entity.id) || 0,  
+      is_favorite: favorite.get(entity.id),
     }));
   
     return [final.map((p) => this.formatProperty(p, baseUrl)), total];
@@ -626,7 +675,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   
       return {
         ...base,
-        rate: property.rate ?? null,
+        // rate: property.rate ?? null,
         price: tour?.price,
         status: tour?.status,
         touristic_info: {
