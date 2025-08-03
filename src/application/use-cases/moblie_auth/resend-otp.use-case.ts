@@ -34,6 +34,6 @@ export class ResendOtpUseCase {
       expires_at: expiresAt,
     });
  
-    await this.otpService.sendOtp(dto.email, code);
+     this.otpService.sendOtp(dto.email, code);
   }
 }

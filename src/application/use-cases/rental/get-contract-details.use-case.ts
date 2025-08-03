@@ -15,10 +15,13 @@ import {
   OfficeRepositoryInterface,
 } from 'src/domain/repositories/office.repository';
 import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
+import { USER_REPOSITORY, UserRepositoryInterface } from 'src/domain/repositories/user.repository';
  
 @Injectable()
 export class GetContractDetailsUseCase {
   constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryInterface,
     @Inject(OFFICE_REPOSITORY)
     private readonly officeRepo: OfficeRepositoryInterface,
 
@@ -44,24 +47,24 @@ export class GetContractDetailsUseCase {
       propertyId,
       contract.user.id,
     );
- 
+    const user=await this.userRepo.findUserInfoById(contract.user.id); 
     const formattedContract = {
       id: contract.id,
-      start_date: contract.start_date,
-      end_date: contract.end_date,
+      startDate: contract.start_date,
+      endDate: contract.end_date,
       status: contract.status,
-      post_image: `${baseUrl}/uploads/properties/posts/images/${contract.residential.property.post.image}` || null,
+      phone: user.phone,
+      imageUrl: `${baseUrl}/uploads/properties/posts/images/${contract.residential.property.post.image}` || null,
     };
 
     const formattedInvoices = invoices.map(inv => ({
       id: inv.id,
       amount: inv.amount,
-      billing_period_start: inv.billing_period_start,
+      created_at: inv.billing_period_start,
       status: inv.status,
       reason: inv.reason,
-      payment_method: inv.status === InvoicesStatus.PENDING ? null : inv.paymentMethod,
-      documentImage: inv.invoiceImage? `${baseUrl}/uploads/UserRentalInvoices/${inv.invoiceImage}`: null,
-
+      paymentMethod: inv.status === InvoicesStatus.PENDING ? null : inv.paymentMethod,
+      invoiceImage: inv.invoiceImage? `${baseUrl}/uploads/UserRentalInvoices/${inv.invoiceImage}`: null,
     })); 
 
     return { contract: formattedContract, invoices: formattedInvoices };

@@ -45,6 +45,6 @@ export class CreateUserUseCase {
     const code = this.otpService.generateOtp();
     const expiresAt = new Date(Date.now() + 5 * 60_000);
     await this.repoAuth.saveOtp({ email: dto.email, code, type: 'signup', expires_at: expiresAt });
-    await this.otpService.sendOtp(dto.email, code);
+    this.otpService.sendOtp(dto.email, code);
   }
 }

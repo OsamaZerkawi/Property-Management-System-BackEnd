@@ -11,6 +11,9 @@ import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-t
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
+import { successResponse } from 'src/shared/helpers/response.helper';
+import { CreateTourismSwaggerDoc } from '../swagger/tourism_places/create-tourism-property.swagger';
+import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-tourism-property.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -24,6 +27,7 @@ export class TourismController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
+  @CreateTourismSwaggerDoc()
   @Post()
   async create(
     @CurrentUser() user: any,
@@ -31,21 +35,24 @@ export class TourismController {
   ) { 
     const dto = new CreateTourismDto();
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
-    return this.createTourism.execute(user.sub, dto);
+    await this.createTourism.execute(user.sub, dto);
+    return successResponse([],'تم اضافة المكان بنجاح');
   }
  
-@UseGuards(JwtAuthGuard)
-@Put(':id')
-async update(
-  @CurrentUser() user: any,
-  @Param('id') id: number,
-  @Body() dto: UpdateTourismDto
-) { 
-  if (!dto || Object.keys(dto).length === 0) {
-    throw new BadRequestException('لا توجد بيانات للتحديث');
+  @UseGuards(JwtAuthGuard)
+  @UpdateTourismSwaggerDoc()
+  @Put(':id')
+  async update(
+    @CurrentUser() user: any,
+    @Param('id') id: number,
+    @Body() dto: UpdateTourismDto
+  ) { 
+    if (!dto || Object.keys(dto).length === 0) {
+      throw new BadRequestException('لا توجد بيانات للتحديث');
+    }
+    return this.updateTourism.execute(user.sub, +id, dto);
   }
-  return this.updateTourism.execute(user.sub, +id, dto);
-}
+
   @UseGuards(JwtAuthGuard)
   @Get()
   async list(@CurrentUser() user: any) {

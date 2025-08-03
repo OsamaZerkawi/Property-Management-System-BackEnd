@@ -7,6 +7,7 @@ import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
 import { Touristic } from 'src/domain/entities/touristic.entity';
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 import { TOURISM_REPOSITORY } from 'src/domain/repositories/tourism.repository';
+import { PropertyType } from 'src/domain/enums/property-type.enum';
 @Injectable()
 export class CreateTourismUseCase {
   
@@ -35,7 +36,7 @@ export class CreateTourismUseCase {
       kitchen_count: dto.kitchen_count,
       bathroom_count: dto.bathroom_count,
       has_furniture: dto.has_furniture,
-      property_type: "عقار سياحي"
+      property_type: PropertyType.TOURISTIC
     });
  
     const savedProperty = await this.repo.createProperty(property);
@@ -70,7 +71,6 @@ export class CreateTourismUseCase {
         dto.additional_services_ids,
       );
     }
-
-     return { property: savedProperty, touristic: savedTouristic };
+ 
   }
 }
