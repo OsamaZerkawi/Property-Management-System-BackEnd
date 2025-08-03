@@ -13,7 +13,7 @@ export class CreateRentalContractDto {
 
   @IsNumber()
   @IsNotEmpty()
-  monthlyRent: number;
+  price: number;
 
   @IsInt()
   @IsNotEmpty()

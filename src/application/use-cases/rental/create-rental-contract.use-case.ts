@@ -65,14 +65,14 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
     rentalContract.period = dto.duration;
     rentalContract.start_date = format(startDate, 'yyyy-MM-dd');
     rentalContract.end_date = format(endDate, 'yyyy-MM-dd');
-    rentalContract.price_per_period = dto.monthlyRent;
+    rentalContract.price_per_period = dto.price;
 
     await manager.getRepository(RentalContract).save(rentalContract);
 
     const invoices: UserPropertyInvoice[] = [];
     for (let i = 0; i < Number(dto.duration); i++) {
       const invoice = new UserPropertyInvoice();
-      invoice.amount = dto.monthlyRent;
+      invoice.amount = dto.price;
       invoice.reason = InoviceReasons.MONTHLY_RENT;
 
       if (i === 0) {

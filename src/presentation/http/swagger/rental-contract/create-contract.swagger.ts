@@ -28,7 +28,7 @@ export function CreateRentalContractSwaggerDoc() {
         properties: {
           phone: { type: 'string', example: "0969090711", description: 'رقم المستخدم المستأجر' },
           duration: { type: 'integer', example: 10, description: 'مدة العقد بالأشهر' },
-          monthlyRent: { type: 'number', example: 2500, description: 'سعر الإيجار الشهري' },
+          price: { type: 'number', example: 2500, description: 'سعر الإيجار شهري/سنوي' },
           propertyId: { type: 'integer', example: 7, description: 'معرف العقار' },
           residentialId: { type: 'integer', example: 3, description: 'معرف الوحدة السكنية' },
           document: {
@@ -37,7 +37,7 @@ export function CreateRentalContractSwaggerDoc() {
             description: 'صورة وثيقة الفاتورة (تنسيق ملف صالح)',
           },
         },
-        required: ['phone', 'duration', 'monthlyRent', 'propertyId', 'residentialId', 'document'],
+        required: ['phone', 'duration', 'price', 'propertyId', 'residentialId', 'document'],
       },
     }),
  
