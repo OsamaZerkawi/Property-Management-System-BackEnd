@@ -70,7 +70,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findOneByUserId(userId: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['socials', 'region'],
+      relations: ['socials', 'region','region.city'],
     });
   }
 

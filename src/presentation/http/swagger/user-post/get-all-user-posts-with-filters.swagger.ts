@@ -26,7 +26,9 @@ export function GetAllUserPostsWithFiltersSwaggerDoc() {
         example: {
           successful: true,
           message: 'تم ارجاع جميع منشورات المستخدمين بنجاح',
-          data: [
+          data: {
+            officeCityId:5,
+            posts:[
             {
               id: 1,
               title: 'شراء شقة في دمشق',
@@ -46,8 +48,8 @@ export function GetAllUserPostsWithFiltersSwaggerDoc() {
               publishedDate: '2025-07-15',
               location: 'حلب، الجميلية',
               isProposed: 0,
-            },
-          ],
+            }],
+          },
           status_code: 200,
         },
       },
