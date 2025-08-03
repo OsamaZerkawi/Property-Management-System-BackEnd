@@ -25,7 +25,6 @@ export class AdvertisementController {
     ){
         const userId = user.sub;
         const data = await this.listOfficeInvoicesUseCase.execute(userId,type);
-        console.log(data);
 
         return successResponse(data,'تم إرجاع جميع السجلات الخاصة بالإعلانات ',200);
     }

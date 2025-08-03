@@ -27,7 +27,7 @@ export class ListOfficeInvoicesUseCase {
         .map(ad => ({
           advertisement_id: ad.id,
           invoice_id: ad.invoice?.id,
-          paid_date: ad.invoice?.paid_date?.toISOString().split('T')[0],
+          paid_date: ad.invoice?.paid_date,
           type: ad.invoice?.type,
           day_period: ad.day_period,
           amount: ad.invoice?.amount,
@@ -38,7 +38,7 @@ export class ListOfficeInvoicesUseCase {
             : 'مرفوض',
         }));
     }else {
-      
+      return [];
     }
 
   }
