@@ -1,5 +1,5 @@
 // src/infrastructure/controllers/rental-contract.controller.ts
-import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get, Query, ParseIntPipe, Param } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get, Query, ParseIntPipe, Param, UseInterceptors } from '@nestjs/common';
 import { CreateRentalContractUseCase } from 'src/application/use-cases/rental/create-rental-contract.use-case';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { CreateRentalContractDto } from 'src/application/dtos/rental_contracts/create-rental-contract.dto';
@@ -17,6 +17,7 @@ import { UploadInvoiceDocumentSwaggerDoc } from '../swagger/rental-contract/uplo
 import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-contract.swagger';
 import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
 import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-rental-contracts.swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
  @Controller('rental-contracts')
 export class RentalContractController {
     
@@ -30,7 +31,7 @@ export class RentalContractController {
   ) {}
 
   @Post()
-  @CreateRentalContractSwaggerDoc()
+  @CreateRentalContractSwaggerDoc() 
   @UserInvoiceImageInterceptor()
   @UseGuards(JwtAuthGuard)  
   async create(

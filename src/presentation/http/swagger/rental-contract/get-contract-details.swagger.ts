@@ -5,10 +5,12 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 export function GetContractDetailsSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(), 
     ApiOperation({ summary: 'تفاصيل عقد إيجار واحد' }),
     ApiParam({ name: 'id', type: Number, description: 'معرف العقد', example: 5 }),
     ApiOkResponse({

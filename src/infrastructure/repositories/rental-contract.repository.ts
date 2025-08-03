@@ -43,6 +43,7 @@ async findContractsByOfficeId(
     .innerJoin('p.region', 'region')
     .innerJoin('region.city', 'city')
     .select([
+      'rc.id AS id',
       'pp.image AS image',
       'pp.title AS title',
       'rc.start_date AS start_date',

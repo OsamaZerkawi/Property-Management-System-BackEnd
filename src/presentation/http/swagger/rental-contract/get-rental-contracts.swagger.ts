@@ -5,10 +5,12 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger'; 
 import { ContractStatus } from 'src/domain/enums/rental-contract-status.enum';
 export function GetRentalContractsSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(), 
     ApiOperation({ summary: 'جلب جميع عقود الإيجار مع إمكانية الفلترة' }),
     ApiQuery({
       name: 'status',
