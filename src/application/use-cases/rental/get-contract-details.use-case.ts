@@ -48,12 +48,16 @@ export class GetContractDetailsUseCase {
       contract.user.id,
     );
     const user=await this.userRepo.findUserInfoById(contract.user.id); 
+    const region = contract.residential.property.region.name;
+    const city = contract.residential.property.region.city.name;
     const formattedContract = {
       id: contract.id,
+      title:contract.residential.property.post.title,
       startDate: contract.start_date,
       endDate: contract.end_date,
       status: contract.status,
       phone: user.phone,
+      location: `${region}، ${city}`,
       imageUrl: `${baseUrl}/uploads/properties/posts/images/${contract.residential.property.post.image}` || null,
     };
 
@@ -67,6 +71,6 @@ export class GetContractDetailsUseCase {
       invoiceImage: inv.invoiceImage? `${baseUrl}/uploads/UserRentalInvoices/${inv.invoiceImage}`: null,
     })); 
 
-    return { contract: formattedContract, invoices: formattedInvoices };
+    return {  formattedContract, invoices: formattedInvoices };
   }
 }

@@ -38,7 +38,8 @@ export function SearchContractsSwaggerDoc() {
           message: 'تم جلب العقود بنجاح',
           data: [
             {
-              title: 'عقد إيجار مكتب',
+              title:  "شاليه 88.54 م²",
+              location:"القامشلي، الحسكة",
               startDate: '2025-01-01',
               endDate: '2025-12-31',
               phone: '0934123456',

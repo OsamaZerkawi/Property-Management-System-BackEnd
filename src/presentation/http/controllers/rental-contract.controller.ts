@@ -136,8 +136,13 @@ async getContractDetails(
 ) {
   try {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
-    const result = await this.getContractDetailsUseCase.execute(user.sub, id,baseUrl);
-    return successResponse(result);
+    const result = await this.getContractDetailsUseCase.execute(user.sub, id, baseUrl);
+    const { formattedContract, invoices } = result;
+    const data = {
+      ...formattedContract,
+      invoices,
+    }; 
+  return successResponse(data);
   } catch (error) {
     return errorResponse(error.message, error.statusCode || 500);
   }

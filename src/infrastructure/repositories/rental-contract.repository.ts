@@ -29,6 +29,8 @@ async findContractsByOfficeId(
 ): Promise<Array<{
   id:  number,
   image: string;
+  region:string,
+  city:string,
   title: string;
   start_date: string;
   end_date: string;
@@ -50,6 +52,8 @@ async findContractsByOfficeId(
       'rc.end_date AS end_date',
       'u.phone AS phone',
       'r.status AS status',
+      'region.name AS region',   
+      'city.name AS city',
     ])
     .orderBy('rc.start_date', 'DESC');
 
@@ -74,7 +78,7 @@ async findContractsByOfficeId(
   async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
     return this.InvoiceRepo.save(invoice);
   }
-  async searchContractsBytitle(
+async searchContractsBytitle(
   officeId: number,
   keyword: string,
 ): Promise<Array<{
@@ -84,12 +88,16 @@ async findContractsByOfficeId(
   end_date: string;
   phone: string;
   status: string;
+  region: string;
+  city: string;
 }>> {
-  return this.repo.createQueryBuilder('rc') 
+  return this.repo.createQueryBuilder('rc')
     .innerJoin('rc.residential', 'r')
     .innerJoin('r.property', 'p', 'p.office_id = :officeId', { officeId })
     .innerJoin('p.post', 'pp', 'pp.status = :postStatus', { postStatus: 'مقبول' })
-    .innerJoin('rc.user', 'u')
+    .innerJoin('rc.user', 'u') 
+    .innerJoin('p.region', 'region')
+    .innerJoin('region.city', 'city')
     .select([
       'pp.image      AS image',
       'pp.title      AS title',
@@ -97,21 +105,30 @@ async findContractsByOfficeId(
       'rc.end_date   AS end_date',
       'u.phone       AS phone',
       'r.status      AS status',
-    ]) 
+      'region.name   AS region',
+      'city.name     AS city',
+    ])
     .where('LOWER(pp.title) LIKE LOWER(:kw)', { kw: `%${keyword}%` })
     .orderBy('rc.start_date', 'DESC')
     .getRawMany();
 }
 
 async findByIdWithRelations(id: number): Promise<RentalContract | null> {
-    return this.repo.findOne({
-      where: { id },
-      relations: {
-        user: true,
-        residential: { property: { post: true } },
+  return this.repo.findOne({
+    where: { id },
+    relations: {
+      user: true,
+      residential: {
+        property: {
+          post: true, 
+          region: {
+            city: true,
+          },
+        },
       },
-    });
-  }
+    },
+  });
+}
 
   async verifyPropertyBelongsToOffice(
     propertyId: number,

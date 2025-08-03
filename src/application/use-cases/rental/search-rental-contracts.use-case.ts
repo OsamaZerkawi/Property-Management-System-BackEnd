@@ -34,6 +34,7 @@ export class SearchRentalContractsUseCase {
     ); 
     return raws.map(r => ({
       title:     r.title,
+      location: [r.region, r.city].filter(Boolean).join(', '),
       startDate: r.start_date,
       endDate:   r.end_date,
       phone:     r.phone,

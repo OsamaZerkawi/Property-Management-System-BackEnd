@@ -22,6 +22,8 @@ export function GetContractDetailsSwaggerDoc() {
           data: {
             contract: {
               id: 5,
+              title:  "شاليه 88.54 م²",
+              location:"القامشلي، الحسكة",
               startDate: '2025-01-01',
               endDate: '2025-12-31',
               status: 'مؤجر',

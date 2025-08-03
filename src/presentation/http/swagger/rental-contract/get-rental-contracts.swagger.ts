@@ -41,8 +41,9 @@ export function GetRentalContractsSwaggerDoc() {
           message: 'تم جلب عقود الايجار بنجاح',
           data: [
             {
-              id: 4,
-              title: 'عقد إيجار شقة سكنية',
+              id: 4, 
+              title:  "شاليه 88.54 م²",
+              location:"القامشلي، الحسكة",
               startDate: '2025-03-01',
               endDate: '2026-03-01',
               phone: '0912123456',
