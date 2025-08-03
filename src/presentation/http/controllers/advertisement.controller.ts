@@ -5,6 +5,7 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";
 import { AdvertisementImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { GetAllOfficeInvoicesSwaggerDoc } from "../swagger/advertisement/get-all-office-invoices.swagger";
 
 @Controller('advertisement')
 export class AdvertisementController {
@@ -14,6 +15,7 @@ export class AdvertisementController {
     ){}
 
     @Get('/invoices')
+    @GetAllOfficeInvoicesSwaggerDoc()
     @Roles('صاحب مكتب')
     async getAll(
         @CurrentUser() user,
