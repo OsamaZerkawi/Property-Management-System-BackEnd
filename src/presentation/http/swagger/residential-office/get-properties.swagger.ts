@@ -1,4 +1,5 @@
 import { ApiOkResponse, ApiBearerAuth, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { Residential } from 'src/domain/entities/residential.entity';
 
 export const GetOfficePropertiesSuccessResponse = ApiOkResponse({
   description: 'تم إرجاع جميع العقارات الخاصة بمكتبك',
@@ -9,6 +10,7 @@ export const GetOfficePropertiesSuccessResponse = ApiOkResponse({
       data: [
         // ✅ مثال 1: حالة الإيجار (أجار)
         {
+          residentialId: 1,
           postTitle: "شقة مفروشة للإيجار",
           postDescription: "شقة مفروشة بالكامل في وسط المدينة",
           postImage: "http://localhost:3000/uploads/properties/posts/images/1.jpg",

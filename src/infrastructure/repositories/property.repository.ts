@@ -604,6 +604,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   private formatPropertyDetails(property: Property, baseUrl: string) {
 
     const base = {
+      residentialId: property.residential.id,
       postTitle: property.post?.title,
       postDescription: property.post?.description,
       postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
@@ -1093,6 +1094,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'post.description',
         'post.tag',
   
+        'residential.id',
         'residential.status',
         'residential.rental_price',
         'residential.rental_period',
