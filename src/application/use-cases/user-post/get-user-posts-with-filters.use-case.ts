@@ -22,6 +22,8 @@ export class GetUserPostsWithFiltersUseCase {
         }
 
         const officeId = office.id;
-        return await this.userPostRepo.getWithFilters(officeId,data);
+        const officeCityId = office.region.city.id;
+        const posts = await this.userPostRepo.getWithFilters(officeId,data);
+        return {officeCityId , posts};
     }
 }

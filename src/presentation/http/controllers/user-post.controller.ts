@@ -57,9 +57,9 @@ export class UserPostController {
         @CurrentUser() user,
     ){
         const userId = user.sub;
-        const posts = await this.getUserPostsWithFiltersUseCase.execute(userId,filters);
+        const data = await this.getUserPostsWithFiltersUseCase.execute(userId,filters);
 
-        return successResponse(posts,'تم ارجاع جميع منشورات المستخدمين بنجاح',200);
+        return successResponse(data,'تم ارجاع جميع منشورات المستخدمين بنجاح',200);
 
     }
 
