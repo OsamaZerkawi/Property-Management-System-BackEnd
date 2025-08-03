@@ -2,12 +2,20 @@ import { applyDecorators } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
+import { ServiceType } from 'src/domain/enums/service-type.enum';
 
 export function GetAllOfficeInvoicesSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
+    ApiQuery({
+      name: 'type',
+      required: false,
+      enum: ServiceType,
+      description: 'نوع الإعلان (صوري أو ترويجي)',
+    }),
     ApiOperation({
       summary: 'جلب جميع الإعلانات مع فواتيرها لمكتب المستخدم الحالي',
       description:
@@ -26,7 +34,7 @@ export function GetAllOfficeInvoicesSwaggerDoc() {
                 advertisement_id: 1,
                 invoice_id: 10,
                 paid_date: '2025-07-01',
-                type: 'إعلان مدفوع',
+                type: 'إعلان صوري',
                 day_period: 3,
                 amount: 5000,
                 advertisement_status: 'مدفوع',
