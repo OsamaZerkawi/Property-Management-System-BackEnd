@@ -170,7 +170,7 @@ export function AdvertisementImageInterceptor() {
 
 export function UserInvoiceImageInterceptor() {
   return UseInterceptors(
-    FileInterceptor('documentImage', {
+    FileInterceptor('document', {
       storage: diskStorage({
         destination: (req, file, cb) => {
           const dir = './uploads/UserRentalInvoices';
