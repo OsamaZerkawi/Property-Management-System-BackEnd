@@ -132,6 +132,8 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         'service_provider.name AS name',
         `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
         'service_provider.career AS career',
+        'service_provider.opening_time AS opening_time',
+        'service_provider.closing_time AS closing_time',
         `CONCAT(city.name, ' ، ', region.name) AS location`,
         'user.phone AS "userPhone"',
         'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',

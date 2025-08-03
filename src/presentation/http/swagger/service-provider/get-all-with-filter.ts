@@ -64,6 +64,8 @@ export function GetAllServiceProvidersWithFiltersSwaggerDoc() {
               name: 'أب محمود',
               logo: 'http://localhost:3000/uploads/service-providers/logos/صورة',
               career: 'مصمم ديكور',
+              opening_time: "10:15 صباحًا",
+              closing_time: "18:30 مساءً",
               location: 'دمشق, جوبر',
               rate: 4,
               rating_count: 1,
