@@ -15,6 +15,7 @@ import { DataSource } from 'typeorm';
 import { Residential } from 'src/domain/entities/residential.entity';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { USER_REPOSITORY, UserRepositoryInterface } from 'src/domain/repositories/user.repository';
+import { RentalPeriod } from 'src/domain/enums/rental-period.enum';
 
 @Injectable()
 export class CreateRentalContractUseCase {
@@ -47,7 +48,7 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
   if (!residential) {
     throw new NotFoundException('العقار السكني غير موجود');
   }
- const user = await this.userRepo.findByPhone(dto.phone);
+  const user = await this.userRepo.findByPhone(dto.phone);
   if(!user){  
     throw new NotFoundException('لا يوجد مستخدم لهذا الرقم');   
   }
@@ -73,7 +74,9 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
     for (let i = 0; i < Number(dto.duration); i++) {
       const invoice = new UserPropertyInvoice();
       invoice.amount = dto.price;
-      invoice.reason = InoviceReasons.MONTHLY_RENT;
+      invoice.reason = residential.rental_period === RentalPeriod.MONTHLY
+    ? InoviceReasons.MONTHLY_RENT
+    : InoviceReasons.YEARLY_RENT; 
 
       if (i === 0) {
         invoice.status = InvoicesStatus.PAID;
