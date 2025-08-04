@@ -4,6 +4,7 @@ import { ServiceType } from "src/domain/enums/service-type.enum";
 import { ADVERTISEMENT_REPOSITORY, AdvertisementRepositoryInterface } from "src/domain/repositories/advertisement.repository";
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from "src/domain/repositories/office.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
+import { GetServicePriceUseCase } from "../get-service-price.use-case";
 
 export class ListOfficeInvoicesUseCase {
   constructor(
@@ -12,6 +13,7 @@ export class ListOfficeInvoicesUseCase {
 
     @Inject(OFFICE_REPOSITORY)
     private readonly officeRepo: OfficeRepositoryInterface,
+    private readonly getServicePriceUseCase: GetServicePriceUseCase,
   ) {}
 
   async execute(userId: number,type: ServiceType){
@@ -22,15 +24,17 @@ export class ListOfficeInvoicesUseCase {
 
     if(type === ServiceType.IMAGE_AD){
       const ads = await this.adRepo.findAllWithInvoicesByOfficeId(office.id);
-  
+      
+      const pricePerDay = await this.getServicePriceUseCase.execute(ServiceType.IMAGE_AD);
+
       return ads
         .map(ad => ({
           advertisement_id: ad.id,
           invoice_id: ad.invoice?.id,
           paid_date: ad.invoice?.paid_date,
-          type: ad.invoice?.type,
+          type: ServiceType.IMAGE_AD,
           day_period: ad.day_period,
-          amount: ad.invoice?.amount,
+          amount: pricePerDay * ad.day_period,
           advertisement_status: ad.invoice
             ? 'مدفوع'
             : ad.admin_agreement === AdminAgreement.PENDING

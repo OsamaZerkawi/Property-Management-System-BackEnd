@@ -8,6 +8,7 @@ import { AdvertisementImageInterceptor } from "src/shared/interceptors/file-uplo
 import { GetAllOfficeInvoicesSwaggerDoc } from "../swagger/advertisement/get-all-office-invoices.swagger";
 import { InvoiceType } from "src/domain/enums/invoice.type.enum";
 import { ServiceType } from "src/domain/enums/service-type.enum";
+import { CreateImageAdSwaggerDoc } from "../swagger/advertisement/create-image-ad.swagger";
 
 @Controller('advertisement')
 export class AdvertisementController {
@@ -31,6 +32,7 @@ export class AdvertisementController {
     
     @Post('imageAd')
     @Roles('صاحب مكتب')
+    @CreateImageAdSwaggerDoc()
     @HttpCode(HttpStatus.CREATED)
     @AdvertisementImageInterceptor()
     async create(

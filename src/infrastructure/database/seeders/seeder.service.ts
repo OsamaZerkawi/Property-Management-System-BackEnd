@@ -59,7 +59,7 @@ export class SeederService {
 
     // 8.Seed Service Providers 
     await this.serviceProviderSeeder.seed();
-    // await this.servicePriceSeeder.seed();
+    await this.servicePriceSeeder.seed();
     console.log('✅ All seeders executed successfully.');
   }
 }

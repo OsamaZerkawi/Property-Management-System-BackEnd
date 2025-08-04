@@ -16,5 +16,6 @@ import { ServicePriceController } from 'src/presentation/http/controllers/servic
     },
     ServicePriceRepository,
   ],
+  exports: [ServicePriceRepository, GetServicePriceUseCase],
 })
 export class ServicePriceModule {}

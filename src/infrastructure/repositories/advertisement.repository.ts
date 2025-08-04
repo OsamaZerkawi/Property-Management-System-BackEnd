@@ -99,7 +99,7 @@ export class AdvertisementRepository implements AdvertisementRepositoryInterface
         return this.advertisementRepo.find({
             where:{office: {id: officeId}},
             relations: ['invoice'],
-            order: {created_at: 'DESC'}
+            // order: {created_at: 'DESC'}
         });
     }
 

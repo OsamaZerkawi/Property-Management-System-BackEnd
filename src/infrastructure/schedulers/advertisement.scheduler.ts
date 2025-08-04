@@ -11,13 +11,13 @@ export class AdvertisementScheduler {
         private readonly advertisementRepo: AdvertisementRepositoryInterface,
     ){}
 
-    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-    async deactivateExpireAds(){
-      const today = new Date();
-      today.setHours(0,0,0);  
+    // @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    // async deactivateExpireAds(){
+    //   const today = new Date();
+    //   today.setHours(0,0,0);  
       
-      const result = await this.advertisementRepo.deactivateExpiredAdvertisements(today);
+    //   const result = await this.advertisementRepo.deactivateExpiredAdvertisements(today);
       
-      this.logger.log(`✅ Deactivated ${result} expired advertisements.`);
-    }
+    //   this.logger.log(`✅ Deactivated ${result} expired advertisements.`);
+    // }
 }

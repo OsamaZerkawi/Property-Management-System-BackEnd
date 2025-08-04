@@ -4,7 +4,7 @@ import { IServicePriceRepository } from 'src/domain/repositories/service-price.r
 export class GetServicePriceUseCase {
   constructor(private readonly servicePriceRepo: IServicePriceRepository) {}
 
-  async execute(service: ServiceType): Promise<number | null> {
+  async execute(service: ServiceType): Promise<number> {
     return await this.servicePriceRepo.findPriceByService(service);
   }
 }

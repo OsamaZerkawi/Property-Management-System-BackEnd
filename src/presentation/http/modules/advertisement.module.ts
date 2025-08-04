@@ -20,13 +20,16 @@ import { NotificationModule } from "./notification.module";
 import { AdvertisementScheduler } from "src/infrastructure/schedulers/advertisement.scheduler";
 import { GetApprovedAdvertisementUseCase } from "src/application/use-cases/advertisement/get-approved-ads.use-case";
 import { GetAllAdvertisementInvoicesUseCase } from "src/application/use-cases/advertisement/get-all-advertisement-invoices.use-case";
+import { ServicePrice } from "src/domain/entities/service-price.entity";
+import { ServicePriceModule } from "./service-price.module";
 
 @Module({
     imports:[
+        ServicePriceModule,
         NotificationModule,
         OfficeModule,
         AuthModule,
-        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User])
+        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User,ServicePrice])
     ],
     controllers:[AdvertisementController,FinanceAdsManagementController],
     providers:[
