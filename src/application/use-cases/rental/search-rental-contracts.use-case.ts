@@ -34,12 +34,12 @@ export class SearchRentalContractsUseCase {
     ); 
     return raws.map(r => ({
       title:     r.title,
-      location: [r.region, r.city].filter(Boolean).join(', '),
+      location: [r.city, r.region].filter(Boolean).join('، '), 
       startDate: r.start_date,
       endDate:   r.end_date,
       phone:     r.phone,
       status:    r.status,
-      imageUrl:  `${baseUrl}/uploads/UserRentalInvoices/${r.image}`,
+      imageUrl:  `${baseUrl}/uploads/properties/posts/images/${r.image}`,
     }));
   }
 }

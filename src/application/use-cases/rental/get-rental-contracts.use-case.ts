@@ -27,12 +27,12 @@ export class GetRentalContractsUseCase {
     return raws.map(r => ({
       id:        r.id,
       title:     r.title,  
-      location: [r.region, r.city].filter(Boolean).join('، '), 
+      location: [r.city, r.region].filter(Boolean).join('، '), 
       startDate: format(new Date(r.start_date), 'yyyy-MM-dd'),
       endDate:   format(new Date(r.end_date),   'yyyy-MM-dd'),
       phone:     r.phone,
       status:    r.status,
-      imageUrl:  `${baseUrl}/uploads/UserRentalInvoices/${r.image}`,
+      imageUrl:  `${baseUrl}/uploads/properties/posts/images/${r.image}`,
     }));
   }
 }

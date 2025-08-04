@@ -57,7 +57,7 @@ export class GetContractDetailsUseCase {
       endDate: contract.end_date,
       status: contract.status,
       phone: user.phone,
-      location: `${region}، ${city}`,
+      location: `${city}، ${region}`,
       imageUrl: `${baseUrl}/uploads/properties/posts/images/${contract.residential.property.post.image}` || null,
     };
 
