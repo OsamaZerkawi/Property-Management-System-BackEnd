@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Touristic } from "./touristic.entity";
 import { Booking } from "./booking.entity";
+import { CalendarStatus } from "../enums/calendar-status.enum";
 
 @Entity('calendars')
 export class Calendar {
@@ -17,8 +18,8 @@ export class Calendar {
     @Column({ type: 'date' })
     end_date: Date;
   
-    @Column({ type: 'varchar', length: 50 })
-    status: string;
+    @Column({ type: 'enum', enum: CalendarStatus})
+    status: CalendarStatus;
   
     @OneToMany(() => Booking, (booking) => booking.calendar)
     bookings: Booking[];
