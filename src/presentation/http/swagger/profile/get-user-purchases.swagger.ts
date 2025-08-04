@@ -27,6 +27,7 @@ export function MyPurchasesSwaggerDoc() {
             status: "تم البيع",
             date: "2023-10-15",
             property_id: 3,
+            selling_price:152230,
             title: "فيلا 300م",
             image: "https://example.com/uploads/properties/posts/images/villa.jpg",
             address: "الرياض, حي السفارات"

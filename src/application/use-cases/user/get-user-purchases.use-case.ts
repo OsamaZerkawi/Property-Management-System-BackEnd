@@ -19,6 +19,7 @@ async execute(userId: number,page: number,items: number, baseUrl: string) {
     id:           r.purchaseId,
     status:       r.status,
     date:         format(new Date(r.date), 'yyyy-MM-dd'),
+    selling_price: r.selling_price,
     property_id:  r.propertyId,
     title:        r.postTitle,
     image:        r.postImage

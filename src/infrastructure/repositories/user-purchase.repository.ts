@@ -51,6 +51,7 @@ export class UserPurchaseRepository
       .select([
         'up.id AS "purchaseId"',
         'up.status AS status',
+        'r.selling_price AS selling_price',
         'up.created_at AS date',
         'p.id AS "propertyId"',
         'pp.title AS "postTitle"',
