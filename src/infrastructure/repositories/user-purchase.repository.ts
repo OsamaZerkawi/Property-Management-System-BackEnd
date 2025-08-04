@@ -37,8 +37,10 @@ export class UserPurchaseRepository
     return await this.repo.save(purchase);
   }
 
-  async findByUserId(userId: number) {
-    return this.repo
+  async findByUserId(userId: number,page:number,items: number) {
+    const offset = (page - 1) * items;
+  
+    const raws = await this.repo
       .createQueryBuilder('up')
       .innerJoin('up.residential', 'r')
       .innerJoin('r.property', 'p')
@@ -47,16 +49,23 @@ export class UserPurchaseRepository
       .innerJoin('region.city', 'city')
       .where('up.user_id = :userId', { userId })
       .select([
-        'up.id              AS "purchaseId"',
-        'up.status          AS status',
-        'up.created_at      AS date',
-        'p.id               AS "propertyId"',
-        'pp.title           AS "postTitle"',
-        'pp.image           AS "postImage"',
-        'region.name        AS "regionName"',
-        'city.name          AS "cityName"',
+        'up.id AS "purchaseId"',
+        'up.status AS status',
+        'up.created_at AS date',
+        'p.id AS "propertyId"',
+        'pp.title AS "postTitle"',
+        'pp.image AS "postImage"',
+        'region.name AS "regionName"',
+        'city.name AS "cityName"',
+        'COUNT(*) OVER() AS total_count',
       ])
       .orderBy('up.created_at', 'DESC')
+      .offset(offset)
+      .limit(items)
       .getRawMany();
+  
+    const total = raws.length ? Number(raws[0].total_count) : 0;
+  
+    return { raws, total };
   }
 }

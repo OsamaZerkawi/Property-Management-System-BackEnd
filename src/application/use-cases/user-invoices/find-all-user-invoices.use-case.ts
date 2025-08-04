@@ -36,7 +36,7 @@ export class FindAllUserInvoicesUseCase {
         reason: invoice.reason,
         amount: Number(invoice.amount),
         status: invoice.status,
-        deadline: invoice.deadline_date?.toISOString().split('T')[0],
+        deadline: invoice.payment_deadline,
       };
     }    
 }

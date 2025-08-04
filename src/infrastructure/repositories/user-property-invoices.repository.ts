@@ -35,22 +35,25 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
 
 
     async getUserPropertyInvoices(userId: number,propertyId: number) {
-       const today = new Date();
-       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-       const startOfYear = new Date(today.getFullYear(), 0, 1);
-     
-       const previous = await this.getInvoicesByPeriod(userId,propertyId, {
-         monthlyBefore: startOfMonth,
-         yearlyBefore: startOfYear,
-         direction: 'before',
-       });
-     
-       const current = await this.getInvoicesByPeriod(userId,propertyId, {
-         monthlyAfter: startOfMonth,
-         yearlyAfter: startOfYear,
-         direction: 'after',
-       });
-     
+      const allInvoices = await this.userPropertyInvoiceRepo
+        .createQueryBuilder('invoice')
+        .leftJoinAndSelect('invoice.property', 'property')
+        .leftJoin('residentials', 'residential', 'residential.property_id = property.id')
+        .leftJoin(
+          'rental_contracts',
+          'rc',
+          `
+            rc.user_id = invoice.user_id
+            AND rc.residential_id = residential.id
+            AND invoice.billing_period_start BETWEEN rc.start_date AND rc.end_date
+          `
+        )     
+        .where('invoice.user_id = :userId', { userId })
+        .andWhere('invoice.property_id = :propertyId', { propertyId })
+        .getMany();
+
+       const previous = allInvoices.filter(inv => inv.status !== InvoicesStatus.PENDING);
+       const current = allInvoices.filter(inv => inv.status === InvoicesStatus.PENDING);
        return {
          previous,
          current,
@@ -190,65 +193,6 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
 
         await this.reminderService.scheduleRemindersForInvoice(installmentInvoice);
       }
-    }
-
-    private async getInvoicesByPeriod(
-      userId: number,
-      propertyId: number,
-      options: {
-        monthlyBefore?: Date;
-        yearlyBefore?: Date;
-        monthlyAfter?: Date;
-        yearlyAfter?: Date;
-        direction: 'before' | 'after';
-      }
-    ) {
-      const result = await this.userPropertyInvoiceRepo
-        .createQueryBuilder('invoice')
-        .leftJoinAndSelect('invoice.property', 'property')
-        .leftJoin('residentials', 'residential', 'residential.property_id = property.id')
-        .leftJoin(
-          'rental_contracts',
-          'rc',
-          `
-            rc.user_id = invoice.user_id
-            AND rc.residential_id = residential.id
-            AND invoice.billing_period_start BETWEEN rc.start_date AND rc.end_date
-          `
-        )     
-        .addSelect('rc.end_date', 'deadline_date')
-        .where('invoice.user_id = :userId', { userId })
-        .andWhere('invoice.property_id = :propertyId', { propertyId })
-        .andWhere(
-          new Brackets((qb) => {
-            if (options.direction === 'before') {
-              qb.where(
-                `(invoice.reason = :monthly AND invoice.billing_period_start < :monthlyBefore)`,
-                { monthly: InoviceReasons.MONTHLY_RENT, monthlyBefore: options.monthlyBefore }
-              ).orWhere(
-                `(invoice.reason = :yearly AND invoice.billing_period_start < :yearlyBefore)`,
-                { yearly: InoviceReasons.YEARLY_RENT, yearlyBefore: options.yearlyBefore }
-              );
-            } else {
-              qb.where(
-                `(invoice.reason = :monthly AND invoice.billing_period_start >= :monthlyAfter)`,
-                { monthly: InoviceReasons.MONTHLY_RENT, monthlyAfter: options.monthlyAfter }
-              ).orWhere(
-                `(invoice.reason = :yearly AND invoice.billing_period_start >= :yearlyAfter)`,
-                { yearly: InoviceReasons.YEARLY_RENT, yearlyAfter: options.yearlyAfter }
-              );
-            }
-          })
-        )
-        .orderBy('invoice.billing_period_start', options.direction === 'before' ? 'DESC' : 'ASC')
-        .getRawAndEntities();
-    
-      return result.entities.map((entity, idx) => {
-        return {
-          ...entity,
-          deadline_date: result.raw[idx]?.deadline_date ? new Date(result.raw[idx].deadline_date) : null,
-        };
-      });
     }
     async saveBulk(invoices: UserPropertyInvoice[]): Promise<UserPropertyInvoice[]> {
     return this.userPropertyInvoiceRepo.save(invoices);

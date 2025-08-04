@@ -1,11 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post, Put, Query, Req, UploadedFile, UseGuards } from "@nestjs/common";
 import { FindUserByPhoneUseCase } from "src/application/use-cases/user/find-user-by-phone.use-case";
 import { GetAllUsersUseCase } from "src/application/use-cases/user/get-all-users.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Public } from "src/shared/decorators/public.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
-import { errorResponse, successResponse } from "src/shared/helpers/response.helper";
+import { errorResponse, successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
 import { Request } from 'express';
 import { GetGlobalInfoUseCase } from "src/application/use-cases/user/get-global-info.use-case";
 import { GetProfileUserUseCase } from "src/application/use-cases/user/get-profile-user.use-case";
@@ -103,13 +103,15 @@ export class UserController {
   @MyPurchasesSwaggerDoc()
   @UseGuards(JwtAuthGuard)
   async myProperties(
+    @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
+    @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
     @CurrentUser() user,
     @Req() request: Request
   ) {
     try {
       const baseUrl = `${request.protocol}://${request.get('host')}`;
-      const data = await this.getUserPurchases.execute(user.sub,baseUrl);
-      return successResponse(data, 'تم جلب الممتلكات بنجاح', 200);
+      const {data ,total} = await this.getUserPurchases.execute(user.sub,page,items,baseUrl);
+      return successPaginatedResponse(data,total,page,items, 'تم جلب الممتلكات بنجاح', 200);
     } catch (err) {
       return errorResponse(
         err.message,

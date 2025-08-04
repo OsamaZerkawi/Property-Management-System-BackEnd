@@ -12,10 +12,10 @@ export class GetUserPurchasesUseCase {
     private readonly purchaseRepo: UserPurchaseRepositoryInterface,
   ) {}
  
-async execute(userId: number, baseUrl: string) {
-  const raws = await this.purchaseRepo.findByUserId(userId);
+async execute(userId: number,page: number,items: number, baseUrl: string) {
+  const  { raws, total } = await this.purchaseRepo.findByUserId(userId,page,items);
 
-  return raws.map(r => ({
+  const data =  raws.map(r => ({
     id:           r.purchaseId,
     status:       r.status,
     date:         format(new Date(r.date), 'yyyy-MM-dd'),
@@ -26,5 +26,7 @@ async execute(userId: number, baseUrl: string) {
       : null,
     address:      `${r.cityName},${r.regionName}`,
   }));
+
+  return { data, total};
   }
 }
