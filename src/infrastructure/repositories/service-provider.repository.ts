@@ -90,7 +90,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         'sp.opening_time AS "openingTime"',
         'sp.closing_time AS "closingTime"',
         'sp.active::int AS active',
-        'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
+        'ROUND(COALESCE(AVG(feedback.rate), 0)::numeric, 1)::double precision AS "avgRate"',
         'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
                 `COALESCE(
           json_agg(
@@ -136,7 +136,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         'service_provider.closing_time AS closing_time',
         `CONCAT(city.name, ' ، ', region.name) AS location`,
         'user.phone AS "userPhone"',
-        'CAST(COALESCE(AVG(feedback.rate), 0) AS INTEGER) AS "avgRate"',
+        'ROUND(COALESCE(AVG(feedback.rate), 0)::numeric, 1)::double precision AS "avgRate"',
         'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
       ])
       .groupBy(`
@@ -165,7 +165,7 @@ export class ServiceProviderRepository implements ServiceProviderRepositoryInter
         'provider.logo AS logo',
         'provider.career AS career',
         `CONCAT(city.name, ', ', region.name) AS location`,
-        'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+        `ROUND(COALESCE(AVG(feedbacks.rate), 0)::numeric, 1)::double precision AS avg_rate`,
         'COUNT(feedbacks.id) AS rating_count',
         'COUNT(*) OVER() AS total_count',
       ])

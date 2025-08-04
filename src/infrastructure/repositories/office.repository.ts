@@ -226,7 +226,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
             : null,
           type: item.type,
           location: item.location,
-          rate: parseFloat(item.avg_rate),
+          rate: parseFloat(item.avg_rate).toFixed(1),
           rating_count: parseInt(item.rating_count),
         }));
         

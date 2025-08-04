@@ -13,6 +13,8 @@ import { TouristicPropertySeeder } from "./touristic-property.seeder";
 import { ServiceProviderSeeder } from "./service-provider.seeder";
 import { PromotedPropertySeeder } from "./promoted-properties.seeder";
 import { UserPostSeeder } from "./user-post.seeder";
+import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
+import { ServiceFeedbackSeeder } from "./service-provider-feedback.seeder";
 
 @Injectable()
 export class SeederService {
@@ -26,6 +28,8 @@ export class SeederService {
     private readonly promotedPropertySeeder: PromotedPropertySeeder,
     private readonly userPostSeeder: UserPostSeeder,
     private readonly servicePriceSeeder: ServicePriceSeeder,
+    private readonly officeFeedbackSeeder: OfficeFeedbackSeeder,
+    private readonly serviceFeedbackSeeder: ServiceFeedbackSeeder,
     
     @InjectRepository(City)
     private readonly cityRepo: Repository<City>,
@@ -59,6 +63,11 @@ export class SeederService {
 
     // 8.Seed Service Providers 
     await this.serviceProviderSeeder.seed();
+
+    await this.serviceFeedbackSeeder.seed();
+
+    await this.officeFeedbackSeeder.seed();
+    
     await this.servicePriceSeeder.seed();
     console.log('✅ All seeders executed successfully.');
   }
