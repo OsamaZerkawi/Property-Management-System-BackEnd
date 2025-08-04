@@ -26,7 +26,8 @@ export class UserReservationRepository implements UserReservationRepositoryInter
       .select([
         'b.id AS id',
         'p.id AS property_id', 
-        `'عقار سياحي' AS type`,
+        `'سياحي' AS type`,
+        'pp.title AS title',
         `CONCAT('${baseUrl}/uploads/properties/posts/images', pp.image) AS image`,
         "TO_CHAR(c.start_date, 'YYYY-MM-DD') AS start_date",
         "TO_CHAR(c.end_date, 'YYYY-MM-DD') AS end_date",
@@ -49,7 +50,8 @@ export class UserReservationRepository implements UserReservationRepositoryInter
       .select([
         'rc.id AS id',
         'p.id AS property_id', 
-        `'عقار سكني' AS type`,
+        `'عقاري' AS type`,
+        'pp.title AS title',
         `CONCAT('${baseUrl}/uploads/properties/posts/images', pp.image) AS image`,
         "TO_CHAR(rc.start_date, 'YYYY-MM-DD') AS start_date",
         "TO_CHAR(rc.end_date, 'YYYY-MM-DD') AS end_date",
