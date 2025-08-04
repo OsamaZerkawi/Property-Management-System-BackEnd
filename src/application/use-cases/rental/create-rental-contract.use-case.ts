@@ -8,7 +8,7 @@ import { RentalContract } from 'src/domain/entities/rental-contract.entity';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
 import { InoviceReasons } from 'src/domain/enums/inovice-reasons.enum';
 import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
-import { addMonths, startOfMonth, format } from 'date-fns';
+import { addMonths, startOfMonth, format, addYears } from 'date-fns';
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { DataSource } from 'typeorm';
@@ -57,7 +57,9 @@ async execute(userId: number, dto: CreateRentalContractDto, documentImage: strin
   } 
   
   const startDate = new Date();
-  const endDate = addMonths(startDate, Number(dto.duration));
+  const endDate = residential.rental_period === RentalPeriod.MONTHLY
+  ? addMonths(startDate, Number(dto.duration))
+  : addYears(startDate, Number(dto.duration));
 
     await this.dataSource.transaction(async (manager) => {
     const rentalContract = new RentalContract();
