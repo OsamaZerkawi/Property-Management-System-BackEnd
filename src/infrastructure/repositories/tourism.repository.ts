@@ -12,6 +12,7 @@ import { DataSource } from 'typeorm';
 import { FilterTourismDto } from 'src/application/dtos/tourism/filter-tourism.dto';
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { Region } from 'src/domain/entities/region.entity';
+import { Service } from 'src/domain/entities/services.entity';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -23,10 +24,37 @@ export class TourismRepository implements ITourismRepository {
     private readonly tourRepo: Repository<Touristic>,
     @InjectRepository(AdditionalService)
     private readonly addServRepo: Repository<AdditionalService>,
+    @InjectRepository(Service) 
+    private readonly serviceRepo: Repository<Service>,
     @InjectRepository(Region)
     private readonly regionRepo: Repository<Region>, 
     private readonly dataSource: DataSource,
   ) {}
+
+  async getServicesMapByNames(names: string[]) {
+    const services = await this.serviceRepo
+      .createQueryBuilder('service')
+      .select(['service.id', 'service.name'])
+      .where('service.name IN (:...names)', { names })
+      .getMany();
+  
+    const nameToIdMap: Record<string, number> = {};
+    services.forEach(service => {
+      nameToIdMap[service.name] = service.id;
+  });
+
+  return nameToIdMap;      
+  }
+
+  async getAdditionalServicesIdsByNames(names: string[]) {
+    const servcies = await this.serviceRepo
+    .createQueryBuilder('service')
+    .select('service.id')
+    .where('service.name IN (:...names)', { names })
+    .getMany();
+
+    return servcies.map((s) => s.id);
+  }
 
   createProperty(info: Property) {
     return this.propRepo.save(info);
@@ -71,8 +99,8 @@ async findAllByOffice(officeId: number) {
     id:       r.id,
     title:    r.title,
     location: `${r.city}، ${r.region}`,   
-    area:     r.area,
-    price:    r.price,
+    area:     Number(r.area.toFixed(1)),
+    price:    Number(r.price),
     status:   r.status,
   }));
 }
@@ -126,7 +154,7 @@ async findPropertyById(id: number): Promise<Property | null> {
       const currentTag = dto.tag !== undefined ? dto.tag : post.tag;
       
       if (dto.tag !== undefined || dto.area !== undefined) {
-        postUpdates.title = `${currentTag} ${currentArea} متر مربع`;
+        postUpdates.title = `${currentTag} ${currentArea} م²`;
       }
       
       if (dto.description !== undefined) postUpdates.description = dto.description;
@@ -156,9 +184,13 @@ async findPropertyById(id: number): Promise<Property | null> {
         await manager.update(Touristic, touristic.id, touristicUpdates);
       }
  
-      if (dto.additional_services_ids !== undefined) {
+      if (dto.additional_services) {
+
+        // Resolve names to Ids
+        const nameToIdMap = await this.getServicesMapByNames(dto.additional_services);
+
         const currentServices = touristic.additionalServices?.map(s => s.service.id) || [];
-        const newServices = dto.additional_services_ids;
+        const newServices = Object.values(nameToIdMap);
  
         const toRemove = currentServices.filter(id => !newServices.includes(id));
         const toAdd = newServices.filter(id => !currentServices.includes(id));
@@ -192,13 +224,13 @@ async filterByOffice(
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
     .leftJoin('property.region', 'region')
+    .leftJoin('region.city','city')
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
     .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
  
   if (filter.city) {
-    query.leftJoin('region.city', 'city')
-         .andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
+    query.andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
   }
  
   if (filter.region) {
@@ -227,6 +259,7 @@ async filterByOffice(
       'property.id as property_id',
       'post.title as post_title',
       'region.name as region_name',
+      'city.name as city_name',
       'property.area as property_area',
       'touristic.price as touristic_price',
       'post.status as post_status',
@@ -237,7 +270,7 @@ async filterByOffice(
   return results.map(item => ({
     id: item.property_id,
     title: item.post_title,
-    region: item.region_name,
+    location: `${item.city_name}, ${item.region_name}`,
     area: item.property_area,
     price: item.touristic_price,
     status: item.post_status === PropertyPostStatus.APPROVED 

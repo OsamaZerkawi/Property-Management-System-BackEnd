@@ -22,6 +22,7 @@ import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-t
 import { Region } from 'src/domain/entities/region.entity';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
+import { Service } from 'src/domain/entities/services.entity';
 @Module({
   imports: [
     AuthModule,
@@ -33,6 +34,7 @@ import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-touri
       PropertyPost,
       AdditionalService,
       Region,
+      Service,
     ]),
   ],
   controllers: [TourismController],

@@ -17,6 +17,7 @@ import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-touris
 import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-property.swagger';
 import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-tourism-property.swagger';
 import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('tourism')
 export class TourismController {
@@ -29,6 +30,7 @@ export class TourismController {
     private readonly showTourismUseCase: ShowTourismUseCase
   ) {}
 
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @CreateTourismSwaggerDoc()
   @Post()
@@ -42,6 +44,7 @@ export class TourismController {
     return successResponse([],'تم اضافة المكان بنجاح');
   }
  
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @UpdateTourismSwaggerDoc()
   @Put(':id')
@@ -57,6 +60,7 @@ export class TourismController {
     return successResponse([],'تم تعديل العقار السياحي بنجاح');
   }
 
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @Get()
   @ListTourismSwaggerDoc()
@@ -65,6 +69,7 @@ export class TourismController {
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
 
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @FilterTourismSwaggerDoc()
   @Get('filter')
@@ -76,6 +81,7 @@ export class TourismController {
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
   
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @Get('search')
   async searchByTitle(
@@ -85,6 +91,7 @@ export class TourismController {
     return this.searchByTitleUseCase.execute(user.sub, title);
   }
 
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ShowTourismSwaggerDoc()

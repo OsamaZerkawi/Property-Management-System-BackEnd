@@ -19,4 +19,6 @@ export interface ITourismRepository {
   findRegionById(id: number): Promise<Region | null>;
   searchByTitleAndOffice(userId: number, title: string): Promise<PropertyPost[]>;
   findFullPropertyDetails(propertyId: number, officeId: number): Promise<Property | null>;
+  getAdditionalServicesIdsByNames(names: string[]);
+  getServicesMapByNames(names: string[]);
 }

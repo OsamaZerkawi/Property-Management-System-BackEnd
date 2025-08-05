@@ -70,8 +70,8 @@ export class CreateTourismDto {
   @IsDefined()
   @IsArray()
   @ArrayNotEmpty()
-  @IsNumber({}, { each: true })
-  additional_services_ids!: number[];
+  @IsString({ each: true })
+  additional_services!: string[];
 
   @IsDefined()
   @IsNumber()
