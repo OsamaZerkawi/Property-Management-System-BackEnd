@@ -12,7 +12,7 @@ export interface ITourismRepository {
   createPost(post: PropertyPost): Promise<PropertyPost>;
   createTouristicDetails(details: Touristic): Promise<Touristic>;
   addServicesToTouristic(touristicId: number, servicesIds: number[]): Promise<void>;
-  findAllByOffice(officeId: number): Promise<Property[]>;
+  findAllByOffice(officeId: number);
   findPropertyById(id: number): Promise<Property | null>;
   updateTourism(propertyId: number, dto: UpdateTourismDto): Promise<void>;
   filterByOffice(officeId: number, filter: FilterTourismDto): Promise<Property[]>;

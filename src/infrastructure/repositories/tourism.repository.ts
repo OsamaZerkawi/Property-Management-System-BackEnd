@@ -49,22 +49,32 @@ export class TourismRepository implements ITourismRepository {
   );
   await this.addServRepo.save(relations);
 }
-async findAllByOffice(officeId: number): Promise<Property[]> {
-  return await this.propRepo
+async findAllByOffice(officeId: number) {
+   const raws =  await this.propRepo
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
     .leftJoin('property.region', 'region')
+    .leftJoin('region.city', 'city')  
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
     .select([
       'property.id AS id',
       'post.title AS title',
       'region.name AS region',
+      'city.name   AS city',
       'property.area AS area',
       'touristic.price AS price',
       'touristic.status AS status'
     ])
      .getRawMany();
+    return raws.map(r => ({
+    id:       r.id,
+    title:    r.title,
+    location: `${r.city}، ${r.region}`,   
+    area:     r.area,
+    price:    r.price,
+    status:   r.status,
+  }));
 }
 
 async findPropertyById(id: number): Promise<Property | null> {
@@ -284,6 +294,8 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
       office: { id: officeId } 
     },
     relations: [ 
+      'region',
+      'region.city',
       'post',
       'touristic',
       'images',

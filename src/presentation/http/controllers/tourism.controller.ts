@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query} from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -7,13 +7,16 @@ import { UpdateTourismDto } from '../../../application/dtos/tourism/update-touri
 import { CreateTourismUseCase } from '../../../application/use-cases/tourism/create-tourism.use-case';
 import { UpdateTourismUseCase } from 'src/application/use-cases/tourism/update-tourism.use-case';
 import { FilterTourismUseCase } from 'src/application/use-cases/tourism/filter-tourism.use-case';
-
+import { Request } from 'express';
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 import { successResponse } from 'src/shared/helpers/response.helper';
 import { CreateTourismSwaggerDoc } from '../swagger/tourism_places/create-tourism-property.swagger';
 import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-tourism-property.swagger';
+import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-property.swagger';
+import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-tourism-property.swagger';
+import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -55,11 +58,13 @@ export class TourismController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
+  @ListTourismSwaggerDoc()
   async list(@CurrentUser() user: any) {
     return this.listTourism.execute(user.sub);
   }
 
   @UseGuards(JwtAuthGuard)
+  @FilterTourismSwaggerDoc()
   @Get('filter')
   async filter(
     @CurrentUser() user: any,
@@ -77,11 +82,15 @@ export class TourismController {
     return this.searchByTitleUseCase.execute(user.sub, title);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @ShowTourismSwaggerDoc()
   async getPropertyDetails(
   @CurrentUser() user: any,
-    @Param('id') propertyId: number
+    @Param('id') propertyId: number,
+     @Req() request: Request
   ) {
-    return this.showTourismUseCase.execute(user.sub, propertyId);
+     const baseUrl = `${request.protocol}://${request.get('host')}`;
+    return this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);
   }
 }

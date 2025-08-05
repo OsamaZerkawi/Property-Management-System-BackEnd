@@ -24,8 +24,7 @@ export function UpdateTourismSwaggerDoc() {
     ApiBody({
       schema: {
         type: 'object',
-        properties: {
-          // من CreateTourismDto
+        properties: { 
           description: { type: 'string', example: 'شقة بحرية رائعة' },
           tag: {
             type: 'string',
@@ -56,16 +55,14 @@ export function UpdateTourismSwaggerDoc() {
           electricity: { type: 'string', example: 'متوفر' },
           water: { type: 'string', example: 'متوفر' },
           pool: { type: 'string', example: 'نعم' },
-
-          // الحقل الجديد في UpdateTourismDto
+ 
           status: {
             type: 'string',
             enum: Object.values(TouristicStatus),
             example: TouristicStatus.AVAILABLE,
             description: 'الحالة الجديدة للعقار السياحي',
           },
-        },
-        // كل الحقول اختيارية في التحديث
+        }, 
         required: [],
       },
     }),
