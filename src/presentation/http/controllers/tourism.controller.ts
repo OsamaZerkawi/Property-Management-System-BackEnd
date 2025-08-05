@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req} from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, UploadedFile} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -11,13 +11,14 @@ import { Request } from 'express';
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
-import { successResponse } from 'src/shared/helpers/response.helper';
+import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { CreateTourismSwaggerDoc } from '../swagger/tourism_places/create-tourism-property.swagger';
 import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-tourism-property.swagger';
 import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-property.swagger';
 import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-tourism-property.swagger';
 import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
 import { Roles } from 'src/shared/decorators/role.decorator';
+import { PropertyPostImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 
 @Controller('tourism')
 export class TourismController {
@@ -33,12 +34,21 @@ export class TourismController {
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @CreateTourismSwaggerDoc()
+  @PropertyPostImageInterceptor()
   @Post()
   async create(
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: any,
     @Body() body: any,
   ) { 
     const dto = new CreateTourismDto();
+
+    if (!file || !file.filename) {
+      throw new BadRequestException(
+        errorResponse('يجب رفع صورة للإعلان',400)
+      );
+    }
+
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
     await this.createTourism.execute(user.sub, dto);
     return successResponse([],'تم اضافة المكان بنجاح');
@@ -47,8 +57,10 @@ export class TourismController {
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @UpdateTourismSwaggerDoc()
-  @Put(':id')
+  @PropertyPostImageInterceptor()
+  @Post(':id')
   async update(
+    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: any,
     @Param('id') id: number,
     @Body() dto: UpdateTourismDto
@@ -56,6 +68,13 @@ export class TourismController {
     if (!dto || Object.keys(dto).length === 0) {
       throw new BadRequestException('لا توجد بيانات للتحديث');
     }
+
+    if (!file || !file.filename) {
+      throw new BadRequestException(
+        errorResponse('يجب رفع صورة للإعلان',400)
+      );
+    }
+
     return this.updateTourism.execute(user.sub, +id, dto);
   }
 

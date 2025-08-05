@@ -307,13 +307,16 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
     .leftJoin('property.region', 'region')
+    .leftJoin('region.city','city')
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
     .andWhere('post.title LIKE :searchTerm', { searchTerm: `%${searchTerm}%` }) // إضافة شرط البحث
     .select([
       'property.id AS id',
       'post.title AS title',
-      'region.name AS region',
+      // 'region.name AS region',
+      // 'city.name AS city',
+      `CONTACT(city.name , ', ' ,region.name) AS location`,
       'property.area AS area',
       'touristic.price AS price',
       'touristic.status AS status'

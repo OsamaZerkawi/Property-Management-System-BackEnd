@@ -49,9 +49,7 @@ export class ShowTourismUseCase {
       `${baseUrl}/uploads/properties/images/${img.image_path}`
     ), 
     status:   touristic.status, 
-    region:   region.name,
-    city:     region.city.name, 
-    street:   touristic.street, 
+    location: `${region.city.name}, ${region.name}, ${touristic.street}`,
     area:             property.area,
     roomCount:        property.room_count,
     livingRoomCount:  property.living_room_count,

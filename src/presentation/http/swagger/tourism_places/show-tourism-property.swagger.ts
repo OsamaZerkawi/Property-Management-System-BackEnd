@@ -37,9 +37,11 @@ export function ShowTourismSwaggerDoc() {
             items: { type: 'string', example: 'http://localhost:3000/uploads/properties/images/img1.jpg' }
           },
           status:           { type: 'string', example: 'غير متوفر' },
-          region:           { type: 'string', example: 'المالكي' },
-          city:             { type: 'string', example: 'دمشق' },
-          street:           { type: 'string', example: '...' },
+          location: {
+            type: 'string',
+            example: 'دمشق، المالكي، شارع الثورة',
+            description: 'المحافظة، المنطقة، الشارع'
+          },
           area:             { type: 'number', example: 350 },
           roomCount:        { type: 'number', example: 4 },
           livingRoomCount:  { type: 'number', example: 2 },
