@@ -5,6 +5,7 @@ import { Touristic } from '../entities/touristic.entity';
 import {UpdateTourismDto} from 'src/application/dtos/tourism/update-tourism.dto';
 import {FilterTourismDto} from 'src/application/dtos/tourism/filter-tourism.dto';
 import { Region } from '../entities/region.entity';
+import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
 
 export const TOURISM_REPOSITORY = 'TOURISM_REPOSITORY';
 export interface ITourismRepository {
@@ -21,4 +22,5 @@ export interface ITourismRepository {
   findFullPropertyDetails(propertyId: number, officeId: number): Promise<Property | null>;
   getAdditionalServicesIdsByNames(names: string[]);
   getServicesMapByNames(names: string[]);
+  filter(dto: FilterTourismPropertiesDto): Promise<Property[]>;
 }

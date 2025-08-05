@@ -18,6 +18,9 @@ import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-pr
 import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-tourism-property.swagger';
 import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
 import { Roles } from 'src/shared/decorators/role.decorator';
+import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
+import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
+import { Public } from 'src/shared/decorators/public.decorator';
 
 @Controller('tourism')
 export class TourismController {
@@ -27,9 +30,19 @@ export class TourismController {
     private readonly listTourism: ListTourismUseCase,
     private readonly filterTourism: FilterTourismUseCase, 
     private readonly searchByTitleUseCase: SearchByTitleUseCase,
-    private readonly showTourismUseCase: ShowTourismUseCase
+    private readonly showTourismUseCase: ShowTourismUseCase,
+     private readonly  filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase
   ) {}
 
+    @Get('mobile')
+  @Public()
+  async index(
+    @Query() query: FilterTourismPropertiesDto,
+  )  {
+    const data = await this.filterTourismPropertiesUseCase.execute(query);
+    return successResponse(data,'تم ارجاع العقارات السياحية بنجاح'); 
+  }
+  
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @CreateTourismSwaggerDoc()
@@ -104,4 +117,6 @@ export class TourismController {
     const data=await this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);
     return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
   }
+
+
 }

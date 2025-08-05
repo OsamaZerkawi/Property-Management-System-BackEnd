@@ -23,6 +23,7 @@ import { Region } from 'src/domain/entities/region.entity';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 import { Service } from 'src/domain/entities/services.entity';
+import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -45,6 +46,7 @@ import { Service } from 'src/domain/entities/services.entity';
     FilterTourismUseCase,
     SearchByTitleUseCase,
     ShowTourismUseCase,
+    FilterTourismPropertiesUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

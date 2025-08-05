@@ -13,6 +13,8 @@ import { FilterTourismDto } from 'src/application/dtos/tourism/filter-tourism.dt
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { Region } from 'src/domain/entities/region.entity';
 import { Service } from 'src/domain/entities/services.entity';
+import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
+import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -337,4 +339,29 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 }
+async filter(dto: FilterTourismPropertiesDto): Promise<Property[]> {
+    const qb = this.propRepo.createQueryBuilder('property')
+      .leftJoinAndSelect('property.region', 'region')
+      .leftJoinAndSelect('region.city', 'city')
+      .leftJoinAndSelect('property.touristic', 'touristic')
+      .leftJoinAndSelect('property.post', 'post')
+    .where('touristic.status = :tourStatus', {
+      tourStatus: TouristicStatus.AVAILABLE,    
+    })
+    .andWhere('post.status = :postStatus', {
+      postStatus: PropertyPostStatus.APPROVED,  
+    }); 
+
+    if (dto.regionId) qb.andWhere('region.id = :regionId', { regionId: dto.regionId });
+    if (dto.cityId) qb.andWhere('city.id = :cityId', { cityId: dto.cityId });
+    if (dto.tag) qb.andWhere('post.tag::text LIKE :tag', {  tag: `%${dto.tag}%`,  });
+    if (dto.minArea) qb.andWhere('property.area >= :minArea', { minArea: dto.minArea });
+    if (dto.maxArea) qb.andWhere('property.area <= :maxArea', { maxArea: dto.maxArea });
+    if (dto.minPrice) qb.andWhere('touristic.price >= :minPrice', { minPrice: dto.minPrice });
+    if (dto.maxPrice) qb.andWhere('touristic.price <= :maxPrice', { maxPrice: dto.maxPrice });
+    if (dto.fromDate) qb.andWhere('post.date >= :fromDate', { fromDate: dto.fromDate });
+    if (dto.toDate) qb.andWhere('post.date <= :toDate', { toDate: dto.toDate });
+
+    return qb.getMany();
+  }
 }
