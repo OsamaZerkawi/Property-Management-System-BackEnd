@@ -13,6 +13,6 @@ export class UpdateOfficeUseCase {
     const office =  await this.officeRepo.findOneByUserId(userId);
     if (!office) throw new NotFoundException('المكتب غير موجود');
  
-    return this.officeRepo.updateOfficeWithSocials(office.id, dto);
+    this.officeRepo.updateOfficeWithSocials(office.id, dto);
   }
 }

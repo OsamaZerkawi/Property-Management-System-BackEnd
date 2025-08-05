@@ -30,6 +30,8 @@ import { GetTopRatedOfficesUseCase } from "src/application/use-cases/office/get-
 import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
 import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger";
 import { PropertyFeeService } from "src/application/services/propertyFee.service";
+import { GetPaymentMethodSwaggerDoc } from "../swagger/office/get-payment-method.swagger";
+import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger";
      
   @Controller('office')
   export class OfficeController {
@@ -46,6 +48,7 @@ import { PropertyFeeService } from "src/application/services/propertyFee.service
     ) {}
 
     @Get('/payment-method')
+    @GetPaymentMethodSwaggerDoc()
     @UseGuards(JwtAuthGuard)
     async getPaymentMethod(
       @CurrentUser() user, 
@@ -68,6 +71,7 @@ import { PropertyFeeService } from "src/application/services/propertyFee.service
     @Post()
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
+    @CreateOfficeSwaggerDoc()
     @OfficeLogoInterceptor()
     async createOffice(
       @CurrentUser() user,
@@ -89,8 +93,8 @@ import { PropertyFeeService } from "src/application/services/propertyFee.service
       @Body() dto: UpdateOfficeDto
     ) {
       const userId = user.sub; 
-      const result = await this.updateOfficeUseCase.execute(userId, dto);
-      return successResponse(result, 'تم تحديث بيانات المكتب بنجاح', 200);
+      await this.updateOfficeUseCase.execute(userId, dto);
+      return successResponse( [], 'تم تحديث بيانات المكتب بنجاح', 200);
     }
  
  

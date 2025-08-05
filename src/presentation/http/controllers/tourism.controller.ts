@@ -53,14 +53,16 @@ export class TourismController {
     if (!dto || Object.keys(dto).length === 0) {
       throw new BadRequestException('لا توجد بيانات للتحديث');
     }
-    return this.updateTourism.execute(user.sub, +id, dto);
+    await this.updateTourism.execute(user.sub, +id, dto);
+    return successResponse([],'تم تعديل العقار السياحي بنجاح');
   }
 
   @UseGuards(JwtAuthGuard)
   @Get()
   @ListTourismSwaggerDoc()
   async list(@CurrentUser() user: any) {
-    return this.listTourism.execute(user.sub);
+    const data= this.listTourism.execute(user.sub);
+    return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
 
   @UseGuards(JwtAuthGuard)
@@ -70,7 +72,8 @@ export class TourismController {
     @CurrentUser() user: any,
     @Query() filterDto: FilterTourismDto,
   ) {
-    return this.filterTourism.execute(user.sub, filterDto);
+    const data= this.filterTourism.execute(user.sub, filterDto);
+    return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
   
   @UseGuards(JwtAuthGuard)
@@ -91,6 +94,7 @@ export class TourismController {
      @Req() request: Request
   ) {
      const baseUrl = `${request.protocol}://${request.get('host')}`;
-    return this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);
+    const data=await this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);
+    return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
   }
 }
