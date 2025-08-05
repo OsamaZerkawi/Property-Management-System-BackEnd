@@ -122,7 +122,8 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
       // === Calculate amounts ===
       const depositAmount = property.area * property.office.deposit_per_m2;
 
-      const fullPrice = residential.selling_price;
+      // Calculate property price and commission of office 
+      const fullPrice = residential.selling_price + (residential.selling_price * property.office.commission);
 
       const remainingAmount = fullPrice - depositAmount;
 

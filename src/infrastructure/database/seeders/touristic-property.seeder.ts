@@ -1,7 +1,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { Office } from 'src/domain/entities/offices.entity';
 import { Property } from 'src/domain/entities/property.entity';
@@ -21,12 +21,14 @@ import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-typ
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
+import { Image } from 'src/domain/entities/image.entity';
 
 @Injectable()
 export class TouristicPropertySeeder {
   constructor(
     @InjectRepository(Office) private officeRepo: Repository<Office>,
     @InjectRepository(Property) private propertyRepo: Repository<Property>,
+    @InjectRepository(Image) private readonly imageRepo: Repository<Image>,
     @InjectRepository(Touristic) private touristicRepo: Repository<Touristic>,
     @InjectRepository(Service) private serviceRepo: Repository<Service>,
     @InjectRepository(AdditionalService) private additionalRepo: Repository<AdditionalService>,
@@ -35,6 +37,7 @@ export class TouristicPropertySeeder {
     @InjectRepository(Role) private roleRepo: Repository<Role>,
     @InjectRepository(Region) private regionRepo: Repository<Region>,
     @InjectRepository(PropertyPost) private readonly propertyPostRepo: Repository<PropertyPost>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async seed() {
@@ -80,6 +83,7 @@ export class TouristicPropertySeeder {
       await this.officeRepo.save(office);
 
       for (let j = 0; j < 10; j++) {
+        const region = faker.helpers.arrayElement(regions);
         const property = this.propertyRepo.create({
           area: faker.number.float({ min: 50, max: 200 }),
           floor_number: faker.number.int({ min: 0, max: 5 }),
@@ -96,7 +100,8 @@ export class TouristicPropertySeeder {
           highlighted: faker.datatype.boolean(),
           rate: 0,
         });
-        await this.propertyRepo.save(property);
+
+        const savedProperty =await this.propertyRepo.save(property);
 
         const tagValue = faker.helpers.arrayElement(Object.values(PropertyPostTag));
         const areaValue = property.area.toFixed(2); 
@@ -112,6 +117,17 @@ export class TouristicPropertySeeder {
         });
 
         await this.propertyPostRepo.save(post);
+
+      const imageCount = faker.number.int({ min: 1, max: 4 });
+      
+      const images = Array.from({ length: imageCount }).map(() => {
+        return this.imageRepo.create({
+          property: savedProperty,
+          image_path: 'property.jpeg', 
+        });
+      });      
+
+      await this.imageRepo.save(images);
         
         const touristic = this.touristicRepo.create({
           property,
@@ -158,29 +174,26 @@ export class TouristicPropertySeeder {
 
   private async seedServices(): Promise<Service[]> {
     const names = [
-      'واي فاي',
-      'تنظيف',
-      'إفطار',
-      'موقف سيارات',
-      'خدمة دليل سياحي',
-      'مكيف هواء',
-      'مصعد',
-      'تلفاز',
-      'حمام خاص',
-      'مطبخ مشترك',
-      'مسبح',
-      'غرفة لياقة بدنية',
-      'خدمة غسيل',
-      'استقبال على مدار الساعة',
-      'خزنة',
-      'تدفئة مركزية',
-      'شرفة',
-      'خدمة الغرف',
-      'مسموح بالحيوانات الأليفة',
-      'توصيل للمطار',
+   'مكان للشواء',
+    'حديقة',
+    'منطقة ألعاب أطفال',
+    'إطلالة بحرية',
+    'إطلالة جبلية',
+    'شرفة (بلكون)',
+    'جاكوزي',
+    'ساونا',
+    'مدفأة',
+    'موقف سيارات',
+    'حراسة / أمان',
+    'انترنت واي فاي',
+    'تلفزيون مع قنوات فضائية',
+    'تكييف هواء',
+    'ملعب رياضي',
     ];
     const existing = await this.serviceRepo.find();
     if (existing.length > 0) return existing;
+
+    await this.dataSource.query('TRUNCATE TABLE services RESTART IDENTITY CASCADE');
 
     const services = names.map((name) => this.serviceRepo.create({ name }));
     return this.serviceRepo.save(services);

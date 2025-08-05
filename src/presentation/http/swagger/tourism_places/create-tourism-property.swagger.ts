@@ -67,10 +67,10 @@ export function CreateTourismSwaggerDoc() {
           tourism_place: {
             type: 'object',
             properties: {
-              additional_services_ids: {
+              additional_services: {
                 type: 'array',
-                items: { type: 'number' },
-                example: [1, 2, 3],
+                items: { type: 'string' },
+                example: ['مكان للشواء','منطقة ألعاب أطفال'],
               },
               price: { type: 'number', example: 500000 },
               street: { type: 'string', example: 'شارع الكورنيش' },

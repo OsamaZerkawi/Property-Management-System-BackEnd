@@ -1,5 +1,5 @@
 // application/use-cases/tourism/create-tourism.use-case.ts
-import { Injectable,NotFoundException ,Inject} from '@nestjs/common';
+import { Injectable,NotFoundException ,Inject, BadRequestException} from '@nestjs/common';
 import { ITourismRepository } from '../../../domain/repositories/tourism.repository';
 import { CreateTourismDto } from 'src/application/dtos/tourism/create-tourism.dto';
 import { Property } from 'src/domain/entities/property.entity';
@@ -8,6 +8,7 @@ import { Touristic } from 'src/domain/entities/touristic.entity';
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 import { TOURISM_REPOSITORY } from 'src/domain/repositories/tourism.repository';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
+import { errorResponse } from 'src/shared/helpers/response.helper';
 @Injectable()
 export class CreateTourismUseCase {
   
@@ -40,7 +41,7 @@ export class CreateTourismUseCase {
     });
  
     const savedProperty = await this.repo.createProperty(property);
-    const generatedTitle = `${dto.tag} ${dto.area} متر مربع`;
+    const generatedTitle = `${dto.tag} ${dto.area} م²`;
     
     const post = new PropertyPost();
     Object.assign(post, {
@@ -65,10 +66,17 @@ export class CreateTourismUseCase {
     });
     const savedTouristic = await this.repo.createTouristicDetails(touristic);
     
-    if (dto.additional_services_ids?.length) {
+    if (dto.additional_services?.length) {
+      const serviceIds = await this.repo.getAdditionalServicesIdsByNames(dto.additional_services);
+      
+      if(serviceIds.length !== dto.additional_services.length){
+        throw new BadRequestException(
+          errorResponse('واحد أو أكثر من المرفقات الإضافية غير صحيح',400)
+        );
+      }
       await this.repo.addServicesToTouristic(
         savedTouristic.id,
-        dto.additional_services_ids,
+        serviceIds,
       );
     }
  

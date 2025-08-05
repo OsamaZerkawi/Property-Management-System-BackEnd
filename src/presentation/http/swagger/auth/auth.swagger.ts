@@ -9,7 +9,7 @@ export const LoginApiBody = ApiBody({
     valid: {
       value: {
         username: 'hasanzaeter',
-        password: 'securePassword123'
+        password: 'password123'
       }
     },
   }
