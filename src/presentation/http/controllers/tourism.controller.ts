@@ -22,6 +22,8 @@ import { FilterTourismPropertiesUseCase, PropertyResponse } from 'src/applicatio
 import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { FilterMobileTourismSwaggerDoc } from '../swagger/tourism_places/filter-mobile-tourism-property.swagger';
+import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/search-tourism-property.use-case';
+import { SearchByTitleSwaggerDoc } from '../swagger/tourism_places/search-by-title-swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -32,7 +34,8 @@ export class TourismController {
     private readonly filterTourism: FilterTourismUseCase, 
     private readonly searchByTitleUseCase: SearchByTitleUseCase,
     private readonly showTourismUseCase: ShowTourismUseCase,
-     private readonly  filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase
+    private readonly filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase,
+    private readonly searchTourismUseCase :SearchTourismUseCase
   ) {}
 
   @Get('mobile')
@@ -42,9 +45,12 @@ export class TourismController {
     @Query() query: FilterTourismPropertiesDto,
     @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
     @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
+     @Req() request: Request
   )  {
+            const baseUrl = `${request.protocol}://${request.get('host')}`;
+
  const { data: results, total } =
-    await this.filterTourismPropertiesUseCase.execute(query, page, items);
+    await this.filterTourismPropertiesUseCase.execute(query, page, items,baseUrl);
  
     return successPaginatedResponse<PropertyResponse[]>(
       results,           
@@ -55,6 +61,20 @@ export class TourismController {
       200              
     );
   }
+
+  @Get('mobile/search') 
+  @SearchByTitleSwaggerDoc()
+  @Public()
+  async searchTourismByTitle(
+    @Query('title') search: string,
+    @Query('page') page = 1,
+    @Query('items') items = 10 ,
+    @Req() request: Request
+  ) {
+        const baseUrl = `${request.protocol}://${request.get('host')}`;
+    return this.searchTourismUseCase.execute(search, page, items,baseUrl);
+  }
+
 
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)

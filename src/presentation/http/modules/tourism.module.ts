@@ -24,6 +24,7 @@ import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-b
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 import { Service } from 'src/domain/entities/services.entity';
 import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
+import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/search-tourism-property.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -47,6 +48,7 @@ import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/touris
     SearchByTitleUseCase,
     ShowTourismUseCase,
     FilterTourismPropertiesUseCase,
+    SearchTourismUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

@@ -22,5 +22,6 @@ export interface ITourismRepository {
   findFullPropertyDetails(propertyId: number, officeId: number): Promise<Property | null>;
   getAdditionalServicesIdsByNames(names: string[]);
   getServicesMapByNames(names: string[]);
-  filter(dto: FilterTourismPropertiesDto,page: number, items: number): Promise<{ data: Property[]; total: number }>;
+  filter(dto: FilterTourismPropertiesDto,page: number, items: number): Promise<{ data: Property[]; total: number }>; 
+   searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }>
 }

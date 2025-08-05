@@ -387,4 +387,24 @@ async filter(
   return { data: rawResults, total };
 }
 
+async searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }> {
+  const query = this.propRepo.createQueryBuilder('property')
+    .leftJoinAndSelect('property.post', 'post')
+    .leftJoinAndSelect('property.region', 'region')
+    .leftJoinAndSelect('region.city', 'city')
+    .innerJoinAndSelect('property.touristic', 'touristic')
+    .where('LOWER(post.title) LIKE LOWER(:title)', { title: `%${title}%` });
+
+  const total = await query.getCount();
+
+  const data = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getMany();
+
+  return { data, total };
+}
+
+
+
 }

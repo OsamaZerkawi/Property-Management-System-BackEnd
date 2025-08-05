@@ -4,7 +4,7 @@ import { ITourismRepository, TOURISM_REPOSITORY } from 'src/domain/repositories/
 export interface PropertyResponse {
   propertyId: number;
   location: string;
-  postImage: string;
+  postImage: string | null;
   title: string;
   price: number;
 } 
@@ -15,7 +15,7 @@ export class FilterTourismPropertiesUseCase {
      @Inject(TOURISM_REPOSITORY)
       private readonly repo: ITourismRepository,  ) {}
 
- async execute(dto: FilterTourismPropertiesDto, page = 1, items = 10): Promise<{
+ async execute(dto: FilterTourismPropertiesDto, page = 1, items = 10,baseUrl:string): Promise<{
   data: PropertyResponse[],
   total: number,
   currentPage: number,
@@ -26,7 +26,9 @@ const {data, total} = await this.repo.filter(dto, page, items);
   const results = data.map((p) => ({
     propertyId: p.id,
     location: `${p.region.city.name}, ${p.region.name}`,
-    postImage: p.post.image,
+     postImage: p.post.image
+      ? `${baseUrl}/uploads/properties/posts/images/${p.post.image}`
+      : null, 
     title: p.post.title,
     price: p.touristic.price,
   }));

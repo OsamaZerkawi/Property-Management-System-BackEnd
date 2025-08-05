@@ -13,7 +13,7 @@ import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
 export function FilterMobileTourismSwaggerDoc() {
   return applyDecorators(
     ApiOperation({
-      summary: 'تصفية العقارات السياحية (للجوال)',
+     summary: 'خاص بتطبيق الموبايل',
       description: 'يرجع قائمة عقارات سياحية مبنية على فلاتر مُحددة مع معلومات الترقيم (pagination).',
     }), 
     ApiQuery({ name: 'regionId',      required: false, type: Number, description: 'معرّف المنطقة' }),
