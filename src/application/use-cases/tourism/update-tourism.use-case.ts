@@ -23,6 +23,6 @@ export class UpdateTourismUseCase {
       throw new NotFoundException('العقار السياحي غير موجود للمكتب');
     }
 
-    return this.repo.updateTourism(propertyId, dto);
+    this.repo.updateTourism(propertyId, dto);
   }
 }

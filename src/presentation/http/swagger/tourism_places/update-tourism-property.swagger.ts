@@ -69,7 +69,12 @@ export function UpdateTourismSwaggerDoc() {
     ApiOkResponse({
       description: 'تم التحديث بنجاح.',
       schema: {
-        example: { message: 'تم تحديث العقار السياحي بنجاح' },
+      example: {
+      successful: true,
+      message: 'تم تعديل العقار السياحي بنجاح',
+      data: [],
+      status_code: 200,
+    },
       },
     }),
     ApiBadRequestResponse({
