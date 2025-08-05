@@ -339,29 +339,52 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 }
-async filter(dto: FilterTourismPropertiesDto): Promise<Property[]> {
-    const qb = this.propRepo.createQueryBuilder('property')
-      .leftJoinAndSelect('property.region', 'region')
-      .leftJoinAndSelect('region.city', 'city')
-      .leftJoinAndSelect('property.touristic', 'touristic')
-      .leftJoinAndSelect('property.post', 'post')
-    .where('touristic.status = :tourStatus', {
-      tourStatus: TouristicStatus.AVAILABLE,    
-    })
-    .andWhere('post.status = :postStatus', {
-      postStatus: PropertyPostStatus.APPROVED,  
-    }); 
-
-    if (dto.regionId) qb.andWhere('region.id = :regionId', { regionId: dto.regionId });
-    if (dto.cityId) qb.andWhere('city.id = :cityId', { cityId: dto.cityId });
-    if (dto.tag) qb.andWhere('post.tag::text LIKE :tag', {  tag: `%${dto.tag}%`,  });
-    if (dto.minArea) qb.andWhere('property.area >= :minArea', { minArea: dto.minArea });
-    if (dto.maxArea) qb.andWhere('property.area <= :maxArea', { maxArea: dto.maxArea });
-    if (dto.minPrice) qb.andWhere('touristic.price >= :minPrice', { minPrice: dto.minPrice });
-    if (dto.maxPrice) qb.andWhere('touristic.price <= :maxPrice', { maxPrice: dto.maxPrice });
-    if (dto.fromDate) qb.andWhere('post.date >= :fromDate', { fromDate: dto.fromDate });
-    if (dto.toDate) qb.andWhere('post.date <= :toDate', { toDate: dto.toDate });
-
-    return qb.getMany();
+async filter(
+  dto: FilterTourismPropertiesDto,
+  page: number,
+  items: number
+): Promise<{ data: Property[]; total: number }> {
+  const qb = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoinAndSelect('property.region',   'region')
+    .leftJoinAndSelect('region.city',       'city')
+    .leftJoinAndSelect('property.touristic','touristic')
+    .leftJoinAndSelect('property.post',     'post')
+    .where('touristic.status = :tourStatus', { tourStatus: TouristicStatus.AVAILABLE })
+    .andWhere('post.status = :postStatus',   { postStatus: PropertyPostStatus.APPROVED });
+ 
+  if (dto.regionId) qb.andWhere('region.id = :regionId',   { regionId: dto.regionId });
+  if (dto.cityId)   qb.andWhere('city.id = :cityId',       { cityId:   dto.cityId });
+  if (dto.tag)      qb.andWhere('post.tag::text LIKE :tag',{ tag:     `%${dto.tag}%` });
+ 
+  let firstOrder = true;
+  if (dto.orderByArea) {
+    qb.orderBy('property.area', dto.orderByArea);
+    firstOrder = false;
   }
+  if (dto.orderByPrice) {
+    if (firstOrder) {
+      qb.orderBy('touristic.price', dto.orderByPrice);
+      firstOrder = false;
+    } else {
+      qb.addOrderBy('touristic.price', dto.orderByPrice);
+    }
+  }
+  if (dto.orderByDate) {
+    if (firstOrder) {
+      qb.orderBy('post.date', dto.orderByDate);
+    } else {
+      qb.addOrderBy('post.date', dto.orderByDate);
+    }
+  } 
+  const [rawResults, total] = await Promise.all([
+    qb.skip((page - 1) * items)
+      .take(items)
+      .getMany(),
+    qb.getCount(),
+  ]);
+
+  return { data: rawResults, total };
+}
+
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req} from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, DefaultValuePipe, ParseIntPipe} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -11,16 +11,17 @@ import { Request } from 'express';
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
-import { successResponse } from 'src/shared/helpers/response.helper';
+import { successPaginatedResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { CreateTourismSwaggerDoc } from '../swagger/tourism_places/create-tourism-property.swagger';
 import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-tourism-property.swagger';
 import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-property.swagger';
 import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-tourism-property.swagger';
 import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
 import { Roles } from 'src/shared/decorators/role.decorator';
-import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
+import { FilterTourismPropertiesUseCase, PropertyResponse } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
 import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
 import { Public } from 'src/shared/decorators/public.decorator';
+import { FilterMobileTourismSwaggerDoc } from '../swagger/tourism_places/filter-mobile-tourism-property.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -34,15 +35,27 @@ export class TourismController {
      private readonly  filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase
   ) {}
 
-    @Get('mobile')
+  @Get('mobile')
+  @FilterMobileTourismSwaggerDoc()
   @Public()
   async index(
     @Query() query: FilterTourismPropertiesDto,
+    @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
+    @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
   )  {
-    const data = await this.filterTourismPropertiesUseCase.execute(query);
-    return successResponse(data,'تم ارجاع العقارات السياحية بنجاح'); 
+ const { data: results, total } =
+    await this.filterTourismPropertiesUseCase.execute(query, page, items);
+ 
+    return successPaginatedResponse<PropertyResponse[]>(
+      results,           
+      total,           
+      page,              
+      items,           
+      'تم ارجاع العقارات السياحية بنجاح', 
+      200              
+    );
   }
-  
+
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @CreateTourismSwaggerDoc()
