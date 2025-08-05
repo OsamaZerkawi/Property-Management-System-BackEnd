@@ -1,39 +1,43 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiBearerAuth,
-  ApiOperation,
+  ApiConsumes,
   ApiBody,
+  ApiOperation,
   ApiCreatedResponse,
   ApiBadRequestResponse,
-  ApiNotFoundResponse,
-  ApiInternalServerErrorResponse,
-} from '@nestjs/swagger'; 
-import { PropertyFurnishingType } from 'src/domain/enums/property-furnishing-type.enum';
-import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 export function CreateTourismSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'إنشاء عقار سياحي',
-      description: 'يقوم هذا المسار بإنشاء منشور عقار سياحي مرتبط بالمكتب الحالي.',
+      summary: 'إنشاء إعلان عقار سياحي',
+      description: 'يقوم هذا المسار بإنشاء عقار سياحي جديد مع بيانات المنشور والموقع والخدمات المرفقة',
     }),
+
+    ApiConsumes('multipart/form-data'),
+
     ApiBody({
       schema: {
         type: 'object',
         properties: {
+          postImage: {
+            type: 'string',
+            format: 'binary',
+            description: 'صورة العقار (إلزامية)',
+          },
           post: {
             type: 'object',
             properties: {
-              description: { type: 'string', example: 'عقار سياحي رائع على البحر' },
+              description: { type: 'string', example: 'وصف العقار السياحي' },
               tag: {
                 type: 'string',
-                enum: Object.values(PropertyPostTag),
-                example: PropertyPostTag.Farm,
+                example: 'سياحي',
+                description: 'الوسم (tag) الخاص بالإعلان',
               },
-              image: { type: 'string', example: 'image-url.jpg' },
             },
-            required: ['description', 'tag', 'image'],
+            required: ['description', 'tag'],
           },
           public_information: {
             type: 'object',
@@ -48,8 +52,8 @@ export function CreateTourismSwaggerDoc() {
               bathroom_count: { type: 'number', example: 2 },
               has_furniture: {
                 type: 'string',
-                enum: Object.values(PropertyFurnishingType),
-                example: PropertyFurnishingType.FullyFurnished,
+                example: 'مفروش جزئياً',
+                description: 'نوع التأثيث (مفروش كلياً / جزئياً / غير مفروش)',
               },
             },
             required: [
@@ -67,52 +71,50 @@ export function CreateTourismSwaggerDoc() {
           tourism_place: {
             type: 'object',
             properties: {
+              price: { type: 'number', example: 100000 },
+              street: { type: 'string', example: 'شارع الثورة' },
+              electricity: { type: 'string', example: 'متوفر 24/7' },
+              water: { type: 'string', example: 'متوفرة بشكل دائم' },
+              pool: { type: 'string', example: 'مسبح داخلي خاص' },
               additional_services: {
                 type: 'array',
                 items: { type: 'string' },
-                example: ['مكان للشواء','منطقة ألعاب أطفال'],
+                example: ['مكيف', 'شاشة تلفاز', 'خدمة تنظيف يومية'],
               },
-              price: { type: 'number', example: 500000 },
-              street: { type: 'string', example: 'شارع الكورنيش' },
-              electricity: { type: 'string', example: 'متوفر' },
-              water: { type: 'string', example: 'متوفر' },
-              pool: { type: 'string', example: 'نعم' },
             },
-            required: ['additional_services_ids', 'price', 'street', 'electricity', 'water', 'pool'],
+            required: [
+              'price',
+              'street',
+              'electricity',
+              'water',
+              'pool',
+              'additional_services',
+            ],
           },
         },
-        required: ['post', 'public_information', 'tourism_place'],
+        required: ['postImage', 'post', 'public_information', 'tourism_place'],
       },
     }),
+
     ApiCreatedResponse({
-      description: 'تم إنشاء العقار السياحي بنجاح.',
+      description: 'تم إنشاء العقار السياحي بنجاح',
       schema: {
         example: {
-          message: 'تم إنشاء المكان بنجاح',
+          successful: true,
+          message: 'تم اضافة المكان بنجاح',
+          data: [],
+          status_code: 201,
         },
       },
     }),
+
     ApiBadRequestResponse({
-      description: 'البيانات غير مكتملة أو تحتوي على أخطاء.',
+      description: 'فشل في التحقق من صحة البيانات المرسلة',
       schema: {
         example: {
-          message: 'tag يجب أن يكون أحد القيم المحددة',
-        },
-      },
-    }),
-    ApiNotFoundResponse({
-      description: 'عدم العثور على المكتب أو المنطقة.',
-      schema: {
-        example: {
-          message: 'المكتب غير موجود',
-        },
-      },
-    }),
-    ApiInternalServerErrorResponse({
-      description: 'خطأ داخلي في الخادم.',
-      schema: {
-        example: {
-          message: 'حدث خطأ غير متوقع',
+          successful: false,
+          message: 'يجب رفع صورة للإعلان',
+          status_code: 400,
         },
       },
     }),

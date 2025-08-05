@@ -13,6 +13,9 @@ import { FilterTourismDto } from 'src/application/dtos/tourism/filter-tourism.dt
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { Region } from 'src/domain/entities/region.entity';
 import { Service } from 'src/domain/entities/services.entity';
+import * as fs from 'fs';
+import * as path from 'path';
+import { errorResponse } from 'src/shared/helpers/response.helper';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -123,7 +126,9 @@ async findPropertyById(id: number): Promise<Property | null> {
       })
     ]);
 
-    if (!property) throw new NotFoundException('Property not found');
+    if (!property) throw new NotFoundException(
+      errorResponse('Property not found',404)
+    );
  
     const propertyUpdates: Partial<Property> = {};
     
@@ -159,7 +164,20 @@ async findPropertyById(id: number): Promise<Property | null> {
       
       if (dto.description !== undefined) postUpdates.description = dto.description;
       if (dto.tag !== undefined) postUpdates.tag = dto.tag;
-      if (dto.image !== undefined) postUpdates.image = dto.image;
+      if (dto.image !== undefined) {
+        const shouldDeleteOldImage =  dto.image && post.image && dto.image !== post.image;
+        if (shouldDeleteOldImage) {
+          const oldImagePath = path.join(
+            process.cwd(),
+            'uploads/properties/posts/images',
+            post.image,
+          );
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        }
+        postUpdates.image = dto.image
+      };
       
       await manager.update(PropertyPost, post.id, postUpdates);
     }

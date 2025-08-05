@@ -49,6 +49,9 @@ export class TourismController {
       );
     }
 
+    const imageUrl = file?.filename;
+    dto.image = imageUrl;
+
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
     await this.createTourism.execute(user.sub, dto);
     return successResponse([],'تم اضافة المكان بنجاح');
@@ -65,14 +68,20 @@ export class TourismController {
     @Param('id') id: number,
     @Body() dto: UpdateTourismDto
   ) { 
+    
     if (!dto || Object.keys(dto).length === 0) {
       throw new BadRequestException('لا توجد بيانات للتحديث');
     }
+    
     if (!file || !file.filename) {
       throw new BadRequestException(
         errorResponse('يجب رفع صورة للإعلان',400)
       );
     }
+
+    const imageUrl = file?.filename;
+    dto.image = imageUrl;
+
     await this.updateTourism.execute(user.sub, +id, dto);
     return successResponse([],'تم تعديل العقار السياحي بنجاح');
   }
@@ -82,7 +91,7 @@ export class TourismController {
   @Get()
   @ListTourismSwaggerDoc()
   async list(@CurrentUser() user: any) {
-    const data= this.listTourism.execute(user.sub);
+    const data= await this.listTourism.execute(user.sub);
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
 
@@ -94,7 +103,7 @@ export class TourismController {
     @CurrentUser() user: any,
     @Query() filterDto: FilterTourismDto,
   ) {
-    const data= this.filterTourism.execute(user.sub, filterDto);
+    const data= await this.filterTourism.execute(user.sub, filterDto);
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
   
