@@ -127,7 +127,7 @@ async findPropertyById(id: number): Promise<Property | null> {
       }),
       manager.findOne(Touristic, { 
         where: { property: { id: propertyId } },
-        relations: ['additionalServices'] 
+        relations: ['additionalServices','additionalServices.service'] 
       })
     ]);
 
@@ -146,6 +146,7 @@ async findPropertyById(id: number): Promise<Property | null> {
       living_room_count: () => propertyUpdates.living_room_count = dto.living_room_count,
       kitchen_count: () => propertyUpdates.kitchen_count = dto.kitchen_count,
       bathroom_count: () => propertyUpdates.bathroom_count = dto.bathroom_count,
+      bedroom_count: () => propertyUpdates.bedroom_count = dto.bedroom_count,
       has_furniture: () => propertyUpdates.has_furniture = dto.has_furniture
     };
 
@@ -164,7 +165,7 @@ async findPropertyById(id: number): Promise<Property | null> {
       const currentTag = dto.tag !== undefined ? dto.tag : post.tag;
       
       if (dto.tag !== undefined || dto.area !== undefined) {
-        postUpdates.title = `${currentTag} ${currentArea.toFixed(2)} م²`;
+        postUpdates.title = `${currentTag} ${currentArea} م²`;
       }
       
       if (dto.description !== undefined) postUpdates.description = dto.description;
