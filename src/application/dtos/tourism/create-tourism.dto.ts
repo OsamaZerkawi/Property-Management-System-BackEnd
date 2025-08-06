@@ -63,6 +63,10 @@ export class CreateTourismDto {
   bathroom_count: number;
 
   @IsDefined()
+  @IsNumber()
+  bedroom_count: number;
+
+  @IsDefined()
   @IsEnum(PropertyFurnishingType)
   has_furniture: PropertyFurnishingType;
 

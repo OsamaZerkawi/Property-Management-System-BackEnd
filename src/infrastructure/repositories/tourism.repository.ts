@@ -81,7 +81,7 @@ export class TourismRepository implements ITourismRepository {
   );
   await this.addServRepo.save(relations);
 }
-async findAllByOffice(officeId: number) {
+async findAllByOffice(officeId: number,baseUrl: string) {
    const raws =  await this.propRepo
     .createQueryBuilder('property')
     .leftJoin('property.post', 'post')
@@ -92,6 +92,7 @@ async findAllByOffice(officeId: number) {
     .select([
       'property.id AS id',
       'post.title AS title',
+      'post.image AS image',
       'region.name AS region',
       'city.name   AS city',
       'property.area AS area',
@@ -102,6 +103,9 @@ async findAllByOffice(officeId: number) {
     return raws.map(r => ({
     id:       r.id,
     title:    r.title,
+    postImage: r.image
+      ? `${baseUrl}/uploads/properties/posts/images/${r.image}`
+      : null, 
     location: `${r.city}، ${r.region}`,   
     area:     Number(r.area.toFixed(1)),
     price:    Number(r.price),

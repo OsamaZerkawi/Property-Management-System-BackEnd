@@ -25,6 +25,7 @@ export function ListTourismSwaggerDoc() {
             title: { type: 'string', example: 'شاليه 55م' },
             location: { type: 'string', example: 'دمشق, المزة' },
             area: { type: 'number', example: 150 },
+            postImage:{ type: 'string', example: 'http://localhost:3000/uploads/properties/posts/images/url.jpg' },
             price: { type: 'number', example: 300000 },
             status: {
               type: 'string',

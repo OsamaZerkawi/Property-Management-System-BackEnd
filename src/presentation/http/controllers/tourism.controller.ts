@@ -86,16 +86,17 @@ export class TourismController {
     return successResponse([],'تم تعديل العقار السياحي بنجاح');
   }
 
-  @Roles('صاحب مكتب')
+  //@Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @Get()
   @ListTourismSwaggerDoc()
-  async list(@CurrentUser() user: any) {
-    const data= await this.listTourism.execute(user.sub);
+  async list(@CurrentUser() user: any,@Req() request: Request) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data= await this.listTourism.execute(user.sub,baseUrl);
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
 
- // @Roles('صاحب مكتب')
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @FilterTourismSwaggerDoc()
   @Get('filter')
@@ -125,8 +126,8 @@ export class TourismController {
   @ShowTourismSwaggerDoc()
   async getPropertyDetails(
   @CurrentUser() user: any,
-    @Param('id') propertyId: number,
-     @Req() request: Request
+  @Param('id') propertyId: number,
+  @Req() request: Request
   ) {
      const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data=await this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);

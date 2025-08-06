@@ -48,13 +48,17 @@ export class ShowTourismUseCase {
     images: images.map(img =>
       `${baseUrl}/uploads/properties/images/${img.image_path}`
     ), 
+    postStatus: post.status,
     status:   touristic.status, 
-    location: `${region.city.name}, ${region.name}, ${touristic.street}`,
+    region:   region.name,
+    city :    region.city.name,
+    street:   touristic.street,
     area:             property.area,
     roomCount:        property.room_count,
     livingRoomCount:  property.living_room_count,
     kitchenCount:     property.kitchen_count,
     bathroomCount:    property.bathroom_count,
+    bedroomCount:     property.bedroom_count,
     hasFurniture:     property.has_furniture,
  
     price:            touristic.price,

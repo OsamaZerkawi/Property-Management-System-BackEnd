@@ -23,8 +23,11 @@ export class CreateTourismUseCase {
   const office = await this.officeRepo.findOneByUserId(userId); 
       if (!office) throw new NotFoundException('المكتب غير موجود');
   
-    const property = new Property();  
-      const region = await this.repo.findRegionById(dto.region_id);
+  const property = new Property();  
+  console.log('DTO:', dto);
+ 
+
+  const region = await this.repo.findRegionById(dto.region_id); 
   if (!region) throw new NotFoundException('المنطقة غير موجودة');
     Object.assign(property, {
       office: office,  
@@ -36,6 +39,7 @@ export class CreateTourismUseCase {
       living_room_count: dto.living_room_count,
       kitchen_count: dto.kitchen_count,
       bathroom_count: dto.bathroom_count,
+      bedroom_count:dto.bedroom_count,
       has_furniture: dto.has_furniture,
       property_type: PropertyType.TOURISTIC
     });
