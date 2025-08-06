@@ -164,7 +164,7 @@ async findPropertyById(id: number): Promise<Property | null> {
       const currentTag = dto.tag !== undefined ? dto.tag : post.tag;
       
       if (dto.tag !== undefined || dto.area !== undefined) {
-        postUpdates.title = `${currentTag} ${currentArea} م²`;
+        postUpdates.title = `${currentTag} ${currentArea.toFixed(2)} م²`;
       }
       
       if (dto.description !== undefined) postUpdates.description = dto.description;

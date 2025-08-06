@@ -45,9 +45,10 @@ export class ShowTourismUseCase {
     postImage: post.image
       ? `${baseUrl}/uploads/properties/posts/images/${post.image}`
       : null, 
-    images: images.map(img =>
-      `${baseUrl}/uploads/properties/images/${img.image_path}`
-    ), 
+    images: property.images.map(image => ({
+      id: image.id,
+      image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+    })),
     postStatus: post.status,
     status:   touristic.status, 
     region:   region.name,

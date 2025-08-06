@@ -35,7 +35,19 @@ export function ShowTourismSwaggerDoc() {
           postStatus:           { type: 'string', example: 'مرفوض' },
           images: {
             type: 'array',
-            items: { type: 'string', example: 'http://localhost:3000/uploads/properties/images/img1.jpg' }
+            items: {
+              type: 'object',
+              properties: {
+                id: {
+                  type: 'integer',
+                  example: 138,
+                },
+                image_url: {
+                  type: 'string',
+                  example: 'http://localhost:3000/uploads/properties/images/property.jpeg',
+                },
+              },
+            },
           },
           status:           { type: 'string', example: 'غير متوفر' },
           region: { type: 'string', example: 'المزة' },

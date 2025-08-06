@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, UploadedFile} from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, UploadedFile, ConsoleLogger} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -19,6 +19,7 @@ import { FilterTourismSwaggerDoc } from '../swagger/tourism_places/filter-touris
 import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-property.swagger';
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { PropertyPostImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
+import { constructFromSymbol } from 'date-fns/constants';
 
 @Controller('tourism')
 export class TourismController {
@@ -37,9 +38,9 @@ export class TourismController {
   @PropertyPostImageInterceptor()
   @Post()
   async create(
-    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: any,
     @Body() body: any,
+    @UploadedFile() file: Express.Multer.File,
   ) { 
     const dto = new CreateTourismDto();
 
@@ -63,24 +64,23 @@ export class TourismController {
   @PropertyPostImageInterceptor()
   @Post(':id')
   async update(
-    @UploadedFile() file: Express.Multer.File,
     @CurrentUser() user: any,
     @Param('id') id: number,
-    @Body() dto: UpdateTourismDto
+    @Body() body: any,
+    @UploadedFile() file: Express.Multer.File,
   ) { 
-    
+    const dto = new UpdateTourismDto();
+
     if (!dto || Object.keys(dto).length === 0) {
       throw new BadRequestException('لا توجد بيانات للتحديث');
     }
-    
-    if (!file || !file.filename) {
-      throw new BadRequestException(
-        errorResponse('يجب رفع صورة للإعلان',400)
-      );
-    }
 
-    const imageUrl = file?.filename;
-    dto.image = imageUrl;
+    if(file && file.filename){
+      dto.image = file.filename;
+    }
+    
+    Object.assign(dto, body.post, body.public_information, body.tourism_place);
+    console.log(dto.description);
 
     await this.updateTourism.execute(user.sub, +id, dto);
     return successResponse([],'تم تعديل العقار السياحي بنجاح');

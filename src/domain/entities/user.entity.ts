@@ -7,7 +7,6 @@ import { UserPropertyInvoice } from "./user-property-invoice.entity";
 import { ServiceProvider } from "./service-provider.entity";
 import { ServiceFeedback } from "./service-feedback.entity";
 import { UserRole } from "./user-role.entity";
-import { Property } from "./property.entity";
 import { PropertyFeedback } from "./property-feedback.entity";
 import { OfficeFeedback } from "./office-feedback.entity";
 import { PropertyFavorite } from "./property-favorite.entity";

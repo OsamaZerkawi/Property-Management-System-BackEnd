@@ -24,7 +24,6 @@ export class CreateTourismUseCase {
       if (!office) throw new NotFoundException('المكتب غير موجود');
   
   const property = new Property();  
-  console.log('DTO:', dto);
  
 
   const region = await this.repo.findRegionById(dto.region_id); 
