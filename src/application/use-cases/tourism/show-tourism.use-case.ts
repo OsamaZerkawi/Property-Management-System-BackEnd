@@ -58,6 +58,7 @@ export class ShowTourismUseCase {
     livingRoomCount:  property.living_room_count,
     kitchenCount:     property.kitchen_count,
     bathroomCount:    property.bathroom_count,
+    bedroomCount:     property.bedroom_count,
     hasFurniture:     property.has_furniture,
  
     price:            touristic.price,

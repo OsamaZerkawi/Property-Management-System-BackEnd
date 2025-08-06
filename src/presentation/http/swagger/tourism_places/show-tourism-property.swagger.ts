@@ -46,6 +46,7 @@ export function ShowTourismSwaggerDoc() {
           livingRoomCount:  { type: 'number', example: 2 },
           kitchenCount:     { type: 'number', example: 1 },
           bathroomCount:    { type: 'number', example: 2 },
+          bedroomCount:     { type: 'number', example: 1 },
           hasFurniture:     { type: 'string', example: 'فرش فاخر' },
           pricePerNight:    { type: 'string', example: '1000.00', description: 'سعر الليلة' },
           electricity:      { type: 'string', example: 'كهرباء 24/7 مع عدّاد ذكي' },
