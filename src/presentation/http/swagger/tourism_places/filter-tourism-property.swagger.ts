@@ -49,6 +49,7 @@ export function FilterTourismSwaggerDoc() {
             region: { type: 'string', example: 'الكرنك' },
             area: { type: 'number', example: 150 },
             price: { type: 'number', example: 500000 },
+            postImage:{ type: 'string', example: 'http://localhost:3000/uploads/properties/posts/images/url.jpg' },
             status: {
               type: 'string',
               example: 'متوفر',
