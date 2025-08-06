@@ -16,6 +16,7 @@ import { Service } from 'src/domain/entities/services.entity';
 import * as fs from 'fs';
 import * as path from 'path';
 import { errorResponse } from 'src/shared/helpers/response.helper';
+import { PropertyType } from 'src/domain/enums/property-type.enum';
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -245,6 +246,7 @@ async filterByOffice(
     .leftJoin('region.city','city')
     .leftJoin('property.touristic', 'touristic')
     .where('property.office_id = :officeId', { officeId })
+    .andWhere('property.property_type = :type',{type: PropertyType.TOURISTIC})
     .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
  
   if (filter.city) {
@@ -289,8 +291,8 @@ async filterByOffice(
     id: item.property_id,
     title: item.post_title,
     location: `${item.city_name}, ${item.region_name}`,
-    area: item.property_area,
-    price: item.touristic_price,
+    area:  Number(item.property_area.toFixed(1)),
+    price: Number(item.touristic_price),
     status: item.post_status === PropertyPostStatus.APPROVED 
             ? item.touristic_status 
             : item.post_status
@@ -345,6 +347,7 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
   return await this.propRepo.findOne({
     where: { 
       id: propertyId,
+      property_type: PropertyType.TOURISTIC,
       office: { id: officeId } 
     },
     relations: [ 
