@@ -12,12 +12,13 @@ export class GetFavoritePropertiesUseCase {
         const {data , total} = await this.propertyFavoriteRepo.getFavoriteProperties(userId,type,page,items);
 
         const favorites = data.map(row => ({
-          property_id: row.property_id,
-          image: `${baseUrl}/uploads/properties/posts/images/${row.image}`,
-          title: row.title,
-          location: `${row.city} - ${row.region}`,
+          propertyId: row.property_id,
+          postImage: `${baseUrl}/uploads/properties/posts/images/${row.image}`,
+          postTitle: row.title,
+          postDate: row.created_at,
+          location: `${row.city}, ${row.region}`,
           price: +row.price,
-          contractType:row.listing_type,
+          listingType:row.listing_type,
           type: row.type, 
           ...(row.listing_type === 'أجار' ? { rate: +row.rate } : {}),
         }));
