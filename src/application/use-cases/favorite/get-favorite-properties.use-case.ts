@@ -15,11 +15,12 @@ export class GetFavoritePropertiesUseCase {
           propertyId: row.property_id,
           postImage: `${baseUrl}/uploads/properties/posts/images/${row.image}`,
           postTitle: row.title,
+          area: Number(row.area.toFixed(2)),
           location: `${row.city}, ${row.region}`,
           price: +row.price,
           listingType:row.listing_type,
-          type: row.type, 
-          ...(row.listing_type === 'أجار' ? { rate: +row.rate } : {}),
+          type: type, 
+          ...(row.listing_type === 'أجار' ? { rate: +row.avg_rate } : {}),
         }));
     
         return { favorites, total };

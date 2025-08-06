@@ -69,6 +69,7 @@ export class PropertyFavoriteRepository implements PropertyFavoriteRepositoryInt
       .createQueryBuilder('fav')
       .innerJoin('fav.property', 'property')
       .innerJoin('property.region', 'region')
+      .innerJoin('property.feedbacks', 'feedbacks')
       .innerJoin('region.city', 'city')
       .leftJoin('property.post', 'post')
       .where('fav.user_id = :userId', { userId })
@@ -80,11 +81,12 @@ export class PropertyFavoriteRepository implements PropertyFavoriteRepositoryInt
            .andWhere('residential.id IS NOT NULL')
            .select([
              'property.id AS property_id',
+             'property.area AS area',
              'post.image AS image',
              'post.title AS title',
              'city.name AS city',
              'region.name AS region',
-             'property.rate AS rate',
+             'AVG(feedbacks.rate) AS avg_rate',
              `COALESCE(
                 CASE
                   WHEN residential.id IS NOT NULL AND residential.listing_type = 'أجار' THEN residential.rental_price
@@ -94,25 +96,39 @@ export class PropertyFavoriteRepository implements PropertyFavoriteRepositoryInt
               ) AS price`,
              'residential.listing_type AS listing_type',
              `COUNT(*) OVER() AS total_count`
-           ]);
+           ])
+           .groupBy('property.id')
+           .addGroupBy('post.id')
+           .addGroupBy('city.name')
+           .addGroupBy('region.name')
+           .addGroupBy('residential.id')
+           .addGroupBy('fav.id');
     } else if (type === PropertyType.TOURISTIC) {
       query.leftJoin('property.touristic', 'touristic')
            .andWhere('touristic.id IS NOT NULL')
            .select([
              'fav.created_at',
              'property.id AS property_id',
+             'property.area AS area',
              'post.image AS image',
              'post.title AS title',
              'city.name AS city',
              'region.name AS region',
-             'property.rate AS rate',
-             'touristic.price',
+             'AVG(feedbacks.rate) AS avg_rate',
+             'touristic.price AS price',
              `'أجار' AS listing_type`,
              `COUNT(*) OVER() AS total_count`
-           ]);
+           ])
+            .groupBy('property.id')
+           .addGroupBy('post.id')
+           .addGroupBy('city.name')
+           .addGroupBy('region.name')
+           .addGroupBy('touristic.id')
+           .addGroupBy('fav.id');
     }
     const rawResults = await query
       .orderBy('fav.created_at','DESC')
+
       .offset(offset)
       .limit(items)
       .getRawMany();
