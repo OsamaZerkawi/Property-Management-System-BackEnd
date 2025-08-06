@@ -39,6 +39,8 @@ import { ServiceFeedback } from "src/domain/entities/service-feedback.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity";
 import { ServiceFeedbackSeeder } from "./service-provider-feedback.seeder";
 import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
+import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
+import { PropertyFavoriteSeeder } from "./favorite.seeder";
 
 
 @Module({
@@ -58,7 +60,8 @@ import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
             PropertyFeedback,Image,User,OfficeSocial,
             ServicePrice,UserRole,Touristic,AdditionalService,
             Service,ServiceProvider,PromotedProperty,OnlineInvoice,
-            UserPost,ServiceFeedback,OfficeFeedback,
+            UserPost,ServiceFeedback,OfficeFeedback,PropertyFavorite,
+
         ])
     ],
     providers:[
@@ -66,7 +69,7 @@ import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
         RoleSeeder,PropertyFeedbackSeeder,OfficePropertySeeder,
         ServicePriceSeeder,TouristicPropertySeeder,ServiceProviderSeeder,
         PromotedPropertySeeder,UserPostSeeder,ServiceFeedbackSeeder,
-        OfficeFeedbackSeeder,
+        OfficeFeedbackSeeder,PropertyFavoriteSeeder,
     ],
     exports:[SeederService]
 })
