@@ -20,7 +20,7 @@ export class GetFavoritePropertiesUseCase {
           price: +row.price,
           listingType:row.listing_type,
           type: type, 
-          ...(row.listing_type === 'أجار' ? { rate: +row.avg_rate } : {}),
+          ...(row.listing_type === 'أجار' ? { rate: Number(parseFloat(row.avg_rate).toFixed(1)) } : {}),
         }));
     
         return { favorites, total };
