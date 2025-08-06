@@ -248,12 +248,12 @@ async filterByOffice(
     .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
  
   if (filter.city) {
-    query.andWhere('city.name LIKE :city', { city: `%${filter.city}%` });
+    query.andWhere('city.name LIKE :city', { city: `${filter.city}` });
   }
  
   if (filter.region) {
     query.andWhere('region.name LIKE :region', {
-      region: `%${filter.region}%`,
+      region: `${filter.region}`,
     });
   }
  
