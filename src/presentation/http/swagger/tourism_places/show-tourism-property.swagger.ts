@@ -32,16 +32,15 @@ export function ShowTourismSwaggerDoc() {
           date:             { type: 'string', example: '2025-08-05' },
           tag:              { type: 'string', example: 'فيلا' },
           postImage:        { type: 'string', example: 'http://localhost:3000/uploads/properties/posts/images/url.jpg' },
+          postStatus:           { type: 'string', example: 'مرفوض' },
           images: {
             type: 'array',
             items: { type: 'string', example: 'http://localhost:3000/uploads/properties/images/img1.jpg' }
           },
           status:           { type: 'string', example: 'غير متوفر' },
-          location: {
-            type: 'string',
-            example: 'دمشق، المالكي، شارع الثورة',
-            description: 'المحافظة، المنطقة، الشارع'
-          },
+          region: { type: 'string', example: 'المزة' },
+          city: { type: 'string', example: 'دمشق' },
+          street:{type:'string', example: 'شارع بغداد'},
           area:             { type: 'number', example: 350 },
           roomCount:        { type: 'number', example: 4 },
           livingRoomCount:  { type: 'number', example: 2 },
