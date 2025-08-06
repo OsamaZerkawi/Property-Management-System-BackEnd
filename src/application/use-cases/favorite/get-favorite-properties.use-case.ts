@@ -15,7 +15,6 @@ export class GetFavoritePropertiesUseCase {
           propertyId: row.property_id,
           postImage: `${baseUrl}/uploads/properties/posts/images/${row.image}`,
           postTitle: row.title,
-          postDate: row.created_at,
           location: `${row.city}, ${row.region}`,
           price: +row.price,
           listingType:row.listing_type,
