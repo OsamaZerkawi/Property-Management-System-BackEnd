@@ -339,6 +339,24 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 }
+async findTourismPropertyDetails(propertyId: number) {
+  return await this.propRepo.findOne({
+    where: { 
+      id: propertyId
+    },
+    relations: [ 
+      'office.region',
+      'office.region.city',
+      'region',
+      'region.city',
+      'post',
+      'touristic',
+      'images',
+      'touristic.additionalServices',
+      'touristic.additionalServices.service', 
+    ],
+  });
+}
 async filter(
   dto: FilterTourismPropertiesDto,
   page: number,

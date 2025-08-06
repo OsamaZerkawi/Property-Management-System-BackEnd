@@ -24,6 +24,8 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { FilterMobileTourismSwaggerDoc } from '../swagger/tourism_places/filter-mobile-tourism-property.swagger';
 import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/search-tourism-property.use-case';
 import { SearchByTitleSwaggerDoc } from '../swagger/tourism_places/search-by-title-swagger';
+import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show-tourism-mobile.use-case';
+import { ShowMobileTourismSwaggerDoc } from '../swagger/tourism_places/show-mobile-tourism-property.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -34,6 +36,7 @@ export class TourismController {
     private readonly filterTourism: FilterTourismUseCase, 
     private readonly searchByTitleUseCase: SearchByTitleUseCase,
     private readonly showTourismUseCase: ShowTourismUseCase,
+    private readonly showTourismMobileUseCase: ShowTourismMobileUseCase,
     private readonly filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase,
     private readonly searchTourismUseCase :SearchTourismUseCase
   ) {}
@@ -151,5 +154,15 @@ export class TourismController {
     return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
   }
 
-
+  @Public()
+  @Get('mobile/:id')
+  @ShowMobileTourismSwaggerDoc()
+  async gettourismPropertyDetails( 
+    @Param('id') propertyId: number,
+     @Req() request: Request
+  ) {
+     const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data=await this.showTourismMobileUseCase.execute(propertyId,baseUrl);
+    return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
+  }
 }
