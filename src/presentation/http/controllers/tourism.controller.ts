@@ -95,15 +95,17 @@ export class TourismController {
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
 
-  @Roles('صاحب مكتب')
+ // @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @FilterTourismSwaggerDoc()
   @Get('filter')
   async filter(
     @CurrentUser() user: any,
     @Query() filterDto: FilterTourismDto,
+    @Req() request: Request
   ) {
-    const data= await this.filterTourism.execute(user.sub, filterDto);
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data= await this.filterTourism.execute(user.sub, filterDto,baseUrl);
     return successResponse(data,'تم ارجاع العقارات السياحية بنجاح');
   }
   

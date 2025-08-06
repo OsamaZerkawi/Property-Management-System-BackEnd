@@ -15,9 +15,9 @@ export class FilterTourismUseCase {
     private readonly repo: ITourismRepository,
   ) {}
 
-  async execute(userId: number, filterDto: FilterTourismDto) {
+  async execute(userId: number, filterDto: FilterTourismDto,baseUrl:string) {
     const office = await this.officeRepo.findOneByUserId(userId);
     if (!office) throw new NotFoundException('المكتب غير موجود');
-    return this.repo.filterByOffice(office.id, filterDto);
+    return this.repo.filterByOffice(office.id, filterDto,baseUrl);
   }
 }

@@ -238,6 +238,7 @@ async findPropertyById(id: number): Promise<Property | null> {
 async filterByOffice(
   officeId: number,
   filter: FilterTourismDto,
+  baseUrl: string,
 ): Promise<any[]> {
   const query = this.propRepo
     .createQueryBuilder('property')
@@ -278,6 +279,7 @@ async filterByOffice(
     .select([
       'property.id as property_id',
       'post.title as post_title',
+      'post.image as image',
       'region.name as region_name',
       'city.name as city_name',
       'property.area as property_area',
@@ -290,6 +292,9 @@ async filterByOffice(
   return results.map(item => ({
     id: item.property_id,
     title: item.post_title,
+    postImage: item.image
+      ? `${baseUrl}/uploads/properties/posts/images/${item.image}`
+      : null, 
     location: `${item.city_name}, ${item.region_name}`,
     area:  Number(item.property_area.toFixed(1)),
     price: Number(item.touristic_price),
