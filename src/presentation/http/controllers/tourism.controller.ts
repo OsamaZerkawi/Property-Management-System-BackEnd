@@ -54,8 +54,9 @@ export class TourismController {
     dto.image = imageUrl;
 
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
-    await this.createTourism.execute(user.sub, dto);
-    return successResponse([],'تم اضافة المكان بنجاح');
+    const {property_id: id} =await this.createTourism.execute(user.sub, dto);
+
+    return successResponse({id},'تم اضافة المكان بنجاح');
   }
  
   @Roles('صاحب مكتب')
@@ -79,8 +80,14 @@ export class TourismController {
       dto.image = file.filename;
     }
     
-    Object.assign(dto, body.post, body.public_information, body.tourism_place);
-    dto.status = body.status;
+    Object.assign(
+      dto,
+      body?.post ?? {},
+      body?.public_information ?? {},
+      body?.tourism_place ?? {}
+    );
+    
+    dto.status = body?.status ?? dto.status;
 
     await this.updateTourism.execute(user.sub, +id, dto);
     return successResponse([],'تم تعديل العقار السياحي بنجاح');

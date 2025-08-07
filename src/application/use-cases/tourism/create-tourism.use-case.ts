@@ -83,5 +83,6 @@ export class CreateTourismUseCase {
       );
     }
  
+    return  { property_id : savedProperty.id};
   }
 }

@@ -214,16 +214,20 @@ async findPropertyById(id: number): Promise<Property | null> {
         const nameToIdMap = await this.getServicesMapByNames(dto.additional_services);
 
         const currentServices = touristic.additionalServices?.map(s => s.service.id) || [];
+
         const newServices = Object.values(nameToIdMap);
- 
+
         const toRemove = currentServices.filter(id => !newServices.includes(id));
         const toAdd = newServices.filter(id => !currentServices.includes(id));
 
         if (toRemove.length > 0) {
-          await manager.delete(AdditionalService, {
-            touristic: { id: touristic.id },
-            service: In(toRemove)
-          });
+          await manager
+            .createQueryBuilder()
+            .delete()
+            .from(AdditionalService)
+            .where('touristicId = :touristicId', { touristicId: touristic.id })
+            .andWhere('serviceId IN (:...services)', { services: toRemove })
+            .execute();
         }
 
         if (toAdd.length > 0) {
@@ -236,6 +240,14 @@ async findPropertyById(id: number): Promise<Property | null> {
           await manager.save(newRelations);
         }
       }
+       else {
+        await manager
+          .createQueryBuilder()
+          .delete()
+          .from(AdditionalService)
+          .where('touristicId = :touristicId', { touristicId: touristic.id })
+          .execute();
+       }
     }
   });
 }
