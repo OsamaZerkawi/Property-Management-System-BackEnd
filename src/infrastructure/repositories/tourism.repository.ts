@@ -292,6 +292,7 @@ async filterByOffice(
       'post.status as post_status',
       'touristic.status as touristic_status'
     ])
+    .orderBy('touristic.created_at','ASC')
     .getRawMany();
 
   return results.map(item => ({

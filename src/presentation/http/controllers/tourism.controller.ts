@@ -80,7 +80,7 @@ export class TourismController {
     }
     
     Object.assign(dto, body.post, body.public_information, body.tourism_place);
-    console.log(dto.description);
+    dto.status = body.status;
 
     await this.updateTourism.execute(user.sub, +id, dto);
     return successResponse([],'تم تعديل العقار السياحي بنجاح');
