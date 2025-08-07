@@ -26,6 +26,8 @@ import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/s
 import { SearchByTitleSwaggerDoc } from '../swagger/tourism_places/search-by-title-swagger';
 import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show-tourism-mobile.use-case';
 import { ShowMobileTourismSwaggerDoc } from '../swagger/tourism_places/show-mobile-tourism-property.swagger';
+import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
+import { ShowTourismFinanceByYearSwaggerDoc } from '../swagger/tourism_places/get-tourism-property-invoices.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -38,7 +40,8 @@ export class TourismController {
     private readonly showTourismUseCase: ShowTourismUseCase,
     private readonly showTourismMobileUseCase: ShowTourismMobileUseCase,
     private readonly filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase,
-    private readonly searchTourismUseCase :SearchTourismUseCase
+    private readonly searchTourismUseCase :SearchTourismUseCase,
+    private readonly getTourismFinanceByYearUseCase: GetTourismFinanceByYearUseCase
   ) {}
 
   @Get('mobile')
@@ -74,7 +77,7 @@ export class TourismController {
     @Query('items') items = 10 ,
     @Req() request: Request
   ) {
-        const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
     return this.searchTourismUseCase.execute(search, page, items,baseUrl);
   }
 
@@ -164,5 +167,21 @@ export class TourismController {
      const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data=await this.showTourismMobileUseCase.execute(propertyId,baseUrl);
     return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
+  }
+
+  @Roles('صاحب مكتب')
+  @UseGuards(JwtAuthGuard)
+  @ShowTourismFinanceByYearSwaggerDoc()
+  @Get('mobile/:id/year/:year') 
+  async getFinanceByYear(
+    @Param('id')   propertyId: number,
+    @Param('year') year: number,
+    @Req() request: Request,
+    @CurrentUser() user:any,
+
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data = await this.getTourismFinanceByYearUseCase.execute(propertyId, year,user.sub,baseUrl);
+    return successResponse(data, 'تم إرجاع السجلات المالية لكل شهر بنجاح');
   }
 }

@@ -6,6 +6,7 @@ import {UpdateTourismDto} from 'src/application/dtos/tourism/update-tourism.dto'
 import {FilterTourismDto} from 'src/application/dtos/tourism/filter-tourism.dto';
 import { Region } from '../entities/region.entity';
 import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
+import { FinanceRecord } from 'src/infrastructure/repositories/tourism.repository';
 
 export const TOURISM_REPOSITORY = 'TOURISM_REPOSITORY';
 export interface ITourismRepository {
@@ -25,4 +26,5 @@ export interface ITourismRepository {
   filter(dto: FilterTourismPropertiesDto,page: number, items: number): Promise<{ data: Property[]; total: number }>; 
   searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }>
   findTourismPropertyDetails(propertyId: number)
+  findByMonth(  propertyId: number,   year: number,  month: number,  baseUrl: string,)
 }

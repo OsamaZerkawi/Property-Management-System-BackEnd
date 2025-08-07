@@ -4,6 +4,7 @@ import { InvoicesStatus } from "../enums/invoices-status.enum";
 import { PaymentMethod } from "../enums/payment-method.enum";
 import { User } from "./user.entity";
 import { Property } from "./property.entity";
+import { Calendar } from "./calendar.entity";
 
 @Entity('user_property_invoices')
 export class UserPropertyInvoice{
@@ -38,6 +39,10 @@ export class UserPropertyInvoice{
     @ManyToOne(() => Property, (property) => property.invoices)
     @JoinColumn({ name: 'property_id' })
     property: Property;
+
+    @ManyToOne(() => Calendar, (calendar) => calendar.invoices, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'calendar_id' })
+    calendar: Calendar;
 
     @Column({type: 'date',nullable: true})
     payment_deadline: Date;
