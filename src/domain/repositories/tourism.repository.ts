@@ -27,4 +27,17 @@ export interface ITourismRepository {
   searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }>
   findTourismPropertyDetails(propertyId: number)
   findByMonth(  propertyId: number,   year: number,  month: number,  baseUrl: string,)
+  findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null>;
+  findRelatedTouristicProperties(
+    options: {
+      PropertyId: number;
+      targetPrice: number;
+      minPrice: number;
+      maxPrice: number;
+      regionId?: number | null;
+      cityId?: number | null;
+      tag?: string | null;
+      limit?: number;
+    }
+  ): Promise<Array<Record<string, any>>> 
 }

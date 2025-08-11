@@ -477,6 +477,173 @@ async searchByTitle(title: string, page: number, items: number): Promise<{ data:
     reason: r.reason,
   }));
 }
+ 
+  async findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null> {
+    return this.propRepo.findOne({
+      where: { id: propertyId },
+      relations: ['post', 'region', 'region.city', 'touristic'],
+    });
+  }
+ 
+async findRelatedTouristicProperties(
+  options: {
+    PropertyId: number;
+    targetPrice: number;
+    minPrice: number;
+    maxPrice: number;
+    regionId?: number | null;
+    cityId?: number | null;
+    tag?: string | null;
+    limit?: number;
+  }
+): Promise<Array<Record<string, any>>> {
+  const {
+    PropertyId,
+    minPrice,
+    maxPrice,
+    regionId,
+    cityId,
+    tag,
+    limit = 5,
+  } = options;
 
+   const priceScoreExpr = `
+    GREATEST(
+      0,
+      (1 - (ABS(CAST(COALESCE(touristic.price, '0') AS numeric) - :targetPrice) / NULLIF(:targetPrice,0)) / 0.2)
+    ) * 30
+  `;
+
+  const locScoreExpr = `(CASE WHEN region.id = :regionId THEN 40 WHEN city.id = :cityId THEN 25 ELSE 0 END)`;
+  const tagScoreExpr = `(CASE WHEN post.tag = :tag THEN 20 ELSE 0 END)`;
+  const priceDiffExpr = `ABS(CAST(COALESCE(touristic.price,'0') AS numeric) - :targetPrice)`;
+
+   const buildScoredQB = (opts: {
+    useRegion?: boolean;
+    useCity?: boolean;
+    includeTag?: boolean;
+    excludeRegion?: number | null;
+    excludeIds?: number[];
+    maxResults?: number;
+  }) => {
+    const { useRegion = false, useCity = false, includeTag = true, excludeRegion = null, excludeIds = [], maxResults = limit } = opts;
+
+    const qb = this.propRepo.createQueryBuilder('property')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.touristic', 'touristic')
+      .where('property.id != :PropertyId', { PropertyId })
+      .andWhere('property.is_deleted = false')
+      .andWhere('post.status = :postStatus', { postStatus: 'مقبول' })
+      .andWhere('touristic.status = :touristicStatus', { touristicStatus: 'متوفر' })
+      .andWhere('CAST(COALESCE(touristic.price, \'0\') AS numeric) BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
+
+    if (useRegion && regionId) qb.andWhere('region.id = :regionId', { regionId });
+    if (useCity && cityId) qb.andWhere('city.id = :cityId', { cityId });
+    if (excludeRegion) qb.andWhere('region.id != :excludeRegion', { excludeRegion });
+
+    if (includeTag && tag) qb.andWhere('post.tag = :tag', { tag });
+
+    if (excludeIds && excludeIds.length > 0) {
+      qb.andWhere('property.id NOT IN (:...excludeIds)', { excludeIds });
+    } 
+     qb.select([
+      'property.id AS property_id',
+      'post.title AS post_title',
+      'post.tag AS post_tag',
+      'post.date AS post_date',
+      'post.image AS post_image',
+      'touristic.price AS touristic_price',
+      'touristic.status AS touristic_status',
+      'property.area AS property_area',
+      'property.room_count AS property_room_count',
+      'region.name AS region_name',
+      'city.name AS city_name', 
+      `${locScoreExpr} AS loc_score`,
+      `${tagScoreExpr} AS tag_score`,
+      `(${priceScoreExpr}) AS price_score`,
+      `(${locScoreExpr} + ${tagScoreExpr} + (${priceScoreExpr})) AS total_score`,
+      `${priceDiffExpr} AS price_diff`,
+    ]);
+
+    qb.setParameters({
+      targetPrice: options.targetPrice,
+      regionId,
+      cityId,
+      tag,
+      minPrice,
+      maxPrice,
+      postStatus: 'مقبول',
+      touristicStatus: 'متوفر',
+    });
+ 
+    qb.orderBy('total_score', 'DESC')
+      .addOrderBy('price_diff', 'ASC')
+      .addOrderBy('post.date', 'DESC')
+      .limit(maxResults);
+
+    return qb;
+  };
+
+  const results: Record<string, any>[] = [];
+ 
+  if (regionId) {
+    const qbRegionWithTag = buildScoredQB({ useRegion: true, includeTag: Boolean(tag), maxResults: limit });
+    const r1 = await qbRegionWithTag.getRawMany();
+    results.push(...r1);
+  }
+
+  if (results.length >= limit || !regionId) {
+    return results.slice(0, limit);
+  }
+ 
+  if (tag && regionId) {
+    const foundIds = results.map(r => Number(r.property_id));
+    const remaining = limit - results.length;
+    const qbRegionNoTag = buildScoredQB({ useRegion: true, includeTag: false, excludeIds: foundIds, maxResults: remaining });
+    const r2 = await qbRegionNoTag.getRawMany();
+    results.push(...r2);
+
+    if (results.length >= limit) {
+      return results.slice(0, limit);
+    }
+  }
+ 
+  if (cityId) {
+    const foundIds = results.map(r => Number(r.property_id));
+    const remainingAfterRegion = limit - results.length;
+
+    const qbCityWithTag = buildScoredQB({
+      useCity: true,
+      includeTag: Boolean(tag),
+      excludeRegion: regionId ?? null,
+      excludeIds: foundIds,
+      maxResults: remainingAfterRegion,
+    });
+    const r3 = await qbCityWithTag.getRawMany();
+    results.push(...r3);
+
+    if (results.length >= limit) return results.slice(0, limit);
+
+    if (tag) {
+      const foundIds2 = results.map(r => Number(r.property_id));
+      const remaining2 = limit - results.length;
+      const qbCityNoTag = buildScoredQB({
+        useCity: true,
+        includeTag: false,
+        excludeRegion: regionId ?? null,
+        excludeIds: foundIds2,
+        maxResults: remaining2,
+      });
+      const r4 = await qbCityNoTag.getRawMany();
+      results.push(...r4);
+
+      if (results.length >= limit) return results.slice(0, limit);
+    }
+  }
+
+  return results.slice(0, limit);
+}
 
 }

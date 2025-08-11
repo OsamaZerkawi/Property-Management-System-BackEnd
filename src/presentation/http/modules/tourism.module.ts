@@ -28,6 +28,7 @@ import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/s
 import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show-tourism-mobile.use-case';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
 import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
+import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -55,6 +56,7 @@ import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/touris
     SearchTourismUseCase,
     ShowTourismMobileUseCase,
     GetTourismFinanceByYearUseCase,
+    GetRelatedTouristicUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,

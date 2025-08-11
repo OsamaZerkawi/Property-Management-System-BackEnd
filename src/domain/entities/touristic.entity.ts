@@ -22,8 +22,7 @@ export class Touristic {
    water: string;
 
    @Column({ length: 255 })
-   pool: string;
-
+   pool: string; 
 
    @Column({ type: 'enum', enum: TouristicStatus })
    status: TouristicStatus;

@@ -28,6 +28,8 @@ import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show
 import { ShowMobileTourismSwaggerDoc } from '../swagger/tourism_places/show-mobile-tourism-property.swagger';
 import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
 import { ShowTourismFinanceByYearSwaggerDoc } from '../swagger/tourism_places/get-tourism-property-invoices.swagger';
+import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
+import { GetRelatedTouristicSwaggerDoc } from '../swagger/tourism_places/get-related-touristic.swagger';
 
 @Controller('tourism')
 export class TourismController {
@@ -41,7 +43,8 @@ export class TourismController {
     private readonly showTourismMobileUseCase: ShowTourismMobileUseCase,
     private readonly filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase,
     private readonly searchTourismUseCase :SearchTourismUseCase,
-    private readonly getTourismFinanceByYearUseCase: GetTourismFinanceByYearUseCase
+    private readonly getTourismFinanceByYearUseCase: GetTourismFinanceByYearUseCase,
+    private readonly getRelatedTouristicUseCase: GetRelatedTouristicUseCase,
   ) {}
 
   @Get('mobile')
@@ -183,5 +186,17 @@ export class TourismController {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data = await this.getTourismFinanceByYearUseCase.execute(propertyId, year,user.sub,baseUrl);
     return successResponse(data, 'تم إرجاع السجلات المالية لكل شهر بنجاح');
+  }
+
+  @Public()
+  @GetRelatedTouristicSwaggerDoc()
+  @Get(':id/related')
+  async getRelated( 
+    @Param('id') id: number,
+    @Req() req: Request,
+  ) {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const items = await this.getRelatedTouristicUseCase.execute( Number(id), baseUrl);
+    return successResponse(items, 'تم جلب العقارات ذات الصلة', 200);
   }
 }
