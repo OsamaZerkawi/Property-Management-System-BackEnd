@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { Touristic } from "./touristic.entity";
 import { Booking } from "./booking.entity";
 import { CalendarStatus } from "../enums/calendar-status.enum";
+import { UserPropertyInvoice } from "./user-property-invoice.entity";
 
 @Entity('calendars')
 export class Calendar {
@@ -23,6 +24,9 @@ export class Calendar {
   
     @OneToMany(() => Booking, (booking) => booking.calendar)
     bookings: Booking[];
+
+    @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.calendar)
+    invoices: UserPropertyInvoice[];
 
     @CreateDateColumn()
     created_at: Date;

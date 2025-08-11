@@ -17,6 +17,20 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { errorResponse } from 'src/shared/helpers/response.helper';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
+import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
+import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
+import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
+
+export interface FinanceRecord {
+  startDate: string;
+  endDate: string;
+  userId: number;
+  invoiceImage: string;
+  price: number;
+  status: string;
+  reason: string;
+}
+ 
 @Injectable()
 export class TourismRepository implements ITourismRepository {
   constructor(
@@ -32,8 +46,11 @@ export class TourismRepository implements ITourismRepository {
     private readonly serviceRepo: Repository<Service>,
     @InjectRepository(Region)
     private readonly regionRepo: Repository<Region>, 
+    @InjectRepository(UserPropertyInvoice)
+    private readonly invoiceRepo: Repository<UserPropertyInvoice>,
     private readonly dataSource: DataSource,
   ) {}
+
 
   async getServicesMapByNames(names: string[]) {
     const services = await this.serviceRepo
@@ -384,4 +401,296 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 }
+async findTourismPropertyDetails(propertyId: number) {
+  return await this.propRepo.findOne({
+    where: { 
+      id: propertyId
+    },
+    relations: [ 
+      'office.region',
+      'office.region.city',
+      'region',
+      'region.city',
+      'post',
+      'touristic',
+      'images',
+      'touristic.additionalServices',
+      'touristic.additionalServices.service', 
+    ],
+  });
+}
+async filter(
+  dto: FilterTourismPropertiesDto,
+  page: number,
+  items: number
+): Promise<{ data: Property[]; total: number }> {
+  const qb = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoinAndSelect('property.region',   'region')
+    .leftJoinAndSelect('region.city',       'city')
+    .leftJoinAndSelect('property.touristic','touristic')
+    .leftJoinAndSelect('property.post',     'post')
+    .where('touristic.status = :tourStatus', { tourStatus: TouristicStatus.AVAILABLE })
+    .andWhere('post.status = :postStatus',   { postStatus: PropertyPostStatus.APPROVED });
+ 
+  if (dto.regionId) qb.andWhere('region.id = :regionId',   { regionId: dto.regionId });
+  if (dto.cityId)   qb.andWhere('city.id = :cityId',       { cityId:   dto.cityId });
+  if (dto.tag)      qb.andWhere('post.tag::text LIKE :tag',{ tag:     `%${dto.tag}%` });
+ 
+  let firstOrder = true;
+  if (dto.orderByArea) {
+    qb.orderBy('property.area', dto.orderByArea);
+    firstOrder = false;
+  }
+  if (dto.orderByPrice) {
+    if (firstOrder) {
+      qb.orderBy('touristic.price', dto.orderByPrice);
+      firstOrder = false;
+    } else {
+      qb.addOrderBy('touristic.price', dto.orderByPrice);
+    }
+  }
+  if (dto.orderByDate) {
+    if (firstOrder) {
+      qb.orderBy('post.date', dto.orderByDate);
+    } else {
+      qb.addOrderBy('post.date', dto.orderByDate);
+    }
+  } 
+  const [rawResults, total] = await Promise.all([
+    qb.skip((page - 1) * items)
+      .take(items)
+      .getMany(),
+    qb.getCount(),
+  ]);
+
+  return { data: rawResults, total };
+}
+
+async searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }> {
+  const query = this.propRepo.createQueryBuilder('property')
+    .leftJoinAndSelect('property.post', 'post')
+    .leftJoinAndSelect('property.region', 'region')
+    .leftJoinAndSelect('region.city', 'city')
+    .innerJoinAndSelect('property.touristic', 'touristic')
+    .where('LOWER(post.title) LIKE LOWER(:title)', { title: `%${title}%` });
+
+  const total = await query.getCount();
+
+  const data = await query
+    .skip((page - 1) * items)
+    .take(items)
+    .getMany();
+
+  return { data, total };
+}
+
+ async findByMonth(
+  propertyId: number,
+  year: number,
+  month: number,
+  baseUrl: string,
+) { 
+  const raws = await this.invoiceRepo
+    .createQueryBuilder('ui')
+    .innerJoin('ui.calendar', 'c')
+    .innerJoin('c.touristic', 't')
+    .innerJoin('ui.user', 'u') 
+    .where('t.property_id = :pid', { pid: propertyId })
+    .andWhere('EXTRACT(YEAR FROM c.start_date) = :year', { year })
+    .andWhere('EXTRACT(MONTH FROM c.start_date) = :month', { month })
+    .select([
+      `TO_CHAR(c.start_date, 'YYYY-MM-DD') AS "startDate"`,
+      `TO_CHAR(c.end_date, 'YYYY-MM-DD') AS "endDate"`,
+      'u.phone                AS "phone"',         
+      'ui.invoiceImage      AS "invoiceImage"',
+      'ui.amount             AS "price"',
+      'ui.status             AS "status"',
+      'ui.reason             AS "reason"',
+    ])
+    .orderBy('c.start_date')
+    .addOrderBy('ui.reason')
+    .getRawMany();
+
+  return raws.map(r => ({
+    startDate: r.startDate,
+    endDate: r.endDate,
+    phone: r.phone,
+    invoiceImage: r.invoiceImage
+      ? `${baseUrl}/uploads/properties/users/invoices/images/${r.invoiceImage}`
+      : null,
+    price: r.price,
+    status: r.status,
+    reason: r.reason,
+  }));
+}
+ 
+  async findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null> {
+    return this.propRepo.findOne({
+      where: { id: propertyId },
+      relations: ['post', 'region', 'region.city', 'touristic'],
+    });
+  }
+ 
+async findRelatedTouristicProperties(
+  options: {
+    PropertyId: number;
+    targetPrice: number;
+    minPrice: number;
+    maxPrice: number;
+    regionId?: number | null;
+    cityId?: number | null;
+    tag?: string | null;
+    limit?: number;
+  }
+): Promise<Array<Record<string, any>>> {
+  const {
+    PropertyId,
+    minPrice,
+    maxPrice,
+    regionId,
+    cityId,
+    tag,
+    limit = 5,
+  } = options;
+
+   const priceScoreExpr = `
+    GREATEST(
+      0,
+      (1 - (ABS(CAST(COALESCE(touristic.price, '0') AS numeric) - :targetPrice) / NULLIF(:targetPrice,0)) / 0.2)
+    ) * 30
+  `;
+
+  const locScoreExpr = `(CASE WHEN region.id = :regionId THEN 40 WHEN city.id = :cityId THEN 25 ELSE 0 END)`;
+  const tagScoreExpr = `(CASE WHEN post.tag = :tag THEN 20 ELSE 0 END)`;
+  const priceDiffExpr = `ABS(CAST(COALESCE(touristic.price,'0') AS numeric) - :targetPrice)`;
+
+   const buildScoredQB = (opts: {
+    useRegion?: boolean;
+    useCity?: boolean;
+    includeTag?: boolean;
+    excludeRegion?: number | null;
+    excludeIds?: number[];
+    maxResults?: number;
+  }) => {
+    const { useRegion = false, useCity = false, includeTag = true, excludeRegion = null, excludeIds = [], maxResults = limit } = opts;
+
+    const qb = this.propRepo.createQueryBuilder('property')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.touristic', 'touristic')
+      .where('property.id != :PropertyId', { PropertyId })
+      .andWhere('property.is_deleted = false')
+      .andWhere('post.status = :postStatus', { postStatus: 'مقبول' })
+      .andWhere('touristic.status = :touristicStatus', { touristicStatus: 'متوفر' })
+      .andWhere('CAST(COALESCE(touristic.price, \'0\') AS numeric) BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
+
+    if (useRegion && regionId) qb.andWhere('region.id = :regionId', { regionId });
+    if (useCity && cityId) qb.andWhere('city.id = :cityId', { cityId });
+    if (excludeRegion) qb.andWhere('region.id != :excludeRegion', { excludeRegion });
+
+    if (includeTag && tag) qb.andWhere('post.tag = :tag', { tag });
+
+    if (excludeIds && excludeIds.length > 0) {
+      qb.andWhere('property.id NOT IN (:...excludeIds)', { excludeIds });
+    } 
+     qb.select([
+      'property.id AS property_id',
+      'post.title AS post_title',
+      'post.tag AS post_tag',
+      'post.date AS post_date',
+      'post.image AS post_image',
+      'touristic.price AS touristic_price',
+      'touristic.status AS touristic_status',
+      'property.area AS property_area',
+      'property.room_count AS property_room_count',
+      'region.name AS region_name',
+      'city.name AS city_name', 
+      `${locScoreExpr} AS loc_score`,
+      `${tagScoreExpr} AS tag_score`,
+      `(${priceScoreExpr}) AS price_score`,
+      `(${locScoreExpr} + ${tagScoreExpr} + (${priceScoreExpr})) AS total_score`,
+      `${priceDiffExpr} AS price_diff`,
+    ]);
+
+    qb.setParameters({
+      targetPrice: options.targetPrice,
+      regionId,
+      cityId,
+      tag,
+      minPrice,
+      maxPrice,
+      postStatus: 'مقبول',
+      touristicStatus: 'متوفر',
+    });
+ 
+    qb.orderBy('total_score', 'DESC')
+      .addOrderBy('price_diff', 'ASC')
+      .addOrderBy('post.date', 'DESC')
+      .limit(maxResults);
+
+    return qb;
+  };
+
+  const results: Record<string, any>[] = [];
+ 
+  if (regionId) {
+    const qbRegionWithTag = buildScoredQB({ useRegion: true, includeTag: Boolean(tag), maxResults: limit });
+    const r1 = await qbRegionWithTag.getRawMany();
+    results.push(...r1);
+  }
+
+  if (results.length >= limit || !regionId) {
+    return results.slice(0, limit);
+  }
+ 
+  if (tag && regionId) {
+    const foundIds = results.map(r => Number(r.property_id));
+    const remaining = limit - results.length;
+    const qbRegionNoTag = buildScoredQB({ useRegion: true, includeTag: false, excludeIds: foundIds, maxResults: remaining });
+    const r2 = await qbRegionNoTag.getRawMany();
+    results.push(...r2);
+
+    if (results.length >= limit) {
+      return results.slice(0, limit);
+    }
+  }
+ 
+  if (cityId) {
+    const foundIds = results.map(r => Number(r.property_id));
+    const remainingAfterRegion = limit - results.length;
+
+    const qbCityWithTag = buildScoredQB({
+      useCity: true,
+      includeTag: Boolean(tag),
+      excludeRegion: regionId ?? null,
+      excludeIds: foundIds,
+      maxResults: remainingAfterRegion,
+    });
+    const r3 = await qbCityWithTag.getRawMany();
+    results.push(...r3);
+
+    if (results.length >= limit) return results.slice(0, limit);
+
+    if (tag) {
+      const foundIds2 = results.map(r => Number(r.property_id));
+      const remaining2 = limit - results.length;
+      const qbCityNoTag = buildScoredQB({
+        useCity: true,
+        includeTag: false,
+        excludeRegion: regionId ?? null,
+        excludeIds: foundIds2,
+        maxResults: remaining2,
+      });
+      const r4 = await qbCityNoTag.getRawMany();
+      results.push(...r4);
+
+      if (results.length >= limit) return results.slice(0, limit);
+    }
+  }
+
+  return results.slice(0, limit);
+}
+
 }

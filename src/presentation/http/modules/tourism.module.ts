@@ -23,6 +23,12 @@ import { Region } from 'src/domain/entities/region.entity';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
 import { Service } from 'src/domain/entities/services.entity';
+import { FilterTourismPropertiesUseCase } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
+import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/search-tourism-property.use-case';
+import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show-tourism-mobile.use-case';
+import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
+import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
+import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
 @Module({
   imports: [
     AuthModule,
@@ -35,6 +41,7 @@ import { Service } from 'src/domain/entities/services.entity';
       AdditionalService,
       Region,
       Service,
+      UserPropertyInvoice,
     ]),
   ],
   controllers: [TourismController],
@@ -45,14 +52,19 @@ import { Service } from 'src/domain/entities/services.entity';
     FilterTourismUseCase,
     SearchByTitleUseCase,
     ShowTourismUseCase,
+    FilterTourismPropertiesUseCase,
+    SearchTourismUseCase,
+    ShowTourismMobileUseCase,
+    GetTourismFinanceByYearUseCase,
+    GetRelatedTouristicUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,
     },
-   {
-  provide: OFFICE_REPOSITORY,
-  useClass: OfficeRepository,
-   }
+    {
+      provide: OFFICE_REPOSITORY,
+      useClass: OfficeRepository,
+    }
 
   ],
 })

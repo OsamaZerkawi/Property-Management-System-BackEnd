@@ -1,4 +1,6 @@
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, UploadedFile, ConsoleLogger} from '@nestjs/common';
+ 
+  
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException ,Query, Req, DefaultValuePipe, ParseIntPipe, UploadedFile} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -11,7 +13,7 @@ import { Request } from 'express';
 import { ListTourismUseCase } from 'src/application/use-cases/tourism/list-tourism.use-case';
 import { SearchByTitleUseCase } from 'src/application/use-cases/tourism/search-by-title.use-case';
 import { ShowTourismUseCase } from 'src/application/use-cases/tourism/show-tourism.use-case';
-import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
+import { errorResponse,successPaginatedResponse, successResponse } from 'src/shared/helpers/response.helper';
 import { CreateTourismSwaggerDoc } from '../swagger/tourism_places/create-tourism-property.swagger';
 import { UpdateTourismSwaggerDoc } from '../swagger/tourism_places/update-tourism-property.swagger';
 import { ListTourismSwaggerDoc } from '../swagger/tourism_places/list-tourism-property.swagger';
@@ -20,7 +22,19 @@ import { ShowTourismSwaggerDoc } from '../swagger/tourism_places/show-tourism-pr
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { PropertyPostImageInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 import { constructFromSymbol } from 'date-fns/constants';
-
+import { FilterTourismPropertiesUseCase, PropertyResponse } from 'src/application/use-cases/tourism-mobile/filter-tourim-property.use-case';
+import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
+import { Public } from 'src/shared/decorators/public.decorator';
+import { FilterMobileTourismSwaggerDoc } from '../swagger/tourism_places/filter-mobile-tourism-property.swagger';
+import { SearchTourismUseCase } from 'src/application/use-cases/tourism-mobile/search-tourism-property.use-case';
+import { SearchByTitleSwaggerDoc } from '../swagger/tourism_places/search-by-title-swagger';
+import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show-tourism-mobile.use-case';
+import { ShowMobileTourismSwaggerDoc } from '../swagger/tourism_places/show-mobile-tourism-property.swagger';
+import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
+import { ShowTourismFinanceByYearSwaggerDoc } from '../swagger/tourism_places/get-tourism-property-invoices.swagger';
+import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
+import { GetRelatedTouristicSwaggerDoc } from '../swagger/tourism_places/get-related-touristic.swagger';
+ 
 @Controller('tourism')
 export class TourismController {
   constructor(
@@ -29,8 +43,51 @@ export class TourismController {
     private readonly listTourism: ListTourismUseCase,
     private readonly filterTourism: FilterTourismUseCase, 
     private readonly searchByTitleUseCase: SearchByTitleUseCase,
-    private readonly showTourismUseCase: ShowTourismUseCase
+    private readonly showTourismUseCase: ShowTourismUseCase,
+    private readonly showTourismMobileUseCase: ShowTourismMobileUseCase,
+    private readonly filterTourismPropertiesUseCase: FilterTourismPropertiesUseCase,
+    private readonly searchTourismUseCase :SearchTourismUseCase,
+    private readonly getTourismFinanceByYearUseCase: GetTourismFinanceByYearUseCase,
+    private readonly getRelatedTouristicUseCase: GetRelatedTouristicUseCase,
   ) {}
+
+  @Get('mobile')
+  @FilterMobileTourismSwaggerDoc()
+  @Public()
+  async index(
+    @Query() query: FilterTourismPropertiesDto,
+    @Query('page',new DefaultValuePipe(1),ParseIntPipe) page: number,
+    @Query('items',new DefaultValuePipe(10),ParseIntPipe) items: number,
+     @Req() request: Request
+  )  {
+            const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+ const { data: results, total } =
+    await this.filterTourismPropertiesUseCase.execute(query, page, items,baseUrl);
+ 
+    return successPaginatedResponse<PropertyResponse[]>(
+      results,           
+      total,           
+      page,              
+      items,           
+      'تم ارجاع العقارات السياحية بنجاح', 
+      200              
+    );
+  }
+
+  @Get('mobile/search') 
+  @SearchByTitleSwaggerDoc()
+  @Public()
+  async searchTourismByTitle(
+    @Query('title') search: string,
+    @Query('page') page = 1,
+    @Query('items') items = 10 ,
+    @Req() request: Request
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    return this.searchTourismUseCase.execute(search, page, items,baseUrl);
+  }
+
 
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
@@ -139,5 +196,45 @@ export class TourismController {
      const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data=await this.showTourismUseCase.execute(user.sub, propertyId,baseUrl);
     return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
+  }
+
+  @Public()
+  @Get('mobile/:id')
+  @ShowMobileTourismSwaggerDoc()
+  async gettourismPropertyDetails( 
+    @Param('id') propertyId: number,
+     @Req() request: Request
+  ) {
+     const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data=await this.showTourismMobileUseCase.execute(propertyId,baseUrl);
+    return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
+  }
+
+  @Roles('صاحب مكتب')
+  @UseGuards(JwtAuthGuard)
+  @ShowTourismFinanceByYearSwaggerDoc()
+  @Get('mobile/:id/year/:year') 
+  async getFinanceByYear(
+    @Param('id')   propertyId: number,
+    @Param('year') year: number,
+    @Req() request: Request,
+    @CurrentUser() user:any,
+
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data = await this.getTourismFinanceByYearUseCase.execute(propertyId, year,user.sub,baseUrl);
+    return successResponse(data, 'تم إرجاع السجلات المالية لكل شهر بنجاح');
+  }
+
+  @Public()
+  @GetRelatedTouristicSwaggerDoc()
+  @Get(':id/related')
+  async getRelated( 
+    @Param('id') id: number,
+    @Req() req: Request,
+  ) {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const items = await this.getRelatedTouristicUseCase.execute( Number(id), baseUrl);
+    return successResponse(items, 'تم جلب العقارات ذات الصلة', 200);
   }
 }
