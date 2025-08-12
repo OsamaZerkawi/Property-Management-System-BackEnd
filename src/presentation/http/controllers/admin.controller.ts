@@ -12,6 +12,10 @@ import { Role } from "src/domain/entities/role.entity";
 import { Public } from "src/shared/decorators/public.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetSupervisorsSwaggerDoc } from "../swagger/admins/get-list-admins.swagger";
+import { CreateAdminSwaggerDoc } from "../swagger/admins/create-admin.swagger";
+import { UpdateAdminSwaggerDoc } from "../swagger/admins/update-admin.swagger";
+import { DeleteSupervisorSwaggerDoc } from "../swagger/admins/delete-admin.swagger";
 
 @Controller('admin')
 export class AdminController {
@@ -23,8 +27,8 @@ export class AdminController {
     ){}
 
     @Roles('مدير')
-    // @Public()
     @Get()
+    @GetSupervisorsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getSupervisors(){
         const supervisors = await this.getSupervisorsUseCase.execute();
@@ -33,6 +37,7 @@ export class AdminController {
     }
 
     @Roles('مدير')
+    @CreateAdminSwaggerDoc()
     // @Public()
     @Post()
     @HttpCode(HttpStatus.CREATED)
@@ -45,6 +50,7 @@ export class AdminController {
     }
 
     @Roles('مدير')
+    @DeleteSupervisorSwaggerDoc()
     @Delete('/:id')
     @HttpCode(HttpStatus.OK)
     async deleteSupervisor(
@@ -56,7 +62,7 @@ export class AdminController {
     }
 
     @Roles('مدير')
-    // @Public()
+    @UpdateAdminSwaggerDoc()
     @Put('/:id')
     @HttpCode(HttpStatus.OK)
     async updateAdmin(

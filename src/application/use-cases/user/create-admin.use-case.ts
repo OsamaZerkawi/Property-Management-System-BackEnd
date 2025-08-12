@@ -22,11 +22,11 @@ export class CreateAdminUseCase {
     ){}
 
     async execute(data: CreateAdminDto){
-        const userExists = await this.userRepo.findByEmailOrPhone(data.email,data.phone);
+        const userExists = await this.userRepo.findByEmail(data.email);
 
         if(userExists){
             throw new BadRequestException(
-                errorResponse('يوجد مستخدم مسجل مسبقًا بنفس البريد الإلكتروني أو رقم الهاتف.',400)
+                errorResponse('يوجد مستخدم مسجل مسبقًا بنفس البريد الإلكتروني .',400)
             );
         }
 
@@ -46,7 +46,6 @@ export class CreateAdminUseCase {
             first_name: data.first_name,
             last_name: data.last_name,
             email: data.email,
-            phone: data.phone,
             password:hashedPassword,
         } as User);
 

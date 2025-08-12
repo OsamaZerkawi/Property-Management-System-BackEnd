@@ -17,6 +17,7 @@ import { GetGlobalInfoSwaggerDoc } from "../swagger/profile/get-global-user-info
 import { MyPurchasesSwaggerDoc } from "../swagger/profile/get-user-purchases.swagger";
 import { UpdateProfileSwaggerDoc } from "../swagger/profile/update-profile-user.swagger";
 import { ProfileSwaggerDoc } from "../swagger/profile/get-profile-user.swagger";
+import { GetAllUsersSwaggerDoc } from "../swagger/auth/get-all-users.swagger";
  @Controller('user')
 export class UserController {
     constructor(
@@ -28,8 +29,9 @@ export class UserController {
         private readonly getUserPurchases: GetUserPurchasesUseCase,
     ){}
 
-    // @Roles('مدير')
-    @Public()
+    @Roles('مدير')
+    // @Public()
+    @GetAllUsersSwaggerDoc()
     @Get('/details')
     @HttpCode(HttpStatus.OK)
     async getUsers(){

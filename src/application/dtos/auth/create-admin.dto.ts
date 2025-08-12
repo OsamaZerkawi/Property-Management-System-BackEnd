@@ -11,9 +11,6 @@ export class CreateAdminDto {
     @IsString()
     email: string;
 
-    @IsString()
-    phone: string;
-
     @IsArray()
     @ArrayNotEmpty()
     @IsInt({each: true})

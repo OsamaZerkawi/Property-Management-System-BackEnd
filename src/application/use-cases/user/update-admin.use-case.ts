@@ -24,18 +24,19 @@ export class UpdateAdminUseCase {
             );
         }
 
-        const existing = await this.userRepo.findByEmailOrPhone(data.email,data.phone);
-        if(existing && existing.id !== user.id){
-            throw new BadRequestException(
-                errorResponse('البريد الإلكتروني أو رقم الهاتف مستخدم مسبقًا.',400)
-            );
+        if(data.email){
+           const existing = await this.userRepo.findByEmail(data.email);
+           if(existing && existing.id !== user.id){
+               throw new BadRequestException(
+                   errorResponse('البريد الإلكتروني أو رقم الهاتف مستخدم مسبقًا.',400)
+               );
+           }
         }
 
         const updateData: Partial<User> = {
           first_name: data.first_name ?? user.first_name,
           last_name: data.last_name ?? user.last_name,
           email: data.email ?? user.email,
-          phone: data.phone ?? user.phone,
         };
 
         if (data.first_name || data.last_name) {
@@ -53,9 +54,9 @@ export class UpdateAdminUseCase {
 
         //if i want to send for email when update admin information
         
-        // const email = data.email ?? user.email;
-        // const username = updateData.username ?? user.username;
-
-        // await this.mailService.sendAdminCredentials(email,username,'كلمة المرور الخاصة بك لم تتغير');
+        const email = data.email ?? user.email;
+        const username = updateData.username ?? user.username;
+        
+        this.mailService.sendAdminCredentials(email,username,'كلمة المرور الخاصة بك لم تتغير');
     }
 }

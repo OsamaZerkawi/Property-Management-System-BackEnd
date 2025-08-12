@@ -14,10 +14,6 @@ export class UpdateAdminDto {
   email?: string;
 
   @IsOptional()
-  @IsString()
-  phone?: string;
-
-  @IsOptional()
   @IsArray()
   @ArrayNotEmpty()
   @IsInt({ each: true })
