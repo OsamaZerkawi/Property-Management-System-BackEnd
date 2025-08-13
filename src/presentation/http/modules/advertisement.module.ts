@@ -22,14 +22,19 @@ import { GetApprovedAdvertisementUseCase } from "src/application/use-cases/adver
 import { GetAllAdvertisementInvoicesUseCase } from "src/application/use-cases/advertisement/get-all-advertisement-invoices.use-case";
 import { ServicePrice } from "src/domain/entities/service-price.entity";
 import { ServicePriceModule } from "./service-price.module";
+import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
+import { PropertyModule } from "./property.module";
+import { Property } from "src/domain/entities/property.entity";
 
 @Module({
     imports:[
         ServicePriceModule,
+        PropertyModule,
+        ServicePriceModule,
         NotificationModule,
         OfficeModule,
         AuthModule,
-        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User,ServicePrice])
+        TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User,ServicePrice,PromotedProperty,Property,])
     ],
     controllers:[AdvertisementController,FinanceAdsManagementController],
     providers:[

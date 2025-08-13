@@ -73,7 +73,8 @@ import { GetPromotedPropertiesUseCase } from "src/application/use-cases/property
         }
     ],
     exports:[
-        PROPERTY_REPOSITORY
+        PROPERTY_REPOSITORY,
+        PROMOTED_PROPERTY_REPOISTORY,
     ]
 })
 export class PropertyModule{}

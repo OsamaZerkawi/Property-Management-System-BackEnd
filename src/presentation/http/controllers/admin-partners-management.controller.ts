@@ -13,6 +13,10 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { Permissions } from "src/shared/decorators/permission.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetOfficesSwaggerDoc } from "../swagger/admin-partners-management/get-all-offices.swagger";
+import { GetServiceProvidersSwaggerDoc } from "../swagger/admin-partners-management/get-all-service-providers.swagger";
+import { GetServiceProviderSwaggerDoc } from "../swagger/admin-partners-management/get-service-provider.swagger";
+import { RespondToJoinRequestSwaggerDoc } from "../swagger/admin-partners-management/respond-to-join-request.swagger";
 
 @ApiTags('Admin - Partners Management')
 @Controller('admin/partners-management')    
@@ -25,8 +29,9 @@ export class AdminPartnersManagementController {
     ){}
     
     @Roles('مشرف')
-    @Permissions('إدارة المكاتب ومزودي الخدمات')
+    @Permissions('إدارة الوسطاء')
     @Get('offices')
+    @GetOfficesSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getOffices(
       @Req() request: Request,
@@ -40,7 +45,8 @@ export class AdminPartnersManagementController {
     } 
 
     @Roles('مشرف')
-    @Permissions('إدارة المكاتب ومزودي الخدمات')
+    @Permissions('إدارة الوسطاء')
+    @GetServiceProvidersSwaggerDoc()
     @Get('service-providers')
     @HttpCode(HttpStatus.OK)
     async getServiceProviders(
@@ -57,7 +63,8 @@ export class AdminPartnersManagementController {
     }
 
     @Roles('مشرف')
-    @Permissions('إدارة المكاتب ومزودي الخدمات')
+    @Permissions('إدارة الوسطاء')
+    @GetServiceProviderSwaggerDoc()
     @Get('service-providers/:id')
     @HttpCode(HttpStatus.OK)    
     async getServiceProvider(
@@ -72,7 +79,8 @@ export class AdminPartnersManagementController {
     }
 
     @Roles('مشرف')
-    @Permissions('إدارة المكاتب ومزودي الخدمات')
+    @RespondToJoinRequestSwaggerDoc()
+    @Permissions('إدارة الوسطاء')
     @HttpCode(HttpStatus.OK)
     @Post('join-requests/:id/respond')
     async respondToJoinRequest(

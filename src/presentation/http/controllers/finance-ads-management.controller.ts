@@ -10,6 +10,7 @@ import { RejectAdRequestUseCase } from "src/application/use-cases/advertisement/
 import { Permissions } from "src/shared/decorators/permission.decorator";
 import { Roles } from "src/shared/decorators/role.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { GetApprovedAdsSwaggerDoc } from "../swagger/advertisement/get-apporved-ads.swagger";
 
 @ApiTags('Finance & Ads Management')
 
@@ -59,6 +60,7 @@ export class FinanceAdsManagementController {
     @Roles('مشرف')
     @Permissions('إدارة المالية والإعلانات')
     @Get('approved-ads')
+    @GetApprovedAdsSwaggerDoc()
     @HttpCode(HttpStatus.OK)
     async getApprovedAds(
         @Req() request: Request,

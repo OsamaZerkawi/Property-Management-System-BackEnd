@@ -16,6 +16,8 @@ import { UserPostSeeder } from "./user-post.seeder";
 import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
 import { ServiceFeedbackSeeder } from "./service-provider-feedback.seeder";
 import { PropertyFavoriteSeeder } from "./favorite.seeder";
+import { Advertisement } from "src/domain/entities/advertisements.entity";
+import { AdvertisementSeeder } from "./advertisement.seeder";
 
 @Injectable()
 export class SeederService {
@@ -32,6 +34,7 @@ export class SeederService {
     private readonly officeFeedbackSeeder: OfficeFeedbackSeeder,
     private readonly serviceFeedbackSeeder: ServiceFeedbackSeeder,
     private readonly propertyFavoriteSeeder: PropertyFavoriteSeeder,
+    private readonly advertisementSeeder: AdvertisementSeeder,
     
     @InjectRepository(City)
     private readonly cityRepo: Repository<City>,
@@ -43,6 +46,8 @@ export class SeederService {
     // 1. Seed cities and regions
     const cityRegionSeeder = new CityRegionSeeder(this.cityRepo, this.regionRepo, this.dataSource);
     await cityRegionSeeder.seed();
+
+    await this.servicePriceSeeder.seed();
 
     // 2. Seed permissions and roles
     await this.permissionSeeder.seed();
@@ -72,7 +77,8 @@ export class SeederService {
 
     await this.propertyFavoriteSeeder.seed();
     
-    await this.servicePriceSeeder.seed();
+
+    await this.advertisementSeeder.seed();
     console.log('✅ All seeders executed successfully.');
   }
 }

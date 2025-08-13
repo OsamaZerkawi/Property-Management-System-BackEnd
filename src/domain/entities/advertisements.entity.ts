@@ -34,7 +34,6 @@ export class Advertisement {
     @JoinColumn({name: 'online_invoice_id'})
     invoice: OnlineInvoice| null;
 
-
     @CreateDateColumn()
     created_at: Date;
 
