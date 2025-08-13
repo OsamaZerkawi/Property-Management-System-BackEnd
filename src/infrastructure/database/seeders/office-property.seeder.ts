@@ -53,6 +53,8 @@ export class OfficePropertySeeder {
   }
 
   for (let i = 0; i < 5; i++) {
+    const { latitude, longitude } = randomLocationInSyria();
+
     const region = faker.helpers.arrayElement(regions);
     const password = await bcrypt.hash('password123', 10);
     const user = this.userRepo.create({
@@ -80,8 +82,8 @@ export class OfficePropertySeeder {
       profits: faker.number.float({ min: 0, max: 100000, fractionDigits:2 }),
       opening_time: getRandomTimeWithPeriod(8, 10),  
       closing_time: getRandomTimeWithPeriod(17, 20), 
-      latitude: faker.location.latitude(),  
-      longitude: faker.location.longitude(),
+      latitude,  
+      longitude,
 
       active: true,
       is_deleted: false,
@@ -103,11 +105,13 @@ export class OfficePropertySeeder {
       await this.socialRepo.save(socials);    
 
     for (let j = 0; j < 10; j++) {
+      const { latitude, longitude } = randomLocationInSyria();
+
       const property = this.propertyRepo.create({
         area: faker.number.float({ min: 50, max: 300 }),
         floor_number: faker.number.int({ min: 0, max: 10 }),
-        latitude: faker.location.latitude(),  
-        longitude: faker.location.longitude(),
+        latitude,  
+        longitude,
         region,
         office,
         room_count: faker.number.int({ min: 1, max: 5 }),
@@ -181,4 +185,20 @@ function getRandomTimeWithPeriod(startHour: number, endHour: number): string {
   const period = hour < 12 ? 'صباحًا' : 'مساءً';
 
   return `${hourStr}:${minutes} ${period}`;
+}
+
+function randomLocationInSyria() {
+  const lat = faker.number.float({
+    min: 32.0,
+    max: 37.5,
+    fractionDigits: 6
+  });
+
+  const lng = faker.number.float({
+    min: 35.6,
+    max: 42.0,
+    fractionDigits: 6
+  });
+
+  return { latitude: lat, longitude: lng };
 }

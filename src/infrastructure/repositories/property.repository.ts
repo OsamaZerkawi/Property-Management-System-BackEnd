@@ -559,7 +559,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
   async findWithinBounds(bounds: ExploreMapDto) {
     return this.propertyRepo.createQueryBuilder('property')
-    .select(['property.id','property.latitude', 'property.longitude'])
+    .select(['property.id','property.latitude', 'property.longitude','property.property_type'])
     .where('property.latitude BETWEEN :minLat AND :maxLat', {
       minLat: bounds.minLat,
       maxLat: bounds.maxLat,

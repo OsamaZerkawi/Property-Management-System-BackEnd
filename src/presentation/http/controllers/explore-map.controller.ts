@@ -3,6 +3,7 @@ import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 import { ExploreMapUseCase } from "src/application/use-cases/map/explore-map.use-case";
 import { Public } from "src/shared/decorators/public.decorator";
 import { successResponse } from "src/shared/helpers/response.helper";
+import { ExploreMapSwaggerDoc } from "../swagger/explore-map/explore-map.swagger";
 
 @Controller('map')
 export class MapExploreController  {
@@ -11,6 +12,7 @@ export class MapExploreController  {
     ){}
 
     @Get('explore')
+    @ExploreMapSwaggerDoc()
     @Public()
     @HttpCode(HttpStatus.OK)
     async exploreMap(

@@ -83,12 +83,15 @@ export class TouristicPropertySeeder {
       await this.officeRepo.save(office);
 
       for (let j = 0; j < 10; j++) {
+
+        const { latitude, longitude } = randomLocationInSyria();
+
         const region = faker.helpers.arrayElement(regions);
         const property = this.propertyRepo.create({
           area: faker.number.float({ min: 50, max: 200 }),
           floor_number: faker.number.int({ min: 0, max: 5 }),
-          latitude: faker.location.latitude(),
-          longitude: faker.location.longitude(),
+          latitude,
+          longitude,
           region,
           office,
           room_count: faker.number.int({ min: 1, max: 4 }),
@@ -198,4 +201,21 @@ export class TouristicPropertySeeder {
     const services = names.map((name) => this.serviceRepo.create({ name }));
     return this.serviceRepo.save(services);
   }
+}
+
+
+function randomLocationInSyria() {
+  const lat = faker.number.float({
+    min: 32.0,
+    max: 37.5,
+    fractionDigits: 6
+  });
+
+  const lng = faker.number.float({
+    min: 35.6,
+    max: 42.0,
+    fractionDigits: 6
+  });
+
+  return { latitude: lat, longitude: lng };
 }
