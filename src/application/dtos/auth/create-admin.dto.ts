@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsInt, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsInt, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateAdminDto {
     
@@ -10,6 +10,10 @@ export class CreateAdminDto {
 
     @IsString()
     email: string;
+
+    @IsOptional()
+    @IsNumber()
+    cityId?: number;
 
     @IsArray()
     @ArrayNotEmpty()

@@ -38,7 +38,6 @@ export class AdminController {
 
     @Roles('مدير')
     @CreateAdminSwaggerDoc()
-    // @Public()
     @Post()
     @HttpCode(HttpStatus.CREATED)
     async create(

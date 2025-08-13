@@ -1,4 +1,4 @@
-import { ArrayNotEmpty, IsArray, IsInt, IsOptional, IsString } from "class-validator";
+import { ArrayNotEmpty, IsArray, IsInt, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class UpdateAdminDto {
   @IsOptional()
@@ -12,6 +12,10 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsString()
   email?: string;
+
+  @IsOptional()
+  @IsNumber()
+  cityId?: number;
 
   @IsOptional()
   @IsArray()

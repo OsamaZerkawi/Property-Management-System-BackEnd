@@ -13,12 +13,12 @@ export class PermissionSeeder {
   ) {}
 
   private readonly permissions = [
-    'إدارة المكاتب ومزودي الخدمات',
+    'إدارة الوسطاء',
     'إدارة المالية والإعلانات',
     'إدارة المنشورات ',
     'إدارة الشكاوي والدعم',
-    'مراقبة إحصائيات النظام',
-  ];
+    'مراقب النظام',
+   ];
 
   async seed() {
     await this.dataSource.query('TRUNCATE TABLE permissions RESTART IDENTITY CASCADE');

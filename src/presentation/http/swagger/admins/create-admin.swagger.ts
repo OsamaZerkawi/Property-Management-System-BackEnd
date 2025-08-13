@@ -14,6 +14,7 @@ export function CreateAdminSwaggerDoc() {
         example: {
           first_name: 'أحمد',
           last_name: 'محمد',
+          cityId: 2,
           email: 'ahmed@example.com',
           permissionIds: [1, 2, 3],
         },

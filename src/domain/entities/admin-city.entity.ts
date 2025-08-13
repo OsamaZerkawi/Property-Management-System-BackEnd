@@ -4,7 +4,7 @@ import { City } from "./city.entity";
 
 
 @Entity('admin_cities')   
-@Index(['user_id']) 
+@Index(['user_id'],{unique: true}) 
 @Index(['city_id'])        
 @Index(['user_id', 'city_id'], { unique: true })
 export class AdminCity{
