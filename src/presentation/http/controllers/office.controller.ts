@@ -34,6 +34,8 @@ import { GetPaymentMethodSwaggerDoc } from "../swagger/office/get-payment-method
 import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger";
 import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
 import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagger";
+import { GetOfficeSearchSwaggerDoc } from "../swagger/office/get-office-search.swagger";
+import { SearchOfficesUseCase } from "src/application/use-cases/office/search-office-by-name.use-case";
      
   @Controller('office')
   export class OfficeController {
@@ -47,7 +49,9 @@ import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagg
       private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase,
       private readonly getTopRatedOfficesUseCase: GetTopRatedOfficesUseCase,
       private readonly propertyFeeService: PropertyFeeService,
-      private readonly listOfficesUseCase: ListOfficesUseCase
+      private readonly listOfficesUseCase: ListOfficesUseCase,
+      private readonly searchOfficesUseCase: SearchOfficesUseCase
+
     ) {}
 
     @Get('/payment-method')
@@ -199,6 +203,35 @@ import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagg
     );
   }
 
+  @Get('search')
+  @Public()
+  @GetOfficeSearchSwaggerDoc()
+  async searchByName(
+    @Query('name') name: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
+    @Req() req: Request,
+  ) {
+    if (!name || name.trim().length === 0) {
+      throw new BadRequestException('q (search query) is required');
+    }
 
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const { data, total } = await this.searchOfficesUseCase.searchByName(
+      name.trim(),
+      page,
+      items,
+      baseUrl,
+    );
+
+    return successPaginatedResponse(
+      data,
+      total,
+      page,
+      items,
+      'تم إرجاع نتائج البحث',
+      200,
+    );
+  }
   }
    

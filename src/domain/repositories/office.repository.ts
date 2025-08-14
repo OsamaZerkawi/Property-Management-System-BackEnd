@@ -21,4 +21,5 @@ export interface OfficeRepositoryInterface {
   findOfficesByCityId(cityId: number);
   findAllOffices();
   findAllWithAvgRating( page: number,items: number,cityId?: number,regionId?: number,type?: string,rate?: number,)
+  findByName(q: string,page: number,items: number,): Promise<{ data: any[]; total: number }>
 }

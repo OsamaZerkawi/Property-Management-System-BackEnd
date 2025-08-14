@@ -272,19 +272,72 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         .andWhere('office.active = true')
         .getMany();        
     } 
-async findAllWithAvgRating(
+  async findAllWithAvgRating(
+    page: number,
+    items: number,
+    cityId?: number,
+    regionId?: number,
+    type?: string,
+    rate?: number,
+  ) {
+    let query = this.officeRepo
+      .createQueryBuilder('office')
+      .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
+      .leftJoin('office.region', 'region')
+      .leftJoin('region.city', 'city')
+      .select([
+        'office.id AS id',
+        'office.name AS name',
+        'office.logo AS logo',
+        'office.type AS type',
+        'region.name AS region_name',
+        'city.name AS city_name',
+        'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate', 
+      ])
+      .groupBy('office.id, region.id, city.id')
+      .orderBy('avg_rate', 'DESC');
+  
+    if (cityId) query = query.andWhere('city.id = :cityId', { cityId }); 
+    if (regionId) query = query.andWhere('region.id = :regionId', { regionId }); 
+    if (type) query = query.andWhere('office.type = :type', { type }); 
+    if (rate && rate >= 1 && rate <= 5) {
+      query = query.having('AVG(feedbacks.rate) >= :rate', { rate });
+    }
+
+    const [data, total] = await Promise.all([
+      query.offset((page - 1) * items).limit(items).getRawMany(),
+      query.getCount(),
+    ]);
+
+    return { data, total };
+  }
+
+
+  async findByName(
+  q: string,
   page: number,
   items: number,
-  cityId?: number,
-  regionId?: number,
-  type?: string,
-  rate?: number,
-) {
-  let query = this.officeRepo
+): Promise<{ data: any[]; total: number }> { 
+  const currentPage = Math.max(1, Number(page) || 1);
+  const pageSize = Math.max(1, Number(items) || 10);
+ 
+  const search = (q ?? '').trim();
+  
+  const likeParam = `%${search}%`;
+ 
+  const baseQb = this.officeRepo
     .createQueryBuilder('office')
     .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
     .leftJoin('office.region', 'region')
     .leftJoin('region.city', 'city')
+    .where('office.is_deleted = false');
+ 
+  if (search.length > 0) {
+    baseQb.andWhere('LOWER(office.name) LIKE LOWER(:q)', { q: likeParam });
+  }
+ 
+  const dataQb = baseQb
+    .clone()  
     .select([
       'office.id AS id',
       'office.name AS name',
@@ -292,27 +345,33 @@ async findAllWithAvgRating(
       'office.type AS type',
       'region.name AS region_name',
       'city.name AS city_name',
-      'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
-      'COUNT(feedbacks.id) AS rating_count',
+      'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate', 
     ])
-    .groupBy('office.id, region.id, city.id')
-    .orderBy('avg_rate', 'DESC');
+    .groupBy('office.id')
+    .addGroupBy('region.id')
+    .addGroupBy('city.id')
+    .orderBy('avg_rate', 'DESC')
+    .offset((currentPage - 1) * pageSize)
+    .limit(pageSize);
  
-  if (cityId) query = query.andWhere('city.id = :cityId', { cityId }); 
-  if (regionId) query = query.andWhere('region.id = :regionId', { regionId }); 
-  if (type) query = query.andWhere('office.type = :type', { type }); 
-  if (rate && rate >= 1 && rate <= 5) {
-    query = query.having('AVG(feedbacks.rate) >= :rate', { rate });
+  const countQb = this.officeRepo
+    .createQueryBuilder('office')
+    .leftJoin('office.region', 'region')
+    .leftJoin('region.city', 'city')
+    .where('office.is_deleted = false');
+
+  if (search.length > 0) {
+    countQb.andWhere('LOWER(office.name) LIKE LOWER(:q)', { q: likeParam });
   }
 
-  const [data, total] = await Promise.all([
-    query.offset((page - 1) * items).limit(items).getRawMany(),
-    query.getCount(),
-  ]);
+  countQb.select('COUNT(DISTINCT office.id)', 'total');
+ 
+  const [data, countRaw] = await Promise.all([dataQb.getRawMany(), countQb.getRawOne()]);
+
+  const total = countRaw && countRaw.total ? parseInt(countRaw.total, 10) : 0;
 
   return { data, total };
 }
-
 
 } 
 

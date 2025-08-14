@@ -13,7 +13,7 @@ export interface OfficeListItem {
 @Injectable()
 export class ListOfficesUseCase {
   constructor(
-     @Inject(OFFICE_REPOSITORY)
+    @Inject(OFFICE_REPOSITORY)
     private readonly officeRepo: OfficeRepositoryInterface,
   ) {}
     
