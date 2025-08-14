@@ -19,6 +19,7 @@ import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity"; 
 import { PropertyFeeService } from "src/application/services/propertyFee.service";  
 import { ResidentialOfficeModule } from "./residential-office.module";
+import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ResidentialOfficeModule } from "./residential-office.module";
     GetOfficeDetailsUseCase,
     GetOfficePaymentMethodUseCase,
     FindOfficeForUserUseCase, 
+    ListOfficesUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

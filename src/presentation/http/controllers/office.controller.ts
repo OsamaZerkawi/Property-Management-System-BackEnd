@@ -32,6 +32,7 @@ import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger"
 import { PropertyFeeService } from "src/application/services/propertyFee.service";
 import { GetPaymentMethodSwaggerDoc } from "../swagger/office/get-payment-method.swagger";
 import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger";
+import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
      
   @Controller('office')
   export class OfficeController {
@@ -44,7 +45,8 @@ import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger"
       private readonly getOfficeFeesUseCase: GetOfficeFeesUseCase,
       private readonly updateOfficeFeesUseCase: UpdateOfficeFeesUseCase,
       private readonly getTopRatedOfficesUseCase: GetTopRatedOfficesUseCase,
-      private readonly propertyFeeService: PropertyFeeService
+      private readonly propertyFeeService: PropertyFeeService,
+      private readonly listOfficesUseCase: ListOfficesUseCase
     ) {}
 
     @Get('/payment-method')
@@ -159,6 +161,17 @@ import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger"
     @Param('property_id') propertyId: number
   ) { 
     return this.propertyFeeService.getCommissionAndRental(propertyId, user.sub);
+  }
+
+  @Get('list')
+  @Public()
+  async list(
+  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
+  @Req() req: Request) {
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const data = await this.listOfficesUseCase.execute(page,items,baseUrl);
+    return successResponse(data, 'تم إرجاع قائمة المكاتب', 200);
   }
   }
    
