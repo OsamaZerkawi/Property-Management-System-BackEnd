@@ -40,7 +40,7 @@ export function FilterMobileTourismSwaggerDoc() {
                 propertyId: { type: 'number', example: 1 },
                 location:   { type: 'string', example: 'دمشق, المزة' },
                 postImage:  { type: 'string', example: 'https://...' },
-                title:      { type: 'string', example: 'شاليه 55م' },
+                postTitle:      { type: 'string', example: 'شاليه 55م' },
                 price:      { type: 'number', example: 300000 },
               },
             },

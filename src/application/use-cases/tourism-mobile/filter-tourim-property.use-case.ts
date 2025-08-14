@@ -5,7 +5,7 @@ export interface PropertyResponse {
   propertyId: number;
   location: string;
   postImage: string | null;
-  title: string;
+  postTitle: string;
   price: number;
 } 
 
@@ -29,8 +29,8 @@ const {data, total} = await this.repo.filter(dto, page, items);
      postImage: p.post.image
       ? `${baseUrl}/uploads/properties/posts/images/${p.post.image}`
       : null, 
-    title: p.post.title,
-    price: p.touristic.price,
+    postTitle: p.post.title,
+    price: Number(p.touristic.price)
   }));
 
   return {

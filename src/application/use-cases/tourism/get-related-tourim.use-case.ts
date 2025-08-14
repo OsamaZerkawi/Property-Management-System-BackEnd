@@ -44,10 +44,10 @@ export class GetRelatedTouristicUseCase {
 
       return {
         propertyId: Number(r.property_id),
-        title: r.post_title,
+        postTitle: r.post_title,
         date: r.post_date ? new Date(r.post_date).toISOString().slice(0, 10) : null,
         postImage,
-        pricePerNight: r.touristic_price,
+        pricePerNight: Number(r.touristic_price),
         location,
       };
     });
