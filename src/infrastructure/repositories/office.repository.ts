@@ -274,9 +274,14 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     } 
 async findAllWithAvgRating(
   page: number,
-  items: number
-): Promise<{ rawData: any[]; total: number }> {
-  const qb = this.officeRepo.createQueryBuilder('office')
+  items: number,
+  cityId?: number,
+  regionId?: number,
+  type?: string,
+  rate?: number,
+) {
+  let query = this.officeRepo
+    .createQueryBuilder('office')
     .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
     .leftJoin('office.region', 'region')
     .leftJoin('region.city', 'city')
@@ -288,18 +293,26 @@ async findAllWithAvgRating(
       'region.name AS region_name',
       'city.name AS city_name',
       'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
-      'COUNT(*) OVER() AS total_count', // ✅ يحسب total بدون query ثاني
+      'COUNT(feedbacks.id) AS rating_count',
     ])
     .groupBy('office.id, region.id, city.id')
-    .orderBy('avg_rate', 'DESC')
-    .offset((page - 1) * items)
-    .limit(items);
+    .orderBy('avg_rate', 'DESC');
+ 
+  if (cityId) query = query.andWhere('city.id = :cityId', { cityId }); 
+  if (regionId) query = query.andWhere('region.id = :regionId', { regionId }); 
+  if (type) query = query.andWhere('office.type = :type', { type }); 
+  if (rate && rate >= 1 && rate <= 5) {
+    query = query.having('AVG(feedbacks.rate) >= :rate', { rate });
+  }
 
-  const rawData = await qb.getRawMany();
-  const total = rawData[0]?.total_count ? parseInt(rawData[0].total_count) : 0;
+  const [data, total] = await Promise.all([
+    query.offset((page - 1) * items).limit(items).getRawMany(),
+    query.getCount(),
+  ]);
 
-  return { rawData, total };
+  return { data, total };
 }
+
 
 } 
 

@@ -168,12 +168,37 @@ import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagg
   @Public()
   @GetOfficeListSwaggerDoc()
   async list(
-  @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-  @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
-  @Req() req: Request) {
+    @Req() req: Request,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
+    @Query('city_id') cityId?: number,
+    @Query('region_id') regionId?: number,
+    @Query('type') type?: string,
+    @Query('rate') rate?: number,  
+
+  ) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const { data, total } = await this.listOfficesUseCase.execute(page,items,baseUrl);
-    return  successPaginatedResponse(data, total, page, items, 'تم إرجاع قائمة المكاتب', 200);
+
+    const { data, total } = await this.listOfficesUseCase.execute(
+      page,
+      items,
+      baseUrl,
+      cityId,
+      regionId,
+      type,
+      rate,
+    );
+
+    return successPaginatedResponse(
+      data,
+      total,
+      page,
+      items,
+      'تم إرجاع قائمة المكاتب',
+      200,
+    );
   }
+
+
   }
    

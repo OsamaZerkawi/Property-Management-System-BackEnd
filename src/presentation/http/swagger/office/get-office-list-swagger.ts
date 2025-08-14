@@ -9,7 +9,8 @@ export function GetOfficeListSwaggerDoc() {
   return applyDecorators(
     ApiOperation({
       summary: 'خاص بتطبيق الموبايل',
-      description: 'API لعرض المكاتب العقارية مع الشعار، النوع، الموقع، ومتوسط التقييم، مع دعم التصفح بالصفحات (Pagination).',
+      description:
+        'API لعرض المكاتب العقارية مع الشعار، النوع، الموقع، ومتوسط التقييم، مع دعم التصفح بالصفحات (Pagination) والفلاتر الاختيارية.',
     }),
 
     ApiQuery({
@@ -28,6 +29,39 @@ export function GetOfficeListSwaggerDoc() {
       description: 'عدد العناصر في كل صفحة (افتراضي = 10)',
     }),
 
+    ApiQuery({
+      name: 'city_id',
+      required: false,
+      type: Number,
+      example: 2,
+      description: 'معرف المدينة لفلترة المكاتب حسب المدينة',
+    }),
+
+    ApiQuery({
+      name: 'region_id',
+      required: false,
+      type: Number,
+      example: 5,
+      description: 'معرف المنطقة لفلترة المكاتب حسب المنطقة',
+    }),
+
+    ApiQuery({
+      name: 'type',
+      required: false,
+      type: String,
+      example: 'سكني',
+      description: 'نوع المكتب (مثال: سكني، سياحي...)',
+    }),
+
+    ApiQuery({
+      name: 'rate',
+      required: false,
+      type: Number,
+      example: 4,
+      description:
+        'تصفية المكاتب التي متوسط تقييمها يساوي أو أكبر من هذا الرقم (1-5)',
+    }),
+
     ApiOkResponse({
       description: 'تم جلب قائمة المكاتب العقارية بنجاح',
       schema: {
@@ -42,14 +76,6 @@ export function GetOfficeListSwaggerDoc() {
               type: 'سكني',
               location: 'دمشق، ميدان',
               rate: 5,
-            },
-            {
-              officeId: 3,
-              name: 'مكتب العمران',
-              logo: 'http://localhost:3000/uploads/offices/logos/logo2.png',
-              type: 'سياحي',
-              location: 'دمشق، باب توما',
-              rate: 3.5,
             },
           ],
           status_code: 200,

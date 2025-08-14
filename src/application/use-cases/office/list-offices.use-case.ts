@@ -17,30 +17,45 @@ export class ListOfficesUseCase {
     private readonly officeRepo: OfficeRepositoryInterface,
   ) {}
     
-    async execute(
-    page: number,
-    items: number,
-    baseUrl: string
-    ): Promise<{ data: OfficeListItem[]; total: number }> {
-    const { rawData, total } = await this.officeRepo.findAllWithAvgRating(page, items);
+   async execute(
+  page: number,
+  items: number,
+  baseUrl: string,
+  cityId?: number,
+  regionId?: number,
+  type?: string,
+  rate?: number,
+): Promise<{ data: OfficeListItem[]; total: number }> {
+  const raws = await this.officeRepo.findAllWithAvgRating(
+    page,
+    items,
+    cityId,
+    regionId,
+    type,
+    rate,
+  );
 
-    const offices: OfficeListItem[] = rawData.map(r => {
-        const logoFileName = r.logo;
-        const logo = logoFileName
-        ? `${baseUrl}/uploads/offices/logos/${logoFileName}`
-        : null;
+  const offices: OfficeListItem[] = raws.data.map((r) => {
+    const logoFileName = r.logo;
+    const logo = logoFileName
+      ? `${baseUrl}/uploads/offices/logos/${logoFileName}`
+      : null;
 
-        return {
-        officeId: r.id,
-        name: r.name,
-        logo,
-        type: r.type,
-        location: `${r.city_name || ''}، ${r.region_name || ''}`.trim(),
-        rate: typeof r.avg_rate === 'string' ? parseFloat(r.avg_rate) : (r.avg_rate ?? 0),
-        };
-    });
+    return {
+      officeId: r.id,
+      name: r.name,
+      logo,
+      type: r.type,
+      location: `${r.city_name || ''}، ${r.region_name || ''}`.trim(),
+      rate:
+        typeof r.avg_rate === 'string'
+          ? parseFloat(r.avg_rate)
+          : r.avg_rate ?? 0,
+    };
+  });
 
-    return { data: offices, total };
-    }
+  return { data: offices, total: raws.total };
+}
+
 
 }

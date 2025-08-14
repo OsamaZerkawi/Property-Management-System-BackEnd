@@ -20,5 +20,5 @@ export interface OfficeRepositoryInterface {
   findWithinBounds(bounds: ExploreMapDto);
   findOfficesByCityId(cityId: number);
   findAllOffices();
-  findAllWithAvgRating(page: number, items: number);
+  findAllWithAvgRating( page: number,items: number,cityId?: number,regionId?: number,type?: string,rate?: number,)
 }
