@@ -40,9 +40,11 @@ import { RentalContractModule } from 'src/presentation/http/modules/rental-contr
 import { UserModule } from 'src/presentation/http/modules/user.module';
 import { ReminderScheduler } from 'src/infrastructure/schedulers/reminder.scheduler';
 import { ReminderModule } from 'src/presentation/http/modules/reminder.module';
+import { StatsModule } from 'src/presentation/http/modules/stats.module';
  
 @Module({
   imports: [
+    StatsModule,
     ReminderModule,
     AdminPartnersManagementModule,
     ScheduleModule.forRoot(),
