@@ -271,27 +271,35 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         .andWhere('office.is_deleted = false')
         .andWhere('office.active = true')
         .getMany();        
-    }
-    async findAllWithAvgRating(page: number, items: number) {
-     return await this.officeRepo
-          .createQueryBuilder('office')
-          .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL') // فقط التقييمات الحقيقية
-          .leftJoin('office.region', 'region')
-          .leftJoin('region.city', 'city')
-          .select([
-            'office.id AS id',
-            'office.name AS name',
-            'office.logo AS logo',
-            'office.type AS type',
-            'region.name AS region_name',
-            'city.name AS city_name',  
-            'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate', 
-          ])
-          .groupBy('office.id, region.id, city.id')
-          .orderBy('avg_rate', 'DESC')
-          .offset((page - 1) * items)
-          .limit(items)
-          .getRawMany();
-  }
+    } 
+async findAllWithAvgRating(
+  page: number,
+  items: number
+): Promise<{ rawData: any[]; total: number }> {
+  const qb = this.officeRepo.createQueryBuilder('office')
+    .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
+    .leftJoin('office.region', 'region')
+    .leftJoin('region.city', 'city')
+    .select([
+      'office.id AS id',
+      'office.name AS name',
+      'office.logo AS logo',
+      'office.type AS type',
+      'region.name AS region_name',
+      'city.name AS city_name',
+      'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+      'COUNT(*) OVER() AS total_count', // ✅ يحسب total بدون query ثاني
+    ])
+    .groupBy('office.id, region.id, city.id')
+    .orderBy('avg_rate', 'DESC')
+    .offset((page - 1) * items)
+    .limit(items);
+
+  const rawData = await qb.getRawMany();
+  const total = rawData[0]?.total_count ? parseInt(rawData[0].total_count) : 0;
+
+  return { rawData, total };
+}
+
 } 
 

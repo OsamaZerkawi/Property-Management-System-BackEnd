@@ -16,27 +16,31 @@ export class ListOfficesUseCase {
      @Inject(OFFICE_REPOSITORY)
     private readonly officeRepo: OfficeRepositoryInterface,
   ) {}
- 
-  async execute(page:number,items:number,baseUrl: string): Promise<OfficeListItem[]> {
-    const raws = await this.officeRepo.findAllWithAvgRating(page,items);
+    
+    async execute(
+    page: number,
+    items: number,
+    baseUrl: string
+    ): Promise<{ data: OfficeListItem[]; total: number }> {
+    const { rawData, total } = await this.officeRepo.findAllWithAvgRating(page, items);
 
-    const offices: OfficeListItem[] = raws.map(r => {
-      const logoFileName = r.logo;
-      const logo = logoFileName
+    const offices: OfficeListItem[] = rawData.map(r => {
+        const logoFileName = r.logo;
+        const logo = logoFileName
         ? `${baseUrl}/uploads/offices/logos/${logoFileName}`
-        : null; 
-      return {
+        : null;
+
+        return {
         officeId: r.id,
         name: r.name,
-        logo: logo,
-        type: r.office_type,
-        location: `${r.city_name || ''}، ${
-          r.region_name || ''
-        }`.trim(),
+        logo,
+        type: r.type,
+        location: `${r.city_name || ''}، ${r.region_name || ''}`.trim(),
         rate: typeof r.avg_rate === 'string' ? parseFloat(r.avg_rate) : (r.avg_rate ?? 0),
-      };
+        };
     });
 
-    return offices;
-  }
+    return { data: offices, total };
+    }
+
 }

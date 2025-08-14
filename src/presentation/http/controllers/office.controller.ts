@@ -33,6 +33,7 @@ import { PropertyFeeService } from "src/application/services/propertyFee.service
 import { GetPaymentMethodSwaggerDoc } from "../swagger/office/get-payment-method.swagger";
 import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger";
 import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
+import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagger";
      
   @Controller('office')
   export class OfficeController {
@@ -165,13 +166,14 @@ import { ListOfficesUseCase } from "src/application/use-cases/office/list-office
 
   @Get('list')
   @Public()
+  @GetOfficeListSwaggerDoc()
   async list(
   @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
   @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
   @Req() req: Request) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const data = await this.listOfficesUseCase.execute(page,items,baseUrl);
-    return successResponse(data, 'تم إرجاع قائمة المكاتب', 200);
+      const { data, total } = await this.listOfficesUseCase.execute(page,items,baseUrl);
+    return  successPaginatedResponse(data, total, page, items, 'تم إرجاع قائمة المكاتب', 200);
   }
   }
    
