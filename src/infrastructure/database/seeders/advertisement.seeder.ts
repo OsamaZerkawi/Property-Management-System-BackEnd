@@ -65,6 +65,7 @@ export class AdvertisementSeeder {
         type: InvoiceType.IMAGE,
         paid_date: faker.date.recent({ days: 15 }),
         office,
+        image: 'invoice.jpeg',
       });
 
       const savedInvoice = await this.invoiceRepo.save(invoice);

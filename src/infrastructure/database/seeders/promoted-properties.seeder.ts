@@ -74,6 +74,7 @@ export class PromotedPropertySeeder {
         type: InvoiceType.PROMOTIONAL,
         paid_date: faker.date.recent({ days: 10 }),
         office,
+        image: 'invoice.jpeg',
       });
 
       const savedInvoice = await this.invoiceRepo.save(invoice);

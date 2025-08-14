@@ -1,7 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectEntityManager } from "@nestjs/typeorm";
-import { InvoiceType } from "src/domain/enums/invoice.type.enum";
-import { ADVERTISEMENT_REPOSITORY, AdvertisementRepositoryInterface } from "src/domain/repositories/advertisement.repository";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { InvoiceType } from 'src/domain/enums/invoice.type.enum';
+import {
+  ADVERTISEMENT_REPOSITORY,
+  AdvertisementRepositoryInterface,
+} from 'src/domain/repositories/advertisement.repository';
 
 @Injectable()
 export class GetAllAdvertisementInvoicesUseCase {
@@ -10,25 +13,33 @@ export class GetAllAdvertisementInvoicesUseCase {
     private readonly advertisementRepo: AdvertisementRepositoryInterface,
   ) {}
 
-
-  async execute(baseUrl: string){
+  async execute(baseUrl: string) {
     const invoices = await this.advertisementRepo.findAllWithInvoices();
 
-    return invoices.map(invoice => {
-      const paidDate = invoice.paid_date ? new Date(invoice.paid_date) : null;
-    
-      //should to add promoted advertisements in future
-      return {
+    return invoices.map((invoice) => {
+      const paidDate = invoice.paid_date
+        ? new Date(invoice.paid_date).toISOString().split('T')[0]
+        : null;
+
+      const result: any = {
         id: invoice.id,
         amount: invoice.amount,
         type: invoice.type,
-        paid_date: paidDate ? paidDate.toISOString().split('T')[0] : null,
+        paid_date: paidDate,
         office_id: invoice.office.id,
         office_name: invoice.office.name,
-        ...(invoice.type === InvoiceType.IMAGE && {
-            image: baseUrl + '/uploads/advertisements/images' + invoice.advertisement.image,
-        }),
+        image: `${baseUrl}/uploads/invoices/images/${invoice.image}`,
       };
-    });  
+
+      // if (invoice.advertisement) {
+      //   result.image = `${baseUrl}/uploads/advertisements/images/${invoice.advertisement.image}`;
+      // }
+
+      // if (invoice.promotedProperty) {
+      //   result.title = invoice.promotedProperty.property.post.title;
+      // }
+
+      return result;
+    });
   }
 }

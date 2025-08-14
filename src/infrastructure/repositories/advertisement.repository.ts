@@ -23,16 +23,24 @@ export class AdvertisementRepository
     return this.onlineInvoiceRepo
       .createQueryBuilder('invoice')
       .leftJoin('invoice.office', 'office')
+      .leftJoin('invoice.promotedProperty', 'promotedProperty')
+      .leftJoin('promotedProperty.property', 'property')
+      .leftJoin('property.post', 'post')
       .leftJoin('invoice.advertisement', 'advertisement')
       .select([
         'invoice.id',
         'invoice.amount',
         'invoice.type',
         'invoice.paid_date',
+        'invoice.image',
         'office.id',
         'office.name',
         'advertisement.id',
         'advertisement.image',
+        'property.id',
+        'promotedProperty.id',
+        'post.id',
+        'post.title',
       ])
       .orderBy('invoice.created_at', 'DESC')
       .getMany();
@@ -92,10 +100,18 @@ export class AdvertisementRepository
   }
 
   async findPendingAds() {
-    return this.advertisementRepo.find({
-      where: { admin_agreement: AdminAgreement.PENDING },
-      select: ['id', 'day_period', 'image'],
-    });
+    return this.advertisementRepo
+      .createQueryBuilder('ad')
+      .leftJoin('ad.office', 'office')
+      .where('ad.admin_agreement = :status', { status: AdminAgreement.PENDING })
+      .select([
+        'ad.id',
+        'ad.day_period',
+        'ad.image',
+        'ad.created_at',
+        'office.name',
+      ])
+      .getMany();
   }
 
   findAllWithInvoicesByOfficeId(officeId: number) {
