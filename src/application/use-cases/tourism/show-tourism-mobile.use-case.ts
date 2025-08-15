@@ -31,7 +31,7 @@ export class ShowTourismMobileUseCase {
 
   const dto = {
     propertyId:       property.id,
-    title:    post.title,
+    postTitle:    post.title,
     description: post.description,
     date: format(post.date, 'yyyy-MM-dd'), 
     postImage: post.image
@@ -52,7 +52,7 @@ export class ShowTourismMobileUseCase {
     officeId:         property.office.id,
     officeName:       property.office.name,
     officeLocation: `${office.region.city.name}، ${office.region.name}`,
-    price:            touristic.price,
+    price:            Number(touristic.price),
     electricity:      touristic.electricity,
     water:            touristic.water,
     pool:             touristic.pool,
