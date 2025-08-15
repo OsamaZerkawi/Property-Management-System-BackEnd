@@ -1229,4 +1229,33 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .getOne();
   }
 
+  async findOfficeProperties(
+  officeId: number,
+  propertyType?: string,
+): Promise<any[]> {
+  const query = this.propertyRepo.createQueryBuilder('property')
+    .innerJoin('property.office', 'office')
+    .innerJoin('property.post', 'post')
+    .innerJoin('property.region', 'region')
+    .innerJoin('region.city', 'city')
+    .innerJoin('property.residential', 'residential')
+    .where('office.id = :officeId', { officeId });
+
+  if (propertyType) {
+    query.andWhere('property.property_type = :propertyType', { propertyType });
+  }
+
+  const properties = await query
+    .select([
+      'post.image AS postImage', 
+      'post.title AS postTitle',
+      "CONCAT(city.name, ',', region.name) AS location",
+      'property.property_type AS type',
+      'residential.selling_price AS price',
+    ])
+    .getRawMany();
+
+  return properties;
+}
+
 }

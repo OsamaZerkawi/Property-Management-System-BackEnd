@@ -45,6 +45,7 @@ import { CreateComplaintOfficeSwaggerDoc } from "../swagger/office/create-compla
 import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
 import { ShowOfficeDetailsSwaggerDoc } from "../swagger/office/show-office-details.swagger";
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
+import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
      
   @Controller('office')
   export class OfficeController {
@@ -63,6 +64,7 @@ import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/
       private readonly rateOfficeUseCase: RateOfficeUseCase,
       private readonly complaintOfficeUseCase: ComplaintOfficeUseCase,
       private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
+      private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
 
     ) {}
 
@@ -280,6 +282,19 @@ import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/
     const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data = await this.getOfficeDetailsMobileUseCase.execute(Number(officeId), baseUrl);
     return successResponse(data, 'تم إرجاع تفاصيل المكتب بنجاح');
+  }
+
+  @Get(':officeId/properties')
+  @Public()
+  async getOfficeProperties(
+    @Param('officeId', ParseIntPipe) officeId: number,
+    @Query('property_type') propertyType?: string,
+  ) {
+    const data = await this.getOfficePropertiesUseCase.execute(
+      officeId,
+      propertyType,
+    );
+   return successResponse(data,'تم ارجاع العقارات بنجاح'); 
   }
 }
    

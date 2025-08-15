@@ -24,10 +24,13 @@ import { SearchOfficesUseCase } from "src/application/use-cases/office/search-of
 import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
 import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
+import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
+import { PropertyModule } from "./property.module";
 
 @Module({
   imports: [
     AuthModule, 
+    PropertyModule,
     forwardRef(() => ResidentialOfficeModule),
     TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback,
 ]),
@@ -48,6 +51,7 @@ import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/
     RateOfficeUseCase,
     ComplaintOfficeUseCase,
     GetOfficeDetailsMobileUseCase,
+    GetOfficePropertiesUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

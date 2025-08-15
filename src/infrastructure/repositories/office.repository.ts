@@ -442,7 +442,7 @@ async findOfficeDetailsById(officeId: number, baseUrl: string) {
       'region.name AS region_name',
       'city.name AS city_name',
       'user.phone AS phone',
-      'COALESCE(AVG(fb.rate), 0) AS avg_rate',
+      'COALESCE(AVG(fb.rate), 0.00) AS avg_rate',
       `COALESCE(
          json_agg(DISTINCT jsonb_build_object('platform', social.platform, 'link', social.link))
          FILTER (WHERE social.id IS NOT NULL),
@@ -465,7 +465,7 @@ async findOfficeDetailsById(officeId: number, baseUrl: string) {
     name: raw.name,
     type: raw.type ?? null,
     location,
-    rate: raw.avg_rate !== null ? Number(raw.avg_rate) : null,
+    rate: raw.avg_rate !== null ? Number(raw.avg_rate) : 0.00,
     opening_time: raw.opening_time ?? null,
     closing_time: raw.closing_time ?? null,
     phone: raw.phone ?? null,
