@@ -6,4 +6,5 @@ export const JOIN_REQUEST_REPOSITORY = 'JOIN_REQUEST_REPOSITORY';
 export interface JoinRequestRepositoryInterface {
     findById(id: number);
     updateStatus(id: number, updateData: Partial<JoinRequest>);
+    findAll();
 }

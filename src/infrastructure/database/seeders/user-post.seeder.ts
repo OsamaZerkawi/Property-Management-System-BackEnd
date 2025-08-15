@@ -111,7 +111,7 @@ export class UserPostSeeder {
       const budget = faker.number.float({ min: 50000, max: 500000, fractionDigits: 2 });
       const type = faker.helpers.arrayElement(Object.values(UserPostPropertyType)) as UserPostPropertyType;
 
-      const status = UserPostAdminAgreement.ACCEPTED
+      const status =faker.helpers.arrayElement(Object.values(UserPostAdminAgreement)) as UserPostAdminAgreement;
 
       const userPost = this.userPostRepo.create({
         user,

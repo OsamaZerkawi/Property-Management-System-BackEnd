@@ -7,6 +7,9 @@ import { UpdatePropertyPostDto } from "src/application/dtos/property/UpdatePrope
 export const PROPERTY_POST_REPOSITORY = 'PROPERTY_POST_REPOSITORY';
 
 export interface PropertyPostRepositoryInterface {
+    findById(id: number)
     createPropertyPostAndSaveIt(data: CreatePropertyPostDto);
     updatePropertyPost(id: number,data: UpdatePropertyPostDto);
+    findPendingPostsForAdmin(adminId: number);
+    update(id: number,fields: Partial<PropertyPost>);
 }

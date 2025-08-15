@@ -30,7 +30,7 @@ export class ApproveAdvertisementRequestUseCase {
         await this.notificationRepo.create({
             userId: user.id,
             title: 'تمت الموافقة على إعلانك',
-            body:'يمكنك الآن إتمام عملة الدفع لتغيل الإعلان',
+            body:'يمكنك الآن إتمام عملية الدفع لتغيل الإعلان',
             data:{
                 adId:advertisement.id,
             },

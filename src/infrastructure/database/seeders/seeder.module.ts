@@ -42,8 +42,9 @@ import { OfficeFeedbackSeeder } from "./office-feedback.seeder";
 import { PropertyFavorite } from "src/domain/entities/property-favorite.entity";
 import { PropertyFavoriteSeeder } from "./favorite.seeder";
 import { AdvertisementSeeder } from "./advertisement.seeder";
-import { ServicePriceModule } from "src/presentation/http/modules/service-price.module";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
+import { JoinRequestSeeder } from "./join-requests.seeder";
+import { JoinRequest } from "src/domain/entities/join-request.entity";
 
 
 @Module({
@@ -64,7 +65,7 @@ import { Advertisement } from "src/domain/entities/advertisements.entity";
             ServicePrice,UserRole,Touristic,AdditionalService,
             Service,ServiceProvider,PromotedProperty,OnlineInvoice,
             UserPost,ServiceFeedback,OfficeFeedback,PropertyFavorite,
-            ServicePrice,Advertisement
+            ServicePrice,Advertisement,JoinRequest,
         ])
     ],
     providers:[
@@ -72,7 +73,8 @@ import { Advertisement } from "src/domain/entities/advertisements.entity";
         RoleSeeder,PropertyFeedbackSeeder,OfficePropertySeeder,
         ServicePriceSeeder,TouristicPropertySeeder,ServiceProviderSeeder,
         PromotedPropertySeeder,UserPostSeeder,ServiceFeedbackSeeder,
-        OfficeFeedbackSeeder,PropertyFavoriteSeeder,AdvertisementSeeder
+        OfficeFeedbackSeeder,PropertyFavoriteSeeder,AdvertisementSeeder,
+        JoinRequestSeeder,
     ],
     exports:[SeederService]
 })
