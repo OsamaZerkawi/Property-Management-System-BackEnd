@@ -22,6 +22,7 @@ import { ResidentialOfficeModule } from "./residential-office.module";
 import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
 import { SearchOfficesUseCase } from "src/application/use-cases/office/search-office-by-name.use-case";
 import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
+import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.
     ListOfficesUseCase,
     SearchOfficesUseCase,
     RateOfficeUseCase,
+    ComplaintOfficeUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

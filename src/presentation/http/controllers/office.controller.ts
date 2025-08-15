@@ -40,6 +40,9 @@ import { CreateOfficeRatingDto } from "src/application/dtos/office/create-office
 import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
 import { RateOfficeSwaggerDoc } from "../swagger/office/rate-office.swagger";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
+import { CreateOfficeComplaintDto } from "src/application/dtos/office/create-office-complaint.dto";
+import { CreateComplaintOfficeSwaggerDoc } from "../swagger/office/create-complaint-office.swagger";
+import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
      
   @Controller('office')
   export class OfficeController {
@@ -55,8 +58,8 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
       private readonly propertyFeeService: PropertyFeeService,
       private readonly listOfficesUseCase: ListOfficesUseCase,
       private readonly searchOfficesUseCase: SearchOfficesUseCase,
-      private readonly rateOfficeUseCase: RateOfficeUseCase
-
+      private readonly rateOfficeUseCase: RateOfficeUseCase,
+      private readonly complaintOfficeUseCase: ComplaintOfficeUseCase
     ) {}
 
     @Get('/payment-method')
@@ -249,6 +252,18 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
   ) {
     await this.rateOfficeUseCase.execute(user.sub, dto);
     return successResponse( [], 'تم تقييم المكتب بنجاح', HttpStatus.CREATED);
+  }
+
+  @Post('report')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileFieldsInterceptor([]))  
+  @CreateComplaintOfficeSwaggerDoc()
+  async reportOffice(
+    @CurrentUser() user: any,
+    @Body() dto: CreateOfficeComplaintDto,
+  ) {
+    await this.complaintOfficeUseCase.execute(user.sub, dto);
+    return successResponse([], 'تم إرسال البلاغ بنجاح', HttpStatus.CREATED);
   }
   }
    

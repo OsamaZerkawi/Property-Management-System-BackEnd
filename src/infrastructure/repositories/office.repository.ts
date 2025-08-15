@@ -406,6 +406,21 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         await manager.save(OfficeFeedback, feedback);
       } 
     });
-  }
+  }  
+  async createComplaint(userId: number, officeId: number, complaintText: string): Promise<void> {
+  await this.dataSource.transaction(async (manager) => {
+    const now = new Date();
+
+    const complaint = manager.create(OfficeFeedback, {
+      office: { id: officeId } as any,
+      user: { id: userId } as any,
+      complaint: complaintText, 
+      created_at: now,
+      updated_at: now,
+    });
+
+    await manager.save(OfficeFeedback, complaint);
+  });
+}
 } 
 

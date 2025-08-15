@@ -23,4 +23,5 @@ export interface OfficeRepositoryInterface {
   findAllWithAvgRating( page: number,items: number,cityId?: number,regionId?: number,type?: string,rate?: number,)
   findByName(q: string,page: number,items: number,): Promise<{ data: any[]; total: number }>
   rateAnOffice( userId: number, officeId: number, rate: number,)
+  createComplaint(userId: number, officeId: number, complaintText: string): Promise<void>
 }
