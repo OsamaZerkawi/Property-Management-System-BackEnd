@@ -12,6 +12,7 @@ import { NotFoundException } from "@nestjs/common";
 import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
 import { errorResponse } from "src/shared/helpers/response.helper"; 
 import { ExploreMapDto } from 'src/application/dtos/map/explore-map.dto';
+import { OfficeFeedback } from 'src/domain/entities/office-feedback.entity';
  
 
 @Injectable()
@@ -373,5 +374,38 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   return { data, total };
 }
 
+  async rateAnOffice(
+    userId: number,
+    officeId: number,
+    rate: number,
+  )  {
+  
+    await this.dataSource.transaction(async (manager) => { 
+  
+      let feedback = await manager.findOne(OfficeFeedback, {
+        where: {
+          office: { id: officeId } as any,
+          user: { id: userId } as any,
+        },
+      });
+
+      const now = new Date();
+
+      if (feedback) { 
+        feedback.rate = rate; 
+        if ('updated_at' in feedback) (feedback as any).updated_at = now;
+        await manager.save(OfficeFeedback, feedback);
+      } else { 
+        feedback = manager.create(OfficeFeedback, {
+          office: { id: officeId } as any,
+          user: { id: userId } as any,
+          rate, 
+          created_at: now as any,
+          updated_at: now as any,
+        });
+        await manager.save(OfficeFeedback, feedback);
+      } 
+    });
+  }
 } 
 

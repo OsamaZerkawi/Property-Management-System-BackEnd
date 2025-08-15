@@ -36,6 +36,10 @@ import { ListOfficesUseCase } from "src/application/use-cases/office/list-office
 import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagger";
 import { GetOfficeSearchSwaggerDoc } from "../swagger/office/get-office-search.swagger";
 import { SearchOfficesUseCase } from "src/application/use-cases/office/search-office-by-name.use-case";
+import { CreateOfficeRatingDto } from "src/application/dtos/office/create-office-rating.dto";
+import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
+import { RateOfficeSwaggerDoc } from "../swagger/office/rate-office.swagger";
+import { FileFieldsInterceptor } from "@nestjs/platform-express";
      
   @Controller('office')
   export class OfficeController {
@@ -50,7 +54,8 @@ import { SearchOfficesUseCase } from "src/application/use-cases/office/search-of
       private readonly getTopRatedOfficesUseCase: GetTopRatedOfficesUseCase,
       private readonly propertyFeeService: PropertyFeeService,
       private readonly listOfficesUseCase: ListOfficesUseCase,
-      private readonly searchOfficesUseCase: SearchOfficesUseCase
+      private readonly searchOfficesUseCase: SearchOfficesUseCase,
+      private readonly rateOfficeUseCase: RateOfficeUseCase
 
     ) {}
 
@@ -232,6 +237,18 @@ import { SearchOfficesUseCase } from "src/application/use-cases/office/search-of
       'تم إرجاع نتائج البحث',
       200,
     );
+  }
+
+  @Post('rate')
+  @UseInterceptors(FileFieldsInterceptor([]))  
+  @RateOfficeSwaggerDoc()
+  @UseGuards(JwtAuthGuard)
+  async rateOffice(
+    @CurrentUser() user: any,
+    @Body() dto: CreateOfficeRatingDto,
+  ) {
+    await this.rateOfficeUseCase.execute(user.sub, dto);
+    return successResponse( [], 'تم تقييم المكتب بنجاح', HttpStatus.CREATED);
   }
   }
    

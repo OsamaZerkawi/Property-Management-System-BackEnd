@@ -18,7 +18,7 @@ export class OfficeFeedback {
     @JoinColumn({name: 'user_id'})
     user: User;
 
-    @Column({type: 'int',nullable: true})
+    @Column({ type: 'numeric', precision: 2, scale: 1, nullable: true })
     rate: number;
 
     @Column({type: 'text',nullable:true})
