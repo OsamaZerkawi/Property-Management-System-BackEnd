@@ -287,14 +287,22 @@ import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get
   @Get(':officeId/properties')
   @Public()
   async getOfficeProperties(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
     @Param('officeId', ParseIntPipe) officeId: number,
+    @Req() req: Request,
     @Query('property_type') propertyType?: string,
   ) {
-    const data = await this.getOfficePropertiesUseCase.execute(
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    const {total,data} = await this.getOfficePropertiesUseCase.execute(
+      page,
+      items,
+      baseUrl,
       officeId,
       propertyType,
     );
-   return successResponse(data,'تم ارجاع العقارات بنجاح'); 
+   return successPaginatedResponse(data,total,page,items,'تم ارجاع العقارات بنجاح'); 
   }
 }
    

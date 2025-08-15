@@ -7,7 +7,31 @@ export class GetOfficePropertiesUseCase {
     @Inject(PROPERTY_REPOSITORY)
     private readonly propertyRepo: PropertyRepositoryInterface,) {}
 
-  async execute(officeId: number, propertyType?: string) {
-    return this.propertyRepo.findOfficeProperties(officeId, propertyType);
+  async execute(
+    page: number,
+    items: number,
+    baseUrl: string,
+    officeId: number,
+    propertyType?: string,
+  ) {
+    const { data: raws, total } = await this.propertyRepo.findOfficeProperties(
+      page,
+      items,
+      officeId,
+      propertyType,
+    );
+
+  const data = raws.map((item) => ({
+      postImage: item.postimage
+        ? `${baseUrl}/uploads/properties/posts/images/${item.postimage}`
+        : null,
+      postTitle: item.posttitle ?? null,
+      location: item.location ?? null,
+      type: item.type ?? null,
+      price: Number(item.price )?? 0.00
+    }));
+
+    return { data, total };
   }
+
 }

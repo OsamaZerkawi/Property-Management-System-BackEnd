@@ -1229,33 +1229,49 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .getOne();
   }
 
-  async findOfficeProperties(
+async findOfficeProperties(
+  page: number,
+  items: number,
   officeId: number,
-  propertyType?: string,
-): Promise<any[]> {
+  propertyType?: string
+) {
   const query = this.propertyRepo.createQueryBuilder('property')
     .innerJoin('property.office', 'office')
     .innerJoin('property.post', 'post')
     .innerJoin('property.region', 'region')
     .innerJoin('region.city', 'city')
-    .innerJoin('property.residential', 'residential')
+    .leftJoin('property.residential', 'residential')
+    .leftJoin('property.touristic', 'touristic')
     .where('office.id = :officeId', { officeId });
 
   if (propertyType) {
     query.andWhere('property.property_type = :propertyType', { propertyType });
   }
+ 
+  query.select([
+    'post.image AS postImage',
+    'post.title AS postTitle',
+    "CONCAT(city.name, ',', region.name) AS location",
+    'property.property_type AS type',
+    `
+    CASE 
+      WHEN property.property_type = 'عقاري' THEN residential.selling_price
+      WHEN property.property_type = 'سياحي' THEN touristic.price
+      ELSE NULL
+    END AS price
+    `,
+  ]);
+ 
+  const [data, total] = await Promise.all([
+    query
+      .offset((page - 1) * items)
+      .limit(items)
+      .getRawMany(),
+    query.getCount(),
+  ]);
 
-  const properties = await query
-    .select([
-      'post.image AS postImage', 
-      'post.title AS postTitle',
-      "CONCAT(city.name, ',', region.name) AS location",
-      'property.property_type AS type',
-      'residential.selling_price AS price',
-    ])
-    .getRawMany();
-
-  return properties;
+  return { data, total };
 }
+
 
 }
