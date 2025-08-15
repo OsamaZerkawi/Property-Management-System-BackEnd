@@ -50,7 +50,7 @@ export class ListOfficesUseCase {
       rate:
         typeof r.avg_rate === 'string'
           ? parseFloat(r.avg_rate)
-          : r.avg_rate ?? 0,
+          : r.avg_rate ?? 0.00,
     };
   });
 

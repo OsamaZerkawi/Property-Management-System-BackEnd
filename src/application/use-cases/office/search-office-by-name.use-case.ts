@@ -42,7 +42,7 @@ export class SearchOfficesUseCase {
         logo,
         type: r.type,
         location: `${r.city_name || ''}، ${r.region_name || ''}`.trim(),
-        rate: typeof r.avg_rate === 'string' ? parseFloat(r.avg_rate) : (r.avg_rate ?? 0),
+        rate: typeof r.avg_rate === 'string' ? parseFloat(r.avg_rate) : (r.avg_rate ?? 0.00),
        };
     });
 
