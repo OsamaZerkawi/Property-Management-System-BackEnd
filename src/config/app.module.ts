@@ -41,6 +41,7 @@ import { UserModule } from 'src/presentation/http/modules/user.module';
 import { ReminderScheduler } from 'src/infrastructure/schedulers/reminder.scheduler';
 import { ReminderModule } from 'src/presentation/http/modules/reminder.module';
 import { StatsModule } from 'src/presentation/http/modules/stats.module';
+import { AdminUserPostModule } from 'src/presentation/http/modules/admin-user-post.module';
  
 @Module({
   imports: [
@@ -51,11 +52,12 @@ import { StatsModule } from 'src/presentation/http/modules/stats.module';
     AdminModule,
     AdvertisementModule,
     NotificationModule,
+    UserPostModule,
+    AdminUserPostModule,
     RoleModule,
     ResidentialOfficeModule,
     PermissionModule,
     PropertyModule,
-    UserPostModule,
     ServiceProviderModule,
     UserPostSuggestionModule,
     OfficeModule,

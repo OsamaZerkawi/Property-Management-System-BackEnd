@@ -1,4 +1,3 @@
-
 // src/seeds/service-provider.seeder.ts
 
 import { Injectable } from '@nestjs/common';

@@ -28,14 +28,14 @@ export class CreateNotificationUseCase {
     });
 
     const token = await this.notificationRepo.getFcmTokensByUserId(userId);
-    
     if (token) {
       // const fullData = {
       //   ...data,
       //   notification_id: notification.id,
       // };
 
-      this.notificationQueue.sendToDevice(token, title, body);
+      // هون لازم نلاقي حل اذا كذا توكن
+      this.notificationQueue.sendToDevice(token[0], title, body);
     }
 
     return notification;
