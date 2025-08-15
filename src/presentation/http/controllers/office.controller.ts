@@ -43,6 +43,8 @@ import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { CreateOfficeComplaintDto } from "src/application/dtos/office/create-office-complaint.dto";
 import { CreateComplaintOfficeSwaggerDoc } from "../swagger/office/create-complaint-office.swagger";
 import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
+import { ShowOfficeDetailsSwaggerDoc } from "../swagger/office/show-office-details.swagger";
+import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
      
   @Controller('office')
   export class OfficeController {
@@ -59,7 +61,9 @@ import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlain
       private readonly listOfficesUseCase: ListOfficesUseCase,
       private readonly searchOfficesUseCase: SearchOfficesUseCase,
       private readonly rateOfficeUseCase: RateOfficeUseCase,
-      private readonly complaintOfficeUseCase: ComplaintOfficeUseCase
+      private readonly complaintOfficeUseCase: ComplaintOfficeUseCase,
+      private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
+
     ) {}
 
     @Get('/payment-method')
@@ -265,5 +269,17 @@ import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlain
     await this.complaintOfficeUseCase.execute(user.sub, dto);
     return successResponse([], 'تم إرسال البلاغ بنجاح', HttpStatus.CREATED);
   }
+
+  @Get(':id')
+  @Public()
+  @ShowOfficeDetailsSwaggerDoc()
+  async getOfficeDetailsMobile(
+    @Param('id') officeId: number,
+    @Req() request: Request,
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data = await this.getOfficeDetailsMobileUseCase.execute(Number(officeId), baseUrl);
+    return successResponse(data, 'تم إرجاع تفاصيل المكتب بنجاح');
   }
+}
    

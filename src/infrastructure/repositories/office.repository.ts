@@ -422,5 +422,57 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     await manager.save(OfficeFeedback, complaint);
   });
 }
+async findOfficeDetailsById(officeId: number, baseUrl: string) {
+  const raw = await this.officeRepo
+    .createQueryBuilder('office')
+    .leftJoin('office.user', 'user')
+    .leftJoin('office.feedbacks', 'fb')  
+    .leftJoin('office.socials', 'social')
+    .leftJoin('office.region', 'region')
+    .leftJoin('region.city', 'city')
+    .where('office.id = :officeId', { officeId })
+    .andWhere('office.is_deleted = false')
+    .select([
+      'office.id AS id',
+      'office.logo AS logo',
+      'office.name AS name',
+      'office.type AS type',
+      'office.opening_time AS opening_time',
+      'office.closing_time AS closing_time',
+      'region.name AS region_name',
+      'city.name AS city_name',
+      'user.phone AS phone',
+      'COALESCE(AVG(fb.rate), 0) AS avg_rate',
+      `COALESCE(
+         json_agg(DISTINCT jsonb_build_object('platform', social.platform, 'link', social.link))
+         FILTER (WHERE social.id IS NOT NULL),
+         '[]'
+       ) AS socials`
+    ])
+    .groupBy(
+      'office.id, office.logo, office.name, office.type, office.opening_time, office.closing_time, user.phone, region.name, city.name'
+    )
+    .getRawOne();
+
+  if (!raw) return null;
+
+  const socials = typeof raw.socials === 'string' ? JSON.parse(raw.socials) : raw.socials;
+  const location = `${raw.city_name ?? ''}، ${raw.region_name ?? ''}`;
+
+  return {
+    id: Number(raw.id),
+    logo: raw.logo ? `${baseUrl}/uploads/offices/logos/${raw.logo}` : null,
+    name: raw.name,
+    type: raw.type ?? null,
+    location,
+    rate: raw.avg_rate !== null ? Number(raw.avg_rate) : null,
+    opening_time: raw.opening_time ?? null,
+    closing_time: raw.closing_time ?? null,
+    phone: raw.phone ?? null,
+    socials,
+  };
+}
+
+
 } 
 

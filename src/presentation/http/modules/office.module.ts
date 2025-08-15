@@ -23,6 +23,7 @@ import { ListOfficesUseCase } from "src/application/use-cases/office/list-office
 import { SearchOfficesUseCase } from "src/application/use-cases/office/search-office-by-name.use-case";
 import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
 import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
+import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlain
     SearchOfficesUseCase,
     RateOfficeUseCase,
     ComplaintOfficeUseCase,
+    GetOfficeDetailsMobileUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository
