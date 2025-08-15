@@ -1,11 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 import { PROPERTY_REPOSITORY, PropertyRepositoryInterface } from 'src/domain/repositories/property.repository';
  
 @Injectable()
 export class GetOfficePropertiesUseCase {
   constructor( 
     @Inject(PROPERTY_REPOSITORY)
-    private readonly propertyRepo: PropertyRepositoryInterface,) {}
+    private readonly propertyRepo: PropertyRepositoryInterface,
+    @Inject(OFFICE_REPOSITORY)
+    private readonly officeRepo: OfficeRepositoryInterface,
+  ) {}
 
   async execute(
     page: number,
@@ -14,6 +18,9 @@ export class GetOfficePropertiesUseCase {
     officeId: number,
     propertyType?: string,
   ) {
+    const office =  await this.officeRepo.findById(officeId);
+    if (!office) throw new NotFoundException('المكتب غير موجود');
+
     const { data: raws, total } = await this.propertyRepo.findOfficeProperties(
       page,
       items,

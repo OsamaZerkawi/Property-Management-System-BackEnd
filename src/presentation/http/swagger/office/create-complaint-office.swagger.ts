@@ -1,4 +1,3 @@
-// presentation/http/decorators/report-office-formdata.swagger.ts
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiOperation,

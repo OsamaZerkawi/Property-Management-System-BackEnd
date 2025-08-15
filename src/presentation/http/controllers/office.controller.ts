@@ -46,6 +46,7 @@ import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlain
 import { ShowOfficeDetailsSwaggerDoc } from "../swagger/office/show-office-details.swagger";
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
 import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
+import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-properties.swagger";
      
   @Controller('office')
   export class OfficeController {
@@ -286,6 +287,7 @@ import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get
 
   @Get(':officeId/properties')
   @Public()
+  @GetOfficePropertiesSwaggerDoc()
   async getOfficeProperties(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('items', new DefaultValuePipe(10), ParseIntPipe) items: number,
