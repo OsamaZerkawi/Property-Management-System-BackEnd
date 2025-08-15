@@ -19,7 +19,7 @@ export function ShowMobileTourismSwaggerDoc() {
           message: 'تم ارجاع تفاصيل العقار السياحي بنجاح',
           data: {
             propertyId: 1,
-            title: 'شقة فاخرة',
+            postTitle: 'شقة فاخرة',
             description: 'شقة للإيجار السياحي مفروشة بالكامل',
             date: '2025-08-06',
             postImage: 'http://localhost:3000/uploads/properties/posts/images/post.jpg',
