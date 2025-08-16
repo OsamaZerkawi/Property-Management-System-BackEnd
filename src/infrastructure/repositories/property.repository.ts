@@ -1228,14 +1228,15 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .andWhere('office.id = :officeId', { officeId })
       .getOne();
   }
-
-async findOfficeProperties(
+ 
+ async findOfficeProperties(
   page: number,
   items: number,
   officeId: number,
-  propertyType?: string
+  propertyType?: string,
+  userId?: number | null,
 ) {
-  const query = this.propertyRepo.createQueryBuilder('property')
+  const qb = this.propertyRepo.createQueryBuilder('property')
     .innerJoin('property.office', 'office')
     .innerJoin('property.post', 'post')
     .innerJoin('property.region', 'region')
@@ -1245,14 +1246,16 @@ async findOfficeProperties(
     .where('office.id = :officeId', { officeId });
 
   if (propertyType) {
-    query.andWhere('property.property_type = :propertyType', { propertyType });
+    qb.andWhere('property.property_type = :propertyType', { propertyType });
   }
  
-  query.select([
-    'post.image AS postImage',
-    'post.title AS postTitle',
-    "CONCAT(city.name, ',', region.name) AS location",
-    'property.property_type AS type',
+  qb.select([
+    'property.id AS property_id',
+    'post.title AS post_title',
+    'post.image AS post_image',
+    'post.date AS post_date',
+    `CONCAT(city.name, ',', region.name) AS location`,
+    'property.property_type AS type', 
     `
     CASE 
       WHEN property.property_type = 'عقاري' THEN residential.selling_price
@@ -1260,14 +1263,36 @@ async findOfficeProperties(
       ELSE NULL
     END AS price
     `,
+    'residential.listing_type AS listing_type',
+    'residential.rental_period AS residential_rental_period',
   ]);
  
+  qb.addSelect(subQb =>
+    subQb
+      .select('COALESCE(ROUND(AVG(pf.rate)::numeric, 1), 0)')
+      .from('property_feedbacks', 'pf')
+      .where('pf.property_id = property.id'),
+    'avg_rate'
+  ); 
+  if (userId) {
+    qb.addSelect(subQb =>
+      subQb
+        .select(`CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END`)
+        .from('property_favorites', 'fav')
+        .where('fav.property_id = property.id')
+        .andWhere('fav.user_id = :userId', { userId }),
+      'is_favorite'
+    );
+  } else {
+    qb.addSelect('0', 'is_favorite');
+  }
+ 
   const [data, total] = await Promise.all([
-    query
+    qb
       .offset((page - 1) * items)
       .limit(items)
       .getRawMany(),
-    query.getCount(),
+    qb.getCount(),
   ]);
 
   return { data, total };

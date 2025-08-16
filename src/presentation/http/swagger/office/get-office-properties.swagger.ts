@@ -1,4 +1,4 @@
- import { applyDecorators } from '@nestjs/common';
+import { applyDecorators } from '@nestjs/common';
 import {
   ApiOperation,
   ApiQuery,
@@ -7,14 +7,16 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 export function GetOfficePropertiesSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'خاص بتطبيق الموبايل',
       description:
-        'إرجاع قائمة العقارات المرتبطة بمكتب معين مع دعم التصفية حسب النوع والتقسيم إلى صفحات.',
+        'إرجاع قائمة العقارات المرتبطة بمكتب معين مع دعم التصفية حسب النوع والتقسيم إلى صفحات. ' 
     }),
 
     ApiParam({
@@ -46,7 +48,7 @@ export function GetOfficePropertiesSwaggerDoc() {
       type: String,
       enum: ['عقاري', 'سياحي'],
       example: 'عقاري',
-      description: 'نوع العقار للتصفية (اختياري)',
+      description: 'نوع العقار للتصفية (اختياري).',
     }),
 
     ApiOkResponse({
@@ -57,17 +59,35 @@ export function GetOfficePropertiesSwaggerDoc() {
           message: 'تم ارجاع العقارات بنجاح',
           page: 1,
           items: 10,
-          total: 25,
+          total: 2,
           data: [
             {
-              postImage: 'http://example.com/uploads/properties/posts/images/image.jpg',
-              postTitle: 'شقة للبيع في وسط المدينة',
-              location: 'دمشق, المزة',
+              propertyId: 2,
+              postTitle: 'أرض 256.01 م²',
+              postImage: 'http://192.168.1.9:3000/uploads/properties/posts/images/property.png',
+              location: 'ريف دمشق, صحنايا',
+              postDate: null,
+              is_favorite: 1,         
               type: 'عقاري',
-              price: 25000000,
+              listing_type: 'أجار',   
+              rental_period: 'سنوي',  
+              price: 508,
+              rate: 2.3
             },
+            {
+              propertyId: 79,
+              postTitle: 'مكتب 146.20 م²',
+              postImage: 'http://192.168.1.9:3000/uploads/properties/posts/images/tourisem.png',
+              location: 'درعا, نوى',
+              postDate: null,
+              is_favorite: 0,
+              type: 'سياحي',
+              price: 1070,
+              rental_period: 'يومي',    
+              rate: 4.3
+            }
           ],
-          status_code: 200,
+          status_code: 200
         },
       },
     }),
@@ -96,6 +116,13 @@ export function GetOfficePropertiesSwaggerDoc() {
 
     ApiInternalServerErrorResponse({
       description: 'خطأ داخلي في الخادم.',
+      schema: {
+        example: {
+          successful: false,
+          message: 'حدث خطأ غير متوقع',
+          status_code: 500,
+        },
+      },
     }),
   );
 }

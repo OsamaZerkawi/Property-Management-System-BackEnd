@@ -298,6 +298,7 @@ import { ShowOfficeAdsSwaggerDoc } from "../swagger/tourism_places/show-office-a
     @Query('property_type') propertyType?: string,
   ) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const userId=(req.user as any)?.sub??null;
 
     const {total,data} = await this.getOfficePropertiesUseCase.execute(
       page,
@@ -305,6 +306,7 @@ import { ShowOfficeAdsSwaggerDoc } from "../swagger/tourism_places/show-office-a
       baseUrl,
       officeId,
       propertyType,
+      userId,
     );
    return successPaginatedResponse(data,total,page,items,'تم ارجاع العقارات بنجاح'); 
   }
