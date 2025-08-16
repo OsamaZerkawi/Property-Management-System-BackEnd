@@ -10,7 +10,7 @@ export class GetRelatedTouristicUseCase {
             private readonly tourismRepo: ITourismRepository,
   ) {}
 
-    async execute( propertyId: number, baseUrl: string) {
+    async execute( propertyId: number,userId:number, baseUrl: string) {
     const property = await this.tourismRepo.findPropertyWithTouristicAndPost(propertyId);
     if (!property) {
       throw new NotFoundException('العقار السياحي غير موجود');
@@ -33,6 +33,7 @@ export class GetRelatedTouristicUseCase {
       regionId,
       cityId,
       tag,
+      userId,
       limit: 5,
     });
 
@@ -47,8 +48,10 @@ export class GetRelatedTouristicUseCase {
         postTitle: r.post_title,
         date: r.post_date ? new Date(r.post_date).toISOString().slice(0, 10) : null,
         postImage,
-        pricePerNight: Number(r.touristic_price),
+        price: Number(r.touristic_price),
         location,
+        avg_rate:Number(r.avg_rate??0.00),
+        is_favorite:r.is_favorite,
       };
     });
   }

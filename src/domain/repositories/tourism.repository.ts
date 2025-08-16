@@ -37,6 +37,7 @@ export interface ITourismRepository {
       regionId?: number | null;
       cityId?: number | null;
       tag?: string | null;
+      userId?:number|null;
       limit?: number;
     }
   ): Promise<Array<Record<string, any>>> 

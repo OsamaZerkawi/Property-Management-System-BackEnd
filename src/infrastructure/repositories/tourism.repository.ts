@@ -401,12 +401,15 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 } 
+
 async findPropertyDetails(propertyId: number, userId?: number) {
   const qb = this.propRepo
     .createQueryBuilder('property')
     .leftJoinAndSelect('property.post', 'post')
-    .leftJoinAndSelect('property.images', 'images')     // relation names must match your entities
+    .leftJoinAndSelect('property.images', 'images')   
     .leftJoinAndSelect('property.touristic', 'touristic')
+    .leftJoinAndSelect('touristic.additionalServices', 'touristic_additional')  
+    .leftJoinAndSelect('touristic_additional.service', 'service') 
     .leftJoinAndSelect('property.region', 'region')
     .leftJoinAndSelect('region.city', 'city')
     .leftJoinAndSelect('property.office', 'office')
@@ -430,11 +433,21 @@ async findPropertyDetails(propertyId: number, userId?: number) {
         .where('fav.property_id = property.id')
         .andWhere('fav.user_id = :userId', { userId }),
       'is_favorite'
+    ); 
+    qb.addSelect(subQb =>
+      subQb
+        .select('pfu.rate')
+        .from('property_feedbacks', 'pfu')
+        .where('pfu.property_id = property.id')
+        .andWhere('pfu.user_id = :userId', { userId })
+        .andWhere('pfu.rate IS NOT NULL')
+        .limit(1),  
+      'user_rate'
     );
   } else {
     qb.addSelect('false', 'is_favorite');
-  }
- 
+    qb.addSelect('NULL', 'user_rate');
+  } 
   qb.addSelect(subQb =>
     subQb
       .select('ROUND(AVG(of.rate)::numeric, 2)')
@@ -442,21 +455,19 @@ async findPropertyDetails(propertyId: number, userId?: number) {
       .where('of.office_id = office.id'),
     'office_rate'
   );
-
- qb.addSelect(subQb =>
-  subQb
-    .select('COUNT(of2.id)')
-    .from('office_feedbacks', 'of2')
-    .where('of2.office_id = office.id')
-    .andWhere('of2.rate IS NOT NULL'),
-  'office_feedback_count'
-);
-
  
+  qb.addSelect(subQb =>
+    subQb
+      .select('COUNT(of2.id)')
+      .from('office_feedbacks', 'of2')
+      .where('of2.office_id = office.id')
+      .andWhere('of2.rate IS NOT NULL'),
+    'office_feedback_count'
+  );
   const result = await qb.getRawAndEntities();  
   return result;  
 }
-
+ 
 async filter(
   dto: FilterTourismPropertiesDto,
   page: number,
@@ -579,6 +590,7 @@ async findRelatedTouristicProperties(
     regionId?: number | null;
     cityId?: number | null;
     tag?: string | null;
+    userId?: number | null;  
     limit?: number;
   }
 ): Promise<Array<Record<string, any>>> {
@@ -589,10 +601,11 @@ async findRelatedTouristicProperties(
     regionId,
     cityId,
     tag,
+    userId = null,
     limit = 5,
   } = options;
 
-   const priceScoreExpr = `
+  const priceScoreExpr = `
     GREATEST(
       0,
       (1 - (ABS(CAST(COALESCE(touristic.price, '0') AS numeric) - :targetPrice) / NULLIF(:targetPrice,0)) / 0.2)
@@ -603,15 +616,14 @@ async findRelatedTouristicProperties(
   const tagScoreExpr = `(CASE WHEN post.tag = :tag THEN 20 ELSE 0 END)`;
   const priceDiffExpr = `ABS(CAST(COALESCE(touristic.price,'0') AS numeric) - :targetPrice)`;
 
-   const buildScoredQB = (opts: {
+  const buildScoredQB = (opts: {
     useRegion?: boolean;
     useCity?: boolean;
-    includeTag?: boolean;
     excludeRegion?: number | null;
     excludeIds?: number[];
     maxResults?: number;
   }) => {
-    const { useRegion = false, useCity = false, includeTag = true, excludeRegion = null, excludeIds = [], maxResults = limit } = opts;
+    const { useRegion = false, useCity = false, excludeRegion = null, excludeIds = [], maxResults = limit } = opts;
 
     const qb = this.propRepo.createQueryBuilder('property')
       .leftJoin('property.post', 'post')
@@ -624,16 +636,19 @@ async findRelatedTouristicProperties(
       .andWhere('touristic.status = :touristicStatus', { touristicStatus: 'متوفر' })
       .andWhere('CAST(COALESCE(touristic.price, \'0\') AS numeric) BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
 
+     if (tag) {
+      qb.andWhere('post.tag = :tag', { tag });
+    }
+
     if (useRegion && regionId) qb.andWhere('region.id = :regionId', { regionId });
     if (useCity && cityId) qb.andWhere('city.id = :cityId', { cityId });
     if (excludeRegion) qb.andWhere('region.id != :excludeRegion', { excludeRegion });
 
-    if (includeTag && tag) qb.andWhere('post.tag = :tag', { tag });
-
     if (excludeIds && excludeIds.length > 0) {
       qb.andWhere('property.id NOT IN (:...excludeIds)', { excludeIds });
-    } 
-     qb.select([
+    }
+
+    qb.select([
       'property.id AS property_id',
       'post.title AS post_title',
       'post.tag AS post_tag',
@@ -644,13 +659,34 @@ async findRelatedTouristicProperties(
       'property.area AS property_area',
       'property.room_count AS property_room_count',
       'region.name AS region_name',
-      'city.name AS city_name', 
+      'city.name AS city_name',
       `${locScoreExpr} AS loc_score`,
       `${tagScoreExpr} AS tag_score`,
       `(${priceScoreExpr}) AS price_score`,
       `(${locScoreExpr} + ${tagScoreExpr} + (${priceScoreExpr})) AS total_score`,
       `${priceDiffExpr} AS price_diff`,
     ]);
+ 
+    qb.addSelect(subQb =>
+      subQb
+        .select('ROUND(AVG(pf.rate)::numeric, 2)')
+        .from('property_feedbacks', 'pf')
+        .where('pf.property_id = property.id'),
+      'avg_rate'
+    );
+ 
+    if (userId) {
+      qb.addSelect(subQb =>
+        subQb
+          .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
+          .from('property_favorites', 'fav')
+          .where('fav.property_id = property.id')
+          .andWhere('fav.user_id = :userId', { userId }),
+        'is_favorite'
+      );
+    } else {
+      qb.addSelect('false', 'is_favorite');
+    }
 
     qb.setParameters({
       targetPrice: options.targetPrice,
@@ -661,8 +697,8 @@ async findRelatedTouristicProperties(
       maxPrice,
       postStatus: 'مقبول',
       touristicStatus: 'متوفر',
+      userId,
     });
- 
     qb.orderBy('total_score', 'DESC')
       .addOrderBy('price_diff', 'ASC')
       .addOrderBy('post.date', 'DESC')
@@ -674,58 +710,32 @@ async findRelatedTouristicProperties(
   const results: Record<string, any>[] = [];
  
   if (regionId) {
-    const qbRegionWithTag = buildScoredQB({ useRegion: true, includeTag: Boolean(tag), maxResults: limit });
-    const r1 = await qbRegionWithTag.getRawMany();
+    const qbRegion = buildScoredQB({ useRegion: true, maxResults: limit });
+    const r1 = await qbRegion.getRawMany();
     results.push(...r1);
   }
-
-  if (results.length >= limit || !regionId) {
-    return results.slice(0, limit);
-  }
  
-  if (tag && regionId) {
-    const foundIds = results.map(r => Number(r.property_id));
-    const remaining = limit - results.length;
-    const qbRegionNoTag = buildScoredQB({ useRegion: true, includeTag: false, excludeIds: foundIds, maxResults: remaining });
-    const r2 = await qbRegionNoTag.getRawMany();
-    results.push(...r2);
-
-    if (results.length >= limit) {
-      return results.slice(0, limit);
-    }
-  }
- 
-  if (cityId) {
+  if (results.length < limit && cityId) {
     const foundIds = results.map(r => Number(r.property_id));
     const remainingAfterRegion = limit - results.length;
 
-    const qbCityWithTag = buildScoredQB({
+    const qbCity = buildScoredQB({
       useCity: true,
-      includeTag: Boolean(tag),
       excludeRegion: regionId ?? null,
       excludeIds: foundIds,
       maxResults: remainingAfterRegion,
     });
-    const r3 = await qbCityWithTag.getRawMany();
+
+    const r2 = await qbCity.getRawMany();
+    results.push(...r2);
+  }
+
+   if (results.length < limit) {
+    const foundIds = results.map(r => Number(r.property_id));
+    const remaining = limit - results.length;
+    const qbAny = buildScoredQB({ excludeIds: foundIds, maxResults: remaining });
+    const r3 = await qbAny.getRawMany();
     results.push(...r3);
-
-    if (results.length >= limit) return results.slice(0, limit);
-
-    if (tag) {
-      const foundIds2 = results.map(r => Number(r.property_id));
-      const remaining2 = limit - results.length;
-      const qbCityNoTag = buildScoredQB({
-        useCity: true,
-        includeTag: false,
-        excludeRegion: regionId ?? null,
-        excludeIds: foundIds2,
-        maxResults: remaining2,
-      });
-      const r4 = await qbCityNoTag.getRawMany();
-      results.push(...r4);
-
-      if (results.length >= limit) return results.slice(0, limit);
-    }
   }
 
   return results.slice(0, limit);
