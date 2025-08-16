@@ -35,7 +35,7 @@ export class FinanceAdsManagementController {
     private readonly getAllAdvertisementInvoicesUseCase: GetAllAdvertisementInvoicesUseCase,
   ) {}
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة المالية والإعلانات')
   @GetAdRequestsSwaggerDoc()
   @Get('ad-requests')
@@ -48,7 +48,7 @@ export class FinanceAdsManagementController {
     return successResponse(ads, 'تم إرجاع جميع طلبات الإعلانات', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة المالية والإعلانات')
   @HttpCode(HttpStatus.OK)
   @RespondToAdRequestSwaggerDoc()
@@ -66,7 +66,7 @@ export class FinanceAdsManagementController {
     return successResponse([], 'تم الرد على طلب الإعلان', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة المالية والإعلانات')
   @GetApprovedAdsSwaggerDoc()
   @Get('approved-ads')
@@ -79,7 +79,7 @@ export class FinanceAdsManagementController {
     return successResponse(ads, 'تم إرجاع الإعلانات الحالية', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة المالية والإعلانات')
   @HttpCode(HttpStatus.OK)
   @GetAllAdvertisementInvoicesSwaggerDoc()

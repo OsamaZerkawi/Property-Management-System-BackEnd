@@ -39,7 +39,7 @@ export class RespondToPropertyPostUseCase {
       await this.propertyPostRepo.update(id, {
         status: PropertyPostStatus.REJECTED,
       });
-      message = 'تم رفض منشور عقارك';
+      message = `تم رفض منشور عقارك، والسبب : ${data.reason}`;
     }
 
     const userId = propertyPost.property.office.user.id;

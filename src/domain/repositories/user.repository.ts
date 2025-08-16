@@ -1,4 +1,5 @@
 import { User } from '../entities/user.entity';
+import { NotificationSender } from '../enums/notification-sender.enum';
 
 export const USER_REPOSITORY = 'USER_REPOSITORY';
 
@@ -15,4 +16,5 @@ export interface UserRepositoryInterface {
     deleteUserById(userId: number);
     findGlobalInfoById(id: number);
     findUserInfoById(id: number);  
+    getTargetUsers(target: NotificationSender);
  }

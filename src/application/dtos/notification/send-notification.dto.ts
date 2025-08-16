@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsObject, IsEnum } from 'class-validator';
+import { NotificationSender } from 'src/domain/enums/notification-sender.enum';
 
 export class SendNotificationDto {
   @ApiProperty({
@@ -21,11 +22,19 @@ export class SendNotificationDto {
   @IsObject()
   data?: Record<string, any>;
 
-  @ApiPropertyOptional({
-    description: 'رمز FCM خاص بالجهاز (اختياري)',
-    example: 'd7gh98sd98f7sd9f7sd9f',
+
+  @ApiProperty({
+    description: 'المستهدفين',
+    enum: NotificationSender,
   })
-  @IsOptional()
-  @IsString()
-  fcmToken?: string;
+  @IsEnum(NotificationSender)
+  target: NotificationSender;
+
+  // @ApiPropertyOptional({
+  //   description: 'رمز FCM خاص بالجهاز (اختياري)',
+  //   example: 'd7gh98sd98f7sd9f7sd9f',
+  // })
+  // @IsOptional()
+  // @IsString()
+  // fcmToken?: string;
 }

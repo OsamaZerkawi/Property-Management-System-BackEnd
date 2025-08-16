@@ -8,4 +8,5 @@ export interface NotificationRepositoryInterface {
     markAsRead(id: number);
     getFcmTokensByUserId(userId: number);
     getFcmTokenByUserId(userId: number);
+    createAndSave(notification: Partial<Notification>)
 }

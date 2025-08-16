@@ -19,21 +19,21 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
 
   async findById(id: number) {
     return this.propertyPostRepo
-    .createQueryBuilder('post')
-    .leftJoin('post.property','property')
-    .leftJoin('property.office','office')
-    .leftJoin('office.user','user')
-    .select([
-      'post.id',
-      'post.status',
-      'post.title',
-      'post.created_at',
-      'property.id',
-      'office.id',
-      'user.id'
-    ])
-    .where('post.id = :id',{id})
-    .getOne();
+      .createQueryBuilder('post')
+      .leftJoin('post.property', 'property')
+      .leftJoin('property.office', 'office')
+      .leftJoin('office.user', 'user')
+      .select([
+        'post.id',
+        'post.status',
+        'post.title',
+        'post.created_at',
+        'property.id',
+        'office.id',
+        'user.id',
+      ])
+      .where('post.id = :id', { id })
+      .getOne();
   }
 
   async update(id: number, fields: Partial<PropertyPost>) {
@@ -47,8 +47,16 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
         'post.id',
         'post.title',
         'post.image',
+        'property.property_type AS property_type',
+        'office.name',
         'region.name',
         'city.name',
+
+        'officeRegion.id',
+        'officeRegion.name AS office_region',
+        'officeCity.id',
+        'officeCity.name AS office_city',
+
         'residential.listing_type',
         'residential.rental_price',
         'residential.rental_period',
@@ -58,6 +66,9 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
       .innerJoin('post.property', 'property')
       .innerJoin('property.region', 'region')
       .innerJoin('region.city', 'city')
+      .innerJoin('property.office', 'office')
+      .innerJoin('office.region', 'officeRegion')
+      .innerJoin('officeRegion.city', 'officeCity')
       .leftJoin(
         AdminCity,
         'adminCity',

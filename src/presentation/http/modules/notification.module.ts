@@ -13,11 +13,15 @@ import { FcmToken } from "src/domain/entities/fcmToken.entity";
 import { NotificationProcessor } from "src/infrastructure/queues/notification.processor";
 import { BullModule } from "@nestjs/bull";
 import { NotificationQueueService } from "src/infrastructure/queues/notificatoin-queue.service";
+import { CreateNotificationForTargetUseCase } from "src/application/use-cases/notification/create-notification-for-target.use-case";
+import { User } from "src/domain/entities/user.entity";
+import { UserModule } from "./user.module";
 
 @Module({
     imports:[
+      UserModule,
       MobileAuthModule,
-      TypeOrmModule.forFeature([Notification,FcmToken]),
+      TypeOrmModule.forFeature([Notification,FcmToken,User]),
     ],
     controllers:[NotificationsController],
     providers:[
@@ -26,6 +30,7 @@ import { NotificationQueueService } from "src/infrastructure/queues/notificatoin
       CreateNotificationUseCase,
       ListNotificationsUseCase,
       MarkNotificationReadUseCase,
+      CreateNotificationForTargetUseCase,
       {
         provide:NOTIFICATION_REPOSITORY,
         useClass:NotificationRepository

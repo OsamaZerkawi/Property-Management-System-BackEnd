@@ -45,7 +45,7 @@ export class AdminPartnersManagementController {
     private readonly respondToPropertyPostUseCase: RespondToPropertyPostUseCase,
   ) {}
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @Get('offices')
   @GetOfficesSwaggerDoc()
@@ -61,25 +61,24 @@ export class AdminPartnersManagementController {
     return successResponse(data, 'تم إرجاع جميع المكاتب بنجاح', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @HttpCode(HttpStatus.OK)
   @GetPendingPropertyPostsSwaggerDoc()
   @Get('property-posts')
-  async getPropertyPosts(
-    @Req() request: Request,
-    @CurrentUser() user,
-  ) {
+  async getPropertyPosts(@Req() request: Request, @CurrentUser() user) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
     const adminId = user.sub;
 
-    const result = await this.getPendingPropertyPostsUseCase.execute(baseUrl,adminId);
+    const result = await this.getPendingPropertyPostsUseCase.execute(
+      baseUrl,
+      adminId,
+    );
 
-    return successResponse(result,'تم إرجاع جميع منشورات العقارات بنجاح',200);
+    return successResponse(result, 'تم إرجاع جميع منشورات العقارات بنجاح', 200);
   }
 
-  
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @HttpCode(HttpStatus.OK)
   @RespondToPropertyPostSwaggerDoc()
@@ -88,12 +87,12 @@ export class AdminPartnersManagementController {
     @Param('id') id: number,
     @Body() data: RespondToAdRequestDto,
   ) {
-    await this.respondToPropertyPostUseCase.execute(id,data);
+    await this.respondToPropertyPostUseCase.execute(id, data);
 
-    return successResponse([],'تم الرد على منشور العقار',200);
+    return successResponse([], 'تم الرد على منشور العقار', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @GetServiceProvidersSwaggerDoc()
   @Get('service-providers')
@@ -111,7 +110,7 @@ export class AdminPartnersManagementController {
     return successResponse(data, 'تم إرجاع جميع مزودي الخدمات بنجاح', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @GetServiceProviderSwaggerDoc()
   @Get('service-providers/:id')
@@ -126,8 +125,8 @@ export class AdminPartnersManagementController {
 
     return successResponse(data, 'تم إرجاع تفاصيل مزود الخدمة بنجاح', 200);
   }
-
-  @Roles('مشرف')
+  
+  @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @GetJoinRequestsSwaggerDoc()
   @HttpCode(HttpStatus.OK)
@@ -140,7 +139,7 @@ export class AdminPartnersManagementController {
     return successResponse(result, 'تم إرجاع جميع الطلبات', 200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @RespondToJoinRequestSwaggerDoc()
   @Permissions('إدارة الوسطاء')
   @HttpCode(HttpStatus.OK)
