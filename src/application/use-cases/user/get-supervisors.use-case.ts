@@ -24,10 +24,10 @@ export class GetSupervisorsUseCase {
 
         return users.map(user => ({
           id: user.id,
-          fullName: `${user.first_name} ${user.last_name}`,
-          username: user.username,
+          full_name: `${user.first_name} ${user.last_name}`,
+          user_name: user.username,
           permissions: user.userPermissions?.map(up => up.permission.name) || [],
-          joiningDate: user.created_at,
+          joining_date: user.created_at.toISOString().split('T')[0],
         }));
     }
 }

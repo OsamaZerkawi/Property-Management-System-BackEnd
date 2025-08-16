@@ -68,8 +68,18 @@ export class StatsRepository implements StatsRepositoryInterface {
           FROM "touristic" t
           INNER JOIN "properties" p ON p.id = t.property_id
           WHERE p.is_deleted = false
-        ) AS total_touristic
-      `,
+        ) AS total_touristic,
+
+        -- Total advertisements (active by date range)
+        (
+          SELECT COUNT(*)::int
+          FROM "advertisements" a
+          WHERE a.start_date IS NOT NULL
+            AND a.start_date <= CURRENT_DATE
+            AND a.start_date + (a.day_period || ' days')::interval >= CURRENT_DATE
+            AND a.admin_agreement = 'مقبول'
+        ) AS total_ads
+        `,
     );
 
     return result[0];

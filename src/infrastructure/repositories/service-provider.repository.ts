@@ -4,6 +4,7 @@ import { ServiceProviderFeedbackDto } from 'src/application/dtos/service-provide
 import { ServiceProviderFiltersDto } from 'src/application/dtos/service-provider/service-provider-filters.dto';
 import { ServiceFeedback } from 'src/domain/entities/service-feedback.entity';
 import { ServiceProvider } from 'src/domain/entities/service-provider.entity';
+import { ComplaintStatus } from 'src/domain/enums/complaint-status.enum';
 import { ServiceProviderRepositoryInterface } from 'src/domain/repositories/service-provider.repository';
 import { Repository } from 'typeorm';
 
@@ -190,6 +191,7 @@ export class ServiceProviderRepository
       feedback = this.feedbackRepo.create({
         user: { id: userId },
         serviceProvider: { id: serviceProviderId },
+        status:ComplaintStatus.PENDING,
       });
     }
     if (data.rate !== undefined) feedback.rate = data.rate;
