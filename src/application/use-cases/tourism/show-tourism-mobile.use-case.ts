@@ -77,8 +77,8 @@ export class ShowTourismMobileUseCase {
       type: entity.office?.property_type,
       name: entity.office?.name ?? null,
       location: `${entity.office?.region?.city?.name ?? ''}، ${entity.office?.region?.name ?? ''}`.trim(),
-      rate:office_rate,  
-      rating_count:office_feedback_count,
+      rate:Number(office_rate)??0.00,  
+      rating_count:Number(office_feedback_count),
       },
 
       price: entity.touristic ? Number(entity.touristic.price) : null,

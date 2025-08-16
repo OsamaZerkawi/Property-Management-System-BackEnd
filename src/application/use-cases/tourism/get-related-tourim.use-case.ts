@@ -50,7 +50,7 @@ export class GetRelatedTouristicUseCase {
         postImage,
         price: Number(r.touristic_price),
         location,
-        avg_rate:r.avg_rate??0,
+        avg_rate:Number(r.avg_rate??0.00),
         is_favorite:r.is_favorite,
       };
     });
