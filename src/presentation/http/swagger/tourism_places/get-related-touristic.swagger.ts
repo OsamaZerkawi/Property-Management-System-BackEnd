@@ -5,10 +5,12 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 export function GetRelatedTouristicSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'خاص تطبيق الموبايل',
       description:
@@ -32,7 +34,7 @@ export function GetRelatedTouristicSwaggerDoc() {
             postTitle: { type: 'string', example: 'فيلا فاخرة على البحر' },
             date: { type: 'string', example: '2025-08-05', description: 'تاريخ النشر بالشكل yyyy-MM-dd' },
             postImage: { type: 'string', example: 'http://localhost:3000/uploads/properties/posts/images/img.jpg', nullable: true },
-            pricePerNight: { type: 'string', example: '1000.00', description: 'سعر الليلة أو السعر المعتمد في touristic.price' },
+            price: { type: 'string', example: '1000.00', description: 'سعر الليلة أو السعر المعتمد في touristic.price' },
             location: { type: 'string', example: 'دمشق,المزة', description: 'city,region' },
           },
         },

@@ -234,7 +234,9 @@ export class TourismController {
     @Req() req: Request,
   ) {
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const items = await this.getRelatedTouristicUseCase.execute( Number(id), baseUrl);
+    const userId=(req.user as any)?.sub??null;
+
+    const items = await this.getRelatedTouristicUseCase.execute( Number(id),userId, baseUrl);
     return successResponse(items, 'تم جلب العقارات ذات الصلة', 200);
   }
 }
