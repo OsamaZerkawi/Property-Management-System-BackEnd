@@ -31,13 +31,13 @@ export class GetAllAdvertisementInvoicesUseCase {
         image: `${baseUrl}/uploads/invoices/images/${invoice.image}`,
       };
 
-      // if (invoice.advertisement) {
-      //   result.image = `${baseUrl}/uploads/advertisements/images/${invoice.advertisement.image}`;
-      // }
+      if (invoice.advertisement) {
+        result.day_period = invoice.advertisement.day_period;
+      }
 
-      // if (invoice.promotedProperty) {
-      //   result.title = invoice.promotedProperty.property.post.title;
-      // }
+      if (invoice.promotedProperty) {
+        result.day_period = invoice.promotedProperty.period;
+      }
 
       return result;
     });

@@ -37,8 +37,10 @@ export class AdvertisementRepository
         'office.name',
         'advertisement.id',
         'advertisement.image',
+        'advertisement.day_period',
         'property.id',
         'promotedProperty.id',
+        'promotedProperty.period',
         'post.id',
         'post.title',
       ])

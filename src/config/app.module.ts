@@ -42,9 +42,11 @@ import { ReminderScheduler } from 'src/infrastructure/schedulers/reminder.schedu
 import { ReminderModule } from 'src/presentation/http/modules/reminder.module';
 import { StatsModule } from 'src/presentation/http/modules/stats.module';
 import { AdminUserPostModule } from 'src/presentation/http/modules/admin-user-post.module';
+import { SupportModule } from 'src/presentation/http/modules/support.module';
  
 @Module({
   imports: [
+    SupportModule,
     StatsModule,
     ReminderModule,
     AdminPartnersManagementModule,

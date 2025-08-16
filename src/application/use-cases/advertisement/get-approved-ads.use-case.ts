@@ -44,6 +44,6 @@ export class GetApprovedAdvertisementUseCase {
       active_days: `${item.period} أيام`,
     }));
 
-    return [...adResults , ...promotedResults];
+    return [...adResults, ...promotedResults];
   }
 }
