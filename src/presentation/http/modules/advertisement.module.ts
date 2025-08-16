@@ -25,7 +25,7 @@ import { ServicePriceModule } from "./service-price.module";
 import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
 import { PropertyModule } from "./property.module";
 import { Property } from "src/domain/entities/property.entity";
-import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
+import { GetAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
 
 @Module({
     imports:[
@@ -47,13 +47,13 @@ import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advert
         ApproveAdvertisementRequestUseCase,
         GetApprovedAdvertisementUseCase,
         GetAllAdvertisementInvoicesUseCase,
-        GetOfficeAdvertisementsUseCase,
+        GetAdvertisementsUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,
         }
     ], 
-    exports: [ADVERTISEMENT_REPOSITORY, GetOfficeAdvertisementsUseCase],
+    exports: [ADVERTISEMENT_REPOSITORY],
 
 })
 export class AdvertisementModule{}
