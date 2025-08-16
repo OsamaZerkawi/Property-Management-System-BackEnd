@@ -18,6 +18,8 @@ import { Office } from 'src/domain/entities/offices.entity';
 import { User } from 'src/domain/entities/user.entity';
 import { ComplaintController } from '../controllers/complaint.controller';
 import { GetPendingComplaintsUseCase } from 'src/application/use-cases/complaint/get-pending.complaints.use-case';
+import { RespondToComplaintUseCase } from 'src/application/use-cases/complaint/respond-to-complaint.use-case';
+import { GetOfficeAndServicesHasComplaintUseCase } from 'src/application/use-cases/complaint/get-office-and-services-has-complaint.use-case';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { GetPendingComplaintsUseCase } from 'src/application/use-cases/complaint
     DeleteFaqUseCase,
     FindAllFaqsUseCase,
     GetPendingComplaintsUseCase,
+    RespondToComplaintUseCase,
+    GetOfficeAndServicesHasComplaintUseCase,
     {
       provide: SUPPORT_REPOSITORY,
       useClass: SupportRepository,
