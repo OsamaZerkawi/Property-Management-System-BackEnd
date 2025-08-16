@@ -131,4 +131,17 @@ export class AdvertisementRepository
 
     await this.advertisementRepo.save(advertisement);
   }
+
+   async getImagesApprovedAdvertisement(officeId: number): Promise<Advertisement[]> {
+    return this.advertisementRepo
+      .createQueryBuilder('ad')
+      .leftJoinAndSelect('ad.office', 'office')
+      .where('office.id = :officeId', { officeId })
+      .andWhere('ad.is_paid = true')
+      .andWhere('ad.is_active = true')
+      .andWhere('ad.admin_agreement = :approved', { approved: AdminAgreement.APPROVED })
+      .andWhere('ad.image IS NOT NULL')
+      .orderBy('ad.created_at', 'DESC')
+      .getMany();
+  }
 }

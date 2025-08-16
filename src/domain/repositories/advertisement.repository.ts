@@ -12,4 +12,5 @@ export interface AdvertisementRepositoryInterface {
     update(id: number,fields: Partial<Advertisement>);
     deactivateExpiredAdvertisements(currentDate: Date);
     getApprovedAdvertisement();
+    getImagesApprovedAdvertisement(officeId: number): Promise<Advertisement[]>
 }

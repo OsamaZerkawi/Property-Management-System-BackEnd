@@ -47,6 +47,8 @@ import { ShowOfficeDetailsSwaggerDoc } from "../swagger/office/show-office-detai
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
 import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
 import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-properties.swagger";
+import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
+import { ShowOfficeAdsSwaggerDoc } from "../swagger/tourism_places/show-office-ads.swagger";
      
   @Controller('office')
   export class OfficeController {
@@ -66,7 +68,7 @@ import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-prop
       private readonly complaintOfficeUseCase: ComplaintOfficeUseCase,
       private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
       private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
-
+      private readonly getOfficeAdvertisementsUseCase: GetOfficeAdvertisementsUseCase,
     ) {}
 
     @Get('/payment-method')
@@ -305,6 +307,19 @@ import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-prop
       propertyType,
     );
    return successPaginatedResponse(data,total,page,items,'تم ارجاع العقارات بنجاح'); 
+  }
+
+
+  @Get('office/:id/ads')
+  @Public()
+  @ShowOfficeAdsSwaggerDoc()
+  async getOfficeAdsImages(
+    @Param('id') officeId: number,
+    @Req() request: Request,
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const images = await this.getOfficeAdvertisementsUseCase.execute(Number(officeId), baseUrl);
+    return successResponse(images, 'تم إرجاع صور الإعلانات بنجاح');
   }
 }
    
