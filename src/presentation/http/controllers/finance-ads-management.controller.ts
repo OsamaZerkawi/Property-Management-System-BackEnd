@@ -25,7 +25,7 @@ import { GetAllAdvertisementInvoicesSwaggerDoc } from '../swagger/advertisement/
 import { GetAdRequestsSwaggerDoc } from '../swagger/advertisement/get-ad-request.swagger';
 
 @ApiTags('Finance & Ads Management')
-@Controller('finance-ads-management')
+@Controller('admin/finance-ads-management')
 export class FinanceAdsManagementController {
   constructor(
     private readonly getPendingAdvertisementUseCase: GetPendingAdvertisementUseCase,
