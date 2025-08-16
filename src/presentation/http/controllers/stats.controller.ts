@@ -18,7 +18,7 @@ import { Permissions } from 'src/shared/decorators/permission.decorator';
 import { GetPublicInfoStatsUseCase } from 'src/application/use-cases/stats/get-public-info-status.use-case';
 import { GetPublicStatsSwaggerDoc } from '../swagger/stats/get-public-info-stats.swagger';
 
-@Controller('stats')
+@Controller('admin/stats')
 export class StatsController {
   constructor(
     private readonly getPopularStatsUseCase: GetPopularStatsUseCase,

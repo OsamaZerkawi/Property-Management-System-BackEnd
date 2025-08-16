@@ -1,8 +1,9 @@
 import { applyDecorators } from "@nestjs/common";
-import { ApiOperation, ApiOkResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiOkResponse, ApiBearerAuth } from "@nestjs/swagger";
 
 export function GetAllUsersSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'جلب جميع حسابات المستخدمين',
       description:
