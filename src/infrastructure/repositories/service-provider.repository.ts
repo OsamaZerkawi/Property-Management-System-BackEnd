@@ -32,20 +32,11 @@ export class ServiceProviderRepository
   }
 
   async getAll(baseUrl: string, page?: number, items?: number) {
-    const query = await this.fetchServiceProviders(baseUrl);
-
-    if (page && items) {
-      const countQuery = query.clone();
-      query.skip((page - 1) * items).take(items);
-      const [results, total] = await Promise.all([
-        query.getRawMany(),
-        countQuery.getCount(),
-      ]);
-      return { results, total, page, items };
-    }
-
+    const query = await this.fetchServiceProviders(baseUrl, page, items);
     const results = await query.getRawMany();
-    return { results };
+    const total = results.length ? parseInt(results[0].total, 10) : 0;
+
+    return { results, total };
   }
 
   async getAllWithFilters(
@@ -60,19 +51,10 @@ export class ServiceProviderRepository
       items,
       filters,
     );
-
-    if (page && items) {
-      const countQuery = query.clone();
-      query.skip((page - 1) * items).take(items);
-      const [results, total] = await Promise.all([
-        query.getRawMany(),
-        countQuery.getCount(),
-      ]);
-      return { results, total, page, items };
-    }
-
     const results = await query.getRawMany();
-    return { results };
+    const total = results.length ? parseInt(results[0].total, 10) : 0;
+
+    return { results, total };
   }
 
   async searchByName(
@@ -81,20 +63,11 @@ export class ServiceProviderRepository
     page?: number,
     items?: number,
   ) {
-    const query = await this.fetchServiceProviders(baseUrl);
+    const query = await this.fetchServiceProviders(baseUrl,page,items);
     query.andWhere('service_provider.name ILIKE :name', { name: `%${name}%` });
-    if (page && items) {
-      const countQuery = query.clone();
-      query.skip((page - 1) * items).take(items);
-      const [results, total] = await Promise.all([
-        query.getRawMany(),
-        countQuery.getCount(),
-      ]);
-      return { results, total, page, items };
-    }
-
     const results = await query.getRawMany();
-    return { results };
+    const total = results.length ? parseInt(results[0].total, 10) : 0;
+    return { results, total };
   }
   async findOneWithDetails(id: number, baseUrl: string) {
     console.log(baseUrl);
@@ -155,28 +128,29 @@ export class ServiceProviderRepository
       });
     }
 
-    query.select([
-      'service_provider.id AS id',
-      'service_provider.name AS name',
-      `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
-      'service_provider.career AS career',
-      'service_provider.opening_time AS opening_time',
-      'service_provider.closing_time AS closing_time',
-      `CONCAT(city.name, ' ، ', region.name) AS location`,
-      'user.phone AS "userPhone"',
-      'ROUND(COALESCE(AVG(feedback.rate), 0)::numeric, 1)::double precision AS "avgRate"',
-      'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
-    ]).groupBy(`
-        service_provider.id,
-        region.id,
-        city.id,
-        user.id
-      `);
+    query
+      .select([
+        'service_provider.id AS id',
+        'service_provider.name AS name',
+        `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
+        'service_provider.career AS career',
+        'service_provider.opening_time AS opening_time',
+        'service_provider.closing_time AS closing_time',
+        `CONCAT(city.name, ' ، ', region.name) AS location`,
+        'user.phone AS "userPhone"',
+        'ROUND(COALESCE(AVG(feedback.rate), 0)::numeric, 1)::double precision AS "avgRate"',
+        'CAST(COUNT(feedback.id) AS INTEGER) AS "ratingCount"',
+        'COUNT(*) OVER() AS total',
+      ])
+      .groupBy('service_provider.id')
+      .addGroupBy('region.id')
+      .addGroupBy('city.id')
+      .addGroupBy('user.id');
+    //  .orderBy('service_provider.id', 'ASC');
 
     if (page && items) {
-      query.skip((page - 1) * items).take(items);
+      query.offset((page - 1) * items).limit(items);
     }
-
     return query;
   }
   async findTopRatedServiceProviders(page: number, items: number) {

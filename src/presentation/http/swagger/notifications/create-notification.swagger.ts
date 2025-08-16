@@ -1,17 +1,19 @@
-
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { SendNotificationDto } from 'src/application/dtos/notification/send-notification.dto';
+import { NotificationSender } from 'src/domain/enums/notification-sender.enum';
 
 export function CreateNotificationSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
+    ApiConsumes('application/json', 'multipart/form-data'),
     ApiOperation({ summary: 'إنشاء وإرسال إشعار للمستخدم الحالي' }),
     ApiBody({
       type: SendNotificationDto,
@@ -22,8 +24,7 @@ export function CreateNotificationSwaggerDoc() {
           value: {
             title: 'تنبيه جديد',
             body: 'تم إضافة عنصر جديد في النظام',
-            data: { key: 'value' },
-            fcmToken: 'optional-fcm-token',
+            target: NotificationSender.ADMINS,
           },
         },
       },

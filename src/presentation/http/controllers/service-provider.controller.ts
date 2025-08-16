@@ -16,7 +16,6 @@ import { GetAllServiceProvidersSwaggerDoc } from "../swagger/service-provider/ge
 import { GetAllServiceProvidersWithFiltersSwaggerDoc } from "../swagger/service-provider/get-all-with-filter";
 import { SearchServiceProvidersSwaggerDoc } from "../swagger/service-provider/search-by-name";
 import { CreateOrUpdateFeedbackSwaggerDoc } from "../swagger/service-provider/create-or-update-feedback";
-import { NotFoundError } from "rxjs";
 import { GetServiceProviderDetailsSwaggerDoc } from "../swagger/service-provider/get-one";
 @Controller('service-provider')
 export class ServiceProviderController{

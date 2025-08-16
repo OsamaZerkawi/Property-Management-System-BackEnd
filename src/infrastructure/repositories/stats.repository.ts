@@ -24,10 +24,9 @@ export class StatsRepository implements StatsRepositoryInterface {
           WHERE NOT EXISTS (
             SELECT 1
             FROM "user_roles" ur
-            INNER JOIN "roles" r ON r.id = ur.role_id
             WHERE ur.user_id = u.id
-              AND r.name = 'مشرف'
           )
+
         ) AS total_users,
 
         -- Count only admins

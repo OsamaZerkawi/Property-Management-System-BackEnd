@@ -26,6 +26,7 @@ export class SendNotificationDto {
   @ApiProperty({
     description: 'المستهدفين',
     enum: NotificationSender,
+    example:NotificationSender.ADMINS
   })
   @IsEnum(NotificationSender)
   target: NotificationSender;

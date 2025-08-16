@@ -77,7 +77,7 @@ export class NotificationsController {
     @Body() body: SendNotificationDto,
   ) {
     const userId = user.sub;
-    const { title, body: notificationBody, data } = body;
+    // const { title, body: notificationBody, data } = body;
 
     const notification = await this.createNotificationForTargetUseCase.execute(userId,body);
 
