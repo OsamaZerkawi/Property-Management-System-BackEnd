@@ -49,8 +49,8 @@ export function GetOfficeListSwaggerDoc() {
       name: 'type',
       required: false,
       type: String,
-      example: 'سكني',
-      description: 'نوع المكتب (مثال: سكني، سياحي...)',
+      example: 'عقاري',
+      description: 'نوع المكتب (مثال: عقاري، سياحي,الكل)',
     }),
 
     ApiQuery({
