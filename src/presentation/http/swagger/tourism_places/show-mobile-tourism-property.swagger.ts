@@ -5,10 +5,13 @@ import {
   ApiOkResponse,
   ApiNotFoundResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+
 
 export function ShowMobileTourismSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: 'خاص بتطبيق الموبايل' }),
     ApiParam({ name: 'id', required: true, description: 'معرّف العقار' }),
     ApiOkResponse({
@@ -19,8 +22,8 @@ export function ShowMobileTourismSwaggerDoc() {
           message: 'تم ارجاع تفاصيل العقار السياحي بنجاح',
           data: {
             propertyId: 1,
-            postTitle: 'شقة فاخرة',
-            description: 'شقة للإيجار السياحي مفروشة بالكامل',
+            postTitle: 'شاليه على البحر',
+            description: 'شاليه سياحي مستقل بمسطح واسع وإطلالة على البحر',
             date: '2025-08-06',
             postImage: 'http://localhost:3000/uploads/properties/posts/images/post.jpg',
             images: [
@@ -28,27 +31,37 @@ export function ShowMobileTourismSwaggerDoc() {
               'http://localhost:3000/uploads/properties/images/image2.jpg'
             ],
             location: 'دمشق، المزة',
-            longitude: 33.5138,
-            latitude: 36.2765,
+            longitude: 36.2765,
+            latitude: 33.5138,
             area: 120,
             roomCount: 3,
             livingRoomCount: 1,
             kitchenCount: 1,
             bathroomCount: 2,
-            hasFurniture: true,
-            officeId: 5,
-            officeName: 'مكتب المستقبل',
-            officeLocation: 'دمشق، الصالحية',
+            hasFurniture: 'مفروش جزئياً',
+            // إحصائيات العقار والمستخدم
+            avg_rate: 3.00,
+            is_favorite: true,
+            // معلومات المكتب بوصف منظم
+            office: {
+              id: 5,
+              logo: 'http://localhost:3000/uploads/offices/logos/logo.png',
+              type: 'وكالة عقارية',
+              name: 'مكتب المستقبل',
+              location: 'حلب، العزيزية',
+              rate: 4.20,
+              rating_count: 25
+            },
             price: 250000,
-            electricity: true,
-            water: true,
-            pool: false,
+            electricity: 'متوفر 24/7',
+            water: 'متوفرة',
+            pool: 'مسبح خارجي خاص',
             additionalServices: ['منطقة ألعاب أطفال', 'جاكوزي']
           }
         }
       }
     }),
-    ApiNotFoundResponse({ description: 'العقار غير موجود' }),
-    ApiInternalServerErrorResponse({ description: 'خطأ في الخادم' })
+    ApiNotFoundResponse({ description: 'العقار غير موجود', schema: { example: { statusCode: 404, message: 'العقار غير موجود' } } }),
+    ApiInternalServerErrorResponse({ description: 'خطأ في الخادم', schema: { example: { statusCode: 500, message: 'حدث خطأ غير متوقع' } } }),
   );
 }
