@@ -19,11 +19,24 @@ import { OfficeSocial } from "src/domain/entities/office-social.entity";
 import { OfficeFeedback } from "src/domain/entities/office-feedback.entity"; 
 import { PropertyFeeService } from "src/application/services/propertyFee.service";  
 import { ResidentialOfficeModule } from "./residential-office.module";
+import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
+import { SearchOfficesUseCase } from "src/application/use-cases/office/search-office-by-name.use-case";
+import { RateOfficeUseCase } from "src/application/use-cases/office/rate-office.usecase";
+import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlaint-office.use-case";
+import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
+import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
+import { PropertyModule } from "./property.module";
+import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
+import { ADVERTISEMENT_REPOSITORY } from "src/domain/repositories/advertisement.repository";
+import { AdvertisementRepository } from "src/infrastructure/repositories/advertisement.repository";
+import { AdvertisementModule } from "./advertisement.module";
 
 @Module({
   imports: [
     AuthModule, 
+    PropertyModule,
     forwardRef(() => ResidentialOfficeModule),
+    forwardRef(() => AdvertisementModule),
     TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback,
 ]),
   ],
@@ -38,10 +51,17 @@ import { ResidentialOfficeModule } from "./residential-office.module";
     GetOfficeDetailsUseCase,
     GetOfficePaymentMethodUseCase,
     FindOfficeForUserUseCase, 
+    ListOfficesUseCase,
+    SearchOfficesUseCase,
+    RateOfficeUseCase,
+    ComplaintOfficeUseCase,
+    GetOfficeDetailsMobileUseCase,
+    GetOfficePropertiesUseCase,
+    GetOfficeAdvertisementsUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository
-    },
+    }, 
     PropertyFeeService,
   ],
   exports: [
