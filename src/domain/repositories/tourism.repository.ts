@@ -25,7 +25,7 @@ export interface ITourismRepository {
   getServicesMapByNames(names: string[]);
   filter(dto: FilterTourismPropertiesDto,page: number, items: number): Promise<{ data: Property[]; total: number }>; 
   searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }>
-  findTourismPropertyDetails(propertyId: number)
+  findPropertyDetails(propertyId: number, userId?: number)
   findByMonth(  propertyId: number,   year: number,  month: number,  baseUrl: string,)
   findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null>;
   findRelatedTouristicProperties(

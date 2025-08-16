@@ -205,8 +205,9 @@ export class TourismController {
     @Param('id') propertyId: number,
      @Req() request: Request
   ) {
-     const baseUrl = `${request.protocol}://${request.get('host')}`;
-    const data=await this.showTourismMobileUseCase.execute(propertyId,baseUrl);
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const userId=(request.user as any)?.sub??null;
+    const data=await this.showTourismMobileUseCase.execute(propertyId,baseUrl,userId);
     return successResponse(data,'تم ارجاع تفاصيل العقار السياحي بنجاح');
   }
 
@@ -219,7 +220,6 @@ export class TourismController {
     @Param('year') year: number,
     @Req() request: Request,
     @CurrentUser() user:any,
-
   ) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
     const data = await this.getTourismFinanceByYearUseCase.execute(propertyId, year,user.sub,baseUrl);

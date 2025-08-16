@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { OnlineInvoice } from "src/domain/entities/online-invoices.entity";
@@ -25,6 +25,7 @@ import { ServicePriceModule } from "./service-price.module";
 import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
 import { PropertyModule } from "./property.module";
 import { Property } from "src/domain/entities/property.entity";
+import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
 
 @Module({
     imports:[
@@ -32,7 +33,7 @@ import { Property } from "src/domain/entities/property.entity";
         PropertyModule,
         ServicePriceModule,
         NotificationModule,
-        OfficeModule,
+        forwardRef(() => OfficeModule),
         AuthModule,
         TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User,ServicePrice,PromotedProperty,Property,])
     ],
@@ -46,13 +47,13 @@ import { Property } from "src/domain/entities/property.entity";
         ApproveAdvertisementRequestUseCase,
         GetApprovedAdvertisementUseCase,
         GetAllAdvertisementInvoicesUseCase,
+        GetOfficeAdvertisementsUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,
         }
-    ],
-    exports:[
-        ADVERTISEMENT_REPOSITORY
-    ]
+    ], 
+    exports: [ADVERTISEMENT_REPOSITORY, GetOfficeAdvertisementsUseCase],
+
 })
 export class AdvertisementModule{}

@@ -400,25 +400,63 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
       'touristic.additionalServices.service', 
     ],
   });
+} 
+async findPropertyDetails(propertyId: number, userId?: number) {
+  const qb = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoinAndSelect('property.post', 'post')
+    .leftJoinAndSelect('property.images', 'images')     // relation names must match your entities
+    .leftJoinAndSelect('property.touristic', 'touristic')
+    .leftJoinAndSelect('property.region', 'region')
+    .leftJoinAndSelect('region.city', 'city')
+    .leftJoinAndSelect('property.office', 'office')
+    .leftJoinAndSelect('office.region', 'office_region')
+    .leftJoinAndSelect('office_region.city', 'office_city')
+    .where('property.id = :propertyId', { propertyId });
+ 
+  qb.addSelect(subQb =>
+    subQb
+      .select('ROUND(AVG(pf.rate)::numeric, 2)')
+      .from('property_feedbacks', 'pf')
+      .where('pf.property_id = property.id'),
+    'avg_rate'
+  );
+ 
+  if (userId) {
+    qb.addSelect(subQb =>
+      subQb
+        .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
+        .from('property_favorites', 'fav')
+        .where('fav.property_id = property.id')
+        .andWhere('fav.user_id = :userId', { userId }),
+      'is_favorite'
+    );
+  } else {
+    qb.addSelect('false', 'is_favorite');
+  }
+ 
+  qb.addSelect(subQb =>
+    subQb
+      .select('ROUND(AVG(of.rate)::numeric, 2)')
+      .from('office_feedbacks', 'of')
+      .where('of.office_id = office.id'),
+    'office_rate'
+  );
+
+ qb.addSelect(subQb =>
+  subQb
+    .select('COUNT(of2.id)')
+    .from('office_feedbacks', 'of2')
+    .where('of2.office_id = office.id')
+    .andWhere('of2.rate IS NOT NULL'),
+  'office_feedback_count'
+);
+
+ 
+  const result = await qb.getRawAndEntities();  
+  return result;  
 }
-async findTourismPropertyDetails(propertyId: number) {
-  return await this.propRepo.findOne({
-    where: { 
-      id: propertyId
-    },
-    relations: [ 
-      'office.region',
-      'office.region.city',
-      'region',
-      'region.city',
-      'post',
-      'touristic',
-      'images',
-      'touristic.additionalServices',
-      'touristic.additionalServices.service', 
-    ],
-  });
-}
+
 async filter(
   dto: FilterTourismPropertiesDto,
   page: number,
