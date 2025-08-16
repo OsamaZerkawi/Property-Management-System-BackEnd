@@ -37,12 +37,12 @@ export function ShowMobileTourismSwaggerDoc() {
             roomCount: 3,
             livingRoomCount: 1,
             kitchenCount: 1,
+            bedroomCount:2,
             bathroomCount: 2,
-            hasFurniture: 'مفروش جزئياً',
-            // إحصائيات العقار والمستخدم
+            hasFurniture: 'مفروش جزئياً', 
+            rate:1.00,
             avg_rate: 3.00,
-            is_favorite: true,
-            // معلومات المكتب بوصف منظم
+            is_favorite: true, 
             office: {
               id: 5,
               logo: 'http://localhost:3000/uploads/offices/logos/logo.png',

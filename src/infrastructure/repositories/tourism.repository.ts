@@ -401,6 +401,7 @@ async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     ],
   });
 } 
+
 async findPropertyDetails(propertyId: number, userId?: number) {
   const qb = this.propRepo
     .createQueryBuilder('property')
@@ -430,11 +431,21 @@ async findPropertyDetails(propertyId: number, userId?: number) {
         .where('fav.property_id = property.id')
         .andWhere('fav.user_id = :userId', { userId }),
       'is_favorite'
+    ); 
+    qb.addSelect(subQb =>
+      subQb
+        .select('pfu.rate')
+        .from('property_feedbacks', 'pfu')
+        .where('pfu.property_id = property.id')
+        .andWhere('pfu.user_id = :userId', { userId })
+        .andWhere('pfu.rate IS NOT NULL')
+        .limit(1),  
+      'user_rate'
     );
   } else {
     qb.addSelect('false', 'is_favorite');
-  }
- 
+    qb.addSelect('NULL', 'user_rate');
+  } 
   qb.addSelect(subQb =>
     subQb
       .select('ROUND(AVG(of.rate)::numeric, 2)')
@@ -442,21 +453,19 @@ async findPropertyDetails(propertyId: number, userId?: number) {
       .where('of.office_id = office.id'),
     'office_rate'
   );
-
- qb.addSelect(subQb =>
-  subQb
-    .select('COUNT(of2.id)')
-    .from('office_feedbacks', 'of2')
-    .where('of2.office_id = office.id')
-    .andWhere('of2.rate IS NOT NULL'),
-  'office_feedback_count'
-);
-
  
+  qb.addSelect(subQb =>
+    subQb
+      .select('COUNT(of2.id)')
+      .from('office_feedbacks', 'of2')
+      .where('of2.office_id = office.id')
+      .andWhere('of2.rate IS NOT NULL'),
+    'office_feedback_count'
+  );
   const result = await qb.getRawAndEntities();  
   return result;  
 }
-
+ 
 async filter(
   dto: FilterTourismPropertiesDto,
   page: number,

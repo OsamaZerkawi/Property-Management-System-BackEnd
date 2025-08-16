@@ -34,9 +34,8 @@ export class ShowTourismMobileUseCase {
       if (Number.isNaN(n)) return null; 
       return Math.round(n * 100) / 100;
     };
-
+    const rate = formatNumber2(row.user_rate)??0.00;
     const avg_rate = formatNumber2(row.avg_rate) ?? 0.00;  
-    console.log(avg_rate)
     const office_rate = formatNumber2(row.office_rate)??0.00;  
     const office_feedback_count = row.office_feedback_count ? Number(row.office_feedback_count) : 0;
     const is_favorite = (() => {
@@ -63,10 +62,12 @@ export class ShowTourismMobileUseCase {
       latitude: entity.latitude ?? null,
       area: entity.area ?? null,
       roomCount: entity.room_count ?? null,
+      bedroomCount:entity.bedroom_count,
       livingRoomCount: entity.living_room_count ?? null,
       kitchenCount: entity.kitchen_count ?? null,
       bathroomCount: entity.bathroom_count ?? null,
       hasFurniture: entity.has_furniture ?? null,    
+      rate,
       avg_rate,  
       is_favorite,
 
