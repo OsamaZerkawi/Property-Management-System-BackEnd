@@ -408,6 +408,8 @@ async findPropertyDetails(propertyId: number, userId?: number) {
     .leftJoinAndSelect('property.post', 'post')
     .leftJoinAndSelect('property.images', 'images')   
     .leftJoinAndSelect('property.touristic', 'touristic')
+    .leftJoinAndSelect('touristic.additionalServices', 'touristic_additional')  
+    .leftJoinAndSelect('touristic_additional.service', 'service') 
     .leftJoinAndSelect('property.region', 'region')
     .leftJoinAndSelect('region.city', 'city')
     .leftJoinAndSelect('property.office', 'office')
