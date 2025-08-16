@@ -1,27 +1,34 @@
-import { ColdObservable } from "rxjs/internal/testing/ColdObservable";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('notifications')
 export class Notification {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    userId: number;
-    
-    @Column()
-    title: string;
+  @Column()
+  userId: number;
 
-    @Column('text')
-    body: string;
+  @Column()
+  title: string;
 
-    @Column({ type: 'jsonb', nullable: true })
-    data;
+  @Column('text')
+  body: string;
 
-    @Column({ default: false })
-    isRead: boolean;
+  @Column({ type: 'jsonb', nullable: true })
+  data;
 
-    @Column({ type: 'timestamp' })
-    sent_at: Date;
+  @Column({ nullable: true })
+  senderId: number;
 
+  @Column({ default: false })
+  isRead: boolean;
+
+  @Column({ type: 'timestamp' })
+  sent_at: Date;
 }

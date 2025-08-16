@@ -43,7 +43,7 @@ export class GetOfficesByAdminCityUseCase {
           office.region_name || ''
         }`.trim(),
         rate: {
-          avgRate: parseFloat(office.avgRate) || 0,
+          avgRate: Number(parseFloat(office.avgRate).toFixed(1)) || 0,
           count: parseInt(office.rateCount, 10) || 0,
         },
       };

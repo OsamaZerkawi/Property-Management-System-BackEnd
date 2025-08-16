@@ -22,6 +22,9 @@ export class GetPendingPropertyPostsUseCase {
         title: row.post_title,
         image: `${baseUrl}/uploads/properties/posts/images/${row.post_image}`,
         location: `${row.city_name}، ${row.region_name}`,
+        office_name: row.office_name,
+        office_location: `${row.office_city}، ${row.office_region}`,
+        type: row.property_type,
       };
 
       if (row.residential_listing_type) {
