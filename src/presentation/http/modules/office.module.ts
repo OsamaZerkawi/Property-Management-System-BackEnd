@@ -26,9 +26,6 @@ import { ComplaintOfficeUseCase } from "src/application/use-cases/office/comlain
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
 import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
 import { PropertyModule } from "./property.module";
-import { GetOfficeAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
-import { ADVERTISEMENT_REPOSITORY } from "src/domain/repositories/advertisement.repository";
-import { AdvertisementRepository } from "src/infrastructure/repositories/advertisement.repository";
 import { AdvertisementModule } from "./advertisement.module";
 
 @Module({
@@ -36,7 +33,6 @@ import { AdvertisementModule } from "./advertisement.module";
     AuthModule, 
     PropertyModule,
     forwardRef(() => ResidentialOfficeModule),
-    forwardRef(() => AdvertisementModule),
     TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback,
 ]),
   ],
@@ -56,8 +52,7 @@ import { AdvertisementModule } from "./advertisement.module";
     RateOfficeUseCase,
     ComplaintOfficeUseCase,
     GetOfficeDetailsMobileUseCase,
-    GetOfficePropertiesUseCase,
-    GetOfficeAdvertisementsUseCase,
+    GetOfficePropertiesUseCase, 
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

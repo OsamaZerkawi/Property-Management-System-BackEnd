@@ -134,11 +134,9 @@ export class AdvertisementRepository
     await this.advertisementRepo.save(advertisement);
   }
 
-   async getImagesApprovedAdvertisement(officeId: number): Promise<Advertisement[]> {
+   async getImagesApprovedAdvertisement( ): Promise<Advertisement[]> {
     return this.advertisementRepo
-      .createQueryBuilder('ad')
-      .leftJoinAndSelect('ad.office', 'office')
-      .where('office.id = :officeId', { officeId })
+      .createQueryBuilder('ad') 
       .andWhere('ad.is_paid = true')
       .andWhere('ad.is_active = true')
       .andWhere('ad.admin_agreement = :approved', { approved: AdminAgreement.APPROVED })
