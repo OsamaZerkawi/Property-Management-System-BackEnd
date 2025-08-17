@@ -26,7 +26,7 @@ export class AdminUserPostController {
   ) {}
 
   @Roles('مشرف', 'مدير')
-  @Permissions('إدارة المنشورات ')
+  @Permissions('إدارة المنشورات')
   @GetPendingUserPostsSwaggerDoc()
   @HttpCode(HttpStatus.OK)
   @Get()
@@ -35,9 +35,9 @@ export class AdminUserPostController {
 
     return successResponse(result, 'تم إرجاع جميع منشورات المستخدمين', 200);
   }
-  
+
   @Roles('مشرف', 'مدير')
-  @Permissions('إدارة المنشورات ')
+  @Permissions('إدارة المنشورات')
   @RespondToUserPostSwaggerDoc()
   @Put(':id/respond')
   async respondToPost(
