@@ -1,7 +1,7 @@
 // infrastructure/repositories/tourism.repository.impl.ts
-import { Injectable,NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable,NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository, SelectQueryBuilder } from 'typeorm';
+import { DeepPartial, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository';
 import { Property } from 'src/domain/entities/property.entity';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
@@ -20,6 +20,12 @@ import { PropertyType } from 'src/domain/enums/property-type.enum';
 import { FilterTourismPropertiesDto } from 'src/application/dtos/tourism-mobile/filter-tourism-properties.dto';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
+import { Calendar } from 'src/domain/entities/calendar.entity';
+import { Booking } from 'src/domain/entities/booking.entity';
+import { CalendarStatus } from 'src/domain/enums/calendar-status.enum';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
+import { InoviceReasons } from 'src/domain/enums/inovice-reasons.enum';
+import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
 
 export interface FinanceRecord {
   startDate: string;
@@ -741,4 +747,88 @@ async findRelatedTouristicProperties(
   return results.slice(0, limit);
 }
 
+  async createBookingWithInvoices(options: {
+  userId: number;
+  propertyId: number;
+  startDate: string;
+  endDate: string;
+  deposit: number;
+  totalPrice: number;
+}): Promise<any> {
+  const { userId, propertyId, startDate, endDate, deposit, totalPrice } = options;
+
+    return await this.dataSource.transaction(async manager => {
+ 
+      const property = await manager.findOne(Property, {
+        where: { id: propertyId },
+        relations: ['touristic'],
+      });
+
+      if (!property) {
+        throw new NotFoundException('العقار غير موجود');
+      }
+
+      const touristic = property.touristic;
+      if (!touristic) {
+        throw new NotFoundException('تفاصيل العقار السياحي غير موجودة');
+      }
+   
+      const overlapExists = await manager
+        .createQueryBuilder(Calendar, 'c')
+        .where('c.touristic_id = :touristicId', { touristicId: touristic.id })
+        .andWhere('c.status = :bookedStatus', { bookedStatus: 'محجوز' })
+        .andWhere('NOT (c.end_date < :startDate OR c.start_date > :endDate)', { startDate, endDate })
+        .getCount();
+
+      if (overlapExists > 0) {
+        throw new BadRequestException('المدى الزمني المطلوب متداخل مع حجز موجود');
+      }
+ 
+      const calendar = manager.create(Calendar, {
+        touristic: { id: touristic.id } as any,
+        start_date: startDate,
+        end_date: endDate,
+        status: CalendarStatus.RESERVED,
+      });
+      await manager.save(Calendar, calendar);
+ 
+      const booking = manager.create(Booking, {
+        user: { id: userId } as any,
+        calendar: { id: calendar.id } as any,
+      });
+      await manager.save(Booking, booking);
+   
+    const invoiceRepo = manager.getRepository(UserPropertyInvoice);
+
+    const depositInvoiceData: DeepPartial<UserPropertyInvoice> = {
+      user: { id: userId } as any,
+      property: { id: propertyId } as any,
+      calendar: calendar ? ({ id: calendar.id } as any) : undefined,
+      amount: deposit,
+      billing_period_start: new Date(),
+      reason: InoviceReasons.DEPOSIT,  
+      status: InvoicesStatus.PAID,   
+      paymentMethod: PaymentMethod.STRIPE,  
+    };
+
+    const depositInvoice = invoiceRepo.create(depositInvoiceData);
+    await invoiceRepo.save(depositInvoice);
+ 
+    const remainingAmount = Number(totalPrice) - Number(deposit);
+    const remainingInvoiceData: DeepPartial<UserPropertyInvoice> = {
+      user: { id: userId } as any,
+      property: { id: propertyId } as any,
+      calendar: calendar ? ({ id: calendar.id } as any) : undefined,
+      amount: remainingAmount >= 0 ? remainingAmount : 0,
+      billing_period_start: new Date(),
+      reason: InoviceReasons.TOURISTIC_BOOKING,  
+      status: InvoicesStatus.PENDING,
+      paymentMethod:  PaymentMethod.STRIPE,  
+    };
+
+    const remainingInvoice = invoiceRepo.create(remainingInvoiceData);
+    await invoiceRepo.save(remainingInvoice);
+ 
+    });
+  }
 }
