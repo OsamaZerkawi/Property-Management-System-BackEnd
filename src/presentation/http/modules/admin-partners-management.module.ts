@@ -33,9 +33,15 @@ import { GetPendingPropertyPostsUseCase } from 'src/application/use-cases/proper
 import { RespondToPropertyPostUseCase } from 'src/application/use-cases/property-post/respond-to-property-post.use-case';
 import { Notification } from 'src/domain/entities/notification.entity';
 import { NotificationModule } from './notification.module';
+import { SubscriberController } from '../controllers/subscribers.controller';
+import { GetPopularStatsUseCase } from 'src/application/use-cases/stats/get-popular-stats.use-case';
+import { StatsModule } from './stats.module';
+import { RegisterSubscriberUseCase } from 'src/application/use-cases/auth/register-subscriber.use-case';
+import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/show-office-details-mobile';
 
 @Module({
   imports: [
+    StatsModule,
     NotificationModule,
     PropertyPostModule,
     RoleModule,
@@ -62,7 +68,7 @@ import { NotificationModule } from './notification.module';
       Notification,
     ]),
   ],
-  controllers: [AdminPartnersManagementController],
+  controllers: [AdminPartnersManagementController, SubscriberController],
   providers: [
     GetOfficesByAdminCityUseCase,
     GetServiceProvidersByAdminCityUseCase,
@@ -71,6 +77,9 @@ import { NotificationModule } from './notification.module';
     GetJoinRequetsUseCase,
     GetPendingPropertyPostsUseCase,
     RespondToPropertyPostUseCase,
+    GetPopularStatsUseCase,
+    RegisterSubscriberUseCase,
+    GetOfficeDetailsMobileUseCase,
     {
       provide: ADMIN_CITY_REPOSITORY,
       useClass: AdminCityRepository,

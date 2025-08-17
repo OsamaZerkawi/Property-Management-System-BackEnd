@@ -62,6 +62,28 @@ export function PropertyImageInterceptor() {
 }
 
 
+export function ProofDocumenteInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('proof_document', {
+      storage: diskStorage({
+        destination: './uploads/proof',
+        filename: (req, file, cb) => {
+        const timestamp = Date.now();
+        const ext = extname(file.originalname);
+        const safeBaseName = file.originalname
+          .replace(/\s+/g, '-')        // replace spaces with dashes
+          .replace(/\.[^/.]+$/, '')    // remove original extension
+          .replace(/[^a-zA-Z0-9-_]/g, ''); // remove unsafe characters
+
+        const filename = `proof-document-${safeBaseName}-${timestamp}${ext}`;
+        cb(null, filename);
+      },
+      }),
+    }),
+  );
+}
+
+
 export function UserPropertyInvoiceImageInterceptor() {
   return UseInterceptors(
     FileInterceptor('document', {
