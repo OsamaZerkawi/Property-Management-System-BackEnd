@@ -41,10 +41,20 @@ export class UserRepository implements UserRepositoryInterface {
     return qb.getMany();
   }
 
-  async findAll() {
-    return this.userRepo.find({
-      select: ['id', 'first_name', 'last_name', 'phone', 'email', 'created_at'],
-    });
+  async findAllWithoutRole() {
+    return this.userRepo
+      .createQueryBuilder('user')
+      .leftJoin('user.userRoles', 'userRole')
+      .where('userRole.id IS NULL')
+      .select([
+        'user.id',
+        'user.first_name',
+        'user.last_name',
+        'user.phone',
+        'user.email',
+        'user.created_at',
+      ])
+      .getMany();
   }
 
   async deleteUserById(userId: number) {
@@ -99,7 +109,7 @@ export class UserRepository implements UserRepositoryInterface {
       .leftJoin('user.userPermissions', 'userPermission')
       .leftJoin('userPermission.permission', 'permission')
       .leftJoin('user.adminCities', 'adminCity')
-      .leftJoin('adminCity.city','city')
+      .leftJoin('adminCity.city', 'city')
       .where('role.id = :roleId', { roleId })
       .select([
         'user.id',

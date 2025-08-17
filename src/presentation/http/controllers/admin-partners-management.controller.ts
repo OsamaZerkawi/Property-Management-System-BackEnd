@@ -125,7 +125,7 @@ export class AdminPartnersManagementController {
 
     return successResponse(data, 'تم إرجاع تفاصيل مزود الخدمة بنجاح', 200);
   }
-  
+
   @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @GetJoinRequestsSwaggerDoc()
