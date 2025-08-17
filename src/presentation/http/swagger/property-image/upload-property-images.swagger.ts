@@ -11,7 +11,6 @@ import {
   ApiNotFoundResponse,
   ApiBody,
 } from '@nestjs/swagger';
-import { Express } from 'express';
 
 export function UploadPropertyImagesSwaggerDoc() {
   return applyDecorators(

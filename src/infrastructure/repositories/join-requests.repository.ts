@@ -1,4 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
+import { RegisterSubscriberDto } from 'src/application/dtos/auth/register-subscriber.dto';
 import { JoinRequest } from 'src/domain/entities/join-request.entity';
 import { AdminAgreement } from 'src/domain/enums/admin-agreement.enum';
 import { JoinRequestRepositoryInterface } from 'src/domain/repositories/join-requests.repository';
@@ -9,10 +10,23 @@ export class JoinRequestRepository implements JoinRequestRepositoryInterface {
     @InjectRepository(JoinRequest)
     private readonly joinRequestRepo: Repository<JoinRequest>,
   ) {}
+  async register(data: RegisterSubscriberDto) {
+    const joinRequest = this.joinRequestRepo.create({
+      proof_document: data.proof_document,
+      agent_type: data.agent_type,
+      email: data.email,
+      first_name: data.first_name,
+      last_name: data.last_name,
+      latitude: data.latitude,
+      longitude: data.longitude,
+    });
+
+    await this.joinRequestRepo.save(joinRequest);
+  }
 
   async findAll() {
     return await this.joinRequestRepo.find({
-        where: {admin_agreement: AdminAgreement.PENDING}
+      where: { admin_agreement: AdminAgreement.PENDING },
     });
   }
 

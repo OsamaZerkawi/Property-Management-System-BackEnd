@@ -31,6 +31,9 @@ import { GetPendingPropertyPostsSwaggerDoc } from '../swagger/admin-partners-man
 import { RespondToAdRequestDto } from 'src/application/dtos/advertisement/respond-to-ad-request.dto';
 import { RespondToPropertyPostUseCase } from 'src/application/use-cases/property-post/respond-to-property-post.use-case';
 import { RespondToPropertyPostSwaggerDoc } from '../swagger/admin-partners-management/respond-to-property-post.swagger';
+import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/show-office-details-mobile';
+import { base } from '@faker-js/faker/.';
+import { GetOfficeDetailsSwaggerDoc } from '../swagger/admin-partners-management/get-office-details.swagger';
 
 @ApiTags('Admin - Partners Management')
 @Controller('admin/partners-management')
@@ -43,6 +46,7 @@ export class AdminPartnersManagementController {
     private readonly getJoinRequetsUseCase: GetJoinRequetsUseCase,
     private readonly getPendingPropertyPostsUseCase: GetPendingPropertyPostsUseCase,
     private readonly respondToPropertyPostUseCase: RespondToPropertyPostUseCase,
+    private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
   ) {}
 
   @Roles('مشرف', 'مدير')
@@ -59,6 +63,26 @@ export class AdminPartnersManagementController {
     );
 
     return successResponse(data, 'تم إرجاع جميع المكاتب بنجاح', 200);
+  }
+
+  @Roles('مشرف', 'مدير')
+  @Permissions('إدارة الوسطاء')
+  @Get('offices/:id')
+  @GetOfficeDetailsSwaggerDoc()
+  @HttpCode(HttpStatus.OK)
+  async getOfficeDetails(
+    @Param('id') id: number,
+    @Req() request: Request,
+    @CurrentUser() user,
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+    const result = await this.getOfficeDetailsMobileUseCase.execute(
+      id,
+      baseUrl,
+    );
+
+    return successResponse(result, 'تم إرجاع تفاصيل المكتب بنجاح', 200);
   }
 
   @Roles('مشرف', 'مدير')
