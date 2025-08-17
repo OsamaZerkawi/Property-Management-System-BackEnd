@@ -1,22 +1,32 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from "typeorm";
-import { RefreshToken } from "./refresh-token.entity";
-import { Office } from "./offices.entity";
-import { UserPost } from "./user-post.entity";
-import { UserPropertyPurchase } from "./user-property-purchase.entity";
-import { UserPropertyInvoice } from "./user-property-invoice.entity";
-import { ServiceProvider } from "./service-provider.entity";
-import { ServiceFeedback } from "./service-feedback.entity";
-import { UserRole } from "./user-role.entity";
-import { PropertyFeedback } from "./property-feedback.entity";
-import { OfficeFeedback } from "./office-feedback.entity";
-import { PropertyFavorite } from "./property-favorite.entity";
-import { Booking } from "./booking.entity";
-import { RentalContract } from "./rental-contract.entity";
-import { FcmToken } from "./fcmToken.entity";
-import { UserPermission } from "./user-permission.entity";
-import { AdminCity } from "./admin-city.entity";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { RefreshToken } from './refresh-token.entity';
+import { Office } from './offices.entity';
+import { UserPost } from './user-post.entity';
+import { UserPropertyPurchase } from './user-property-purchase.entity';
+import { UserPropertyInvoice } from './user-property-invoice.entity';
+import { ServiceProvider } from './service-provider.entity';
+import { ServiceFeedback } from './service-feedback.entity';
+import { UserRole } from './user-role.entity';
+import { PropertyFeedback } from './property-feedback.entity';
+import { OfficeFeedback } from './office-feedback.entity';
+import { PropertyFavorite } from './property-favorite.entity';
+import { Booking } from './booking.entity';
+import { RentalContract } from './rental-contract.entity';
+import { FcmToken } from './fcmToken.entity';
+import { UserPermission } from './user-permission.entity';
+import { AdminCity } from './admin-city.entity';
 
-@Entity({name: 'users'})
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -27,10 +37,10 @@ export class User {
   @Column()
   last_name: string;
 
-  @Column({unique: true, nullable: true})
+  @Column({ unique: true, nullable: true })
   phone: string;
 
-  @Column({unique: true,nullable:true})
+  @Column({ unique: true, nullable: true })
   username: string;
 
   @Column()
@@ -51,31 +61,31 @@ export class User {
   @OneToOne(() => Office, (office) => office.user)
   office: Office;
 
-  @OneToMany(() => UserPost,post => post.user)
+  @OneToMany(() => UserPost, (post) => post.user)
   userPosts: UserPost[];
 
-  @OneToMany(() => UserPropertyPurchase,(purchase) => purchase.user)
+  @OneToMany(() => UserPropertyPurchase, (purchase) => purchase.user)
   propertyPurchases: UserPropertyPurchase[];
 
   @OneToMany(() => UserPropertyInvoice, (invoice) => invoice.user)
   invoices: UserPropertyInvoice[];
-  
+
   @OneToOne(() => ServiceProvider, (sp) => sp.user)
   serviceProvider: ServiceProvider;
 
   @OneToMany(() => ServiceFeedback, (feedback) => feedback.user)
   service_feedbacks: ServiceFeedback[];
 
-  @OneToMany(() => PropertyFeedback, feedback => feedback.user)
+  @OneToMany(() => PropertyFeedback, (feedback) => feedback.user)
   property_feedbacks: PropertyFeedback[];
 
   @OneToMany(() => OfficeFeedback, (feedback) => feedback.user)
   office_feedbacks: OfficeFeedback[];
 
-  @OneToMany(() => UserRole, ur => ur.user)
+  @OneToMany(() => UserRole, (ur) => ur.user)
   userRoles: UserRole[];
 
-  @OneToMany(() => PropertyFavorite, favorite => favorite.user)
+  @OneToMany(() => PropertyFavorite, (favorite) => favorite.user)
   propertyFavorites: PropertyFavorite[];
 
   @OneToMany(() => Booking, (booking) => booking.user)
@@ -84,15 +94,15 @@ export class User {
   @OneToMany(() => RentalContract, (rentalContract) => rentalContract.user)
   rentalContracts: RentalContract[];
 
-  @OneToMany(() => FcmToken, fcmToken => fcmToken.user)
+  @OneToMany(() => FcmToken, (fcmToken) => fcmToken.user)
   fcmTokens: FcmToken[];
 
-  @OneToMany(() => UserPermission, up => up.user)
+  @OneToMany(() => UserPermission, (up) => up.user)
   userPermissions: UserPermission[];
 
-  @OneToMany(() => AdminCity, adminCity => adminCity.user)
-  adminCities: AdminCity[];
- 
+  @OneToOne(() => AdminCity, (adminCity) => adminCity.user)
+  adminCities: AdminCity;
+
   @CreateDateColumn()
   created_at: Date;
 

@@ -1,17 +1,13 @@
-
 import { applyDecorators } from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiOkResponse,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
 
 export function GetSupervisorsSwaggerDoc() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
       summary: 'إرجاع جميع المشرفين',
-      description: 'هذه الواجهة تُستخدم من قبل المدير لإرجاع قائمة بجميع المشرفين مع بياناتهم وصلاحياتهم.',
+      description:
+        'هذه الواجهة تُستخدم من قبل المدير لإرجاع قائمة بجميع المشرفين مع بياناتهم وصلاحياتهم.',
     }),
     ApiOkResponse({
       description: 'تم إرجاع جميع المشرفين بنجاح',
@@ -24,6 +20,10 @@ export function GetSupervisorsSwaggerDoc() {
               id: 1,
               fullName: 'أحمد محمد',
               username: 'ahmed123',
+              email: 'dysm.alkafy10@yahoo.com',
+              city_id: 3,
+              first_name: 'عزيز',
+              last_name: 'الدنوني',
               permissions: ['إضافة إعلان', 'حذف إعلان'],
               joiningDate: '2024-05-10T08:30:00.000Z',
             },
