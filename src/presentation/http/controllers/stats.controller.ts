@@ -25,7 +25,7 @@ export class StatsController {
     private readonly getPublicInfoStatsUseCase: GetPublicInfoStatsUseCase,
   ) {}
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('مراقب النظام')
   @GetPublicStatsSwaggerDoc()
   @Get('public-info')
@@ -36,7 +36,7 @@ export class StatsController {
     return successResponse(result,'تم إرجاع المعلومات العامة',200);
   }
 
-  @Roles('مشرف')
+  @Roles('مشرف', 'مدير')
   @Permissions('مراقب النظام')
   @Get('popular')
   @GetPopularStatsSwaggerDoc()
