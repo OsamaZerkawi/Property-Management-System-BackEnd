@@ -17,7 +17,7 @@ export class UserRepository implements UserRepositoryInterface {
       .createQueryBuilder('user')
       .leftJoin('user.userRoles', 'ur')
       .leftJoin('ur.role', 'role')
-      .leftJoin('user.fcmTokens','fcm');
+      .leftJoin('user.fcmTokens', 'fcm');
 
     switch (target) {
       case NotificationSender.AGENT:
@@ -98,6 +98,8 @@ export class UserRepository implements UserRepositoryInterface {
       .leftJoin('userRole.role', 'role')
       .leftJoin('user.userPermissions', 'userPermission')
       .leftJoin('userPermission.permission', 'permission')
+      .leftJoin('user.adminCities', 'adminCity')
+      .leftJoin('adminCity.city','city')
       .where('role.id = :roleId', { roleId })
       .select([
         'user.id',
@@ -105,10 +107,13 @@ export class UserRepository implements UserRepositoryInterface {
         'user.last_name',
         'user.username',
         'user.created_at',
+        'user.email',
 
         'userPermission.id',
         'permission.id',
         'permission.name',
+
+        'adminCity.city_id',
       ])
       .getMany();
   }

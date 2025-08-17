@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Office } from 'src/domain/entities/offices.entity';
+
 import {
   ADMIN_CITY_REPOSITORY,
   AdminCityRepositoryInterface,
