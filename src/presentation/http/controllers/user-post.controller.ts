@@ -151,7 +151,7 @@ export class UserPostController {
     @CurrentUser() user,
   ) {
     const userId = user.sub;
-    console.log(userId,page,items)
+
     const baseUrl = `${request.protocol}://${request.get('host')}`;
 
     const { suggestions, total } =
