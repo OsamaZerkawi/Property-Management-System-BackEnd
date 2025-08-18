@@ -43,6 +43,7 @@ import { ReminderModule } from 'src/presentation/http/modules/reminder.module';
 import { StatsModule } from 'src/presentation/http/modules/stats.module';
 import { AdminUserPostModule } from 'src/presentation/http/modules/admin-user-post.module';
 import { SupportModule } from 'src/presentation/http/modules/support.module';
+import { StripePaymentModule } from 'src/presentation/http/modules/stripe-payment.module';
  
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { SupportModule } from 'src/presentation/http/modules/support.module';
     //SentryModule.forRoot(), 
     PropertyReservationModule, 
     UserModule,
+    StripePaymentModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env', 
