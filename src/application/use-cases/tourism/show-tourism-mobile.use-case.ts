@@ -49,14 +49,14 @@ export class ShowTourismMobileUseCase {
     const images = (entity.images || []).map((img: any) =>
       img.image_path ? `${baseUrl}/uploads/properties/images/${img.image_path}` : null
     ).filter(Boolean);
-
+    const propertyType = entity.property_type ?? null; // مثال: 'عقاري' أو 'سياحي'
     const dto = {
       propertyId: entity.id,
       postTitle: entity.post?.title ?? null,
       description: entity.post?.description ?? null,
       date: entity.post?.date ? (new Date(entity.post.date)).toISOString().slice(0,10) : null, // yyyy-mm-dd
       postImage,
-      images,
+      images, 
       location: `${entity.region?.city?.name ?? ''}، ${entity.region?.name ?? ''}`.trim(),
       longitude: entity.longitude ?? null,
       latitude: entity.latitude ?? null,
@@ -74,7 +74,7 @@ export class ShowTourismMobileUseCase {
       office:{
       id: entity.office?.id ?? null, 
       logo: `${baseUrl}/uploads/offices/logos/${entity.office?.logo}`,
-      type: entity.office?.property_type,
+      type: propertyType,
       name: entity.office?.name ?? null,
       location: `${entity.office?.region?.city?.name ?? ''}، ${entity.office?.region?.name ?? ''}`.trim(),
       rate:Number(office_rate)??0.00,  

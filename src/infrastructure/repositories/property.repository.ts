@@ -1229,7 +1229,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .getOne();
   }
  
- async findOfficeProperties(
+async findOfficeProperties(
   page: number,
   items: number,
   officeId: number,
@@ -1248,16 +1248,21 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   if (propertyType) {
     qb.andWhere('property.property_type = :propertyType', { propertyType });
   }
- 
+
   qb.select([
     'property.id AS property_id',
     'post.title AS post_title',
     'post.image AS post_image',
     'post.date AS post_date',
     `CONCAT(city.name, ',', region.name) AS location`,
-    'property.property_type AS type', 
+    'property.property_type AS type',
+
+    'residential.selling_price AS residential_selling_price',
+    'residential.rental_price AS residential_rental_price',
+    'touristic.price AS touristic_price',
     `
-    CASE 
+    CASE
+      WHEN property.property_type = 'عقاري' AND residential.listing_type = 'أجار' THEN residential.rental_price
       WHEN property.property_type = 'عقاري' THEN residential.selling_price
       WHEN property.property_type = 'سياحي' THEN touristic.price
       ELSE NULL
@@ -1266,14 +1271,15 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     'residential.listing_type AS listing_type',
     'residential.rental_period AS residential_rental_period',
   ]);
- 
+
   qb.addSelect(subQb =>
     subQb
       .select('COALESCE(ROUND(AVG(pf.rate)::numeric, 1), 0)')
       .from('property_feedbacks', 'pf')
       .where('pf.property_id = property.id'),
     'avg_rate'
-  ); 
+  );
+
   if (userId) {
     qb.addSelect(subQb =>
       subQb
@@ -1286,7 +1292,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
   } else {
     qb.addSelect('0', 'is_favorite');
   }
- 
+
   const [data, total] = await Promise.all([
     qb
       .offset((page - 1) * items)
