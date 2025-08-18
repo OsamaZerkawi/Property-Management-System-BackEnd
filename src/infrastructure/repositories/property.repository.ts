@@ -511,8 +511,8 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     const [rawResults, total] = await Promise.all([
       query
-        .skip((page - 1) * items)
-        .take(items)
+        .offset((page - 1) * items)
+        .limit(items)
         .getRawAndEntities(),
       query.getCount(),
     ]);

@@ -4,6 +4,7 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 export function GetUserPostSuggestionsSwaggerDoc() {
@@ -19,6 +20,22 @@ export function GetUserPostSuggestionsSwaggerDoc() {
       example: 12,
     }),
 
+    ApiQuery({
+      name: 'page',
+      required: true,
+      type: Number,
+      description: 'رقم الصفحة ',
+      example: 1,
+    }),
+
+    ApiQuery({
+      name: 'items',
+      required: true,
+      type: Number,
+      description: 'عدد العقارات في الصفحة الواحدة',
+      example: 10,
+    }),
+
     ApiOkResponse({
       description: 'تم جلب اقتراحات العقارات بنجاح',
       schema: {
@@ -27,24 +44,47 @@ export function GetUserPostSuggestionsSwaggerDoc() {
           message: 'تم جلب اقتراحات العقارات بنجاح',
           data: [
             {
-              property_id: 101,
-              image: 'http://localhost:3000/uploads/properties/posts/images/propertyImage-01.jpg',
-              title: 'شقة فاخرة للإيجار',
-              location: 'دمشق - المزة',
-              price: 150000,
-              rate: 4.5,
+              propertyId: 1,
+              postTitle: 'محل تجاري 180.05 م²',
+              postImage:
+                'http://localhost:3000/uploads/properties/posts/images/property.png',
+              location: 'حلب, الأنصاري',
+              postDate: '2025-08-17',
+              is_favorite: 0,
+              listing_type: 'بيع',
+              price: 133059,
+              area: 180,
             },
             {
-              property_id: 102,
-              image: 'http://localhost:3000/uploads/properties/posts/images/propertyImage-02.jpg',
-              title: 'منزل للبيع مع إطلالة',
-              location: 'حلب - الفرقان',
-              price: 9000000,
+              propertyId: 2,
+              postTitle: 'روف 208.22 م²',
+              postImage:
+                'http://localhost:3000/uploads/properties/posts/images/property.png',
+              location: 'حلب, الأنصاري',
+              postDate: '2025-08-17',
+              is_favorite: 0,
+              listing_type: 'بيع',
+              price: 509543,
+              area: 208,
+            },
+            {
+              propertyId: 3,
+              postTitle: 'مخزن 212.62 م²',
+              postImage:
+                'http://localhost:3000/uploads/properties/posts/images/property.png',
+              location: 'حلب, الأنصاري',
+              postDate: '2025-08-17',
+              is_favorite: 0,
+              type: 'عقاري',
+              listing_type: 'أجار',
+              rental_period: 'شهري',
+              price: 1714,
+              rate: 2,
             },
           ],
           status_code: 200,
         },
       },
-    })
+    }),
   );
 }

@@ -2,6 +2,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { filter } from 'rxjs';
 import { UserPostFiltersDto } from 'src/application/dtos/user-post/user-post-filters.dto';
 import { UserPost } from 'src/domain/entities/user-post.entity';
+import { ListingType } from 'src/domain/enums/listing-type.enum';
+import { PropertyType } from 'src/domain/enums/property-type.enum';
 import { UserPostAdminAgreement } from 'src/domain/enums/user-post-admin-agreement.enum';
 import { UserPostRepositoryInterface } from 'src/domain/repositories/user-post.repository';
 import { FindOptionsOrderValue, Repository } from 'typeorm';
@@ -86,7 +88,12 @@ export class UserPostRepository implements UserPostRepositoryInterface {
     };
   }
 
-  async findSuggestionsByUserPostId(id: number, userId: number) {
+  async findSuggestionsByUserPostId(
+    id: number,
+    page: number,
+    items: number,
+    userId: number,
+  ) {
     return this.userPostRepo
       .createQueryBuilder('user_post')
       .leftJoin('user_post.userPostSuggestions', 'suggestion')
@@ -103,16 +110,32 @@ export class UserPostRepository implements UserPostRepositoryInterface {
         'property.id AS property_id',
         'post.title AS post_title',
         'post.image AS post_image',
+        'post.created_at AS post_created_at',
         'city.name AS city_name',
         'region.name AS region_name',
+        'property.property_type AS property_type',
+        'property.area AS property_area',
         'residential.listing_type AS listing_type',
         'residential.selling_price AS selling_price',
         'residential.rental_price AS rental_price',
+        'residential.rental_period AS rental_period',
         'AVG(feedback.rate) AS avg_rate',
+        'COUNT(*) OVER() AS total',
       ])
-      .groupBy(
-        'property.id, post.title, post.image, city.name, region.name, residential.listing_type, residential.selling_price, residential.rental_price',
+      .addSelect(
+        `CASE
+           WHEN EXISTS(
+             SELECT 1 FROM property_favorites pf 
+             WHERE pf.property_id = property.id AND pf.user_id = :userId
+           ) THEN true
+           ELSE false
+         END`,
+        'is_favorite',
       )
+      .setParameter('userId', userId)
+      .groupBy('property.id,post.id,city.name, region.name, residential.id')
+      .offset((page - 1) * items)
+      .limit(items)
       .getRawMany();
   }
 
