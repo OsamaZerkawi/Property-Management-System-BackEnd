@@ -29,4 +29,9 @@ export class CreateTouristicBookingDto {
   @IsNumber()
   @Min(0, { message: 'totalPrice يجب أن يكون >= 0' })
   totalPrice: number;
+
+  @IsDefined()
+  @Type(() => String)
+  @IsString() 
+  payment_id: string;
 }

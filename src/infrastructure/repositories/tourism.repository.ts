@@ -754,8 +754,9 @@ async findRelatedTouristicProperties(
   endDate: string;
   deposit: number;
   totalPrice: number;
+  payment_id:string;
 }): Promise<any> {
-  const { userId, propertyId, startDate, endDate, deposit, totalPrice } = options;
+  const { userId, propertyId, startDate, endDate, deposit, totalPrice,payment_id } = options;
 
     return await this.dataSource.transaction(async manager => {
  
@@ -809,6 +810,7 @@ async findRelatedTouristicProperties(
       reason: InoviceReasons.DEPOSIT,  
       status: InvoicesStatus.PAID,   
       paymentMethod: PaymentMethod.STRIPE,  
+      stripePaymentIntentId:payment_id,
     };
 
     const depositInvoice = invoiceRepo.create(depositInvoiceData);

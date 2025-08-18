@@ -27,13 +27,14 @@ export class CreateTouristicBookingUseCase {
     }
 
  
-    const result = await this.tourismRepo.createBookingWithInvoices({
+      await this.tourismRepo.createBookingWithInvoices({
       userId,
       propertyId: dto.propertyId,
       startDate: dto.startDate,
       endDate: dto.endDate,
       deposit: dto.deposit,
       totalPrice: dto.totalPrice,
+      payment_id:dto.payment_id
     });
  
  

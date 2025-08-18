@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { StripeService } from 'src/application/services/stripe.service';
-import { StripePaymentController } from '../controllers/stripe-payment.controller';
-import { JwtService } from '@nestjs/jwt';
-import { AuthTokenBlackListService } from 'src/application/services/authTokenBlacklist.service';
+import { StripePaymentController } from '../controllers/stripe-payment.controller'; 
 import { AuthModule } from './auth.module';
  
 @Module({

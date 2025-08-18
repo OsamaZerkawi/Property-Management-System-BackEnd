@@ -41,5 +41,5 @@ export interface ITourismRepository {
       limit?: number;
     }
   ): Promise<Array<Record<string, any>>> 
-  createBookingWithInvoices(options: {userId: number;propertyId: number;startDate: string;endDate: string;deposit: number;totalPrice: number;}): Promise<any>
+  createBookingWithInvoices(options: {userId: number;propertyId: number;startDate: string;endDate: string;deposit: number;totalPrice: number;payment_id:string}): Promise<any>
 }
