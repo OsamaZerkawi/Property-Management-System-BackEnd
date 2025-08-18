@@ -639,14 +639,32 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     };
   }
 
-  async findWithinBounds(bounds: ExploreMapDto) {
-    return this.propertyRepo
+  async findWithinBounds(bounds: ExploreMapDto,userId: number) {
+    const query = this.propertyRepo
       .createQueryBuilder('property')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.feedbacks', 'feedback')
+      .leftJoin('property.residential', 'residential')
+      .leftJoin('property.touristic', 'touristic')
       .select([
-        'property.id',
-        'property.latitude',
-        'property.longitude',
-        'property.property_type',
+        'property.id AS property_id',
+        'property.latitude AS latitude',
+        'property.longitude AS longitude',
+        'post.title AS post_title',
+        'post.image AS post_image',
+        'post.created_at AS post_date',
+        'city.name AS city_name',
+        'region.name AS region_name',
+        'residential.listing_type AS listing_type',
+        'residential.selling_price AS selling_price',
+        'residential.rental_price AS rental_price',
+        'residential.rental_period AS rental_period',
+        'touristic.price AS touristic_price',
+        'property.property_type AS property_type',
+        'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+        'COUNT(DISTINCT feedback.user_id) AS rating_count',
       ])
       .where('property.latitude BETWEEN :minLat AND :maxLat', {
         minLat: bounds.minLat,
@@ -657,7 +675,26 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         maxLng: bounds.maxLng,
       })
       .andWhere('property.is_deleted = false')
-      .getMany();
+      .groupBy(
+        'property.id, post.id, city.id, region.id, residential.id, touristic.id',
+      );
+
+    if (userId) {
+      query.addSelect(
+        `CASE
+        WHEN EXISTS (
+          SELECT 1 FROM property_favorites pf
+          WHERE pf.property_id = property.id AND pf.user_id = :userId
+        ) THEN true
+        ELSE false
+      END`,
+        'is_favorite',
+      ).setParameter('userId', userId);
+    } else {
+      query.addSelect('false', 'is_favorite');
+    }
+
+    return await query.getRawMany();
   }
 
   private formatProperty(property, baseUrl: string) {

@@ -27,7 +27,7 @@ export interface PropertyRepositoryInterface {
     rateProperty(userId: number,propertyId: number,rate: number);
     compareTwoProperties(propertyId1: number,propertyId2: number,userId: number,baseUrl: string);
     getTopRatedProperties(page: number,items: number,type: PropertyType,userId: number);
-    findWithinBounds(bounds: ExploreMapDto);
+    findWithinBounds(bounds: ExploreMapDto,userId: number);
     findOneByIdAndOffice(propertyId: number, officeId: number): Promise<Property | null>;
     findOfficeProperties(page:number,items:number,officeId: number,propertyType?: string,userId?:number)
 }

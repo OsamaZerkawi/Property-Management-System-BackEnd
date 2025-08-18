@@ -265,9 +265,22 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   }
 
   async findWithinBounds(bounds: ExploreMapDto) {
-    return this.officeRepo
+    return await this.officeRepo
       .createQueryBuilder('office')
-      .select(['office.latitude', 'office.longitude'])
+      .leftJoin('office.feedbacks', 'feedbacks', 'feedbacks.rate IS NOT NULL')
+      .leftJoin('office.region', 'region')
+      .leftJoin('region.city', 'city')
+      .select([
+        'office.id AS id',
+        'office.latitude AS latitude',
+        'office.longitude AS longitude',
+        'office.name AS name',
+        'office.logo AS logo',
+        'office.type AS type',
+        "city.name || ', ' || region.name AS location",
+        'COALESCE(AVG(feedbacks.rate), 0) AS avg_rate',
+        'COUNT(feedbacks.id) AS rating_count',
+      ])
       .where('office.latitude BETWEEN :minLat AND :maxLat', {
         minLat: bounds.minLat,
         maxLat: bounds.maxLat,
@@ -278,7 +291,8 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       })
       .andWhere('office.is_deleted = false')
       .andWhere('office.active = true')
-      .getMany();
+      .groupBy('office.id, region.id, city.id')
+      .getRawMany();
   }
   async findAllWithAvgRating(
     page: number,
