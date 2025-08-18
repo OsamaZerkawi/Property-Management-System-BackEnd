@@ -37,6 +37,7 @@ export class ComplaintRepository implements ComplaintRepositoryInterface {
       .select([
         'sp.id AS id',
         'sp.name AS name',
+        'sp.career AS career',
         'COUNT(feedback.id) AS complaints_count',
         'sp.logo AS logo',
         'region.name AS region_name',

@@ -11,6 +11,8 @@ import { ROLE_REPOSITORY, RoleRepositoryInterface } from "src/domain/repositorie
 import { MailService } from "src/application/services/mail.service";
 import { Admin } from "typeorm";
 import { join } from "path";
+import { AgentType } from "src/domain/enums/agent-type.enum";
+import { Agent } from "http";
 
 @Injectable()
 export class RespondToJoinRequestUseCase {
@@ -64,11 +66,17 @@ export class RespondToJoinRequestUseCase {
                 password:hashedPassword,
             } as User);
 
-            const role = await this.roleRepo.findByName(joinRequest.agent_type);
+            let role;
+            if(joinRequest.agent_type === AgentType.OFFICE_OWNER){
+                role = await this.roleRepo.findByName('صاحب مكتب');
+            }else if(joinRequest.agent_type === AgentType.SERVICE_PROVIDER) {
+                role = await this.roleRepo.findByName('مزود خدمة');
+            }
+            // const role = await this.roleRepo.findByName(joinRequest.agent_type);
 
             if(!role){ 
                 throw new NotFoundException(
-                    errorResponse('الدور  غير موجود',404)
+                    errorResponse('الدور غير موجود',404)
                 );
             }
 

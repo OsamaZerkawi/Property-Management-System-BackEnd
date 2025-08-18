@@ -17,7 +17,7 @@ export class GetOfficeAndServicesHasComplaintUseCase {
 
     const officeResult = offices.map((o) => ({
       id: o.id,
-      type: 'مكتب',
+      type: 'real-estate',
       office_type: o.type,
       name: o.name,
       complaints_count: Number(o.complaints_count),
@@ -27,7 +27,8 @@ export class GetOfficeAndServicesHasComplaintUseCase {
 
     const serviceResult = serviceProviders.map((s) => ({
       id: s.id,
-      type: 'مزود خدمة',
+      type: 'service-provider',
+      career: s.career,
       name: s.name,
       complaints_count: Number(s.complaints_count),
       logo: s.logo

@@ -35,7 +35,7 @@ export class GetOfficesByAdminCityUseCase {
     return offices.map((office) => {
       return {
         id: office.id,
-        logo: `${baseUrl}/uploads/offices/logos/${office.office}`,
+        logo: `${baseUrl}/uploads/offices/logos/${office.logo}`,
         name: office.name,
         type: office.type,
         location: `${office.city_name || ''}، ${

@@ -23,6 +23,7 @@ import { GetUserNotificationsSwaggerDoc } from '../swagger/notifications/get-use
 import { CreateNotificationSwaggerDoc } from '../swagger/notifications/create-notification.swagger';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { CreateNotificationForTargetUseCase } from 'src/application/use-cases/notification/create-notification-for-target.use-case';
+import { Roles } from 'src/shared/decorators/role.decorator';
 
 @Controller('notifications')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -34,7 +35,7 @@ export class NotificationsController {
     private readonly markReadUseCase: MarkNotificationReadUseCase,
     private readonly firebaseService: FirebaseService,
     private readonly notificationQueue: NotificationQueueService,
-    private readonly createNotificationForTargetUseCase: CreateNotificationForTargetUseCase
+    private readonly createNotificationForTargetUseCase: CreateNotificationForTargetUseCase,
   ) {}
 
   @Get()
@@ -69,6 +70,7 @@ export class NotificationsController {
     return { message: 'Notification queued successfully 🚀' };
   }
 
+  @Roles('مشرف', 'مدير')
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @CreateNotificationSwaggerDoc()
@@ -79,7 +81,10 @@ export class NotificationsController {
     const userId = user.sub;
     // const { title, body: notificationBody, data } = body;
 
-    const notification = await this.createNotificationForTargetUseCase.execute(userId,body);
+    const notification = await this.createNotificationForTargetUseCase.execute(
+      userId,
+      body,
+    );
 
     return successResponse([], 'تم إنشاء الإشعار وإرساله', 201);
   }
