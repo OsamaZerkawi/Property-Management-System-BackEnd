@@ -787,8 +787,8 @@ async findRelatedTouristicProperties(
  
       const calendar = manager.create(Calendar, {
         touristic: { id: touristic.id } as any,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: new Date(startDate).toISOString().split('T')[0],  
+        end_date: new Date(endDate).toISOString().split('T')[0],    
         status: CalendarStatus.RESERVED,
       });
       await manager.save(Calendar, calendar);
@@ -806,7 +806,7 @@ async findRelatedTouristicProperties(
       property: { id: propertyId } as any,
       calendar: calendar ? ({ id: calendar.id } as any) : undefined,
       amount: deposit,
-      billing_period_start: new Date(),
+      billing_period_start: new Date().toISOString().split('T')[0],
       reason: InoviceReasons.DEPOSIT,  
       status: InvoicesStatus.PAID,   
       paymentMethod: PaymentMethod.STRIPE,  

@@ -36,6 +36,8 @@ import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/ge
 import { GetRelatedTouristicSwaggerDoc } from '../swagger/tourism_places/get-related-touristic.swagger';
 import { CreateTouristicBookingDto } from 'src/application/dtos/tourism-mobile/create-touristic-booking.dto';
 import { CreateTouristicBookingUseCase } from 'src/application/use-cases/tourism/create-touristic-booking.use-case';
+import { CreateTouristicBookingSwagger } from '../swagger/tourism_places/create-tourism-property-booking.swagger';
+import { ApiConsumes } from '@nestjs/swagger';
  
 @Controller('tourism')
 export class TourismController {
@@ -56,6 +58,7 @@ export class TourismController {
 
     
   @Post('book')
+  @CreateTouristicBookingSwagger() 
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async bookTouristic(

@@ -1,15 +1,12 @@
-// presentation/http/dtos/create-touristic-booking.dto.ts
-import { IsDefined, IsNumber, IsString, IsDateString, Min } from 'class-validator';
+import { IsDefined, IsDateString, IsNumber, Min, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateTouristicBookingDto {
   @IsDefined()
-  @Type(() => String)
   @IsDateString()
   startDate: string;
 
   @IsDefined()
-  @Type(() => String)
   @IsDateString()
   endDate: string;
 
@@ -31,7 +28,6 @@ export class CreateTouristicBookingDto {
   totalPrice: number;
 
   @IsDefined()
-  @Type(() => String)
-  @IsString() 
+  @IsString()
   payment_id: string;
 }
