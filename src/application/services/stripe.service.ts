@@ -27,7 +27,7 @@ export class StripeService {
     amount,
     currency,
     automatic_payment_methods: { enabled: true },
-    metadata: { userId }   // ربط المستخدم بالعملية
+    metadata: { userId }   
   });
 
   return paymentIntent;

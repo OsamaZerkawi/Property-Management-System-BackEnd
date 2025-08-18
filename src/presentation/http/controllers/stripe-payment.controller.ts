@@ -3,6 +3,7 @@ import { StripeService } from 'src/application/services/stripe.service';
 import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { CreatePaymentIntentSwaggerDoc } from '../swagger/payment-intent.swagger';
 
 @Controller('payments')
 export class StripePaymentController {
@@ -25,23 +26,23 @@ export class StripePaymentController {
     return { url: session.url };
   }
 
-@UseGuards(JwtAuthGuard)
-@Post('create-payment-intent')
-async createIntent(
-  @CurrentUser() user,
-  @Body() dto: { amount: number }
-) {
-  const paymentIntent = await this.stripeService.createPaymentIntent(
-    dto.amount,  // خليه بالـ cents مباشرة
-    'usd',
-    user.sub
-  );
+    @UseGuards(JwtAuthGuard)
+    @CreatePaymentIntentSwaggerDoc()
+    @Post('create-payment-intent')
+    async createIntent(
+    @CurrentUser() user,
+    @Body() dto: { amount: number }
+    ) {
+    const paymentIntent = await this.stripeService.createPaymentIntent(
+        dto.amount,  
+        'usd',
+        user.sub
+    );
 
-  return { 
-    clientSecret: paymentIntent.client_secret, 
-    paymentId: paymentIntent.id 
-  };
-}
-
+    return { 
+        clientSecret: paymentIntent.client_secret, 
+        paymentId: paymentIntent.id 
+    };
+    }
 
 }
