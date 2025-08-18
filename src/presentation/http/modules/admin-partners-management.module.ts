@@ -38,9 +38,17 @@ import { GetPopularStatsUseCase } from 'src/application/use-cases/stats/get-popu
 import { StatsModule } from './stats.module';
 import { RegisterSubscriberUseCase } from 'src/application/use-cases/auth/register-subscriber.use-case';
 import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/show-office-details-mobile';
+import { Residential } from 'src/domain/entities/residential.entity';
+import { Touristic } from 'src/domain/entities/touristic.entity';
+import { Property } from 'src/domain/entities/property.entity';
+import { GetPropertiesForOfficeUseCase } from 'src/application/use-cases/office/get-properties-for-office.use.case';
+import { PropertyModule } from './property.module';
+import { TourismModule } from './tourism.module';
 
 @Module({
   imports: [
+    PropertyModule,
+    TourismModule,
     StatsModule,
     NotificationModule,
     PropertyPostModule,
@@ -66,6 +74,9 @@ import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/
       Region,
       City,
       Notification,
+      Residential,
+      Touristic,
+      Property
     ]),
   ],
   controllers: [AdminPartnersManagementController, SubscriberController],
@@ -80,6 +91,7 @@ import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/
     GetPopularStatsUseCase,
     RegisterSubscriberUseCase,
     GetOfficeDetailsMobileUseCase,
+    GetPropertiesForOfficeUseCase,
     {
       provide: ADMIN_CITY_REPOSITORY,
       useClass: AdminCityRepository,

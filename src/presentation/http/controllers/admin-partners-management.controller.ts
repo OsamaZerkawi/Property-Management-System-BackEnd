@@ -8,6 +8,9 @@ import {
   Post,
   Put,
   Req,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
@@ -34,7 +37,9 @@ import { RespondToPropertyPostSwaggerDoc } from '../swagger/admin-partners-manag
 import { GetOfficeDetailsMobileUseCase } from 'src/application/use-cases/office/show-office-details-mobile';
 import { base } from '@faker-js/faker/.';
 import { GetOfficeDetailsSwaggerDoc } from '../swagger/admin-partners-management/get-office-details.swagger';
-
+import { GetOfficePropertiesUseCase } from 'src/application/use-cases/office/get-office-properties.use-case';
+import { GetPropertiesForOfficeUseCase } from 'src/application/use-cases/office/get-properties-for-office.use.case';
+import { GetAdminOfficePropertiesSwaggerDoc } from '../swagger/admin-partners-management/get-properties-for-office.swagger';
 @ApiTags('Admin - Partners Management')
 @Controller('admin/partners-management')
 export class AdminPartnersManagementController {
@@ -47,6 +52,8 @@ export class AdminPartnersManagementController {
     private readonly getPendingPropertyPostsUseCase: GetPendingPropertyPostsUseCase,
     private readonly respondToPropertyPostUseCase: RespondToPropertyPostUseCase,
     private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
+    // private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
+    private readonly getPropertiesForOfficeUseCase: GetPropertiesForOfficeUseCase,
   ) {}
 
   @Roles('مشرف', 'مدير')
@@ -85,6 +92,19 @@ export class AdminPartnersManagementController {
     return successResponse(result, 'تم إرجاع تفاصيل المكتب بنجاح', 200);
   }
 
+
+  @Roles('مشرف', 'مدير')
+  @Permissions('إدارة الوسطاء')
+  @Get('offices/:officeId/properties')
+  @GetAdminOfficePropertiesSwaggerDoc()
+  async getOfficeProperties(@Param('officeId') officeId: number, @Req() request: Request) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    
+    const result = await this.getPropertiesForOfficeUseCase.execute(officeId,baseUrl);
+
+    return successResponse(result, 'تم إرجاع جميع العقارات بنجاح', 200);
+  }
+  
   @Roles('مشرف', 'مدير')
   @Permissions('إدارة الوسطاء')
   @HttpCode(HttpStatus.OK)

@@ -67,5 +67,6 @@ import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/ge
     }
 
   ],
+  exports: [TOURISM_REPOSITORY]
 })
 export class TourismModule {}

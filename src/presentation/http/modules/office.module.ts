@@ -27,6 +27,7 @@ import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/
 import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
 import { PropertyModule } from "./property.module";
 import { AdvertisementModule } from "./advertisement.module";
+import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { AdvertisementModule } from "./advertisement.module";
     ComplaintOfficeUseCase,
     GetOfficeDetailsMobileUseCase,
     GetOfficePropertiesUseCase, 
+    GetPropertiesForOfficeUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository
@@ -62,7 +64,8 @@ import { AdvertisementModule } from "./advertisement.module";
   exports: [
     OFFICE_REPOSITORY,
     FindOfficeForUserUseCase,
-    GetOfficePaymentMethodUseCase
+    GetOfficePaymentMethodUseCase,
+    GetPropertiesForOfficeUseCase,
   ],
 })
 export class OfficeModule {}
