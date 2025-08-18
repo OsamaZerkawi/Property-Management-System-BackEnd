@@ -47,7 +47,7 @@ export class MobileAuthController {
     @Body() body: CreateUserDto,
   ) { 
     if (file) {
-      body.photo = file.filename;
+      body.photo = file.path;
     }
     await this.createUser.execute(body);
     return successResponse( [], 'تم إرسال رمز التحقق. يرجى التحقق من بريدك الإلكتروني.' );
