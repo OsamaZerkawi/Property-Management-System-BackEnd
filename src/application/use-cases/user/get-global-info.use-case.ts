@@ -17,7 +17,7 @@ export class GetGlobalInfoUseCase {
 
     const fullName = `${user.first_name} ${user.last_name}`; 
     const photo_url = user.photo
-      ? `${baseUrl}/${user.photo}`
+      ? `${baseUrl}/uploads/profile/${user.photo}`
       : null; 
     return { fullName, phone: user.phone, photo_url };
   }

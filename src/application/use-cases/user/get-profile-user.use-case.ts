@@ -16,7 +16,7 @@ export class GetProfileUserUseCase {
     }
  
     const photoUrl = user.photo
-      ? `${baseUrl}/${user.photo}`
+      ? `${baseUrl}/uploads/profile/${user.photo}`
       : null; 
       
     return {
