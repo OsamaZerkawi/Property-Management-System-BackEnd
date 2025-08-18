@@ -23,7 +23,7 @@ export function GetGlobalInfoSwaggerDoc() {
         example: {
           fullName: 'محمد أحمد',
           phone: '0969090711',
-          photoUrl: 'https://example.com/uploads/users/123.jpg'
+          photo_url: 'https://example.com/uploads/users/123.jpg'
         }
       }
     }),

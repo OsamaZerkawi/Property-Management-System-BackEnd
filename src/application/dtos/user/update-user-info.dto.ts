@@ -13,7 +13,6 @@ export class UpdateUserInfoDto {
   @IsString()
   phone?: string;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() 
   photo?: string;
 }
