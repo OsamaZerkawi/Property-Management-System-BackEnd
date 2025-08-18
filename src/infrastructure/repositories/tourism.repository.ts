@@ -54,6 +54,8 @@ export class TourismRepository implements ITourismRepository {
     private readonly regionRepo: Repository<Region>, 
     @InjectRepository(UserPropertyInvoice)
     private readonly invoiceRepo: Repository<UserPropertyInvoice>,
+    @InjectRepository(Calendar)
+    private readonly calendarRepo: Repository<Calendar>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -586,6 +588,12 @@ async searchByTitle(title: string, page: number, items: number): Promise<{ data:
       relations: ['post', 'region', 'region.city', 'touristic'],
     });
   }
+    async findPropertyWithTouristicAndOffice(propertyId: number): Promise<Property | null> {
+    return this.propRepo.findOne({
+      where: { id: propertyId },
+      relations: [ 'office', 'touristic'],
+    });
+  }
  
 async findRelatedTouristicProperties(
   options: {
@@ -832,5 +840,17 @@ async findRelatedTouristicProperties(
     await invoiceRepo.save(remainingInvoice);
  
     });
+  }
+   async findCalendarsForTouristicInRange(
+    touristicId: number,
+    rangeStart: Date,
+    rangeEnd: Date,
+  ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> {
+    return this.calendarRepo
+      .createQueryBuilder('c')
+      .where('c.touristic_id = :touristicId', { touristicId })
+      .andWhere('NOT (c.end_date < :rangeStart OR c.start_date > :rangeEnd)', { rangeStart, rangeEnd })
+      .select(['c.id', 'c.start_date', 'c.end_date', 'c.status'])
+      .getRawMany();
   }
 }

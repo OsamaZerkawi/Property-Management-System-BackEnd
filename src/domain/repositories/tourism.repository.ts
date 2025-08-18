@@ -42,4 +42,7 @@ export interface ITourismRepository {
     }
   ): Promise<Array<Record<string, any>>> 
   createBookingWithInvoices(options: {userId: number;propertyId: number;startDate: string;endDate: string;deposit: number;totalPrice: number;payment_id:string}): Promise<any>
+  findPropertyWithTouristicAndOffice(propertyId: number): Promise<Property | null>
+  findCalendarsForTouristicInRange(touristicId: number,rangeStart: Date,rangeEnd: Date,
+  ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> 
 }
