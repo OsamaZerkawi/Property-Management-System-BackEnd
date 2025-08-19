@@ -17,13 +17,13 @@ export class CreateTouristicBookingDto {
 
   @IsDefined()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 }) 
   @Min(0, { message: 'deposit يجب أن يكون >= 0' })
   deposit: number;
 
   @IsDefined()
   @Type(() => Number)
-  @IsNumber()
+  @IsNumber({ maxDecimalPlaces: 2 }) 
   @Min(0, { message: 'totalPrice يجب أن يكون >= 0' })
   totalPrice: number;
 

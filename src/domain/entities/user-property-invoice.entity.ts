@@ -11,7 +11,7 @@ export class UserPropertyInvoice{
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({type:'decimal',nullable: true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     amount: number;
 
     @Column({type:'enum',enum:InoviceReasons})
