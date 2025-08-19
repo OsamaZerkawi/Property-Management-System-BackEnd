@@ -1,6 +1,5 @@
 
-
-import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException, Query, Req, DefaultValuePipe, ParseIntPipe, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Put, Param, Body, UseGuards, BadRequestException, Query, Req, DefaultValuePipe, ParseIntPipe, UploadedFile, HttpCode, HttpStatus } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
 import { CreateTourismDto } from '../../../application/dtos/tourism/create-tourism.dto';
@@ -34,7 +33,13 @@ import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/touris
 import { ShowTourismFinanceByYearSwaggerDoc } from '../swagger/tourism_places/get-tourism-property-invoices.swagger';
 import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
 import { GetRelatedTouristicSwaggerDoc } from '../swagger/tourism_places/get-related-touristic.swagger';
-
+import { CreateTouristicBookingDto } from 'src/application/dtos/tourism-mobile/create-touristic-booking.dto';
+import { CreateTouristicBookingUseCase } from 'src/application/use-cases/tourism/create-touristic-booking.use-case';
+import { CreateTouristicBookingSwagger } from '../swagger/tourism_places/create-tourism-property-booking.swagger';
+import { ApiConsumes } from '@nestjs/swagger';
+import { GetTouristicAvailabilityUseCase } from 'src/application/use-cases/tourism/get-tourism-availability.use-case';
+import { GetTouristicAvailabilitySwaggerDoc } from '../swagger/tourism_places/get-touristic-availability.swagger';
+  
 @Controller('tourism')
 export class TourismController {
   constructor(
@@ -49,8 +54,23 @@ export class TourismController {
     private readonly searchTourismUseCase: SearchTourismUseCase,
     private readonly getTourismFinanceByYearUseCase: GetTourismFinanceByYearUseCase,
     private readonly getRelatedTouristicUseCase: GetRelatedTouristicUseCase,
-  ) { }
+    private readonly createBookingUseCase: CreateTouristicBookingUseCase,
+    private readonly getAvailability: GetTouristicAvailabilityUseCase
+  ) { }  
 
+    
+  @Post('book')
+  @CreateTouristicBookingSwagger() 
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async bookTouristic(
+    @CurrentUser() user: any,
+    @Body() dto: CreateTouristicBookingDto,
+  ) {
+    const result = await this.createBookingUseCase.execute(user.sub, dto);
+    return successResponse(result, 'تم إنشاء الحجز والفواتير بنجاح', HttpStatus.CREATED);
+  }
+  
   @Get('mobile')
   @FilterMobileTourismSwaggerDoc()
   @Public()
@@ -238,5 +258,15 @@ export class TourismController {
 
     const items = await this.getRelatedTouristicUseCase.execute(Number(id), userId, baseUrl);
     return successResponse(items, 'تم جلب العقارات ذات الصلة', 200);
+  }
+
+  @Public()
+  @GetTouristicAvailabilitySwaggerDoc()
+  @Get(':propertyId/availability')
+  async getTourismAvailability(
+    @Param('propertyId', ParseIntPipe) propertyId: number, 
+  ) {
+      const result = await this.getAvailability.execute(propertyId);
+      return successResponse(result,'تم جلب التقويم بنجاح');
   }
 }

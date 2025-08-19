@@ -29,6 +29,9 @@ import { ShowTourismMobileUseCase } from 'src/application/use-cases/tourism/show
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
 import { GetTourismFinanceByYearUseCase } from 'src/application/use-cases/tourism/get-finance-tourism-by-year.use-case';
 import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/get-related-tourim.use-case';
+import { CreateTouristicBookingUseCase } from 'src/application/use-cases/tourism/create-touristic-booking.use-case';
+import { GetTouristicAvailabilityUseCase } from 'src/application/use-cases/tourism/get-tourism-availability.use-case';
+import { Calendar } from 'src/domain/entities/calendar.entity';
 @Module({
   imports: [
     AuthModule,
@@ -42,6 +45,7 @@ import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/ge
       Region,
       Service,
       UserPropertyInvoice,
+      Calendar
     ]),
   ],
   controllers: [TourismController],
@@ -57,6 +61,8 @@ import { GetRelatedTouristicUseCase } from 'src/application/use-cases/tourism/ge
     ShowTourismMobileUseCase,
     GetTourismFinanceByYearUseCase,
     GetRelatedTouristicUseCase,
+    CreateTouristicBookingUseCase,
+    GetTouristicAvailabilityUseCase,
     {
       provide: TOURISM_REPOSITORY,
       useClass: TourismRepository,
