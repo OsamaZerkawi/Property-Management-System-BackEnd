@@ -848,9 +848,14 @@ async findRelatedTouristicProperties(
   ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> {
     return this.calendarRepo
       .createQueryBuilder('c')
-      .where('c.touristic_id = :touristicId', { touristicId })
-      .andWhere('NOT (c.end_date < :rangeStart OR c.start_date > :rangeEnd)', { rangeStart, rangeEnd })
-      .select(['c.id', 'c.start_date', 'c.end_date', 'c.status'])
-      .getRawMany();
+    .where('c.touristic_id = :touristicId', { touristicId })
+    .andWhere('NOT (c.end_date < :rangeStart OR c.start_date > :rangeEnd)', { rangeStart, rangeEnd })
+    .select([
+      'c.id AS id',
+      'c.start_date AS start_date',
+      'c.end_date AS end_date',
+      'c.status AS status',
+    ])
+    .getRawMany();
   }
 }
