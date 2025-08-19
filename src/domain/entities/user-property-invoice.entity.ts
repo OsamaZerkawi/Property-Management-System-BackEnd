@@ -23,8 +23,9 @@ export class UserPropertyInvoice{
     @Column({type: 'date',nullable: true})
     billing_period_start: Date;
 
-    @Column({type:'integer',nullable:true})
-    stripePaymentIntentId: number;
+    @Column({ type: 'varchar', nullable: true })
+    stripePaymentIntentId: string;
+
 
     @Column({nullable:true})
     invoiceImage: string;
