@@ -39,6 +39,7 @@ import { CreateTouristicBookingUseCase } from 'src/application/use-cases/tourism
 import { CreateTouristicBookingSwagger } from '../swagger/tourism_places/create-tourism-property-booking.swagger';
 import { ApiConsumes } from '@nestjs/swagger';
 import { GetTouristicAvailabilityUseCase } from 'src/application/use-cases/tourism/get-tourism-availability.use-case';
+import { GetTouristicAvailabilitySwaggerDoc } from '../swagger/tourism_places/get-touristic-availability.swagger';
  
 @Controller('tourism')
 export class TourismController {
@@ -261,11 +262,11 @@ export class TourismController {
   }
 
   @Public()
+  @GetTouristicAvailabilitySwaggerDoc()
   @Get(':propertyId/availability')
   async getTourismAvailability(
     @Param('propertyId', ParseIntPipe) propertyId: number, 
   ) {
-   
       const result = await this.getAvailability.execute(propertyId);
       return successResponse(result,'تم جلب التقويم بنجاح');
   }
