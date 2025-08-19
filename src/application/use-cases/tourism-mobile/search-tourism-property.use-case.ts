@@ -18,9 +18,9 @@ export class SearchTourismUseCase {
     page = 1,
     items = 10,
     baseUrl: string,
-    userId?: number,
+    userId: number,
   ): Promise<any> {
-    const { data, total } = await this.repo.searchByTitle(search, page, items);
+    const { data, total } = await this.repo.searchByTitle(search, page, items,userId);
 
     const results = data.map((p) => ({
       propertyId: p.id,
@@ -30,6 +30,7 @@ export class SearchTourismUseCase {
         : null,
       postTitle: p.post.title,
       price: Number(p.touristic.price),
+      is_favorite: (p as any).is_favorite ? 1 : 0,
     }));
 
     return successPaginatedResponse(results, total, page, items);

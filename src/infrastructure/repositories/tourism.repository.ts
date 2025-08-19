@@ -1,6 +1,10 @@
 // infrastructure/repositories/tourism.repository.impl.ts
 
-import { BadRequestException, Injectable,NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository';
@@ -58,8 +62,7 @@ export class TourismRepository implements ITourismRepository {
     @InjectRepository(Calendar)
     private readonly calendarRepo: Repository<Calendar>,
     private readonly dataSource: DataSource,
-  ) { }
-
+  ) {}
 
   async getServicesMapByNames(names: string[]) {
     const services = await this.serviceRepo
@@ -69,7 +72,7 @@ export class TourismRepository implements ITourismRepository {
       .getMany();
 
     const nameToIdMap: Record<string, number> = {};
-    services.forEach(service => {
+    services.forEach((service) => {
       nameToIdMap[service.name] = service.id;
     });
 
@@ -115,7 +118,9 @@ export class TourismRepository implements ITourismRepository {
       .leftJoin('region.city', 'city')
       .leftJoin('property.touristic', 'touristic')
       .where('property.office_id = :officeId', { officeId })
-      .andWhere('property.property_type = :type', { type: PropertyType.TOURISTIC })
+      .andWhere('property.property_type = :type', {
+        type: PropertyType.TOURISTIC,
+      })
       .andWhere('property.is_deleted = :isDeleted', { isDeleted: false })
       .select([
         'property.id as property_id',
@@ -126,11 +131,11 @@ export class TourismRepository implements ITourismRepository {
         'property.area as property_area',
         'touristic.price as touristic_price',
         'post.status as post_status',
-        'touristic.status as touristic_status'
+        'touristic.status as touristic_status',
       ])
       .getRawMany();
 
-    return raws.map(item => ({
+    return raws.map((item) => ({
       id: item.property_id,
       title: item.post_title,
       postImage: item.image
@@ -139,9 +144,10 @@ export class TourismRepository implements ITourismRepository {
       location: `${item.city_name}, ${item.region_name}`,
       area: Number(item.property_area.toFixed(1)),
       price: Number(item.touristic_price),
-      status: item.post_status === PropertyPostStatus.APPROVED
-        ? item.touristic_status
-        : item.post_status
+      status:
+        item.post_status === PropertyPostStatus.APPROVED
+          ? item.touristic_status
+          : item.post_status,
     }));
   }
 
@@ -149,37 +155,45 @@ export class TourismRepository implements ITourismRepository {
     return this.propRepo.findOne({ where: { id }, relations: ['office'] });
   }
 
-  async updateTourism(propertyId: number, dto: UpdateTourismDto): Promise<void> {
-    await this.dataSource.transaction(async manager => {
+  async updateTourism(
+    propertyId: number,
+    dto: UpdateTourismDto,
+  ): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
       const [property, post, touristic] = await Promise.all([
         manager.findOne(Property, { where: { id: propertyId } }),
         manager.findOne(PropertyPost, {
           where: { property: { id: propertyId } },
-          relations: ['property']
+          relations: ['property'],
         }),
         manager.findOne(Touristic, {
           where: { property: { id: propertyId } },
-          relations: ['additionalServices', 'additionalServices.service']
-        })
+          relations: ['additionalServices', 'additionalServices.service'],
+        }),
       ]);
 
-      if (!property) throw new NotFoundException(
-        errorResponse('Property not found', 404)
-      );
+      if (!property)
+        throw new NotFoundException(errorResponse('Property not found', 404));
 
       const propertyUpdates: Partial<Property> = {};
 
       const propertyMappings = {
-        region_id: () => propertyUpdates.region = { id: dto.region_id } as any,
-        latitude: () => propertyUpdates.latitude = dto.latitude,
-        longitude: () => propertyUpdates.longitude = dto.longitude,
-        area: () => propertyUpdates.area = dto.area,
-        room_count: () => propertyUpdates.room_count = dto.room_count,
-        living_room_count: () => propertyUpdates.living_room_count = dto.living_room_count,
-        kitchen_count: () => propertyUpdates.kitchen_count = dto.kitchen_count,
-        bathroom_count: () => propertyUpdates.bathroom_count = dto.bathroom_count,
-        bedroom_count: () => propertyUpdates.bedroom_count = dto.bedroom_count,
-        has_furniture: () => propertyUpdates.has_furniture = dto.has_furniture
+        region_id: () =>
+          (propertyUpdates.region = { id: dto.region_id } as any),
+        latitude: () => (propertyUpdates.latitude = dto.latitude),
+        longitude: () => (propertyUpdates.longitude = dto.longitude),
+        area: () => (propertyUpdates.area = dto.area),
+        room_count: () => (propertyUpdates.room_count = dto.room_count),
+        living_room_count: () =>
+          (propertyUpdates.living_room_count = dto.living_room_count),
+        kitchen_count: () =>
+          (propertyUpdates.kitchen_count = dto.kitchen_count),
+        bathroom_count: () =>
+          (propertyUpdates.bathroom_count = dto.bathroom_count),
+        bedroom_count: () =>
+          (propertyUpdates.bedroom_count = dto.bedroom_count),
+        has_furniture: () =>
+          (propertyUpdates.has_furniture = dto.has_furniture),
       };
 
       Object.entries(propertyMappings).forEach(([key, updateFn]) => {
@@ -200,10 +214,12 @@ export class TourismRepository implements ITourismRepository {
           postUpdates.title = `${currentTag} ${currentArea} م²`;
         }
 
-        if (dto.description !== undefined) postUpdates.description = dto.description;
+        if (dto.description !== undefined)
+          postUpdates.description = dto.description;
         if (dto.tag !== undefined) postUpdates.tag = dto.tag;
         if (dto.image !== undefined) {
-          const shouldDeleteOldImage = dto.image && post.image && dto.image !== post.image;
+          const shouldDeleteOldImage =
+            dto.image && post.image && dto.image !== post.image;
           if (shouldDeleteOldImage) {
             const oldImagePath = path.join(
               process.cwd(),
@@ -214,8 +230,8 @@ export class TourismRepository implements ITourismRepository {
               fs.unlinkSync(oldImagePath);
             }
           }
-          postUpdates.image = dto.image
-        };
+          postUpdates.image = dto.image;
+        }
 
         await manager.update(PropertyPost, post.id, postUpdates);
       }
@@ -224,12 +240,12 @@ export class TourismRepository implements ITourismRepository {
         const touristicUpdates: Partial<Touristic> = {};
 
         const touristicMappings = {
-          price: () => touristicUpdates.price = dto.price,
-          street: () => touristicUpdates.street = dto.street,
-          electricity: () => touristicUpdates.electricity = dto.electricity,
-          water: () => touristicUpdates.water = dto.water,
-          pool: () => touristicUpdates.pool = dto.pool,
-          status: () => touristicUpdates.status = dto.status
+          price: () => (touristicUpdates.price = dto.price),
+          street: () => (touristicUpdates.street = dto.street),
+          electricity: () => (touristicUpdates.electricity = dto.electricity),
+          water: () => (touristicUpdates.water = dto.water),
+          pool: () => (touristicUpdates.pool = dto.pool),
+          status: () => (touristicUpdates.status = dto.status),
         };
 
         Object.entries(touristicMappings).forEach(([key, updateFn]) => {
@@ -241,38 +257,45 @@ export class TourismRepository implements ITourismRepository {
         }
 
         if (dto.additional_services) {
-
           // Resolve names to Ids
-          const nameToIdMap = await this.getServicesMapByNames(dto.additional_services);
+          const nameToIdMap = await this.getServicesMapByNames(
+            dto.additional_services,
+          );
 
-          const currentServices = touristic.additionalServices?.map(s => s.service.id) || [];
+          const currentServices =
+            touristic.additionalServices?.map((s) => s.service.id) || [];
 
           const newServices = Object.values(nameToIdMap);
 
-          const toRemove = currentServices.filter(id => !newServices.includes(id));
-          const toAdd = newServices.filter(id => !currentServices.includes(id));
+          const toRemove = currentServices.filter(
+            (id) => !newServices.includes(id),
+          );
+          const toAdd = newServices.filter(
+            (id) => !currentServices.includes(id),
+          );
 
           if (toRemove.length > 0) {
             await manager
               .createQueryBuilder()
               .delete()
               .from(AdditionalService)
-              .where('touristicId = :touristicId', { touristicId: touristic.id })
+              .where('touristicId = :touristicId', {
+                touristicId: touristic.id,
+              })
               .andWhere('serviceId IN (:...services)', { services: toRemove })
               .execute();
           }
 
           if (toAdd.length > 0) {
-            const newRelations = toAdd.map(serviceId =>
+            const newRelations = toAdd.map((serviceId) =>
               manager.create(AdditionalService, {
                 touristic: { id: touristic.id },
-                service: { id: serviceId }
-              })
+                service: { id: serviceId },
+              }),
             );
             await manager.save(newRelations);
           }
-        }
-        else {
+        } else {
           await manager
             .createQueryBuilder()
             .delete()
@@ -296,7 +319,9 @@ export class TourismRepository implements ITourismRepository {
       .leftJoin('region.city', 'city')
       .leftJoin('property.touristic', 'touristic')
       .where('property.office_id = :officeId', { officeId })
-      .andWhere('property.property_type = :type', { type: PropertyType.TOURISTIC })
+      .andWhere('property.property_type = :type', {
+        type: PropertyType.TOURISTIC,
+      })
       .andWhere('property.is_deleted = :isDeleted', { isDeleted: false });
 
     if (filter.city) {
@@ -312,14 +337,15 @@ export class TourismRepository implements ITourismRepository {
     if (filter.status) {
       if (this.isPostStatus(filter.status)) {
         query.andWhere('post.status = :postStatus', {
-          postStatus: filter.status
+          postStatus: filter.status,
         });
       } else {
-        query.andWhere('post.status = :approvedStatus', {
-          approvedStatus: PropertyPostStatus.APPROVED
-        })
+        query
+          .andWhere('post.status = :approvedStatus', {
+            approvedStatus: PropertyPostStatus.APPROVED,
+          })
           .andWhere('touristic.status = :touristicStatus', {
-            touristicStatus: filter.status
+            touristicStatus: filter.status,
           });
       }
     }
@@ -334,12 +360,12 @@ export class TourismRepository implements ITourismRepository {
         'property.area as property_area',
         'touristic.price as touristic_price',
         'post.status as post_status',
-        'touristic.status as touristic_status'
+        'touristic.status as touristic_status',
       ])
       .orderBy('touristic.created_at', 'ASC')
       .getRawMany();
 
-    return results.map(item => ({
+    return results.map((item) => ({
       id: item.property_id,
       title: item.post_title,
       postImage: item.image
@@ -348,17 +374,17 @@ export class TourismRepository implements ITourismRepository {
       location: `${item.city_name}, ${item.region_name}`,
       area: Number(item.property_area.toFixed(1)),
       price: Number(item.touristic_price),
-      status: item.post_status === PropertyPostStatus.APPROVED
-        ? item.touristic_status
-        : item.post_status
+      status:
+        item.post_status === PropertyPostStatus.APPROVED
+          ? item.touristic_status
+          : item.post_status,
     }));
   }
 
   private isPostStatus(status: string): boolean {
-    return [
-      PropertyPostStatus.PENDING,
-      PropertyPostStatus.REJECTED
-    ].includes(status as any);
+    return [PropertyPostStatus.PENDING, PropertyPostStatus.REJECTED].includes(
+      status as any,
+    );
   }
 
   async findRegionById(id: number): Promise<Region | null> {
@@ -376,17 +402,19 @@ export class TourismRepository implements ITourismRepository {
       console.error('فشل في البحث عن المنطقة:', error);
       throw new Error('حدث خطأ أثناء البحث عن المنطقة');
     }
-  } 
+  }
 
   async searchByTitleAndOffice(officeId: number, searchTerm: string) {
     return await this.propRepo
-      .createQueryBuilder('property') 
+      .createQueryBuilder('property')
       .leftJoin('property.post', 'post')
       .leftJoin('property.region', 'region')
       .leftJoin('region.city', 'city')
       .leftJoin('property.touristic', 'touristic')
       .where('property.office_id = :officeId', { officeId })
-      .andWhere('post.title LIKE :searchTerm', { searchTerm: `%${searchTerm}%` }) // إضافة شرط البحث
+      .andWhere('post.title LIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      }) // إضافة شرط البحث
       .select([
         'property.id AS id',
         'post.title AS title',
@@ -395,7 +423,7 @@ export class TourismRepository implements ITourismRepository {
         `CONTACT(city.name , ', ' ,region.name) AS location`,
         'property.area AS area',
         'touristic.price AS price',
-        'touristic.status AS status'
+        'touristic.status AS status',
       ])
       .getRawMany();
   }
@@ -404,7 +432,7 @@ export class TourismRepository implements ITourismRepository {
       where: {
         id: propertyId,
         property_type: PropertyType.TOURISTIC,
-        office: { id: officeId }
+        office: { id: officeId },
       },
       relations: [
         'region',
@@ -433,52 +461,57 @@ export class TourismRepository implements ITourismRepository {
       .leftJoinAndSelect('office_region.city', 'office_city')
       .where('property.id = :propertyId', { propertyId });
 
-    qb.addSelect(subQb =>
-      subQb
-        .select('ROUND(AVG(pf.rate)::numeric, 2)')
-        .from('property_feedbacks', 'pf')
-        .where('pf.property_id = property.id'),
-      'avg_rate'
+    qb.addSelect(
+      (subQb) =>
+        subQb
+          .select('ROUND(AVG(pf.rate)::numeric, 2)')
+          .from('property_feedbacks', 'pf')
+          .where('pf.property_id = property.id'),
+      'avg_rate',
     );
 
     if (userId) {
-      qb.addSelect(subQb =>
-        subQb
-          .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
-          .from('property_favorites', 'fav')
-          .where('fav.property_id = property.id')
-          .andWhere('fav.user_id = :userId', { userId }),
-        'is_favorite'
+      qb.addSelect(
+        (subQb) =>
+          subQb
+            .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
+            .from('property_favorites', 'fav')
+            .where('fav.property_id = property.id')
+            .andWhere('fav.user_id = :userId', { userId }),
+        'is_favorite',
       );
-      qb.addSelect(subQb =>
-        subQb
-          .select('pfu.rate')
-          .from('property_feedbacks', 'pfu')
-          .where('pfu.property_id = property.id')
-          .andWhere('pfu.user_id = :userId', { userId })
-          .andWhere('pfu.rate IS NOT NULL')
-          .limit(1),
-        'user_rate'
+      qb.addSelect(
+        (subQb) =>
+          subQb
+            .select('pfu.rate')
+            .from('property_feedbacks', 'pfu')
+            .where('pfu.property_id = property.id')
+            .andWhere('pfu.user_id = :userId', { userId })
+            .andWhere('pfu.rate IS NOT NULL')
+            .limit(1),
+        'user_rate',
       );
     } else {
       qb.addSelect('false', 'is_favorite');
       qb.addSelect('NULL', 'user_rate');
     }
-    qb.addSelect(subQb =>
-      subQb
-        .select('ROUND(AVG(of.rate)::numeric, 2)')
-        .from('office_feedbacks', 'of')
-        .where('of.office_id = office.id'),
-      'office_rate'
+    qb.addSelect(
+      (subQb) =>
+        subQb
+          .select('ROUND(AVG(of.rate)::numeric, 2)')
+          .from('office_feedbacks', 'of')
+          .where('of.office_id = office.id'),
+      'office_rate',
     );
 
-    qb.addSelect(subQb =>
-      subQb
-        .select('COUNT(of2.id)')
-        .from('office_feedbacks', 'of2')
-        .where('of2.office_id = office.id')
-        .andWhere('of2.rate IS NOT NULL'),
-      'office_feedback_count'
+    qb.addSelect(
+      (subQb) =>
+        subQb
+          .select('COUNT(of2.id)')
+          .from('office_feedbacks', 'of2')
+          .where('of2.office_id = office.id')
+          .andWhere('of2.rate IS NOT NULL'),
+      'office_feedback_count',
     );
     const result = await qb.getRawAndEntities();
     return result;
@@ -488,7 +521,7 @@ export class TourismRepository implements ITourismRepository {
     dto: FilterTourismPropertiesDto,
     page: number,
     items: number,
-    userId?:number,
+    userId?: number,
   ) {
     const qb = this.propRepo
       .createQueryBuilder('property')
@@ -496,12 +529,34 @@ export class TourismRepository implements ITourismRepository {
       .leftJoinAndSelect('region.city', 'city')
       .leftJoinAndSelect('property.touristic', 'touristic')
       .leftJoinAndSelect('property.post', 'post')
-      .where('touristic.status = :tourStatus', { tourStatus: TouristicStatus.AVAILABLE })
-      .andWhere('post.status = :postStatus', { postStatus: PropertyPostStatus.APPROVED });
+      .where('touristic.status = :tourStatus', {
+        tourStatus: TouristicStatus.AVAILABLE,
+      })
+      .andWhere('post.status = :postStatus', {
+        postStatus: PropertyPostStatus.APPROVED,
+      });
 
-    if (dto.regionId) qb.andWhere('region.id = :regionId', { regionId: dto.regionId });
+    if (dto.regionId)
+      qb.andWhere('region.id = :regionId', { regionId: dto.regionId });
     if (dto.cityId) qb.andWhere('city.id = :cityId', { cityId: dto.cityId });
-    if (dto.tag) qb.andWhere('post.tag::text LIKE :tag', { tag: `%${dto.tag}%` });
+    if (dto.tag)
+      qb.andWhere('post.tag::text LIKE :tag', { tag: `%${dto.tag}%` });
+
+    if (userId) {
+      qb.addSelect(
+        `CASE
+        WHEN EXISTS (
+          SELECT 1 FROM property_favorites pf
+          WHERE pf.property_id = property.id AND pf.user_id = :userId
+        ) THEN true
+        ELSE false
+      END`,
+        'is_favorite',
+      ).setParameter('userId', userId);
+    } else {
+      qb.addSelect('false', 'is_favorite');
+    }
+
     let firstOrder = true;
     if (dto.orderByArea) {
       qb.orderBy('property.area', dto.orderByArea);
@@ -523,29 +578,63 @@ export class TourismRepository implements ITourismRepository {
       }
     }
     const [rawResults, total] = await Promise.all([
-      qb.skip((page - 1) * items)
-        .take(items)
-        .getMany(),
+      qb
+        .offset((page - 1) * items)
+        .limit(items)
+        .getRawAndEntities(),
       qb.getCount(),
     ]);
 
-    return { data: rawResults, total };
+    const data = rawResults.entities.map((entity, idx) => ({
+      ...entity,
+      is_favorite: rawResults.raw[idx].is_favorite,
+    }));
+
+    return { data, total };
   }
 
-  async searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }> {
-    const query = this.propRepo.createQueryBuilder('property')
+  async searchByTitle(
+    title: string,
+    page: number,
+    items: number,
+    userId: number,
+  ): Promise<{ data: Property[]; total: number }> {
+    const query = this.propRepo
+      .createQueryBuilder('property')
       .leftJoinAndSelect('property.post', 'post')
       .leftJoinAndSelect('property.region', 'region')
       .leftJoinAndSelect('region.city', 'city')
       .innerJoinAndSelect('property.touristic', 'touristic')
       .where('LOWER(post.title) LIKE LOWER(:title)', { title: `%${title}%` });
 
+    if (userId) {
+      query
+        .addSelect(
+          `CASE
+        WHEN EXISTS (
+          SELECT 1 FROM property_favorites pf
+          WHERE pf.property_id = property.id AND pf.user_id = :userId
+        ) THEN true
+        ELSE false
+      END`,
+          'is_favorite',
+        )
+        .setParameter('userId', userId);
+    } else {
+      query.addSelect('false', 'is_favorite');
+    }
+
     const total = await query.getCount();
 
-    const data = await query
+    const rawResults = await query
       .skip((page - 1) * items)
       .take(items)
-      .getMany();
+      .getRawAndEntities();
+
+    const data = rawResults.entities.map((entity, idx) => ({
+      ...entity,
+      is_favorite: rawResults.raw[idx].is_favorite,
+    }));
 
     return { data, total };
   }
@@ -577,7 +666,7 @@ export class TourismRepository implements ITourismRepository {
       .addOrderBy('ui.reason')
       .getRawMany();
 
-    return raws.map(r => ({
+    return raws.map((r) => ({
       startDate: r.startDate,
       endDate: r.endDate,
       phone: r.phone,
@@ -590,31 +679,33 @@ export class TourismRepository implements ITourismRepository {
     }));
   }
 
-  async findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null> {
+  async findPropertyWithTouristicAndPost(
+    propertyId: number,
+  ): Promise<Property | null> {
     return this.propRepo.findOne({
       where: { id: propertyId },
       relations: ['post', 'region', 'region.city', 'touristic'],
     });
   }
- async findPropertyWithTouristicAndOffice(propertyId: number): Promise<Property | null> {
+  async findPropertyWithTouristicAndOffice(
+    propertyId: number,
+  ): Promise<Property | null> {
     return this.propRepo.findOne({
       where: { id: propertyId },
-      relations: [ 'office', 'touristic'],
+      relations: ['office', 'touristic'],
     });
   }
-  async findRelatedTouristicProperties(
-    options: {
-      PropertyId: number;
-      targetPrice: number;
-      minPrice: number;
-      maxPrice: number;
-      regionId?: number | null;
-      cityId?: number | null;
-      tag?: string | null;
-      userId?: number | null;
-      limit?: number;
-    }
-  ): Promise<Array<Record<string, any>>> {
+  async findRelatedTouristicProperties(options: {
+    PropertyId: number;
+    targetPrice: number;
+    minPrice: number;
+    maxPrice: number;
+    regionId?: number | null;
+    cityId?: number | null;
+    tag?: string | null;
+    userId?: number | null;
+    limit?: number;
+  }): Promise<Array<Record<string, any>>> {
     const {
       PropertyId,
       minPrice,
@@ -644,9 +735,16 @@ export class TourismRepository implements ITourismRepository {
       excludeIds?: number[];
       maxResults?: number;
     }) => {
-      const { useRegion = false, useCity = false, excludeRegion = null, excludeIds = [], maxResults = limit } = opts;
+      const {
+        useRegion = false,
+        useCity = false,
+        excludeRegion = null,
+        excludeIds = [],
+        maxResults = limit,
+      } = opts;
 
-      const qb = this.propRepo.createQueryBuilder('property')
+      const qb = this.propRepo
+        .createQueryBuilder('property')
         .leftJoin('property.post', 'post')
         .leftJoin('property.region', 'region')
         .leftJoin('region.city', 'city')
@@ -654,16 +752,23 @@ export class TourismRepository implements ITourismRepository {
         .where('property.id != :PropertyId', { PropertyId })
         .andWhere('property.is_deleted = false')
         .andWhere('post.status = :postStatus', { postStatus: 'مقبول' })
-        .andWhere('touristic.status = :touristicStatus', { touristicStatus: 'متوفر' })
-        .andWhere('CAST(COALESCE(touristic.price, \'0\') AS numeric) BETWEEN :minPrice AND :maxPrice', { minPrice, maxPrice });
+        .andWhere('touristic.status = :touristicStatus', {
+          touristicStatus: 'متوفر',
+        })
+        .andWhere(
+          "CAST(COALESCE(touristic.price, '0') AS numeric) BETWEEN :minPrice AND :maxPrice",
+          { minPrice, maxPrice },
+        );
 
       if (tag) {
         qb.andWhere('post.tag = :tag', { tag });
       }
 
-      if (useRegion && regionId) qb.andWhere('region.id = :regionId', { regionId });
+      if (useRegion && regionId)
+        qb.andWhere('region.id = :regionId', { regionId });
       if (useCity && cityId) qb.andWhere('city.id = :cityId', { cityId });
-      if (excludeRegion) qb.andWhere('region.id != :excludeRegion', { excludeRegion });
+      if (excludeRegion)
+        qb.andWhere('region.id != :excludeRegion', { excludeRegion });
 
       if (excludeIds && excludeIds.length > 0) {
         qb.andWhere('property.id NOT IN (:...excludeIds)', { excludeIds });
@@ -688,22 +793,24 @@ export class TourismRepository implements ITourismRepository {
         `${priceDiffExpr} AS price_diff`,
       ]);
 
-      qb.addSelect(subQb =>
-        subQb
-          .select('ROUND(AVG(pf.rate)::numeric, 2)')
-          .from('property_feedbacks', 'pf')
-          .where('pf.property_id = property.id'),
-        'avg_rate'
+      qb.addSelect(
+        (subQb) =>
+          subQb
+            .select('ROUND(AVG(pf.rate)::numeric, 2)')
+            .from('property_feedbacks', 'pf')
+            .where('pf.property_id = property.id'),
+        'avg_rate',
       );
 
       if (userId) {
-        qb.addSelect(subQb =>
-          subQb
-            .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
-            .from('property_favorites', 'fav')
-            .where('fav.property_id = property.id')
-            .andWhere('fav.user_id = :userId', { userId }),
-          'is_favorite'
+        qb.addSelect(
+          (subQb) =>
+            subQb
+              .select('CASE WHEN COUNT(*) > 0 THEN true ELSE false END')
+              .from('property_favorites', 'fav')
+              .where('fav.property_id = property.id')
+              .andWhere('fav.user_id = :userId', { userId }),
+          'is_favorite',
         );
       } else {
         qb.addSelect('false', 'is_favorite');
@@ -737,7 +844,7 @@ export class TourismRepository implements ITourismRepository {
     }
 
     if (results.length < limit && cityId) {
-      const foundIds = results.map(r => Number(r.property_id));
+      const foundIds = results.map((r) => Number(r.property_id));
       const remainingAfterRegion = limit - results.length;
 
       const qbCity = buildScoredQB({
@@ -752,9 +859,12 @@ export class TourismRepository implements ITourismRepository {
     }
 
     if (results.length < limit) {
-      const foundIds = results.map(r => Number(r.property_id));
+      const foundIds = results.map((r) => Number(r.property_id));
       const remaining = limit - results.length;
-      const qbAny = buildScoredQB({ excludeIds: foundIds, maxResults: remaining });
+      const qbAny = buildScoredQB({
+        excludeIds: foundIds,
+        maxResults: remaining,
+      });
       const r3 = await qbAny.getRawMany();
       results.push(...r3);
     }
@@ -763,18 +873,25 @@ export class TourismRepository implements ITourismRepository {
   }
 
   async createBookingWithInvoices(options: {
-  userId: number;
-  propertyId: number;
-  startDate: string;
-  endDate: string;
-  deposit: number;
-  totalPrice: number;
-  payment_id:string;
-}): Promise<any> {
-  const { userId, propertyId, startDate, endDate, deposit, totalPrice,payment_id } = options;
+    userId: number;
+    propertyId: number;
+    startDate: string;
+    endDate: string;
+    deposit: number;
+    totalPrice: number;
+    payment_id: string;
+  }): Promise<any> {
+    const {
+      userId,
+      propertyId,
+      startDate,
+      endDate,
+      deposit,
+      totalPrice,
+      payment_id,
+    } = options;
 
-    return await this.dataSource.transaction(async manager => {
- 
+    return await this.dataSource.transaction(async (manager) => {
       const property = await manager.findOne(Property, {
         where: { id: propertyId },
         relations: ['touristic'],
@@ -788,82 +905,91 @@ export class TourismRepository implements ITourismRepository {
       if (!touristic) {
         throw new NotFoundException('تفاصيل العقار السياحي غير موجودة');
       }
-   
+
       const overlapExists = await manager
         .createQueryBuilder(Calendar, 'c')
         .where('c.touristic_id = :touristicId', { touristicId: touristic.id })
         .andWhere('c.status = :bookedStatus', { bookedStatus: 'محجوز' })
-        .andWhere('NOT (c.end_date < :startDate OR c.start_date > :endDate)', { startDate, endDate })
+        .andWhere('NOT (c.end_date < :startDate OR c.start_date > :endDate)', {
+          startDate,
+          endDate,
+        })
         .getCount();
 
       if (overlapExists > 0) {
-        throw new BadRequestException('المدى الزمني المطلوب متداخل مع حجز موجود');
+        throw new BadRequestException(
+          'المدى الزمني المطلوب متداخل مع حجز موجود',
+        );
       }
- 
+
       const calendar = manager.create(Calendar, {
         touristic: { id: touristic.id } as any,
-        start_date: new Date(startDate).toISOString().split('T')[0],  
-        end_date: new Date(endDate).toISOString().split('T')[0],    
+        start_date: new Date(startDate).toISOString().split('T')[0],
+        end_date: new Date(endDate).toISOString().split('T')[0],
         status: CalendarStatus.RESERVED,
       });
       await manager.save(Calendar, calendar);
- 
+
       const booking = manager.create(Booking, {
         user: { id: userId } as any,
         calendar: { id: calendar.id } as any,
       });
       await manager.save(Booking, booking);
-   
-    const invoiceRepo = manager.getRepository(UserPropertyInvoice);
 
-    const depositInvoiceData: DeepPartial<UserPropertyInvoice> = {
-      user: { id: userId } as any,
-      property: { id: propertyId } as any,
-      calendar: calendar ? ({ id: calendar.id } as any) : undefined,
-      amount: deposit,
-      billing_period_start: new Date().toISOString().split('T')[0],
-      reason: InoviceReasons.DEPOSIT,  
-      status: InvoicesStatus.PAID,   
-      paymentMethod: PaymentMethod.STRIPE,  
-      stripePaymentIntentId:payment_id,
-    };
+      const invoiceRepo = manager.getRepository(UserPropertyInvoice);
 
-    const depositInvoice = invoiceRepo.create(depositInvoiceData);
-    await invoiceRepo.save(depositInvoice);
- 
-    const remainingAmount = Number(totalPrice) - Number(deposit);
-    const remainingInvoiceData: DeepPartial<UserPropertyInvoice> = {
-      user: { id: userId } as any,
-      property: { id: propertyId } as any,
-      calendar: calendar ? ({ id: calendar.id } as any) : undefined,
-      amount: remainingAmount >= 0 ? remainingAmount : 0,
-      billing_period_start: new Date(),
-      reason: InoviceReasons.TOURISTIC_BOOKING,  
-      status: InvoicesStatus.PENDING,
-      paymentMethod:  PaymentMethod.STRIPE,  
-      payment_deadline: startDate,
-    };
+      const depositInvoiceData: DeepPartial<UserPropertyInvoice> = {
+        user: { id: userId } as any,
+        property: { id: propertyId } as any,
+        calendar: calendar ? ({ id: calendar.id } as any) : undefined,
+        amount: deposit,
+        billing_period_start: new Date().toISOString().split('T')[0],
+        reason: InoviceReasons.DEPOSIT,
+        status: InvoicesStatus.PAID,
+        paymentMethod: PaymentMethod.STRIPE,
+        stripePaymentIntentId: payment_id,
+      };
 
-    const remainingInvoice = invoiceRepo.create(remainingInvoiceData);
-    await invoiceRepo.save(remainingInvoice);
- 
+      const depositInvoice = invoiceRepo.create(depositInvoiceData);
+      await invoiceRepo.save(depositInvoice);
+
+      const remainingAmount = Number(totalPrice) - Number(deposit);
+      const remainingInvoiceData: DeepPartial<UserPropertyInvoice> = {
+        user: { id: userId } as any,
+        property: { id: propertyId } as any,
+        calendar: calendar ? ({ id: calendar.id } as any) : undefined,
+        amount: remainingAmount >= 0 ? remainingAmount : 0,
+        billing_period_start: new Date(),
+        reason: InoviceReasons.TOURISTIC_BOOKING,
+        status: InvoicesStatus.PENDING,
+        paymentMethod: PaymentMethod.STRIPE,
+        payment_deadline: startDate,
+      };
+
+      const remainingInvoice = invoiceRepo.create(remainingInvoiceData);
+      await invoiceRepo.save(remainingInvoice);
     });
   }
-   async findCalendarsForTouristicInRange(
+  async findCalendarsForTouristicInRange(
     touristicId: number,
     rangeStart: Date,
     rangeEnd: Date,
-  ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> {
+  ): Promise<
+    Array<{ id: number; start_date: Date; end_date: Date; status: string }>
+  > {
     return this.calendarRepo
       .createQueryBuilder('c')
-    .where('c.touristic_id = :touristicId', { touristicId })
-    .andWhere('NOT (c.end_date < :rangeStart OR c.start_date > :rangeEnd)', { rangeStart, rangeEnd })
-    .select([
-      'c.id AS id',
-      'c.start_date AS start_date',
-      'c.end_date AS end_date',
-      'c.status AS status',
-    ])
-    .getRawMany();
+      .where('c.touristic_id = :touristicId', { touristicId })
+      .andWhere('NOT (c.end_date < :rangeStart OR c.start_date > :rangeEnd)', {
+        rangeStart,
+        rangeEnd,
+      })
+      .select([
+        'c.id AS id',
+        'c.start_date AS start_date',
+        'c.end_date AS end_date',
+        'c.status AS status',
+      ])
+      .getRawMany();
   }
 }
