@@ -27,6 +27,7 @@ export class NotificationRepository implements NotificationRepositoryInterface {
   findByUser(userId: number) {
     return this.notificationRepo.find({
       where: { userId },
+      relations: ['sender', 'sender.userRoles', 'sender.userRoles.role'],
       order: { sent_at: 'DESC' },
     });
   }

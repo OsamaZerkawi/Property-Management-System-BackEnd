@@ -1,4 +1,3 @@
-
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -9,7 +8,7 @@ import {
 
 export function GetUserNotificationsSwaggerDoc() {
   return applyDecorators(
-    ApiBearerAuth(), 
+    ApiBearerAuth(),
     ApiOperation({ summary: 'جلب جميع الإشعارات الخاصة بالمستخدم الحالي' }),
     ApiResponse({
       status: HttpStatus.OK,
@@ -20,14 +19,12 @@ export function GetUserNotificationsSwaggerDoc() {
           message: 'تم ارجاع جميع الاشعارات الخاصة بك',
           data: [
             {
-              id: 1,
-              title: 'تمت الموافقة على إعلانك',
-              body: 'يمكنك الآن إتمام عملة الدفع لتغيل الإعلان',
+              id: 2,
+              title: 'تم قبول منشورك',
+              body: 'هل المرة لح نقبلو',
+              name: 'مشرف',
               isRead: false,
-              sent_at: '2025-07-14',
-              data: {
-                adId: 1,
-              },
+              sent_at: '2025-08-18',
             },
           ],
           status_code: 200,

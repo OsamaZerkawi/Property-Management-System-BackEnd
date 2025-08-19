@@ -175,8 +175,9 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         'office.id',
         'office.type',
         'office.deposit_per_m2',
+        'office.commission',
         'office.booking_period',
-        'office.tourism_deposit_percentage',
+        'office.tourism_deposit',
       ])
       .getOne();
     if (!office) {
@@ -187,11 +188,12 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     const result = {
       office_id: office.id,
       booking_period: office.booking_period,
+      commission: Number(office.commission * 100),
       ...(office.deposit_per_m2 != null && {
         deposit_per_m2: Number(office.deposit_per_m2),
       }),
-      ...(office.tourism_deposit_percentage != null && {
-        tourism_deposit_percentage: Number(office.tourism_deposit_percentage),
+      ...(office.tourism_deposit != null && {
+        tourism_deposit_percentage: Number(office.tourism_deposit * 100),
       }),
     };
     return result;
