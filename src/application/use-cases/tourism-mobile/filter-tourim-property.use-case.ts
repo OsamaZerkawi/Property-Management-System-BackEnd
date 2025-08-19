@@ -7,6 +7,7 @@ export interface PropertyResponse {
   postImage: string | null;
   postTitle: string;
   price: number;
+  is_favorite:boolean;
 } 
 
 @Injectable()
@@ -15,13 +16,13 @@ export class FilterTourismPropertiesUseCase {
      @Inject(TOURISM_REPOSITORY)
       private readonly repo: ITourismRepository,  ) {}
 
- async execute(dto: FilterTourismPropertiesDto, page = 1, items = 10,baseUrl:string): Promise<{
+ async execute(dto: FilterTourismPropertiesDto, page = 1, items = 10,baseUrl:string, userId?:number): Promise<{
   data: PropertyResponse[],
   total: number,
   currentPage: number,
   totalPages: number
 }> {
-const {data, total} = await this.repo.filter(dto, page, items);
+const {data, total} = await this.repo.filter(dto, page, items,userId);
 
   const results = data.map((p) => ({
     propertyId: p.id,
@@ -30,7 +31,8 @@ const {data, total} = await this.repo.filter(dto, page, items);
       ? `${baseUrl}/uploads/properties/posts/images/${p.post.image}`
       : null, 
     postTitle: p.post.title,
-    price: Number(p.touristic.price)
+    price: Number(p.touristic.price),
+     is_favorite: p.is_favorite,
   }));
 
   return {

@@ -16,6 +16,8 @@ import { UpdatePropertyDto } from 'src/application/dtos/property/UpdateProperty.
 import { PropertyFeedback } from 'src/domain/entities/property-feedback.entity';
 import { Property } from 'src/domain/entities/property.entity';
 import { Residential } from 'src/domain/entities/residential.entity';
+import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
+import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
 import { CombinedPropertyStatus } from 'src/domain/enums/combined-property-status.enum';
 import { ListingType } from 'src/domain/enums/listing-type.enum';
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
@@ -29,7 +31,7 @@ import {
   UserRepositoryInterface,
 } from 'src/domain/repositories/user.repository';
 import { errorResponse } from 'src/shared/helpers/response.helper';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -40,6 +42,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     private readonly propertyRepo: Repository<Property>,
     @InjectRepository(PropertyFeedback)
     private readonly feedbackRepo: Repository<PropertyFeedback>,
+    private readonly dataSource: DataSource
   ) {}
 
   async findByIdWithOwner(propertyId: number) {

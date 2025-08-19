@@ -1,4 +1,4 @@
-import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, DefaultValuePipe, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { PropertiesFiltersDto } from "src/application/dtos/property/PropertiesFilters.dto";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
@@ -28,6 +28,8 @@ import { userInfo } from "os";
 import { GetPromotedPropertiesUseCase } from "src/application/use-cases/property/get-promoted-properties.use-case";
 import { use } from "passport";
 import { GetPromotedPropertiesSwaggerDoc } from "../swagger/property/get-promoted-properties.swagger";
+import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { CreatePropertyPurchaseDto } from "src/application/dtos/property/create-property-purchase.dto";
 
 
 @Controller('properties')
@@ -43,6 +45,7 @@ export class PropertyController{
         private readonly compareTwoPropertiesUseCase: CompareTwoPropertiesUseCase,
         private readonly findTopRatedPropertiesUseCase: FindTopRatedPropertiesUseCase,
         private readonly getPromotedPropertiesUseCase: GetPromotedPropertiesUseCase,
+       // private readonly createPurchaseUseCase: CreatePropertyPurchaseUseCase,
     ){}
 
     @Get('top-rated')

@@ -18,6 +18,7 @@ export class SearchTourismUseCase {
     page = 1,
     items = 10,
     baseUrl: string,
+    userId?: number,
   ): Promise<any> {
     const { data, total } = await this.repo.searchByTitle(search, page, items);
 

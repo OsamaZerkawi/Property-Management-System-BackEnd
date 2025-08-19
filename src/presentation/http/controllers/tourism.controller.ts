@@ -81,9 +81,10 @@ export class TourismController {
     @Req() request: Request
   ) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
-
+    const userId = (request.user as any)?.sub ?? null;
+ 
     const { data: results, total } =
-      await this.filterTourismPropertiesUseCase.execute(query, page, items, baseUrl);
+      await this.filterTourismPropertiesUseCase.execute(query, page, items, baseUrl,userId);
 
     return successPaginatedResponse<PropertyResponse[]>(
       results,
@@ -105,7 +106,8 @@ export class TourismController {
     @Req() request: Request
   ) {
     const baseUrl = `${request.protocol}://${request.get('host')}`;
-    return this.searchTourismUseCase.execute(search, page, items, baseUrl);
+    const userId = (request.user as any)?.sub ?? null;
+    return this.searchTourismUseCase.execute(search, page, items, baseUrl,userId);
   }
 
 

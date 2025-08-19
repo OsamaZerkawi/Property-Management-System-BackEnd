@@ -487,8 +487,9 @@ export class TourismRepository implements ITourismRepository {
   async filter(
     dto: FilterTourismPropertiesDto,
     page: number,
-    items: number
-  ): Promise<{ data: Property[]; total: number }> {
+    items: number,
+    userId?:number,
+  ) {
     const qb = this.propRepo
       .createQueryBuilder('property')
       .leftJoinAndSelect('property.region', 'region')
@@ -501,7 +502,6 @@ export class TourismRepository implements ITourismRepository {
     if (dto.regionId) qb.andWhere('region.id = :regionId', { regionId: dto.regionId });
     if (dto.cityId) qb.andWhere('city.id = :cityId', { cityId: dto.cityId });
     if (dto.tag) qb.andWhere('post.tag::text LIKE :tag', { tag: `%${dto.tag}%` });
-
     let firstOrder = true;
     if (dto.orderByArea) {
       qb.orderBy('property.area', dto.orderByArea);
