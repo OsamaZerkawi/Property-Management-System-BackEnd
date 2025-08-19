@@ -28,7 +28,7 @@ export class UserReservationRepository implements UserReservationRepositoryInter
         'p.id AS property_id', 
         `'سياحي' AS type`,
         'pp.title AS title',
-        't.price AS rental_price',
+        'CAST(t.price AS INT) AS rental_price',
         `'يومي' AS rental_period`,
         `CONCAT('${baseUrl}/uploads/properties/posts/images', pp.image) AS image`,
         "TO_CHAR(c.start_date, 'YYYY-MM-DD') AS start_date",
