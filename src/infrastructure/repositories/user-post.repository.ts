@@ -104,8 +104,11 @@ export class UserPostRepository implements UserPostRepositoryInterface {
       .leftJoin('property.residential', 'residential')
       .leftJoin('property.feedbacks', 'feedback')
       .where('user_post.id = :id', { id })
-      .where('user_post.user_id = :userId', { userId })
+      .andWhere('user_post.user_id = :userId', { userId })
       .andWhere('property.is_deleted = false')
+      .andWhere('property.property_type = :type', {
+        type: PropertyType.RESIDENTIAL,
+      })
       .select([
         'property.id AS property_id',
         'post.title AS post_title',
