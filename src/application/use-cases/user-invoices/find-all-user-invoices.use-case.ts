@@ -23,8 +23,8 @@ export class FindAllUserInvoicesUseCase {
         id: invoice.id,
         date: invoice.billing_period_start,
         reason: invoice.reason,
-        payment_method: invoice.paymentMethod,
-        amount: Number(invoice.amount),
+        payment_method: invoice.paymentMethod, 
+        amount: Number(Number(invoice.amount).toFixed(1)),  
         status: invoice.status,
         invoiceImage:`${baseUrl}/uploads/invocies/user/${invoice.invoiceImage}` // maybe should to modify path of image
       };
@@ -34,7 +34,7 @@ export class FindAllUserInvoicesUseCase {
       return {
         id: invoice.id,
         reason: invoice.reason,
-        amount: Number(invoice.amount),
+        amount: Number(Number(invoice.amount).toFixed(1)),  
         status: invoice.status,
         deadline: invoice.payment_deadline,
       };
