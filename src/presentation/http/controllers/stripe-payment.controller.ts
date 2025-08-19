@@ -33,8 +33,9 @@ export class StripePaymentController {
     @CurrentUser() user,
     @Body() dto: { amount: number }
     ) {
+    const amountInCents = Math.round(dto.amount * 100);
     const paymentIntent = await this.stripeService.createPaymentIntent(
-        dto.amount,  
+        amountInCents,  
         'usd',
         user.sub
     );
