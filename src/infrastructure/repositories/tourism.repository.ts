@@ -841,6 +841,7 @@ export class TourismRepository implements ITourismRepository {
       reason: InoviceReasons.TOURISTIC_BOOKING,  
       status: InvoicesStatus.PENDING,
       paymentMethod:  PaymentMethod.STRIPE,  
+      payment_deadline: startDate,
     };
 
     const remainingInvoice = invoiceRepo.create(remainingInvoiceData);
