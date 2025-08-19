@@ -13,7 +13,7 @@ export class GetTopRatedServiceProvidersUseCase{
         const data = rawData.map((item) => ({
           id: item.id,
           name: item.name,
-          logo: item.logo ? `${baseUrl}/uploads/service-providers/logos/${item.logo}` : null,
+          logo: item.logo ? `${baseUrl}/uploads/providers/logo/${item.logo}` : null,
           career: item.career,
           location: item.location,
           rate: parseFloat(item.avg_rate),
