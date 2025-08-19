@@ -25,6 +25,7 @@ import { RentalContract } from './rental-contract.entity';
 import { FcmToken } from './fcmToken.entity';
 import { UserPermission } from './user-permission.entity';
 import { AdminCity } from './admin-city.entity';
+import { Notification } from './notification.entity';
 
 @Entity({ name: 'users' })
 export class User {
@@ -84,7 +85,7 @@ export class User {
 
   @OneToMany(() => UserRole, (ur) => ur.user)
   userRoles: UserRole[];
-
+  
   @OneToMany(() => PropertyFavorite, (favorite) => favorite.user)
   propertyFavorites: PropertyFavorite[];
 
@@ -102,6 +103,9 @@ export class User {
 
   @OneToOne(() => AdminCity, (adminCity) => adminCity.user)
   adminCities: AdminCity;
+
+  @OneToMany(() => Notification, (notification) => notification.sender)
+  sentNotifications: Notification[];
 
   @CreateDateColumn()
   created_at: Date;

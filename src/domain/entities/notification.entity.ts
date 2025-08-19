@@ -3,8 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from './user.entity';
 
 @Entity('notifications')
 export class Notification {
@@ -25,6 +28,10 @@ export class Notification {
 
   @Column({ nullable: true })
   senderId: number;
+
+  @ManyToOne(() => User, (user) => user.sentNotifications, { eager: true })
+  @JoinColumn({ name: 'senderId' })
+  sender: User;
 
   @Column({ default: false })
   isRead: boolean;

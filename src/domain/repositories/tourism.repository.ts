@@ -23,8 +23,8 @@ export interface ITourismRepository {
   findFullPropertyDetails(propertyId: number, officeId: number): Promise<Property | null>;
   getAdditionalServicesIdsByNames(names: string[]);
   getServicesMapByNames(names: string[]);
-  filter(dto: FilterTourismPropertiesDto,page: number, items: number): Promise<{ data: Property[]; total: number }>; 
-  searchByTitle(title: string, page: number, items: number): Promise<{ data: Property[], total: number }>
+  filter(dto: FilterTourismPropertiesDto,page: number, items: number,userId?:number)
+  searchByTitle(title: string, page: number, items: number,userId: number): Promise<{ data: Property[], total: number }>
   findPropertyDetails(propertyId: number, userId?: number)
   findByMonth(  propertyId: number,   year: number,  month: number,  baseUrl: string,)
   findPropertyWithTouristicAndPost(propertyId: number): Promise<Property | null>;

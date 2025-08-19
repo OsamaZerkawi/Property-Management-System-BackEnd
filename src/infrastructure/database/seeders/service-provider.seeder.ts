@@ -4,14 +4,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { faker } from '@faker-js/faker';
+import { Faker, ar, en } from '@faker-js/faker';
 import { ServiceProvider } from 'src/domain/entities/service-provider.entity';
 import { User } from 'src/domain/entities/user.entity';
 import { Region } from 'src/domain/entities/region.entity';
 import { Role } from 'src/domain/entities/role.entity';
 import { UserRole } from 'src/domain/entities/user-role.entity';
 import { ServiceProviderType } from 'src/domain/enums/service-provider-type.enum';
-
+const faker = new Faker({ locale: [ar, en] });
 @Injectable()
 export class ServiceProviderSeeder {
   constructor(
@@ -55,7 +55,7 @@ export class ServiceProviderSeeder {
 
       const provider = this.serviceProviderRepo.create({
         name: `مزود خدمة ${i + 1}`,
-        logo: `/uploads/service-providers/logo${i + 1}.png`,
+        logo: `service-provider.jpg`,
         details: faker.lorem.sentences(2),
         career: faker.helpers.arrayElement(Object.values(ServiceProviderType)),
         active: faker.datatype.boolean(),

@@ -6,6 +6,7 @@ import {
   ApiOkResponse,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { SortDirection } from 'src/domain/enums/sort-direction.enum';
 import { PropertyPostTag } from 'src/domain/enums/property-post-tag.enum';

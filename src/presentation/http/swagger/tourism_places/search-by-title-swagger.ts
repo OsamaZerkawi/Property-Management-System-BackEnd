@@ -6,6 +6,7 @@ import {
   ApiOkResponse,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 
 export function SearchByTitleSwaggerDoc() {
