@@ -20,7 +20,12 @@ export class ServiceFeedback {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    nullable: true,
+  })
   rate: number;
 
   @Column({ type: 'text', nullable: true })
