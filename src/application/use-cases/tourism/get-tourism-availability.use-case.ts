@@ -28,7 +28,7 @@ async execute(propertyId: number) {
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
   const today = startOfDay(toZonedTime(new Date(), timeZone));
-  const startDate = today;
+  const startDate = addDays(today, 1);
   const endDate = startOfDay(toZonedTime(addDays(startDate, daysCount - 1), timeZone));
 
   const calendars = await this.tourismRepo.findCalendarsForTouristicInRange(
