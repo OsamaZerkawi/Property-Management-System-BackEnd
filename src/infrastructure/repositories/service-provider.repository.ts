@@ -82,7 +82,7 @@ export class ServiceProviderRepository
       .select([
         'sp.id AS "id"',
         'sp.name AS "name"',
-        `CONCAT('${baseUrl}/uploads/providers/logo', sp.logo) AS "logo"`,
+        `CONCAT('${baseUrl}/uploads/providers/logo/', sp.logo) AS "logo"`,
         'sp.details AS "details"',
         'sp.career AS "career"',
         'city.name AS city_name',
@@ -135,7 +135,7 @@ export class ServiceProviderRepository
       .select([
         'service_provider.id AS id',
         'service_provider.name AS name',
-        `CONCAT('${baseUrl}/uploads/providers/logo', service_provider.logo) AS logo`,
+        `CONCAT('${baseUrl}/uploads/providers/logo/', service_provider.logo) AS logo`,
         'service_provider.career AS career',
         'service_provider.opening_time AS opening_time',
         'service_provider.closing_time AS closing_time',
