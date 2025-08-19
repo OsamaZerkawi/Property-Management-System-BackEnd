@@ -9,9 +9,11 @@ import { User } from 'src/domain/entities/user.entity';
 @Injectable()
 export class ServiceFeedbackSeeder {
   constructor(
-    @InjectRepository(ServiceFeedback) private feedbackRepo: Repository<ServiceFeedback>,
+    @InjectRepository(ServiceFeedback)
+    private feedbackRepo: Repository<ServiceFeedback>,
     @InjectRepository(User) private userRepo: Repository<User>,
-    @InjectRepository(ServiceProvider) private spRepo: Repository<ServiceProvider>,
+    @InjectRepository(ServiceProvider)
+    private spRepo: Repository<ServiceProvider>,
   ) {}
 
   async seed() {
@@ -42,7 +44,7 @@ export class ServiceFeedbackSeeder {
         const feedback = this.feedbackRepo.create({
           serviceProvider: sp,
           user,
-          rate:faker.number.int({ min: 1, max: 5 }),
+          rate: faker.number.float({ min: 1, max: 5, fractionDigits: 2 }),
         });
         await this.feedbackRepo.save(feedback);
         created++;
