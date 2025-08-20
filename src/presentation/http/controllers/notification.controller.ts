@@ -24,6 +24,7 @@ import { CreateNotificationSwaggerDoc } from '../swagger/notifications/create-no
 import { Public } from 'src/shared/decorators/public.decorator';
 import { CreateNotificationForTargetUseCase } from 'src/application/use-cases/notification/create-notification-for-target.use-case';
 import { Roles } from 'src/shared/decorators/role.decorator';
+import { Permissions } from 'src/shared/decorators/permission.decorator';
 
 @Controller('notifications')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -71,6 +72,7 @@ export class NotificationsController {
   }
 
   @Roles('مشرف', 'مدير')
+  @Permissions('مراقب النظام')
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @CreateNotificationSwaggerDoc()
