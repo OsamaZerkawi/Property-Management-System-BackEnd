@@ -82,7 +82,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       select: ['id', 'commission'],
     });
   }
-
+ 
   // async createOfficeWithSocials(
   //   userId: number,
   //   dto: CreateOfficeDto,
@@ -104,7 +104,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   //       longitude: dto.longitude,
   //       region: { id: dto.region_id } as any,
   //     });
-
+ 
   //     await manager.save(office);
 
   //     if (dto.socials && dto.socials.length > 0) {

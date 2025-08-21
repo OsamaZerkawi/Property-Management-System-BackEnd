@@ -20,7 +20,7 @@ async execute(propertyId: number) {
   const touristicId = touristic.id;
   const price = Number(touristic.price ?? 0);
   const office = property.office;
-  const deposit = Number(office?.tourism_deposit_percentage/100) ?? 0;
+  const deposit = Number(office?.tourism_deposit) ?? 0;
   const commission = Number(office?.commission) ?? 0;
 
   const daysCount = 15;
