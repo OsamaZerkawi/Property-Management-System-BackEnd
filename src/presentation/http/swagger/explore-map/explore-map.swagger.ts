@@ -1,9 +1,10 @@
 // src/docs/explore-map.swagger.ts
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 export function ExploreMapSwaggerDoc() {
   return applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({
       summary: 'استكشاف العقارات والمكاتب ضمن حدود الخريطة',
       description:

@@ -28,6 +28,7 @@ export class ExploreMapUseCase {
     const markers = [
       ...properties.map((p) => {
         const baseCard = {
+          area: Number(Number(p.area).toFixed(2)),
           propertyId: p.property_id,
           postTitle: p.post_title,
           postImage: p.post_image
@@ -88,6 +89,7 @@ export class ExploreMapUseCase {
         lng: +o.longitude,
         type: 'مكتب',
         card: {
+          id: o.id,
           name: o.name,
           logo: o.logo ? `${baseUrl}/uploads/offices/logos/${o.logo}` : null,
           type: o.type,

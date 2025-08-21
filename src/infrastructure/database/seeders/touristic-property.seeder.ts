@@ -51,6 +51,8 @@ export class TouristicPropertySeeder {
     const services = await this.seedServices(); // Fill default services if not present
 
     for (let i = 0; i < 5; i++) {
+      const { latitude, longitude } = randomLocationInSyria();
+
       const region = faker.helpers.arrayElement(regions);
       const password = await bcrypt.hash('password123', 10);
       const user = this.userRepo.create({
@@ -71,14 +73,26 @@ export class TouristicPropertySeeder {
         type: OfficeType.TOURISTIC,
         commission: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
         booking_period: faker.number.int({ min: 1, max: 30 }),
-        deposit_per_m2: faker.number.float({ min: 10, max: 200, fractionDigits: 2 }),
-        tourism_deposit: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
-        tourism_deposit_percentage: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        deposit_per_m2: faker.number.float({
+          min: 10,
+          max: 200,
+          fractionDigits: 2,
+        }),
+        tourism_deposit: faker.number.float({
+          min: 0,
+          max: 1,
+          fractionDigits: 2,
+        }),
+        tourism_deposit_percentage: faker.number.float({
+          min: 0,
+          max: 1,
+          fractionDigits: 2,
+        }),
         payment_method: PaymentMethod.BOTH,
         opening_time: '08:00 صباحًا',
         closing_time: '08:00 مساءً',
-        latitude: faker.location.latitude(),
-        longitude: faker.location.longitude(),
+        latitude,
+        longitude,
         region,
         user,
         active: true,

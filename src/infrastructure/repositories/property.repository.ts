@@ -655,6 +655,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'property.id AS property_id',
         'property.latitude AS latitude',
         'property.longitude AS longitude',
+        'property.area AS area',
         'post.title AS post_title',
         'post.image AS post_image',
         'post.created_at AS post_date',
