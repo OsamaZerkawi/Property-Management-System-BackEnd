@@ -27,8 +27,8 @@ export class Office {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
-  @Column({ type: 'varchar', length: 500,nullable: true  })
-  logo: string;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  logo: string | null;
 
   @Column({
     type: 'enum',
@@ -120,7 +120,9 @@ export class Office {
   @JoinColumn({ name: 'region_id' }) 
   region: Region;
 
-  @OneToMany(() => OfficeSocial, social => social.office, { cascade: true })
+ @OneToMany(() => OfficeSocial, (officeSocial) => officeSocial.office, {
+    cascade: true,
+  })
   socials: OfficeSocial[];
 
   getPaymentMethod(): PaymentMethod {

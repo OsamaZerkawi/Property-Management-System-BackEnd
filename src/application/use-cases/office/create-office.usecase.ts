@@ -1,6 +1,5 @@
 // src/application/use-cases/office/create-office.usecase.ts
 import { Injectable, Inject,ConflictException } from '@nestjs/common';
-import { CreateOfficeDto } from 'src/application/dtos/office/create-office.dto';
 import {
   OFFICE_REPOSITORY,
   OfficeRepositoryInterface,
@@ -13,11 +12,11 @@ export class CreateOfficeUseCase {
     private readonly repo: OfficeRepositoryInterface,
   ) {}
 
-  async execute(userId: number, dto: CreateOfficeDto) {
-    const existingOffice = await this.repo.findOfficeByUserId(userId);
-    if (existingOffice) {
-      throw new ConflictException('المستخدم يملك مكتب بالفعل. لا يمكن إنشاء أكثر من مكتب واحد');
-    }
-    return this.repo.createOfficeWithSocials(userId, dto);
-  }
+  // async execute(userId: number, dto: CreateOfficeDto) {
+  //   const existingOffice = await this.repo.findOfficeByUserId(userId);
+  //   if (existingOffice) {
+  //     throw new ConflictException('المستخدم يملك مكتب بالفعل. لا يمكن إنشاء أكثر من مكتب واحد');
+  //   }
+  //  // return this.repo.createOfficeWithSocials(userId, dto);
+  // }
 }

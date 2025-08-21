@@ -14,8 +14,6 @@ import { UpdateOfficeUseCase } from "src/application/use-cases/office/update-off
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
-import { CreateOfficeDto } from "src/application/dtos/office/create-office.dto";
-import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
 import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
 import { OfficeResource } from 'src/presentation/http/resources/office.resource';
 import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
@@ -47,6 +45,8 @@ import { ShowOfficeDetailsSwaggerDoc } from "../swagger/office/show-office-detai
 import { GetOfficeDetailsMobileUseCase } from "src/application/use-cases/office/show-office-details-mobile";
 import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get-office-properties.use-case";
 import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-properties.swagger";
+import { UpdateOfficeSwagger } from "../swagger/office/update-office.swagger";
+import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
        
   @Controller('office')
   export class OfficeController {
@@ -89,35 +89,43 @@ import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-prop
       return successResponse(data, 'تم ارجاع عمولة المكتب', 200);
     }
   
-    @Post()
-    @UseGuards(JwtAuthGuard)
-    @HttpCode(HttpStatus.CREATED)
-    @CreateOfficeSwaggerDoc()
-    @OfficeLogoInterceptor()
-    async createOffice(
-      @CurrentUser() user,
-      @Body() dto: CreateOfficeDto,
-      @UploadedFile() logoFile: Express.Multer.File,
-    ) { 
-      if (logoFile) {
-        dto.logo = logoFile.filename;
-      } 
-      const result = await this.createOfficeUseCase.execute(user.sub, dto);
-      return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
-    }
+    // @Post()
+    // @UseGuards(JwtAuthGuard)
+    // @HttpCode(HttpStatus.CREATED)
+    // @OfficeLogoInterceptor()
+    // async createOffice(
+    //   @CurrentUser() user,
+    //   @Body() dto: UpdateOfficeDto,
+    //   @UploadedFile() logoFile: Express.Multer.File,
+    // ) { 
+    //   if (logoFile) {
+    //     dto.logo = logoFile.filename;
+    //   } 
+    //   //const result = await this.createOfficeUseCase.execute(user.sub, dto);
+    //   //return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
+    // }
   
-    @Patch()
-    @UseGuards(JwtAuthGuard)
-    @HttpCode(HttpStatus.OK)
-    async updateOffice(
-      @CurrentUser() user, 
-      @Body() dto: UpdateOfficeDto
-    ) {
-      const userId = user.sub; 
-      await this.updateOfficeUseCase.execute(userId, dto);
-      return successResponse( [], 'تم تحديث بيانات المكتب بنجاح', 200);
-    }
- 
+   @Post()
+@UseGuards(JwtAuthGuard)
+@UpdateOfficeSwagger()
+@OfficeLogoInterceptor()
+@HttpCode(HttpStatus.OK)
+async updateOffice(
+  @CurrentUser() user,
+  @Body() dto: UpdateOfficeDto,
+  @UploadedFile() logoFile: Express.Multer.File,
+) {
+  const userId = user.sub;
+   
+  const updateDto = { ...dto };
+  
+  if (logoFile) {
+    updateDto.logo = logoFile.filename;
+  }
+  
+  await this.updateOfficeUseCase.execute(userId, updateDto);
+  return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
+}
  
     @Get()
     @HttpCode(HttpStatus.OK)

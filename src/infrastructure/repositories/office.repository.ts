@@ -1,17 +1,18 @@
 /* src/infrastructure/repositories/office.repository.ts */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Office } from 'src/domain/entities/offices.entity';
 import { OfficeSocial } from 'src/domain/entities/office-social.entity';
 import { OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
-import { CreateOfficeDto } from 'src/application/dtos/office/create-office.dto';
-import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
 import { NotFoundException } from '@nestjs/common';
 import { UpdateOfficeFeesDto } from 'src/application/dtos/office/Update-office-fees.dto';
 import { errorResponse } from 'src/shared/helpers/response.helper';
 import { ExploreMapDto } from 'src/application/dtos/map/explore-map.dto';
 import { OfficeFeedback } from 'src/domain/entities/office-feedback.entity';
+import { SocialPlatform } from 'src/domain/entities/social_platforms.entity';
+import { SocialItem, UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
+import { Region } from 'src/domain/entities/region.entity';
 
 @Injectable()
 export class OfficeRepository implements OfficeRepositoryInterface {
@@ -82,44 +83,44 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     });
   }
 
-  async createOfficeWithSocials(
-    userId: number,
-    dto: CreateOfficeDto,
-  ): Promise<{ id: number }> {
-    return this.dataSource.transaction(async (manager) => {
-      const office = manager.create(Office, {
-        user: { id: userId },
-        name: dto.name,
-        logo: dto.logo || undefined,
-        type: dto.type,
-        commission: dto.commission,
-        booking_period: dto.booking_period,
-        deposit_per_m2: dto.deposit_per_m2,
-        tourism_deposit: dto.tourism_deposit,
-        payment_method: dto.payment_method,
-        opening_time: dto.opening_time,
-        closing_time: dto.closing_time,
-        latitude: dto.latitude,
-        longitude: dto.longitude,
-        region: { id: dto.region_id } as any,
-      });
+  // async createOfficeWithSocials(
+  //   userId: number,
+  //   dto: CreateOfficeDto,
+  // ): Promise<{ id: number }> {
+  //   return this.dataSource.transaction(async (manager) => {
+  //     const office = manager.create(Office, {
+  //       user: { id: userId },
+  //       name: dto.name,
+  //       logo: dto.logo || undefined,
+  //       type: dto.type,
+  //       commission: dto.commission,
+  //       booking_period: dto.booking_period,
+  //       deposit_per_m2: dto.deposit_per_m2,
+  //       tourism_deposit: dto.tourism_deposit,
+  //       payment_method: dto.payment_method,
+  //       opening_time: dto.opening_time,
+  //       closing_time: dto.closing_time,
+  //       latitude: dto.latitude,
+  //       longitude: dto.longitude,
+  //       region: { id: dto.region_id } as any,
+  //     });
 
-      await manager.save(office);
+  //     await manager.save(office);
 
-      if (dto.socials && dto.socials.length > 0) {
-        const socials = dto.socials.map((s) =>
-          manager.create(OfficeSocial, {
-            office,
-            platform: s.platform,
-            link: s.link,
-          }),
-        );
-        await manager.save(socials);
-      }
+  //     if (dto.socials && dto.socials.length > 0) {
+  //       const socials = dto.socials.map((s) =>
+  //         manager.create(OfficeSocial, {
+  //           office,
+  //           platform: s.platform,
+  //           link: s.link,
+  //         }),
+  //       );
+  //       await manager.save(socials);
+  //     }
 
-      return { id: office.id };
-    });
-  }
+  //     return { id: office.id };
+  //   });
+  // }
 
   async findById(id: number): Promise<Office | null> {
     return this.officeRepo.findOne({
@@ -127,44 +128,77 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       relations: ['user', 'socials', 'region', 'region.city'],
     });
   }
+async updateOfficeWithSocials(
+  office: Office,
+  dto: UpdateOfficeDto,
+): Promise<void> {
+  const queryRunner = this.dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
 
-  async updateOfficeWithSocials(
-    officeId: number,
-    dto: UpdateOfficeDto,
-  ): Promise<{ id: number }> {
-    return this.dataSource.transaction(async (manager) => {
-      const office = await manager.findOne(Office, {
-        where: { id: officeId },
-        relations: ['socials'],
-      });
-      if (!office) throw new Error('Office not found');
+  try {
+    const officeId = office.id; 
+    const officeUpdateData: Partial<Office> = {};
+ 
+    for (const key of [
+      'name',
+      'logo',
+      'type',
+      'commission',
+      'booking_period',
+      'deposit_per_m2',
+      'tourism_deposit',
+      'payment_method',
+      'opening_time',
+      'closing_time', 
+      'latitude',
+      'longitude',
+    ]) {
+      if (dto[key] !== undefined) {
+        officeUpdateData[key] = dto[key];
+      }
+    }
+ 
+    if (dto.region_id !== undefined) {
+      officeUpdateData['region'] = { id: dto.region_id } as Region;
+    }
+ 
+    if (Object.keys(officeUpdateData).length > 0) {
+      await queryRunner.manager.update(Office, officeId, officeUpdateData);
+    }
+ 
+    if (dto.socials && dto.socials.length > 0) {
+      for (const social of dto.socials) {
+        const platform = await queryRunner.manager.findOne(SocialPlatform, { where: { id: social.id } });
+        if (!platform) continue;
 
-      Object.entries(dto).forEach(([key, value]) => {
-        if (value !== undefined && key !== 'socials') {
-          (office as any)[key] = value;
+        let officeSocial = await queryRunner.manager.findOne(OfficeSocial, {
+          where: { office: { id: officeId }, platform: { id: social.id } },
+        });
+
+        if (officeSocial) {
+          officeSocial.link = social.link ?? officeSocial.link;
+          await queryRunner.manager.save(officeSocial);
+        } else if (social.link) {
+          officeSocial = queryRunner.manager.create(OfficeSocial, {
+            office: { id: officeId },
+            platform: { id: social.id },
+            link: social.link,
+          });
+          await queryRunner.manager.save(officeSocial);
         }
-      });
-      if (dto.region_id !== undefined) {
-        office.region = { id: dto.region_id } as any;
       }
+    }
 
-      await manager.save(office);
-
-      if (dto.socials) {
-        await manager.delete(OfficeSocial, { office: { id: officeId } });
-        const newSocials = dto.socials.map((s) =>
-          manager.create(OfficeSocial, {
-            office,
-            platform: s.platform,
-            link: s.link,
-          }),
-        );
-        await manager.save(newSocials);
-      }
-
-      return { id: office.id };
-    });
+    await queryRunner.commitTransaction();
+  } catch (err) {
+    await queryRunner.rollbackTransaction();
+    throw err;
+  } finally {
+    await queryRunner.release();
   }
+}
+
 
   async getOfficeFees(userId: number) {
     const office = await this.officeRepo

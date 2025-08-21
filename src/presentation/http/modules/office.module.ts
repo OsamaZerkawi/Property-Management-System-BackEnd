@@ -28,13 +28,14 @@ import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get
 import { PropertyModule } from "./property.module";
 import { AdvertisementModule } from "./advertisement.module";
 import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
+import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
 
 @Module({
   imports: [
     AuthModule, 
     PropertyModule,
     forwardRef(() => ResidentialOfficeModule),
-    TypeOrmModule.forFeature([Office, Region, OfficeSocial,OfficeFeedback,
+    TypeOrmModule.forFeature([Office, Region, OfficeSocial, SocialPlatform,OfficeFeedback,
 ]),
   ],
   controllers: [OfficeController],

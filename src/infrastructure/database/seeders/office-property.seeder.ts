@@ -93,16 +93,16 @@ export class OfficePropertySeeder {
 
     await this.officeRepo.save(office);
 
-    const socialCount = faker.number.int({ min: 1, max: 3 });
-      const socials = Array.from({ length: socialCount }).map(() => {
-        const platform = faker.helpers.arrayElement(socialPlatforms);
-        return this.socialRepo.create({
-          platform,
-          link: `https://www.${platform}.com/${faker.internet.userName()}`,
-          office,
-        });
-      });
-      await this.socialRepo.save(socials);    
+    // const socialCount = faker.number.int({ min: 1, max: 3 });
+    //   const socials = Array.from({ length: socialCount }).map(() => {
+    //     const platform = faker.helpers.arrayElement(socialPlatforms);
+    //     return this.socialRepo.create({
+    //       platform,
+    //       link: `https://www.${platform}.com/${faker.internet.userName()}`,
+    //       office,
+    //     });
+    //   });
+    //   await this.socialRepo.save(socials);    
 
     for (let j = 0; j < 10; j++) {
       const { latitude, longitude } = randomLocationInSyria();
