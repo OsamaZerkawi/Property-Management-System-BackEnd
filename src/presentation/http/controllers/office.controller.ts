@@ -47,6 +47,7 @@ import { UpdateOfficeSwagger } from "../swagger/office/update-office.swagger";
 import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
 import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.swagger";
 import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
+import { GetOfficeDashboardSwaggerDoc } from "../swagger/office/get-office-dashboard.swagger";
        
   @Controller('office')
   export class OfficeController {
@@ -68,19 +69,21 @@ import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-
       private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
       private readonly getOfficeDashboardUseCase: GetOfficeDashboardUseCase,
     ) {}
-      @Get('dashboard')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(HttpStatus.OK)
-  async dashboard(
-    @CurrentUser() user: any,
-    @Req() req: Request,
-  ) {
-    const userId = user.sub;
-    const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const data = await this.getOfficeDashboardUseCase.execute(userId, baseUrl);
-    return successResponse(data, 'تم جلب إحصاءات لوحة التحكم بنجاح', 200);
-  }
-  
+
+    @Get('dashboard')
+    @GetOfficeDashboardSwaggerDoc()
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    async dashboard(
+      @CurrentUser() user: any,
+      @Req() req: Request,
+    ) {
+      const userId = user.sub;
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const data = await this.getOfficeDashboardUseCase.execute(userId, baseUrl);
+      return successResponse(data, 'تم جلب إحصاءات لوحة التحكم بنجاح', 200);
+    }
+
     @Roles('صاحب مكتب')
     @Get('/payment-method')
     @GetPaymentMethodSwaggerDoc()
