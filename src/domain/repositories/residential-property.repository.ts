@@ -13,4 +13,5 @@ export interface ResidentialPropertyRepositoryInterface{
     searchFilteredResidentialsProperties(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number);
     findById(id: number);
     findOneByPropertyId(propertyId: number): Promise<Residential|null> 
+    findTopResidentialLocationsByOffice(officeId: number): Promise<string[]> 
 }

@@ -30,13 +30,21 @@ import { AdvertisementModule } from "./advertisement.module";
 import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
 import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
 import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
+import { GetTopRegionsUseCase } from "src/application/use-cases/office/get-top-region.use-case";
+import { RESIDENTIAL_PROPERTY_REPOSITORY } from "src/domain/repositories/residential-property.repository";
+import { ResidentialPropertyRepository } from "src/infrastructure/repositories/residetial-property.repository";
+import { TOURISM_REPOSITORY } from "src/domain/repositories/tourism.repository";
+import { TourismRepository } from "src/infrastructure/repositories/tourism.repository";
+import { TourismModule } from "./tourism.module";
+import { Residential } from "src/domain/entities/residential.entity";
 
 @Module({
   imports: [
     AuthModule, 
     PropertyModule,
-    forwardRef(() => ResidentialOfficeModule),
-    TypeOrmModule.forFeature([Office, Region, OfficeSocial, SocialPlatform,OfficeFeedback,
+    forwardRef(() => ResidentialOfficeModule), 
+    forwardRef(() => TourismModule),      
+    TypeOrmModule.forFeature([Office, Region, OfficeSocial, SocialPlatform,OfficeFeedback,Residential
 ]),
   ],
   controllers: [OfficeController],
@@ -58,6 +66,7 @@ import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-
     GetOfficePropertiesUseCase, 
     GetPropertiesForOfficeUseCase,
     GetOfficeDashboardUseCase,
+    GetTopRegionsUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

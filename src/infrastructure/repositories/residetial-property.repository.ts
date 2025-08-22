@@ -333,4 +333,27 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
 
     return payload;
   }
+
+  async findTopResidentialLocationsByOffice(officeId: number): Promise<string[]> {
+    const qb = this.residentialRepo
+      .createQueryBuilder('res')
+      .innerJoin('res.property', 'p')
+      .innerJoin('p.region', 'r')
+      .innerJoin('r.city', 'city')
+      .where('p.office_id = :officeId', { officeId })
+      .andWhere('res.status IN (:...states)', {
+        states: ['تم البيع', 'تم التأجير'],
+      })
+      .select([
+        "city.name || '، ' || r.name AS location",
+        'COUNT(res.id) AS cnt',
+      ])
+      .groupBy('city.name, r.name')
+      .orderBy('cnt', 'DESC')
+      .limit(10);
+
+    const raws = await qb.getRawMany();
+    return raws.map(r => String(r.location));
+  }
+
 }

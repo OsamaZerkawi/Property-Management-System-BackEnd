@@ -48,6 +48,7 @@ import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
 import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.swagger";
 import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
 import { GetOfficeDashboardSwaggerDoc } from "../swagger/office/get-office-dashboard.swagger";
+import { GetTopRegionsUseCase } from "src/application/use-cases/office/get-top-region.use-case";
        
   @Controller('office')
   export class OfficeController {
@@ -68,6 +69,7 @@ import { GetOfficeDashboardSwaggerDoc } from "../swagger/office/get-office-dashb
       private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
       private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
       private readonly getOfficeDashboardUseCase: GetOfficeDashboardUseCase,
+      private readonly getTopRegionsUseCase: GetTopRegionsUseCase
     ) {}
 
     @Get('dashboard')
@@ -83,6 +85,14 @@ import { GetOfficeDashboardSwaggerDoc } from "../swagger/office/get-office-dashb
       const data = await this.getOfficeDashboardUseCase.execute(userId, baseUrl);
       return successResponse(data, 'تم جلب إحصاءات لوحة التحكم بنجاح', 200);
     }
+
+    @Get('top-regions')
+    @UseGuards(JwtAuthGuard)
+    async getTopRegions(@CurrentUser() user: any,) { 
+    const data = await this.getTopRegionsUseCase.execute(user.sub);
+    return successResponse(data, 'تم إرجاع المناطق الأكثر طلبًا بنجاح');
+   }
+
 
     @Roles('صاحب مكتب')
     @Get('/payment-method')

@@ -45,4 +45,5 @@ export interface ITourismRepository {
   findPropertyWithTouristicAndOffice(propertyId: number): Promise<Property | null>
   findCalendarsForTouristicInRange(touristicId: number,rangeStart: Date,rangeEnd: Date,
   ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> 
+  findTopTouristicLocationsByOffice(officeId: number): Promise<string[]>
 }
