@@ -69,7 +69,7 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
       private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
       private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
     ) {}
-
+    @Roles('صاحب مكتب')
     @Get('/payment-method')
     @GetPaymentMethodSwaggerDoc()
     @UseGuards(JwtAuthGuard)
@@ -80,7 +80,8 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
       const data = await this.getPaymentMethodUseCase.execute(userId);
       return successResponse(data, 'تم ارجاع طريقة الدفع', 200);
     }
- 
+
+    @Roles('صاحب مكتب')
     @Get('/commission')
     @CommissionSwaggerDocs()
     @UseGuards(JwtAuthGuard)
@@ -106,7 +107,7 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
     //   //const result = await this.createOfficeUseCase.execute(user.sub, dto);
     //   //return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
     // }
-  
+    @Roles('صاحب مكتب')
     @Post()
     @UseGuards(JwtAuthGuard)
     @UpdateOfficeSwagger()
@@ -121,7 +122,7 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
       await this.updateOfficeUseCase.execute(user.sub, dto);
       return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
     }
- 
+    @Roles('صاحب مكتب')
     @Get()
     @UseGuards(JwtAuthGuard)
     @GetOfficeDetailsSwagger()

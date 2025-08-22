@@ -19,7 +19,7 @@ export class GetCommissionOfOfficeUseCase {
         }
 
         return {
-            commission: office.commission
+            commission: Number(office.commission)??0.00
         };
     }
 }
