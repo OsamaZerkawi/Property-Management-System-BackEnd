@@ -562,7 +562,16 @@ async updateOfficeWithSocials(
       .where('of.office_id = office.id'),
       'avg_rate'
     )
- 
+
+  .addSelect(subQb => subQb
+    .select('COUNT(*)')
+    .from('office_feedbacks', 'of')
+    .where('of.office_id = office.id')
+    .andWhere('of.complaint IS NOT NULL')
+    .andWhere('of.status = :acceptedStatus', { acceptedStatus: 'مقبول' }),
+    'complaints_count'
+  )
+
     .addSelect(subQb => subQb
       .select('COUNT(*)')
       .from('properties', 'p')

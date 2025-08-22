@@ -29,6 +29,7 @@ export class GetOfficeDashboardUseCase {
       logo,
       location,
       rate: row.avg_rate !== null && row.avg_rate !== undefined ? Number(row.avg_rate) : 0,
+      complaints_count:Number(row.complaints_count),
       profits: row.profits !== null && row.profits !== undefined ? Number(row.profits) : 0,
       touristicCount: Number(row.touristic_count ?? 0),
       totalProperties: Number(row.total_properties ?? 0),
