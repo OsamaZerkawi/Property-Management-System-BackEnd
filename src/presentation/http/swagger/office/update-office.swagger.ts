@@ -25,7 +25,7 @@ export function UpdateOfficeSwagger() {
           latitude: { type: 'number', nullable: true },
           longitude: { type: 'number', nullable: true },
           socials: {
-            type: 'string', // مهم: اجعله string بدلاً من array
+            type: 'string',  
             nullable: true,
             description: 'معلومات وسائل التواصل الاجتماعي كـ JSON string',
             example: '[{"id": 1, "link": "https://facebook.com/example"}, {"id": 2, "link": "https://twitter.com/example"}]'

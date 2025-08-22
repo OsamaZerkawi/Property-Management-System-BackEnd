@@ -160,13 +160,21 @@ async updateOfficeWithSocials(
     }
  
     if (dto.region_id !== undefined) {
-      officeUpdateData['region'] = { id: dto.region_id } as Region;
+    const region = await queryRunner.manager.findOne(Region, {
+      where: { id: dto.region_id }
+    });
+    if (!region) {
+      throw new NotFoundException('المنطقة غير موجودة');
     }
+    officeUpdateData.region = region;
+  }
+
  
     if (Object.keys(officeUpdateData).length > 0) {
       await queryRunner.manager.update(Office, officeId, officeUpdateData);
     }
- 
+ console.log('Processing socials:', dto.socials); // للتتبع
+    //هنا يطبع Processing socials: [ {}, {} ]
     if (dto.socials && dto.socials.length > 0) {
       for (const social of dto.socials) {
         const platform = await queryRunner.manager.findOne(SocialPlatform, { where: { id: social.id } });

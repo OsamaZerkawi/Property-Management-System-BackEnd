@@ -3,7 +3,9 @@ import {
     IsString, IsEnum, IsBoolean, IsNumber, IsOptional,
     Matches, ValidateNested, ArrayNotEmpty,
     IsNotEmpty,
-    IsArray
+    IsArray,
+    ArrayMinSize,
+    IsUrl
   } from 'class-validator';
   import { OfficeType } from 'src/domain/enums/office-type.enum';
   import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
@@ -12,9 +14,10 @@ import {
     @IsNumber()
     id: number;
   
-    @IsOptional()
-    @IsString()
-    link: string;
+  @IsOptional()
+  @IsString()
+  @IsUrl({}, { message: 'الرابط يجب أن يكون صحيحاً' })
+  link?: string;
   }
   
  export class UpdateOfficeDto {
@@ -71,31 +74,8 @@ import {
   longitude: number;
  
 
-   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SocialItem)
-  @Transform(({ value }) => { 
-    if (!value || value === '' || value === 'undefined' || value === 'null') {
-      return [];
-    } 
-    if (typeof value === 'string') {
-      try {
-        const parsed = JSON.parse(value);  
-        return Array.isArray(parsed) ? parsed : [parsed];
-      } catch {
-        return [];
-      }
-    }
-     
-    if (typeof value === 'object' && !Array.isArray(value)) {
-      return [value];
-    } 
-    if (Array.isArray(value)) {
-      return value;
-    }
-    
-    return [];
-  })
-  socials?: SocialItem[];
+  socials: SocialItem[];
 }

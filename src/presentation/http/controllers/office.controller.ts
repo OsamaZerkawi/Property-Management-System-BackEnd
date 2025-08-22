@@ -105,27 +105,21 @@ import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
     //   //return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
     // }
   
-   @Post()
+@Post()
 @UseGuards(JwtAuthGuard)
 @UpdateOfficeSwagger()
 @OfficeLogoInterceptor()
-@HttpCode(HttpStatus.OK)
 async updateOffice(
   @CurrentUser() user,
   @Body() dto: UpdateOfficeDto,
-  @UploadedFile() logoFile: Express.Multer.File,
+  @UploadedFile() logoFile?: Express.Multer.File,
 ) {
-  const userId = user.sub;
-   
-  const updateDto = { ...dto };
-  
-  if (logoFile) {
-    updateDto.logo = logoFile.filename;
-  }
-  
-  await this.updateOfficeUseCase.execute(userId, updateDto);
+  if (logoFile) dto.logo = logoFile.filename;
+  console.log('incoming dto.socials:', dto.socials);
+  await this.updateOfficeUseCase.execute(user.sub, dto);
   return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
 }
+
  
     @Get()
     @HttpCode(HttpStatus.OK)
