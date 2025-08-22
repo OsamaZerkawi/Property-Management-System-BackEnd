@@ -48,6 +48,7 @@ import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-prop
 import { UpdateOfficeSwagger } from "../swagger/office/update-office.swagger";
 import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
 import { ParseJsonFieldsPipe } from "src/shared/interceptors/parse-json-field.interceptor";
+import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.swagger";
        
   @Controller('office')
   export class OfficeController {
@@ -106,30 +107,33 @@ import { ParseJsonFieldsPipe } from "src/shared/interceptors/parse-json-field.in
     //   //return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
     // }
   
-@Post()
-@UseGuards(JwtAuthGuard)
-@UpdateOfficeSwagger()
-@OfficeLogoInterceptor()
-async updateOffice(
-  @CurrentUser() user,
-  @Body() dto: UpdateOfficeDto,
-  @UploadedFile() logoFile?: Express.Multer.File,
-) {
-  if (logoFile) dto.logo = logoFile.filename;
-  console.log('incoming dto.socials:', dto.socials);
-  await this.updateOfficeUseCase.execute(user.sub, dto);
-  return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
-}
-
+    @Post()
+    @UseGuards(JwtAuthGuard)
+    @UpdateOfficeSwagger()
+    @OfficeLogoInterceptor()
+    async updateOffice(
+      @CurrentUser() user,
+      @Body() dto: UpdateOfficeDto,
+      @UploadedFile() logoFile?: Express.Multer.File,
+    ) {
+      if (logoFile) dto.logo = logoFile.filename;
+      console.log('incoming dto.socials:', dto.socials);
+      await this.updateOfficeUseCase.execute(user.sub, dto);
+      return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
+    }
  
     @Get()
+    @UseGuards(JwtAuthGuard)
+    @GetOfficeDetailsSwagger()
     @HttpCode(HttpStatus.OK)
     async getOfficeDetails(
       @CurrentUser() user, 
+      @Req() request: Request
     ) { 
       const userId = user.sub;
-      const officeEntity = await this.getOfficeDetailsUseCase.execute(userId);
-      const data = OfficeResource.toJson(officeEntity);
+      const baseUrl = `${request.protocol}://${request.get('host')}`;
+
+      const data = await this.getOfficeDetailsUseCase.execute(userId,baseUrl);
       return successResponse(data, 'تم جلب بيانات المكتب بنجاح', 200);
     }
 
@@ -176,6 +180,7 @@ async updateOffice(
 
         return successResponse([],'تم تحديث معلومات الرسوم الخاصة بالمكتب بنجاح',200);
     }
+
     @UseGuards(JwtAuthGuard)
     @Get(':property_id/commission-and-price')
     async getPropertyFees(

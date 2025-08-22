@@ -25,7 +25,7 @@ export function GetPaymentMethodSwaggerDoc() {
           data: {
             type: 'object',
             properties: {
-              paymentMethod: { type: 'string', example: 'كاش' },
+              paymentMethod: { type: 'string', example: 'دفع يدوي' },
             },
           },
         },
