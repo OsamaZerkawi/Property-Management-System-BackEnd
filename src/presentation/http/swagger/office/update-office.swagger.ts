@@ -1,4 +1,3 @@
-// update-office.swagger.ts
 import { applyDecorators } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 export function UpdateOfficeSwagger() {

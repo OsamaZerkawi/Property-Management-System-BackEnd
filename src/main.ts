@@ -5,6 +5,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express'; 
 import { setupSwagger } from './presentation/http/swagger/swagger.config'; 
  import * as express from 'express'; 
+import { ParseJsonFieldsPipe } from './shared/interceptors/parse-json-field.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -31,7 +32,7 @@ async function bootstrap() {
     }),
   );
 
-
+//app.useGlobalPipes(new ParseJsonFieldsPipe(['socials']));
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads/',
   });

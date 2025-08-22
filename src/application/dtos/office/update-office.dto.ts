@@ -74,8 +74,18 @@ import {
   longitude: number;
  
 
+ @IsOptional()
+  @Transform(({ value }) => {
+    if (!value) return value;
+    if (typeof value === 'string') {
+      try { return JSON.parse(value); }
+      catch { throw new Error('socials must be a valid JSON array'); }
+    }
+    return value;
+  })
+ @IsOptional() 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SocialItem)
-  socials: SocialItem[];
+  socials?: SocialItem[];
 }

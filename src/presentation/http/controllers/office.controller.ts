@@ -47,6 +47,7 @@ import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get
 import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-properties.swagger";
 import { UpdateOfficeSwagger } from "../swagger/office/update-office.swagger";
 import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
+import { ParseJsonFieldsPipe } from "src/shared/interceptors/parse-json-field.interceptor";
        
   @Controller('office')
   export class OfficeController {
