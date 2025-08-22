@@ -547,4 +547,64 @@ async updateOfficeWithSocials(
       socials,
     };
   }
+  async getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> {
+  const qb = this.dataSource.createQueryBuilder()
+    .select('office.id', 'id')
+    .addSelect('office.name', 'name')
+    .addSelect('office.logo', 'logo')
+    .addSelect('office.profits', 'profits')
+    .addSelect('region.name', 'region_name')
+    .addSelect('city.name', 'city_name')
+ 
+    .addSelect(subQb => subQb
+      .select('COALESCE(ROUND(AVG(of.rate)::numeric, 1), 0)')
+      .from('office_feedbacks', 'of')
+      .where('of.office_id = office.id'),
+      'avg_rate'
+    )
+ 
+    .addSelect(subQb => subQb
+      .select('COUNT(*)')
+      .from('properties', 'p')
+      .where('p.office_id = office.id')
+      .andWhere('p.property_type = :touristicType', { touristicType: 'سياحي' }),
+      'touristic_count'
+    )
+ 
+    .addSelect(subQb => subQb
+      .select('COUNT(*)')
+      .from('properties', 'p2')
+      .where('p2.office_id = office.id'),
+      'total_properties'
+    )
+ 
+    .addSelect(subQb => subQb
+      .select('COUNT(*)')
+      .from('properties', 'p3')
+      .innerJoin('residentials', 'r3', 'r3.property_id = p3.id')
+      .where('p3.office_id = office.id')
+      .andWhere('p3.property_type = :resType', { resType: 'عقاري' })
+      .andWhere('r3.listing_type = :sale', { sale: 'بيع' }),
+      'residential_sale_count'
+    )
+ 
+    .addSelect(subQb => subQb
+      .select('COUNT(*)')
+      .from('properties', 'p4')
+      .innerJoin('residentials', 'r4', 'r4.property_id = p4.id')
+      .where('p4.office_id = office.id')
+      .andWhere('p4.property_type = :resType2', { resType2: 'عقاري' })
+      .andWhere('r4.listing_type = :rent', { rent: 'أجار' }),
+      'residential_rent_count'
+    )
+
+    .from('offices', 'office')
+    .leftJoin('regions', 'region', 'region.id = office.region_id')
+    .leftJoin('cities', 'city', 'city.id = region.city_id')
+    .where('office.id = :officeId', { officeId });
+
+  const raw = await qb.getRawOne();
+  return raw || null;
+}
+
 }

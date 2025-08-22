@@ -29,6 +29,7 @@ import { PropertyModule } from "./property.module";
 import { AdvertisementModule } from "./advertisement.module";
 import { GetPropertiesForOfficeUseCase } from "src/application/use-cases/property/get-properties-for-office.use-case";
 import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
+import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
     GetOfficeDetailsMobileUseCase,
     GetOfficePropertiesUseCase, 
     GetPropertiesForOfficeUseCase,
+    GetOfficeDashboardUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

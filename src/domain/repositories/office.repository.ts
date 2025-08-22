@@ -24,4 +24,5 @@ export interface OfficeRepositoryInterface {
   rateAnOffice( userId: number, officeId: number, rate: number,)
   createComplaint(userId: number, officeId: number, complaintText: string): Promise<void>
   findOfficeDetailsById(officeId: number, baseUrl: string)
+  getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> 
 }

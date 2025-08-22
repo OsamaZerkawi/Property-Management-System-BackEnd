@@ -15,7 +15,6 @@ import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
 import { GetOfficeDetailsUseCase } from 'src/application/use-cases/office/get-office-details.usecase';
-import { OfficeResource } from 'src/presentation/http/resources/office.resource';
 import { GetOfficePaymentMethodUseCase } from 'src/application/use-cases/office/get-office-payment-method.use-case';
 import { OfficeLogoInterceptor} from  "src/shared/interceptors/file-upload.interceptor"; 
 import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto"; 
@@ -29,7 +28,6 @@ import { GetTopRatedOfficesSwaggerDoc } from "../swagger/office/get-top-rated";
 import { CommissionSwaggerDocs } from "../swagger/office/get-commission.swagger";
 import { PropertyFeeService } from "src/application/services/propertyFee.service";
 import { GetPaymentMethodSwaggerDoc } from "../swagger/office/get-payment-method.swagger";
-import { CreateOfficeSwaggerDoc } from "../swagger/office/create-office.swagger";
 import { ListOfficesUseCase } from "src/application/use-cases/office/list-offices.use-case";
 import { GetOfficeListSwaggerDoc } from "../swagger/office/get-office-list-swagger";
 import { GetOfficeSearchSwaggerDoc } from "../swagger/office/get-office-search.swagger";
@@ -47,8 +45,8 @@ import { GetOfficePropertiesUseCase } from "src/application/use-cases/office/get
 import { GetOfficePropertiesSwaggerDoc } from "../swagger/office/get-office-properties.swagger";
 import { UpdateOfficeSwagger } from "../swagger/office/update-office.swagger";
 import { UpdateOfficeDto } from "src/application/dtos/office/update-office.dto";
-import { ParseJsonFieldsPipe } from "src/shared/interceptors/parse-json-field.interceptor";
 import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.swagger";
+import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
        
   @Controller('office')
   export class OfficeController {
@@ -68,7 +66,21 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
       private readonly complaintOfficeUseCase: ComplaintOfficeUseCase,
       private readonly getOfficeDetailsMobileUseCase: GetOfficeDetailsMobileUseCase,
       private readonly getOfficePropertiesUseCase: GetOfficePropertiesUseCase,
+      private readonly getOfficeDashboardUseCase: GetOfficeDashboardUseCase,
     ) {}
+      @Get('dashboard')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async dashboard(
+    @CurrentUser() user: any,
+    @Req() req: Request,
+  ) {
+    const userId = user.sub;
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const data = await this.getOfficeDashboardUseCase.execute(userId, baseUrl);
+    return successResponse(data, 'تم جلب إحصاءات لوحة التحكم بنجاح', 200);
+  }
+  
     @Roles('صاحب مكتب')
     @Get('/payment-method')
     @GetPaymentMethodSwaggerDoc()
