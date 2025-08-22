@@ -82,12 +82,7 @@ export class TouristicPropertySeeder {
           min: 0,
           max: 1,
           fractionDigits: 2,
-        }),
-        tourism_deposit_percentage: faker.number.float({
-          min: 0,
-          max: 1,
-          fractionDigits: 2,
-        }),
+        }), 
         payment_method: PaymentMethod.BOTH,
         opening_time: '08:00 صباحًا',
         closing_time: '08:00 مساءً',

@@ -66,12 +66,6 @@ export class Office {
   })
   tourism_deposit: number; 
   
-  @Column({ 
-    type: 'decimal', 
-    nullable: true 
-  })
-  tourism_deposit_percentage: number; 
-
   @Column({
     type: 'enum',
     enum: PaymentMethod,

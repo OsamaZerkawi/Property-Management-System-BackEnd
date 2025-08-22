@@ -872,6 +872,7 @@ export class TourismRepository implements ITourismRepository {
     return results.slice(0, limit);
   }
 
+  
   async createBookingWithInvoices(options: {
     userId: number;
     propertyId: number;

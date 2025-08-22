@@ -44,6 +44,7 @@ import { StatsModule } from 'src/presentation/http/modules/stats.module';
 import { AdminUserPostModule } from 'src/presentation/http/modules/admin-user-post.module';
 import { SupportModule } from 'src/presentation/http/modules/support.module';
 import { StripePaymentModule } from 'src/presentation/http/modules/stripe-payment.module';
+import { ProfitsSubscriber } from 'src/infrastructure/subscribers/profits.subscriber';
  
 @Module({
   imports: [
@@ -105,6 +106,7 @@ import { StripePaymentModule } from 'src/presentation/http/modules/stripe-paymen
   controllers: [AppController],
   providers: [
     AppService,
+    ProfitsSubscriber,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard, // authenticate first, sets request.user

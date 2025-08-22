@@ -45,6 +45,7 @@ import { ServiceProviderSocial } from "src/domain/entities/service-providers-soc
 import { InvoiceReminderLog } from "src/domain/entities/invoice-reminder-log.entity";
 import { Faqs } from "src/domain/entities/faqs.entity";
 import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
+import { ProfitsSubscriber } from "../subscribers/profits.subscriber";
 const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     type: 'postgres',
     host: configService.get<string>('DB_HOST'),
@@ -52,6 +53,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
     username: configService.get<string>('DB_USERNAME'),
     password: configService.get<string>('DB_PASSWORD'),
     database: configService.get<string>('DB_NAME'),
+    subscribers: [ProfitsSubscriber], // 👈 لازم تضيفه هون
     entities: [
         User,RefreshToken,TokenBlackList,Office,City,
         Region,Property,Residential,PropertyPost,
