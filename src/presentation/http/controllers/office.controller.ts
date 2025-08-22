@@ -49,6 +49,7 @@ import { GetOfficeDetailsSwagger } from "../swagger/office/get-office-details.sw
 import { GetOfficeDashboardUseCase } from "src/application/use-cases/office/get-office-dashboard.use-case";
 import { GetOfficeDashboardSwaggerDoc } from "../swagger/office/get-office-dashboard.swagger";
 import { GetTopRegionsUseCase } from "src/application/use-cases/office/get-top-region.use-case";
+import { GetTopLocationsSwagger } from "../swagger/office/get-top-locations.swagger";
        
   @Controller('office')
   export class OfficeController {
@@ -87,6 +88,7 @@ import { GetTopRegionsUseCase } from "src/application/use-cases/office/get-top-r
     }
 
     @Get('top-regions')
+    @GetTopLocationsSwagger()
     @UseGuards(JwtAuthGuard)
     async getTopRegions(@CurrentUser() user: any,) { 
     const data = await this.getTopRegionsUseCase.execute(user.sub);
