@@ -19,6 +19,7 @@ import { PropertyFavoriteSeeder } from "./favorite.seeder";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { AdvertisementSeeder } from "./advertisement.seeder";
 import { JoinRequestSeeder } from "./join-requests.seeder";
+import { SocialPlatformSeeder } from "./social-platform.seeder";
 
 @Injectable()
 export class SeederService {
@@ -37,6 +38,7 @@ export class SeederService {
     private readonly propertyFavoriteSeeder: PropertyFavoriteSeeder,
     private readonly advertisementSeeder: AdvertisementSeeder,
     private readonly joinRequestSeeder: JoinRequestSeeder,
+    private readonly socialPlatformSeeder: SocialPlatformSeeder,
     
     @InjectRepository(City)
     private readonly cityRepo: Repository<City>,
@@ -49,6 +51,8 @@ export class SeederService {
     const cityRegionSeeder = new CityRegionSeeder(this.cityRepo, this.regionRepo, this.dataSource);
     await cityRegionSeeder.seed();
 
+    await this.socialPlatformSeeder.seed();
+    
     await this.servicePriceSeeder.seed();
 
     // 2. Seed permissions and roles

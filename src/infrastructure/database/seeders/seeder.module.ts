@@ -45,6 +45,8 @@ import { AdvertisementSeeder } from "./advertisement.seeder";
 import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { JoinRequestSeeder } from "./join-requests.seeder";
 import { JoinRequest } from "src/domain/entities/join-request.entity";
+import { SocialPlatformSeeder } from "./social-platform.seeder";
+import { SocialPlatform } from "src/domain/entities/social_platforms.entity";
 
 
 @Module({
@@ -65,7 +67,7 @@ import { JoinRequest } from "src/domain/entities/join-request.entity";
             ServicePrice,UserRole,Touristic,AdditionalService,
             Service,ServiceProvider,PromotedProperty,OnlineInvoice,
             UserPost,ServiceFeedback,OfficeFeedback,PropertyFavorite,
-            ServicePrice,Advertisement,JoinRequest,
+            ServicePrice,Advertisement,JoinRequest,SocialPlatform
         ])
     ],
     providers:[
@@ -74,7 +76,7 @@ import { JoinRequest } from "src/domain/entities/join-request.entity";
         ServicePriceSeeder,TouristicPropertySeeder,ServiceProviderSeeder,
         PromotedPropertySeeder,UserPostSeeder,ServiceFeedbackSeeder,
         OfficeFeedbackSeeder,PropertyFavoriteSeeder,AdvertisementSeeder,
-        JoinRequestSeeder,
+        JoinRequestSeeder,SocialPlatformSeeder
     ],
     exports:[SeederService]
 })

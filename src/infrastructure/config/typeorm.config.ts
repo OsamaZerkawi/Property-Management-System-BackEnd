@@ -66,7 +66,7 @@ const OrmConfig = (configService: ConfigService): DataSourceOptions => ({
         Notification,FcmToken,Advertisement,OnlineInvoice,UserPermission,
         Otp, TempUser,ServicePrice,AdditionalService,Service,AdminCity,
         JoinRequest,PromotedProperty,ServiceProviderSocial,InvoiceReminderLog,
-        Faqs,SocialPlatform,
+        Faqs,SocialPlatform
     ],
     synchronize: true,
     //dropSchema: true,
