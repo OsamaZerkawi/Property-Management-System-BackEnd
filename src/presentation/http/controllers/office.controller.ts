@@ -149,7 +149,7 @@ import { GetTopLocationsSwagger } from "../swagger/office/get-top-locations.swag
       await this.updateOfficeUseCase.execute(user.sub, dto);
       return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
     }
-    @Roles('صاحب مكتب')
+    //@Roles('صاحب مكتب')
     @Get()
     @UseGuards(JwtAuthGuard)
     @GetOfficeDetailsSwagger()

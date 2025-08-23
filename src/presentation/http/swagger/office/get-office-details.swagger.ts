@@ -19,6 +19,7 @@ export function GetOfficeDetailsSwagger() {
             properties: {
               id: { type: 'number', example: 5 },
               name: { type: 'string', example: 'مكتب النجاح' },
+              phone: { type: 'string', example: '0969090711' },
               logo: { type: 'string', nullable: true, example: 'http://localhost:3000/uploads/offices/logos/logo.png' },
               type: { type: 'string', example: 'سياحي' },
               commission: { type: 'number', example: 10 },
@@ -30,9 +31,26 @@ export function GetOfficeDetailsSwagger() {
               closing_time: { type: 'string', example: '18:00' },
               latitude: { type: 'number', example: 33.5157 },
               longitude: { type: 'number', example: 36.2765 },
-              region: { type: 'string', nullable: true, example: 'المزة' },
-              city: { type: 'string', nullable: true, example: 'دمشق' },
+              region: {
+                type: 'object',
+                nullable: true,
+                properties: {
+                  id: { type: 'number', example: 12 },
+                  name: { type: 'string', example: 'المزة' },
+                },
+              },
+
+              city: {
+                type: 'object',
+                nullable: true,
+                properties: {
+                  id: { type: 'number', example: 5 },
+                  name: { type: 'string', example: 'دمشق' },
+                },
+              },
+
               default_meter_price: { type: 'number', nullable: true, example: 500 },
+
               socials: {
                 type: 'array',
                 items: {
@@ -49,6 +67,7 @@ export function GetOfficeDetailsSwagger() {
         },
       },
     }),
+
     ApiResponse({ status: 404, description: 'المكتب غير موجود' }),
   );
 }
