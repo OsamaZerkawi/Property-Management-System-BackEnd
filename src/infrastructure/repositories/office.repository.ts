@@ -11,7 +11,10 @@ import { errorResponse } from 'src/shared/helpers/response.helper';
 import { ExploreMapDto } from 'src/application/dtos/map/explore-map.dto';
 import { OfficeFeedback } from 'src/domain/entities/office-feedback.entity';
 import { SocialPlatform } from 'src/domain/entities/social_platforms.entity';
-import { SocialItem, UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
+import {
+  SocialItem,
+  UpdateOfficeDto,
+} from 'src/application/dtos/office/update-office.dto';
 import { Region } from 'src/domain/entities/region.entity';
 
 @Injectable()
@@ -70,7 +73,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findOneByUserId(userId: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['user','socials', 'region', 'region.city'],
+      relations: ['user', 'socials', 'region', 'region.city'],
     });
   }
 
@@ -82,7 +85,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       select: ['id', 'commission'],
     });
   }
- 
+
   // async createOfficeWithSocials(
   //   userId: number,
   //   dto: CreateOfficeDto,
@@ -104,7 +107,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   //       longitude: dto.longitude,
   //       region: { id: dto.region_id } as any,
   //     });
- 
+
   //     await manager.save(office);
 
   //     if (dto.socials && dto.socials.length > 0) {
@@ -128,85 +131,85 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       relations: ['user', 'socials', 'region', 'region.city'],
     });
   }
-async updateOfficeWithSocials(
-  office: Office,
-  dto: UpdateOfficeDto,
-): Promise<void> {
-  const queryRunner = this.dataSource.createQueryRunner();
-  await queryRunner.connect();
-  await queryRunner.startTransaction();
+  async updateOfficeWithSocials(
+    office: Office,
+    dto: UpdateOfficeDto,
+  ): Promise<void> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-  try {
-    const officeId = office.id; 
-    const officeUpdateData: Partial<Office> = {};
- 
-    for (const key of [
-      'name',
-      'logo',
-      'type',
-      'commission',
-      'booking_period',
-      'deposit_per_m2',
-      'tourism_deposit',
-      'payment_method',
-      'opening_time',
-      'closing_time', 
-      'latitude',
-      'longitude',
-    ]) {
-      if (dto[key] !== undefined) {
-        officeUpdateData[key] = dto[key];
-      }
-    }
- 
-    if (dto.region_id !== undefined) {
-    const region = await queryRunner.manager.findOne(Region, {
-      where: { id: dto.region_id }
-    });
-    if (!region) {
-      throw new NotFoundException('المنطقة غير موجودة');
-    }
-    officeUpdateData.region = region;
-  }
+    try {
+      const officeId = office.id;
+      const officeUpdateData: Partial<Office> = {};
 
- 
-    if (Object.keys(officeUpdateData).length > 0) {
-      await queryRunner.manager.update(Office, officeId, officeUpdateData);
-    }
- console.log('Processing socials:', dto.socials); // للتتبع
-    //هنا يطبع Processing socials: [ {}, {} ]
-    if (dto.socials && dto.socials.length > 0) {
-      for (const social of dto.socials) {
-        const platform = await queryRunner.manager.findOne(SocialPlatform, { where: { id: social.id } });
-        if (!platform) continue;
-
-        let officeSocial = await queryRunner.manager.findOne(OfficeSocial, {
-          where: { office: { id: officeId }, platform: { id: social.id } },
-        });
-
-        if (officeSocial) {
-          officeSocial.link = social.link ?? officeSocial.link;
-          await queryRunner.manager.save(officeSocial);
-        } else if (social.link) {
-          officeSocial = queryRunner.manager.create(OfficeSocial, {
-            office: { id: officeId },
-            platform: { id: social.id },
-            link: social.link,
-          });
-          await queryRunner.manager.save(officeSocial);
+      for (const key of [
+        'name',
+        'logo',
+        'type',
+        'commission',
+        'booking_period',
+        'deposit_per_m2',
+        'tourism_deposit',
+        'payment_method',
+        'opening_time',
+        'closing_time',
+        'latitude',
+        'longitude',
+      ]) {
+        if (dto[key] !== undefined) {
+          officeUpdateData[key] = dto[key];
         }
       }
+
+      if (dto.region_id !== undefined) {
+        const region = await queryRunner.manager.findOne(Region, {
+          where: { id: dto.region_id },
+        });
+        if (!region) {
+          throw new NotFoundException('المنطقة غير موجودة');
+        }
+        officeUpdateData.region = region;
+      }
+
+      if (Object.keys(officeUpdateData).length > 0) {
+        await queryRunner.manager.update(Office, officeId, officeUpdateData);
+      }
+      console.log('Processing socials:', dto.socials); // للتتبع
+      //هنا يطبع Processing socials: [ {}, {} ]
+      if (dto.socials && dto.socials.length > 0) {
+        for (const social of dto.socials) {
+          const platform = await queryRunner.manager.findOne(SocialPlatform, {
+            where: { id: social.id },
+          });
+          if (!platform) continue;
+
+          let officeSocial = await queryRunner.manager.findOne(OfficeSocial, {
+            where: { office: { id: officeId }, platform: { id: social.id } },
+          });
+
+          if (officeSocial) {
+            officeSocial.link = social.link ?? officeSocial.link;
+            await queryRunner.manager.save(officeSocial);
+          } else if (social.link) {
+            officeSocial = queryRunner.manager.create(OfficeSocial, {
+              office: { id: officeId },
+              platform: { id: social.id },
+              link: social.link,
+            });
+            await queryRunner.manager.save(officeSocial);
+          }
+        }
+      }
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
-
-    await queryRunner.commitTransaction();
-  } catch (err) {
-    await queryRunner.rollbackTransaction();
-    throw err;
-  } finally {
-    await queryRunner.release();
   }
-}
-
 
   async getOfficeFees(userId: number) {
     const office = await this.officeRepo
@@ -496,6 +499,7 @@ async updateOfficeWithSocials(
       .leftJoin('office.user', 'user')
       .leftJoin('office.feedbacks', 'fb')
       .leftJoin('office.socials', 'social')
+      .leftJoin('social.platform', 'platform')
       .leftJoin('office.region', 'region')
       .leftJoin('region.city', 'city')
       .where('office.id = :officeId', { officeId })
@@ -514,8 +518,12 @@ async updateOfficeWithSocials(
         'user.phone AS phone',
         'COALESCE(AVG(fb.rate), 0.00) AS avg_rate',
         `COALESCE(
-         json_agg(DISTINCT jsonb_build_object('platform', social.platform, 'link', social.link))
-         FILTER (WHERE social.id IS NOT NULL),
+         json_agg(
+           DISTINCT jsonb_build_object(
+             'platform', platform.name,
+             'link', social.link
+           )
+         ) FILTER (WHERE social.id IS NOT NULL),
          '[]'
        ) AS socials`,
       ])
@@ -548,72 +556,88 @@ async updateOfficeWithSocials(
     };
   }
   async getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> {
-  const qb = this.dataSource.createQueryBuilder()
-    .select('office.id', 'id')
-    .addSelect('office.name', 'name')
-    .addSelect('office.logo', 'logo')
-    .addSelect('office.profits', 'profits')
-    .addSelect('region.name', 'region_name')
-    .addSelect('city.name', 'city_name')
- 
-    .addSelect(subQb => subQb
-      .select('COALESCE(ROUND(AVG(of.rate)::numeric, 1), 0)')
-      .from('office_feedbacks', 'of')
-      .where('of.office_id = office.id'),
-      'avg_rate'
-    )
+    const qb = this.dataSource
+      .createQueryBuilder()
+      .select('office.id', 'id')
+      .addSelect('office.name', 'name')
+      .addSelect('office.logo', 'logo')
+      .addSelect('office.profits', 'profits')
+      .addSelect('region.name', 'region_name')
+      .addSelect('city.name', 'city_name')
 
-  .addSelect(subQb => subQb
-    .select('COUNT(*)')
-    .from('office_feedbacks', 'of')
-    .where('of.office_id = office.id')
-    .andWhere('of.complaint IS NOT NULL')
-    .andWhere('of.status = :acceptedStatus', { acceptedStatus: 'مقبول' }),
-    'complaints_count'
-  )
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COALESCE(ROUND(AVG(of.rate)::numeric, 1), 0)')
+            .from('office_feedbacks', 'of')
+            .where('of.office_id = office.id'),
+        'avg_rate',
+      )
 
-    .addSelect(subQb => subQb
-      .select('COUNT(*)')
-      .from('properties', 'p')
-      .where('p.office_id = office.id')
-      .andWhere('p.property_type = :touristicType', { touristicType: 'سياحي' }),
-      'touristic_count'
-    )
- 
-    .addSelect(subQb => subQb
-      .select('COUNT(*)')
-      .from('properties', 'p2')
-      .where('p2.office_id = office.id'),
-      'total_properties'
-    )
- 
-    .addSelect(subQb => subQb
-      .select('COUNT(*)')
-      .from('properties', 'p3')
-      .innerJoin('residentials', 'r3', 'r3.property_id = p3.id')
-      .where('p3.office_id = office.id')
-      .andWhere('p3.property_type = :resType', { resType: 'عقاري' })
-      .andWhere('r3.listing_type = :sale', { sale: 'بيع' }),
-      'residential_sale_count'
-    )
- 
-    .addSelect(subQb => subQb
-      .select('COUNT(*)')
-      .from('properties', 'p4')
-      .innerJoin('residentials', 'r4', 'r4.property_id = p4.id')
-      .where('p4.office_id = office.id')
-      .andWhere('p4.property_type = :resType2', { resType2: 'عقاري' })
-      .andWhere('r4.listing_type = :rent', { rent: 'أجار' }),
-      'residential_rent_count'
-    )
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COUNT(*)')
+            .from('office_feedbacks', 'of')
+            .where('of.office_id = office.id')
+            .andWhere('of.complaint IS NOT NULL')
+            .andWhere('of.status = :acceptedStatus', {
+              acceptedStatus: 'مقبول',
+            }),
+        'complaints_count',
+      )
 
-    .from('offices', 'office')
-    .leftJoin('regions', 'region', 'region.id = office.region_id')
-    .leftJoin('cities', 'city', 'city.id = region.city_id')
-    .where('office.id = :officeId', { officeId });
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COUNT(*)')
+            .from('properties', 'p')
+            .where('p.office_id = office.id')
+            .andWhere('p.property_type = :touristicType', {
+              touristicType: 'سياحي',
+            }),
+        'touristic_count',
+      )
 
-  const raw = await qb.getRawOne();
-  return raw || null;
-}
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COUNT(*)')
+            .from('properties', 'p2')
+            .where('p2.office_id = office.id'),
+        'total_properties',
+      )
 
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COUNT(*)')
+            .from('properties', 'p3')
+            .innerJoin('residentials', 'r3', 'r3.property_id = p3.id')
+            .where('p3.office_id = office.id')
+            .andWhere('p3.property_type = :resType', { resType: 'عقاري' })
+            .andWhere('r3.listing_type = :sale', { sale: 'بيع' }),
+        'residential_sale_count',
+      )
+
+      .addSelect(
+        (subQb) =>
+          subQb
+            .select('COUNT(*)')
+            .from('properties', 'p4')
+            .innerJoin('residentials', 'r4', 'r4.property_id = p4.id')
+            .where('p4.office_id = office.id')
+            .andWhere('p4.property_type = :resType2', { resType2: 'عقاري' })
+            .andWhere('r4.listing_type = :rent', { rent: 'أجار' }),
+        'residential_rent_count',
+      )
+
+      .from('offices', 'office')
+      .leftJoin('regions', 'region', 'region.id = office.region_id')
+      .leftJoin('cities', 'city', 'city.id = region.city_id')
+      .where('office.id = :officeId', { officeId });
+
+    const raw = await qb.getRawOne();
+    return raw || null;
+  }
 }
