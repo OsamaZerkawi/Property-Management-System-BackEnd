@@ -9,7 +9,6 @@ import { SocialPlatform } from './social_platforms.entity';
  
 
 @Entity('office_socials')
-@Unique(['office', 'platform'])  
 export class OfficeSocial {
   @PrimaryGeneratedColumn()
   id: number;
