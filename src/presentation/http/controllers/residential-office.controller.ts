@@ -18,6 +18,10 @@ import { GetOfficePropertiesSwaggerDoc, GetOfficePropertySwaggerDoc, SearchPrope
 import { CreateResidentialPropertySwaggerDoc } from "../swagger/residential-office/create-property.swagger";
 import { GetExpectedPriceSwaggerDoc } from "../swagger/residential-office/get-expected-price.swagger";
 import { UpdateResidentialPropertySwaggerDoc } from "../swagger/residential-office/update-property.swagger";
+import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
+import { CreatePurchaseDto } from "src/application/dtos/property/create-property-purchase.dto";
+import { CreatePurchaseUseCase } from "src/application/use-cases/residential/create-purchase.use-case";
+import { CreatePurchaseSwagger } from "../swagger/residential-office/create-purchase.swagger";
 
 @Controller('residential-office')
 export class ResidentialOfficeController {
@@ -29,8 +33,19 @@ export class ResidentialOfficeController {
       private readonly updateResidentialPropertyDetailsUseCase: UpdateResidentialPropertyDetailsUseCase,
       private readonly searchResidentialPropertyByTitleUseCase: SearchResidentialPropertyByTitleUseCase,
       private readonly getExpectedPricePropertyUseCase: GetExpectedPricePropertyUseCase,
+      private readonly createPurchaseUseCase: CreatePurchaseUseCase
     )
     {}
+
+    @Post('purchases')
+    @CreatePurchaseSwagger()
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.CREATED)
+    async createPurchase(@Req() req, @Body() dto: CreatePurchaseDto) {
+      const userId = req.user.sub;
+      await this.createPurchaseUseCase.execute(userId, dto);
+      return successResponse([], 'تم إنشاء عملية الشراء وإصدار الفواتير بنجاح', HttpStatus.CREATED);
+    }
 
     @Roles('صاحب مكتب')
     @GetOfficePropertiesSwaggerDoc()

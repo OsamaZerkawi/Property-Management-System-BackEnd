@@ -1,7 +1,7 @@
 // src/infrastructure/repositories/mobile_auth.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 import { MoreThan,LessThan } from 'typeorm';
 
 import { MobileAuthRepositoryInterface } from 'src/domain/repositories/mobile_auth.repository';
@@ -10,6 +10,7 @@ import { TempUser }     from 'src/domain/entities/temp-user.entity';
 import { Otp, OtpType } from 'src/domain/entities/otp.entity';
 import { RefreshToken } from 'src/domain/entities/refresh-token.entity';
 import { User }         from 'src/domain/entities/user.entity';
+import { FcmToken } from 'src/domain/entities/fcmToken.entity';
 
 @Injectable()
 export class MobileAuthRepository implements MobileAuthRepositoryInterface {
@@ -18,6 +19,7 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
     @InjectRepository(Otp)          private readonly otpRepo:     Repository<Otp>,
     @InjectRepository(RefreshToken) private readonly refreshRepo: Repository<RefreshToken>,
     @InjectRepository(User)         private readonly userRepo:    Repository<User>,
+    private readonly dataSource: DataSource
   ) {}
 
   // Temp users
@@ -106,6 +108,58 @@ export class MobileAuthRepository implements MobileAuthRepositoryInterface {
     },
   });
   return count > 0;
+} 
+
+async saveOrUpdateToken(
+  userId: number,
+  deviceId?: string | null,
+  fcmToken?: string,
+): Promise<void> { 
+  deviceId = deviceId ? String(deviceId).trim() : undefined;
+  fcmToken = fcmToken ? String(fcmToken).trim() : '';
+
+  if (!fcmToken) {
+     return;
+  }
+
+  await this.dataSource.transaction(async (manager) => {
+    const repo = manager.getRepository(FcmToken);
+
+     let existing: FcmToken | null = null;
+    if (deviceId) {
+      existing = await repo.findOne({
+        where: {
+          user: { id: userId } as any,
+          device_id: deviceId,
+        } as any,
+      });
+    }
+
+     if (!existing) {
+      existing = await repo.findOne({
+        where: {
+          user: { id: userId } as any,
+          fcmToken: fcmToken,
+        } as any,
+      });
+    }
+
+     if (existing) {
+      existing.fcmToken = fcmToken;
+      if (deviceId !== undefined) existing.device_id = deviceId as any;
+      await repo.save(existing);
+      return; 
+    }
+
+     const payload: any = {
+      user: { id: userId } as any,
+      fcmToken,
+      device_id: deviceId ?? null,
+    };
+
+    const entity = repo.create(payload as any);
+    await repo.save(entity);
+    return;
+  });
 }
- 
 }

@@ -993,4 +993,24 @@ export class TourismRepository implements ITourismRepository {
       ])
       .getRawMany();
   }
+
+   async findTopTouristicLocationsByOffice(officeId: number): Promise<string[]> {
+    const raws = await this.calendarRepo
+      .createQueryBuilder('c')
+      .innerJoin('c.touristic', 't')
+      .innerJoin('t.property', 'p')
+      .innerJoin('p.region', 'r')
+      .innerJoin('r.city', 'city')
+      .where('p.office_id = :officeId', { officeId })  
+      .select([
+        "city.name || '، ' || r.name AS location",
+        'COUNT(c.id) AS requests',
+      ])
+      .groupBy('city.name, r.name')
+      .orderBy('requests', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    return raws.map(r => String(r.location));
+  }
 }

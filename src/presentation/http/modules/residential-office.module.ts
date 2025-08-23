@@ -35,6 +35,7 @@ import { SearchResidentialPropertyByTitleUseCase } from "src/application/use-cas
 import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/property/get-expected-price.use-case";
 import { PropertyModule } from "./property.module";
 import { GetRentalPriceUseCase } from "src/application/use-cases/residential/get-rental-price.use-case";
+import { CreatePurchaseUseCase } from "src/application/use-cases/residential/create-purchase.use-case";
 
 
 @Module({
@@ -68,6 +69,7 @@ import { GetRentalPriceUseCase } from "src/application/use-cases/residential/get
         SearchResidentialPropertyByTitleUseCase,
         GetExpectedPricePropertyUseCase, 
         GetRentalPriceUseCase, 
+        CreatePurchaseUseCase,
     ],
     exports: [
         RESIDENTIAL_PROPERTY_REPOSITORY, 

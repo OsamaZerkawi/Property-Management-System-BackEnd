@@ -24,7 +24,8 @@ import { MobileLoginSwaggerDoc } from "../swagger/mobile-auth/login.swagger";
 import { ResetPasswordSwaggerDoc } from "../swagger/mobile-auth/reset-password.swagger";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { LogoutUseCase } from "src/application/use-cases/moblie_auth/logout.usecase";
- @Controller('mobile-auth')
+import { MobileLoginWithDeviceDto } from "src/application/dtos/mobile_auth/fcm-token-device-id.dto";
+  @Controller('mobile-auth')
 export class MobileAuthController {
   constructor(
     private readonly createUser: CreateUserUseCase,
@@ -102,16 +103,19 @@ export class MobileAuthController {
     return successResponse(data, 'تم تحديث رمز الدخول بنجاح');
   }
 
-  @Public()
+ @Public()
   @MobileLoginSwaggerDoc()
   @UseGuards(MobileLocalAuthGuard)
   @Post('login') 
-  async login(@Req() req) {
+  async login(
+    @Req() req,
+    @Body() body: MobileLoginWithDeviceDto, ) {
     const user = req.user;
-    const tokens = await this.loginUseCase.execute(user);
+    const tokens = await this.loginUseCase.execute(user,body);
 
     return successResponse(tokens, 'تم تسجيل الدخول بنجاح',200);
   }
+
 
   @Public()
   @ResetPasswordSwaggerDoc()

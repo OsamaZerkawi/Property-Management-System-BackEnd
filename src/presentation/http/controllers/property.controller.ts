@@ -29,7 +29,6 @@ import { GetPromotedPropertiesUseCase } from "src/application/use-cases/property
 import { use } from "passport";
 import { GetPromotedPropertiesSwaggerDoc } from "../swagger/property/get-promoted-properties.swagger";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
-import { CreatePropertyPurchaseDto } from "src/application/dtos/property/create-property-purchase.dto";
 
 
 @Controller('properties')

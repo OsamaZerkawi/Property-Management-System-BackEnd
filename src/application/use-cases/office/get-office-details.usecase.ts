@@ -14,6 +14,7 @@ export class GetOfficeDetailsUseCase {
       return {
     id: office.id,
     name: office.name,
+    phone: office.user.phone,
     logo:   office.logo
       ? `${baseUrl}/uploads/offices/logos/${office.logo}`
       : null,
@@ -27,8 +28,20 @@ export class GetOfficeDetailsUseCase {
     closing_time: office.closing_time,
     latitude: office.latitude,
     longitude: office.longitude,
-    region: office.region?.name ?? null,
-    city: office.region?.city?.name ?? null,
+    region: office.region
+      ? {
+          id: office.region.id,
+          name: office.region.name,
+        }
+      : null,
+
+    city: office.region?.city
+      ? {
+          id: office.region.city.id,
+          name: office.region.city.name,
+        }
+      : null,
+
     default_meter_price: office.region?.default_meter_price ?? null,
     socials: office.socials?.map(s => ({
       id: s.id,
