@@ -21,6 +21,7 @@ import { UpdateResidentialPropertySwaggerDoc } from "../swagger/residential-offi
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { CreatePurchaseDto } from "src/application/dtos/property/create-property-purchase.dto";
 import { CreatePurchaseUseCase } from "src/application/use-cases/residential/create-purchase.use-case";
+import { CreatePurchaseSwagger } from "../swagger/residential-office/create-purchase.swagger";
 
 @Controller('residential-office')
 export class ResidentialOfficeController {
@@ -37,6 +38,7 @@ export class ResidentialOfficeController {
     {}
 
     @Post('purchases')
+    @CreatePurchaseSwagger()
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.CREATED)
     async createPurchase(@Req() req, @Body() dto: CreatePurchaseDto) {
