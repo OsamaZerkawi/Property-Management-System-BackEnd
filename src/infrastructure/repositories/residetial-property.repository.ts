@@ -385,8 +385,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       if (!property.residential) throw new NotFoundException('هذا العقار ليس سكنياً أو تفاصيله غير موجودة');
 
       const residential = property.residential;
- 
-      
+  
       const purchaseRepo = manager.getRepository(UserPropertyPurchase);
       const purchase = purchaseRepo.create({
         user: { id: userId } as any,
@@ -421,7 +420,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
           reason: InoviceReasons.PROPERTY_PURCHASE,
           status: InvoicesStatus.PENDING,
           stripePaymentIntentId: undefined,
-          paymentMethod: undefined,
+          paymentMethod: PaymentMethod.STRIPE,
         });
         await invoiceRepo.save(remInvoice);
       } else { 
@@ -430,7 +429,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
           throw new BadRequestException('مدة التقسيط غير معرفة في تفاصيل العقار');
         }
 
-         const base = Math.floor((remaining / months) * 100) / 100;  
+        const base = Math.floor((remaining / months) * 100) / 100;  
         let accumulated = 0;
         let dueDate = startOfDay(new Date());
 
@@ -447,7 +446,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
             reason: InoviceReasons.INSTALLMENT_PAYMENT,
             status: InvoicesStatus.PENDING,
             stripePaymentIntentId: undefined,
-            paymentMethod: undefined,
+            paymentMethod: PaymentMethod.STRIPE,
           });
           await invoiceRepo.save(installmentInvoice);
 

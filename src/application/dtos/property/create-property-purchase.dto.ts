@@ -24,7 +24,7 @@ export class CreatePurchaseDto {
   @IsString()
   paymentIntentId?: string;
 
-   @IsDefined()
+  @IsDefined()
   @IsBoolean()
   installment: boolean;
 }
