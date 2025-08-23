@@ -28,4 +28,6 @@ export interface MobileAuthRepositoryInterface {
   deleteRefreshToken(userId: number): Promise<void>;
   getUserWithRefreshToken(userId: number): Promise<User | null>;
   findRefreshToken(token: string);
+
+  saveOrUpdateToken(userId: number,deviceId?: string | null,fcmToken?: string,): Promise<void>
 }

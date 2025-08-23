@@ -1,11 +1,37 @@
 import { applyDecorators, HttpStatus } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { MobileLoginDto } from 'src/application/dtos/auth/mobile-login.dto';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 export function MobileLoginSwaggerDoc() {
   return applyDecorators(
     ApiOperation({ summary: 'تسجيل دخول المستخدم عبر الجوال' }),
-    ApiBody({ type: MobileLoginDto }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            example: 'user@example.com',
+            description: 'البريد الإلكتروني للمستخدم',
+          },
+          password: {
+            type: 'string',
+            example: 'password123',
+            description: 'كلمة المرور',
+          },
+          device_id: {
+            type: 'string',
+            example: 'device-abc-123',
+            description: 'معرف الجهاز (اختياري)',
+          },
+          fcm_token: {
+            type: 'string',
+            example: 'fcm_token_example',
+            description: 'رمز Firebase Cloud Messaging (اختياري)',
+          },
+        },
+        required: ['email', 'password'],
+      },
+    }),
 
     ApiResponse({
       status: HttpStatus.OK,
@@ -22,7 +48,7 @@ export function MobileLoginSwaggerDoc() {
         },
       },
     }),
-    
+
     ApiResponse({
       status: HttpStatus.FORBIDDEN,
       description: 'الحساب غير مفعل',
@@ -36,23 +62,10 @@ export function MobileLoginSwaggerDoc() {
         },
       },
     }),
-    
-    ApiResponse({
-      status: HttpStatus.NOT_FOUND,
-      description: 'البريد الإلكتروني غير موجود',
-      content: {
-        'application/json': {
-          example: {
-            successful: false,
-            message: 'البريد الالكتروني غير موجود',
-            status_code: 404,
-          },
-        },
-      },
-    }),
+
     ApiResponse({
       status: HttpStatus.UNAUTHORIZED,
-      description: 'أخطاء محتملة عند تسجيل الدخول',
+      description: 'بيانات الدخول غير صحيحة',
       content: {
         'application/json': {
           examples: {
