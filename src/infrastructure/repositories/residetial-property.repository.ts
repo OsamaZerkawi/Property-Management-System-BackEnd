@@ -1,24 +1,32 @@
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { addMonths, startOfDay } from "date-fns";
 import { stat } from "fs";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
 import { UpdateResidentialPropertyDetailsDto } from "src/application/dtos/property/UpdateResidentialPropertyDetails.dto";
 import { Property } from "src/domain/entities/property.entity";
 import { Residential } from "src/domain/entities/residential.entity";
+import { UserPropertyInvoice } from "src/domain/entities/user-property-invoice.entity";
+import { UserPropertyPurchase } from "src/domain/entities/user-property-purchase.entity";
+import { InoviceReasons } from "src/domain/enums/inovice-reasons.enum";
+import { InvoicesStatus } from "src/domain/enums/invoices-status.enum";
 import { ListingType } from "src/domain/enums/listing-type.enum";
+import { PaymentMethod } from "src/domain/enums/payment-method.enum";
 import { PropertyPostStatus } from "src/domain/enums/property-post-status.enum";
 import { PropertyPostTag } from "src/domain/enums/property-post-tag.enum";
+import { PurchaseStatus } from "src/domain/enums/property-purchases.enum";
 import { PropertyStatus } from "src/domain/enums/property-status.enum";
 import { RentalPeriod } from "src/domain/enums/rental-period.enum";
 import { ResidentialPropertyRepositoryInterface } from "src/domain/repositories/residential-property.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
-import { Repository} from "typeorm";
+import { DataSource, DeepPartial, Repository} from "typeorm";
 
 export class ResidentialPropertyRepository implements ResidentialPropertyRepositoryInterface{
     constructor(
         @InjectRepository(Residential)
         private readonly residentialRepo: Repository<Residential>,
+        private readonly dataSource: DataSource
     ){}
     
     async updateStatusOfProperty(propertyId: number, status: PropertyStatus) {
@@ -354,6 +362,99 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
 
     const raws = await qb.getRawMany();
     return raws.map(r => String(r.location));
+  }
+
+    async createPurchaseWithInvoices(options: {
+    userId: number;
+    propertyId: number;
+    deposit: number;
+    totalPrice: number;
+    paymentIntentId?: string | null;
+    installment: boolean;
+  }): Promise<void> {
+    const { userId, propertyId, deposit, totalPrice, paymentIntentId, installment } = options;
+
+    await this.dataSource.transaction(async (manager) => {
+  
+      const property = await manager.findOne(Property, {
+        where: { id: propertyId },
+        relations: ['residential', 'office'],
+      });
+
+      if (!property) throw new NotFoundException('العقار غير موجود');
+      if (!property.residential) throw new NotFoundException('هذا العقار ليس سكنياً أو تفاصيله غير موجودة');
+
+      const residential = property.residential;
+ 
+      
+      const purchaseRepo = manager.getRepository(UserPropertyPurchase);
+      const purchase = purchaseRepo.create({
+        user: { id: userId } as any,
+        residential: { id: residential.id } as any,
+        date: new Date(),
+        status: PurchaseStatus.RESERVED,
+      } as DeepPartial<UserPropertyPurchase>);
+      await purchaseRepo.save(purchase);
+ 
+      const invoiceRepo = manager.getRepository(UserPropertyInvoice);
+ 
+      const depositInvoice = invoiceRepo.create({
+        user: { id: userId } as any,
+        property: { id: propertyId } as any,
+        amount: deposit,
+        billing_period_start: startOfDay(new Date()),
+        reason: InoviceReasons.DEPOSIT,
+        status: InvoicesStatus.PAID,
+        stripePaymentIntentId: paymentIntentId ?? undefined, 
+        paymentMethod: PaymentMethod.STRIPE,
+      });
+      await invoiceRepo.save(depositInvoice);
+ 
+      const remaining = Number(totalPrice) - Number(deposit);
+
+      if (!installment) { 
+        const remInvoice = invoiceRepo.create({
+          user: { id: userId } as any,
+          property: { id: propertyId } as any,
+          amount: remaining,
+          billing_period_start: startOfDay(new Date()),
+          reason: InoviceReasons.PROPERTY_PURCHASE,
+          status: InvoicesStatus.PENDING,
+          stripePaymentIntentId: undefined,
+          paymentMethod: undefined,
+        });
+        await invoiceRepo.save(remInvoice);
+      } else { 
+        const months = Number(residential.installment_duration ?? 0);
+        if (!months || months <= 0) {
+          throw new BadRequestException('مدة التقسيط غير معرفة في تفاصيل العقار');
+        }
+
+         const base = Math.floor((remaining / months) * 100) / 100;  
+        let accumulated = 0;
+        let dueDate = startOfDay(new Date());
+
+        for (let i = 0; i < months; i++) {
+          const isLast = i === months - 1;
+          const amount = isLast ? Number((remaining - accumulated).toFixed(2)) : Number(base.toFixed(2));
+          accumulated += amount;
+
+          const installmentInvoice = invoiceRepo.create({
+            user: { id: userId } as any,
+            property: { id: propertyId } as any,
+            amount,
+            billing_period_start: startOfDay(dueDate),
+            reason: InoviceReasons.INSTALLMENT_PAYMENT,
+            status: InvoicesStatus.PENDING,
+            stripePaymentIntentId: undefined,
+            paymentMethod: undefined,
+          });
+          await invoiceRepo.save(installmentInvoice);
+
+          dueDate = addMonths(dueDate, 1);
+        }
+      }
+    });  
   }
 
 }

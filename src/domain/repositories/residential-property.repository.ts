@@ -14,4 +14,13 @@ export interface ResidentialPropertyRepositoryInterface{
     findById(id: number);
     findOneByPropertyId(propertyId: number): Promise<Residential|null> 
     findTopResidentialLocationsByOffice(officeId: number): Promise<string[]> 
+ 
+  createPurchaseWithInvoices(options: {
+    userId: number;
+    propertyId: number;
+    deposit: number;
+    totalPrice: number;
+    paymentIntentId?: string | null;
+    installment: boolean;
+  }): Promise<void>; 
 }
