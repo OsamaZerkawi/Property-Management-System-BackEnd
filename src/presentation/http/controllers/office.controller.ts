@@ -37,7 +37,7 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { Request } from 'express';
 import { GetTopRatedOfficesUseCase } from 'src/application/use-cases/office/get-top-rated-offices.use-case';
 import { GetTopRatedOfficesSwaggerDoc } from '../swagger/office/get-top-rated';
-import { CommissionSwaggerDocs } from '../swagger/office/get-commission.swagger';
+import { MobileCommissionSwaggerDocs } from '../swagger/office/get-commission(mobile).swagger';
 import { PropertyFeeService } from 'src/application/services/propertyFee.service';
 import { GetPaymentMethodSwaggerDoc } from '../swagger/office/get-payment-method.swagger';
 import { ListOfficesUseCase } from 'src/application/use-cases/office/list-offices.use-case';
@@ -65,11 +65,14 @@ import { GetTopLocationsSwagger } from '../swagger/office/get-top-locations.swag
 import { PropertyType } from 'src/domain/enums/property-type.enum';
 import { GetTopRatedPropertiesForOfficeUseCase } from 'src/application/use-cases/office/get-top-rated-properties-for-office.use-case';
 import { GetTopRatedPropertiesForOfficeSwaggerDoc } from '../swagger/office/get-top-rated-properties-for-office.use-case';
+import { GetCommissionOfOfficeMobileUseCase } from 'src/application/use-cases/office/get-commission-of-office(mobile).use-case';
+import { CommissionSwaggerDocs } from '../swagger/office/get-commission.swagger';
 
 @Controller('office')
 export class OfficeController {
   constructor(
     private readonly getCommissionOfOfficeUseCase: GetCommissionOfOfficeUseCase,
+    private readonly getCommissionOfOfficeMobileUseCase: GetCommissionOfOfficeMobileUseCase,
     private readonly createOfficeUseCase: CreateOfficeUseCase,
     private readonly updateOfficeUseCase: UpdateOfficeUseCase,
     private readonly getOfficeDetailsUseCase: GetOfficeDetailsUseCase,
@@ -138,15 +141,26 @@ export class OfficeController {
     const data = await this.getPaymentMethodUseCase.execute(userId);
     return successResponse(data, 'تم ارجاع طريقة الدفع', 200);
   }
-
+ 
+  @Roles('صاحب مكتب') 
+  @Get('/commission') 
+  @CommissionSwaggerDocs() 
+  @UseGuards(JwtAuthGuard) 
+  @HttpCode(HttpStatus.OK) 
+  async getCommissionOfOffice(@CurrentUser() user) { 
+    const userId = user.sub; 
+    const data = await this.getCommissionOfOfficeUseCase.execute(userId);
+    return successResponse(data, 'تم ارجاع عمولة المكتب', 200);
+  }
+  
   @Public()
   @Get('/commission/:office_id')
-  @CommissionSwaggerDocs()
+  @MobileCommissionSwaggerDocs()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getCommissionOfOffice(@Param('office_id') officeId: number,) {
+  async getCommissionOfOfficeMobile(@Param('office_id') officeId: number,) {
 
-    const data = await this.getCommissionOfOfficeUseCase.execute(officeId);
+    const data = await this.getCommissionOfOfficeMobileUseCase.execute(officeId);
     return successResponse(data, 'تم ارجاع عمولة ونسبة المكتب', 200);
   }
 
