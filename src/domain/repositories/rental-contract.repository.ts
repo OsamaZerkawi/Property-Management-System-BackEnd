@@ -13,6 +13,5 @@ export interface RentalContractRepositoryInterface {
   findByIdWithRelations(id: number): Promise<RentalContract | null>;
   verifyPropertyBelongsToOffice(   propertyId: number,  officeId: number,): Promise<boolean>; 
   findInvoicesByPropertyAndUser(propertyId: number,userId: number,): Promise<UserPropertyInvoice[]>;
-  
-  
+  createRentalBooking( userId: number, propertyId: number, periodCount: number, totalPrice: number,paymentIntentId?: string|null )
 }

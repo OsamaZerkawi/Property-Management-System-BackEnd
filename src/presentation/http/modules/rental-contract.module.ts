@@ -37,6 +37,7 @@ import { InvoiceReminderLog } from 'src/domain/entities/invoice-reminder-log.ent
 import { NotificationModule } from './notification.module';
 import { ReminderModule } from './reminder.module';
 import { Image } from 'src/domain/entities/image.entity';
+import { CreateRentalRequestUseCase } from 'src/application/use-cases/rental/create-rental-request.use-case';
   
 
 @Module({
@@ -60,6 +61,7 @@ import { Image } from 'src/domain/entities/image.entity';
     UploadInvoiceDocumentUseCase,
     SearchRentalContractsUseCase,
     GetContractDetailsUseCase,
+    CreateRentalRequestUseCase,
     {
       provide: RENTAL_CONTRACT_REPOSITORY,
       useClass: RentalContractRepository,

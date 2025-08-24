@@ -1,5 +1,5 @@
 // src/infrastructure/controllers/rental-contract.controller.ts
-import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get, Query, ParseIntPipe, Param, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Req, UploadedFile, BadRequestException, Get, Query, ParseIntPipe, Param, UseInterceptors, HttpCode, HttpStatus } from '@nestjs/common';
 import { CreateRentalContractUseCase } from 'src/application/use-cases/rental/create-rental-contract.use-case';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { CreateRentalContractDto } from 'src/application/dtos/rental_contracts/create-rental-contract.dto';
@@ -18,6 +18,8 @@ import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-con
 import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
 import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-rental-contracts.swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateRentalRequestDto } from 'src/application/dtos/rental_contracts/create-rental-request.dto';
+import { CreateRentalRequestUseCase } from 'src/application/use-cases/rental/create-rental-request.use-case';
  @Controller('rental-contracts')
 export class RentalContractController {
     
@@ -27,8 +29,19 @@ export class RentalContractController {
     private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
     private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
     private readonly getContractDetailsUseCase: GetContractDetailsUseCase ,
-
+    private readonly createRentalRequestUseCase: CreateRentalRequestUseCase
   ) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async createRental(
+    @Body() dto: CreateRentalRequestDto,
+    @CurrentUser()user,
+   ) { 
+    const result = await this.createRentalRequestUseCase.execute(user.sub, dto);
+    return successResponse(result, 'تم إنشاء عقد الإيجار والفواتير بنجاح', HttpStatus.CREATED);
+  }
 
   @Post()
   @CreateRentalContractSwaggerDoc() 
