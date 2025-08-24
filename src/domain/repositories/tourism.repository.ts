@@ -46,4 +46,5 @@ export interface ITourismRepository {
   findCalendarsForTouristicInRange(touristicId: number,rangeStart: Date,rangeEnd: Date,
   ): Promise<Array<{ id: number; start_date: Date; end_date: Date; status: string }>> 
   findTopTouristicLocationsByOffice(officeId: number): Promise<string[]>
+  findFiveTopRatedTourism(userId: number,baseUrl:string);
 }

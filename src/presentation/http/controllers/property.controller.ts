@@ -212,8 +212,6 @@ export class PropertyController{
         @Req() request: Request
     ){
         const userId = (request.user as any)?.sub ?? null;
-
-        console.log(userId);
         
         const baseUrl = `${request.protocol}://${request.get('host')}`;
 

@@ -13,6 +13,7 @@ import { CreatePropertyDto } from 'src/application/dtos/property/CreateProperty.
 import { PropertiesFiltersDto } from 'src/application/dtos/property/PropertiesFilters.dto';
 import { SearchPropertiesDto } from 'src/application/dtos/property/search-properties.dto';
 import { UpdatePropertyDto } from 'src/application/dtos/property/UpdateProperty.dto';
+import { Image } from 'src/domain/entities/image.entity';
 import { PropertyFeedback } from 'src/domain/entities/property-feedback.entity';
 import { Property } from 'src/domain/entities/property.entity';
 import { Residential } from 'src/domain/entities/residential.entity';
@@ -42,7 +43,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     private readonly propertyRepo: Repository<Property>,
     @InjectRepository(PropertyFeedback)
     private readonly feedbackRepo: Repository<PropertyFeedback>,
-    private readonly dataSource: DataSource
+    @InjectRepository(Image)
+    private readonly imageRepo: Repository<Image>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findByIdWithOwner(propertyId: number) {
@@ -285,7 +288,111 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     return updatedProperty;
   }
+  async findFiveTopRatedPropertiesForOffice(userId: number, baseUrl: string) {
+    const query = this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoin('property.office', 'office')
+      .leftJoin('property.residential', 'residential')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.feedbacks', 'feedback')
+      .where('property.is_deleted = false')
+      .select([
+        'property.id',
+        'property.area',
+        'property.latitude',
+        'property.longitude',
+        'property.property_type',
+        'property.floor_number',
+        'property.notes',
+        'property.highlighted',
+        'property.room_count',
+        'property.bedroom_count',
+        'property.living_room_count',
+        'property.kitchen_count',
+        'property.bathroom_count',
+        'property.has_furniture',
 
+        'post.id',
+        'post.title',
+        'post.image',
+        'post.created_at',
+        'post.status',
+        'post.description',
+        'post.tag',
+
+        'residential.id',
+        'residential.status',
+        'residential.rental_price',
+        'residential.rental_period',
+        'residential.listing_type',
+        'residential.selling_price',
+        'residential.installment_allowed',
+        'residential.installment_duration',
+        'residential.ownership_type',
+        'residential.direction',
+
+        'region.id',
+        'region.name',
+
+        'city.id',
+        'city.name',
+      ])
+      .addSelect('COALESCE(AVG(feedback.rate), 0)', 'avg_rate')
+      .addSelect('COUNT(feedback.id)', 'feedback_count')
+      .groupBy('property.id')
+      .addGroupBy('post.id')
+      .addGroupBy('residential.id')
+      .addGroupBy('region.id')
+      .addGroupBy('city.id')
+      .addGroupBy('office.id')
+      .andWhere('property.property_type = :type', {
+        type: PropertyType.RESIDENTIAL,
+      })
+      .andWhere('residential.listing_type = :listingType', {
+        listingType: ListingType.RENT,
+      })
+      .andWhere('office.user_id = :userId', { userId })
+      .orderBy('avg_rate', 'DESC')
+      .limit(5);
+    const { entities: properties, raw } = await query.getRawAndEntities();
+
+    const propertyIds = properties.map((p) => p.id);
+
+    const images = await this.imageRepo
+      .createQueryBuilder('img')
+      .leftJoinAndSelect('img.property', 'property')
+      .where('property.id IN (:...ids)', { ids: propertyIds })
+      .getMany();
+
+    const imagesMap = images.reduce((map, img) => {
+      if (!map[img.property.id]) map[img.property.id] = [];
+      map[img.property.id].push({
+        id: img.id,
+        image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
+      });
+      return map;
+    }, {} as Record<number, any[]>);
+
+    // Create a map of propertyId -> avg_rate
+    const avgRateMap = new Map<number, number>();
+    raw.forEach((row) => {
+      const propertyId = Number(row.property_id);
+      const avgRate = parseFloat(parseFloat(row.avg_rate).toFixed(1)) || 0;
+      avgRateMap.set(propertyId, avgRate);
+    });
+
+    // Build final response
+    return properties.map((property) => {
+      const rate = avgRateMap.get(property.id) || 0;
+      return {
+        ...this.formatPropertyDetails(property, baseUrl),
+        images: imagesMap[property.id],
+        rate,
+      };
+    });
+  }
   async findPropertiesByUserOffice(userId: number, baseUrl: string) {
     const query = await this.createBasePropertyDetailsQuery()
       .andWhere('property.property_type = :type', {
@@ -642,7 +749,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     };
   }
 
-  async findWithinBounds(bounds: ExploreMapDto,userId: number) {
+  async findWithinBounds(bounds: ExploreMapDto, userId: number) {
     const query = this.propertyRepo
       .createQueryBuilder('property')
       .leftJoin('property.post', 'post')
@@ -684,16 +791,18 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       );
 
     if (userId) {
-      query.addSelect(
-        `CASE
+      query
+        .addSelect(
+          `CASE
         WHEN EXISTS (
           SELECT 1 FROM property_favorites pf
           WHERE pf.property_id = property.id AND pf.user_id = :userId
         ) THEN true
         ELSE false
       END`,
-        'is_favorite',
-      ).setParameter('userId', userId);
+          'is_favorite',
+        )
+        .setParameter('userId', userId);
     } else {
       query.addSelect('false', 'is_favorite');
     }
@@ -758,10 +867,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         id: property.region?.city?.id,
         name: property.region?.city?.name,
       },
-      images: property.images.map((image) => ({
-        id: image.id,
-        image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
-      })),
+      // images: property.images.map((image) => ({
+      //   id: image.id,
+      //   image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+      // })),
       tag: property.post?.tag,
     };
 
@@ -1271,6 +1380,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       .addGroupBy('post.id')
       .addGroupBy('residential.id')
       .addGroupBy('images.id')
+      .addGroupBy('images.image_path')
       .addGroupBy('region.id')
       .addGroupBy('city.id')
       .addGroupBy('office.id');

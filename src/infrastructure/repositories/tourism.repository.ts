@@ -110,6 +110,61 @@ export class TourismRepository implements ITourismRepository {
     );
     await this.addServRepo.save(relations);
   }
+
+  async findFiveTopRatedTourism(userId: number, baseUrl: string) {
+    const raws = await this.propRepo
+      .createQueryBuilder('property')
+      .leftJoin('property.office', 'office')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.touristic', 'touristic')
+      .leftJoin('property.feedbacks', 'feedback')
+      .where('office.user_id = :userId', { userId })
+      .andWhere('property.property_type = :type', {
+        type: PropertyType.TOURISTIC,
+      })
+      .andWhere('property.is_deleted = :isDeleted', { isDeleted: false })
+      .select([
+        'property.id as property_id',
+        'post.title as post_title',
+        'post.image as image',
+        'region.name as region_name',
+        'city.name as city_name',
+        'property.area as property_area',
+        'touristic.price as touristic_price',
+        'post.status as post_status',
+        'touristic.status as touristic_status',
+        'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+      ])
+      .groupBy('property.id')
+      .addGroupBy('post.title')
+      .addGroupBy('post.image')
+      .addGroupBy('region.name')
+      .addGroupBy('city.name')
+      .addGroupBy('touristic.price')
+      .addGroupBy('post.status')
+      .addGroupBy('touristic.status')
+      .orderBy('avg_rate', 'DESC')
+      .limit(5)
+      .getRawMany();
+
+    return raws.map((item) => ({
+      id: item.property_id,
+      title: item.post_title,
+      postImage: item.image
+        ? `${baseUrl}/uploads/properties/posts/images/${item.image}`
+        : null,
+      location: `${item.city_name}, ${item.region_name}`,
+      area: Number(item.property_area.toFixed(1)),
+      price: Number(item.touristic_price),
+      status:
+        item.post_status === PropertyPostStatus.APPROVED
+          ? item.touristic_status
+          : item.post_status,
+      avg_rate: parseFloat(parseFloat(item.avg_rate).toFixed(1)),
+    }));
+  }
   async findAllByOffice(officeId: number, baseUrl: string) {
     const raws = await this.propRepo
       .createQueryBuilder('property')
@@ -872,7 +927,6 @@ export class TourismRepository implements ITourismRepository {
     return results.slice(0, limit);
   }
 
-  
   async createBookingWithInvoices(options: {
     userId: number;
     propertyId: number;
@@ -994,14 +1048,14 @@ export class TourismRepository implements ITourismRepository {
       .getRawMany();
   }
 
-   async findTopTouristicLocationsByOffice(officeId: number): Promise<string[]> {
+  async findTopTouristicLocationsByOffice(officeId: number): Promise<string[]> {
     const raws = await this.calendarRepo
       .createQueryBuilder('c')
       .innerJoin('c.touristic', 't')
       .innerJoin('t.property', 'p')
       .innerJoin('p.region', 'r')
       .innerJoin('r.city', 'city')
-      .where('p.office_id = :officeId', { officeId })  
+      .where('p.office_id = :officeId', { officeId })
       .select([
         "city.name || '، ' || r.name AS location",
         'COUNT(c.id) AS requests',
@@ -1011,6 +1065,6 @@ export class TourismRepository implements ITourismRepository {
       .limit(10)
       .getRawMany();
 
-    return raws.map(r => String(r.location));
+    return raws.map((r) => String(r.location));
   }
 }

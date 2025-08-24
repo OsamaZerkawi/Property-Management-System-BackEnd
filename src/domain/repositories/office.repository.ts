@@ -26,5 +26,4 @@ export interface OfficeRepositoryInterface {
   createComplaint(userId: number, officeId: number, complaintText: string): Promise<void>
   findOfficeDetailsById(officeId: number, baseUrl: string)
   getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> ,
-  findTopRatedPropertiesForOffice(userId: number,type: PropertyType);
 }
