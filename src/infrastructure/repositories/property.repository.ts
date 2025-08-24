@@ -360,20 +360,24 @@ export class PropertyRepository implements PropertyRepositoryInterface {
 
     const propertyIds = properties.map((p) => p.id);
 
-    const images = await this.imageRepo
-      .createQueryBuilder('img')
-      .leftJoinAndSelect('img.property', 'property')
-      .where('property.id IN (:...ids)', { ids: propertyIds })
-      .getMany();
+    let imagesMap: Record<number, any[]> = {};
 
-    const imagesMap = images.reduce((map, img) => {
-      if (!map[img.property.id]) map[img.property.id] = [];
-      map[img.property.id].push({
-        id: img.id,
-        image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
-      });
-      return map;
-    }, {} as Record<number, any[]>);
+    if (propertyIds.length > 0) {
+      const images = await this.imageRepo
+        .createQueryBuilder('img')
+        .leftJoinAndSelect('img.property', 'property')
+        .where('property.id IN (:...ids)', { ids: propertyIds })
+        .getMany();
+
+      imagesMap = images.reduce((map, img) => {
+        if (!map[img.property.id]) map[img.property.id] = [];
+        map[img.property.id].push({
+          id: img.id,
+          image_url: `${baseUrl}/uploads/properties/images/${img.image_path}`,
+        });
+        return map;
+      }, {} as Record<number, any[]>);
+    }
 
     // Create a map of propertyId -> avg_rate
     const avgRateMap = new Map<number, number>();
