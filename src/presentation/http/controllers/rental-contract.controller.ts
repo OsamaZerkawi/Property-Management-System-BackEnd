@@ -20,6 +20,7 @@ import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-ren
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateRentalRequestDto } from 'src/application/dtos/rental_contracts/create-rental-request.dto';
 import { CreateRentalRequestUseCase } from 'src/application/use-cases/rental/create-rental-request.use-case';
+import { CreateRentalRequestSwagger } from '../swagger/rental-contract/create-rental-request.swagger';
  @Controller('rental-contracts')
 export class RentalContractController {
     
@@ -33,6 +34,7 @@ export class RentalContractController {
   ) {}
 
   @Post('Rent')
+  @CreateRentalRequestSwagger()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createRental(
