@@ -1,4 +1,4 @@
- 
+// presentation/http/decorators/create-purchase.swagger.ts
 import { applyDecorators } from '@nestjs/common';
 import {
   ApiOperation,
@@ -7,6 +7,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 export function CreatePurchaseSwagger() {
@@ -15,9 +16,12 @@ export function CreatePurchaseSwagger() {
     ApiOperation({
       summary: 'إنشاء عملية شراء',
       description:
-        'يقوم بإنشاء عملية شراء جديدة لمستخدم معين وإصدار الفواتير الخاصة بها.',
+        'إنشاء عملية شراء لعقار سكني وإصدار الفواتير. يتم إرسال البيانات كـ JSON في جسم الطلب.',
     }),
-    ApiConsumes('multipart/form-data'),
+
+    // الآن نأخذ JSON بدلاً من form-data
+    ApiConsumes('application/json'),
+
     ApiBody({
       schema: {
         type: 'object',
@@ -40,22 +44,39 @@ export function CreatePurchaseSwagger() {
           paymentIntentId: {
             type: 'string',
             example: 'pi_123456789',
-            description: 'معرّف عملية الدفع (اختياري)',
+            description: 'معرّف عملية الدفع (اختياري). إذا لم يكن متوفرًا ارسله null أو احذفه',
           },
           installment: {
             type: 'boolean',
             example: true,
-            description: 'هل عملية الشراء بالتقسيط؟',
+            description: 'هل عملية الشراء بالتقسيط؟ (true/false)',
           },
         },
         required: ['propertyId', 'deposit', 'totalPrice', 'installment'],
+        example: {
+          propertyId: 12,
+          deposit: 5000,
+          totalPrice: 20000,
+          paymentIntentId: 'pi_123456789',
+          installment: true
+        }
       },
     }),
+
     ApiCreatedResponse({
       description: 'تم إنشاء عملية الشراء وإصدار الفواتير بنجاح',
     }),
-    ApiBadRequestResponse({
-      description: 'فشل في التحقق من صحة البيانات (مثلاً: قيمة العربون أكبر من السعر الإجمالي)',
+    ApiBadRequestResponse({ 
+      schema: {
+        example: {
+          message: 'العقار محجوز أو غير متاح حالياً',
+          error: 'Bad Request',
+          statusCode: 400,
+        },
+      },
+    }),
+    ApiUnauthorizedResponse({
+      description: 'مطلوب توكن صالح للوصول',
     }),
   );
 }
