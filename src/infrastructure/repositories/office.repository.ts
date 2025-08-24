@@ -81,7 +81,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findOneByUserId(userId: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'socials', 'region', 'region.city'],
+      relations: ['user', 'region', 'region.city'],
     });
   }
 
@@ -647,5 +647,30 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
     const raw = await qb.getRawOne();
     return raw || null;
+  }
+  
+    async getAllSocialPlatformsWithOfficeLinks(officeId: number): Promise<Array<{ id: number; name: string; link: string | null }>> {
+    const spRepo = this.dataSource.getRepository(SocialPlatform);
+    const osRepo = this.dataSource.getRepository(OfficeSocial);
+ 
+    const platforms = await spRepo.find({ order: { id: 'ASC' } });
+ 
+    const officeSocials = await osRepo.find({
+      where: { office: { id: officeId } as any },
+      relations: ['platform'],
+    });
+ 
+    const linkMap = new Map<number, string | null>();
+    for (const os of officeSocials) {
+      if (os.platform && typeof os.platform.id === 'number') {
+        linkMap.set(os.platform.id, os.link ?? null);
+      }
+    }
+ 
+    return platforms.map(p => ({
+      id: p.id,
+      name: p.name,
+      link: linkMap.has(p.id) ? linkMap.get(p.id) ?? null : null,
+    }));
   }
 }

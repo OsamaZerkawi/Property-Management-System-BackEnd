@@ -180,7 +180,8 @@ export class OfficeController {
     await this.updateOfficeUseCase.execute(user.sub, dto);
     return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
   }
-  //@Roles('صاحب مكتب')
+  
+  @Roles('صاحب مكتب')
   @Get()
   @UseGuards(JwtAuthGuard)
   @GetOfficeDetailsSwagger()
