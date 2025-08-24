@@ -694,12 +694,12 @@ export class TourismRepository implements ITourismRepository {
     return { data, total };
   }
 
-  async findByMonth(
-    propertyId: number,
-    year: number,
-    month: number,
-    baseUrl: string,
-  ) {
+   async findByMonth(
+  propertyId: number,
+  year: number,
+  month: number,
+  baseUrl: string,
+) {
     const raws = await this.invoiceRepo
       .createQueryBuilder('ui')
       .innerJoin('ui.calendar', 'c')
@@ -709,19 +709,23 @@ export class TourismRepository implements ITourismRepository {
       .andWhere('EXTRACT(YEAR FROM c.start_date) = :year', { year })
       .andWhere('EXTRACT(MONTH FROM c.start_date) = :month', { month })
       .select([
+        'ui.id AS "id"',                   
+        'ui.paymentMethod AS "paymentMethod"',  
         `TO_CHAR(c.start_date, 'YYYY-MM-DD') AS "startDate"`,
         `TO_CHAR(c.end_date, 'YYYY-MM-DD') AS "endDate"`,
-        'u.phone                AS "phone"',
-        'ui.invoiceImage      AS "invoiceImage"',
-        'ui.amount             AS "price"',
-        'ui.status             AS "status"',
-        'ui.reason             AS "reason"',
+        'u.phone AS "phone"',
+        'ui.invoiceImage AS "invoiceImage"',
+        'ui.amount AS "price"',
+        'ui.status AS "status"',
+        'ui.reason AS "reason"',
       ])
       .orderBy('c.start_date')
       .addOrderBy('ui.reason')
       .getRawMany();
 
     return raws.map((r) => ({
+      id: r.id,
+      paymentMethod: r.paymentMethod,
       startDate: r.startDate,
       endDate: r.endDate,
       phone: r.phone,
@@ -750,6 +754,7 @@ export class TourismRepository implements ITourismRepository {
       relations: ['office', 'touristic'],
     });
   }
+
   async findRelatedTouristicProperties(options: {
     PropertyId: number;
     targetPrice: number;
