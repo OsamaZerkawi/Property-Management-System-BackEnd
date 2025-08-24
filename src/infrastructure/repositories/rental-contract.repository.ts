@@ -216,13 +216,11 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
       const perPeriodRaw = Number(totalPrice) / Number(periodCount); 
       const perPeriod = Math.round(perPeriodRaw * 100) / 100;
  
-      let curStart = startDate;
-      const bookingPeriodDays = Number(office?.booking_period ?? 0);
+      let curStart = startDate; 
       for (let i = 0; i < periodCount; i++) {
         const isFirst = i === 0; 
         const billingStart = curStart; 
-        const paymentDeadline = bookingPeriodDays > 0 ? addDays(billingStart, bookingPeriodDays) : addDays(billingStart, 1);
-
+        const paymentDeadline = addMonths(billingStart, 1);
         const invoicePayload: DeepPartial<any> = {
           user: { id: userId } as any,
           property: { id: propertyId } as any,
@@ -235,7 +233,9 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
           stripePaymentIntentId: isFirst && paymentIntentId ? paymentIntentId : null,
           paymentMethod:  PaymentMethod.STRIPE , 
         }; 
-         invoiceRepo.create(invoicePayload);  
+         const invoice = invoiceRepo.create(invoicePayload);  
+         await invoiceRepo.save(invoice);  
+         curStart = rentalPeriod === RentalPeriod.YEARLY   ? addYears(billingStart, 1) : addMonths(billingStart, 1);
       } 
     });
   }
