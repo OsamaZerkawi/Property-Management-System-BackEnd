@@ -36,6 +36,7 @@ import { ReminderService } from 'src/application/services/reminder.service';
 import { InvoiceReminderLog } from 'src/domain/entities/invoice-reminder-log.entity';
 import { NotificationModule } from './notification.module';
 import { ReminderModule } from './reminder.module';
+import { Image } from 'src/domain/entities/image.entity';
   
 
 @Module({
@@ -49,7 +50,7 @@ import { ReminderModule } from './reminder.module';
     TypeOrmModule.forFeature([
       RentalContract,UserPropertyInvoice,Property,
       Office,PropertyFeedback,OfficeSocial,Residential,
-      User,Region,UserPropertyPurchase,InvoiceReminderLog,
+      User,Region,UserPropertyPurchase,InvoiceReminderLog,Image,
     ]),
   ],
   controllers: [RentalContractController],
