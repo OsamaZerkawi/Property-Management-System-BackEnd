@@ -236,7 +236,7 @@ export class TourismController {
   @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @ShowTourismFinanceByYearSwaggerDoc()
-  @Get('mobile/:id/year/:year')
+  @Get('/:id/year/:year')
   async getFinanceByYear(
     @Param('id') propertyId: number,
     @Param('year') year: number,
