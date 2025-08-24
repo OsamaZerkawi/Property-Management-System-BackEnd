@@ -136,7 +136,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findById(id: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { id },
-      relations: ['user', 'socials', 'region', 'region.city'],
+      relations: ['user', 'region', 'region.city'],
     });
   }
   async updateOfficeWithSocials(

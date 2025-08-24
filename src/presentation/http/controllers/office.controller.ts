@@ -139,15 +139,15 @@ export class OfficeController {
     return successResponse(data, 'تم ارجاع طريقة الدفع', 200);
   }
 
-  @Roles('صاحب مكتب')
-  @Get('/commission')
+  @Public()
+  @Get('/commission/:office_id')
   @CommissionSwaggerDocs()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async getCommissionOfOffice(@CurrentUser() user) {
-    const userId = user.sub;
-    const data = await this.getCommissionOfOfficeUseCase.execute(userId);
-    return successResponse(data, 'تم ارجاع عمولة المكتب', 200);
+  async getCommissionOfOffice(@Param('office_id') officeId: number,) {
+
+    const data = await this.getCommissionOfOfficeUseCase.execute(officeId);
+    return successResponse(data, 'تم ارجاع عمولة ونسبة المكتب', 200);
   }
 
   // @Post()

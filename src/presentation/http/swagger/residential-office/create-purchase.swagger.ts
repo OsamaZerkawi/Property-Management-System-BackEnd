@@ -14,12 +14,11 @@ export function CreatePurchaseSwagger() {
   return applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'إنشاء عملية شراء',
+      summary: 'خاص بتطبيق الموبايل',
       description:
-        'إنشاء عملية شراء لعقار سكني وإصدار الفواتير. يتم إرسال البيانات كـ JSON في جسم الطلب.',
+        'إنشاء عملية شراء لعقار سكني وإصدار الفواتير.',
     }),
-
-    // الآن نأخذ JSON بدلاً من form-data
+ 
     ApiConsumes('application/json'),
 
     ApiBody({
