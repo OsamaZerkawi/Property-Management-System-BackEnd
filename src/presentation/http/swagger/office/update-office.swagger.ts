@@ -11,6 +11,7 @@ export function UpdateOfficeSwagger() {
         type: 'object',
         properties: {
           name: { type: 'string', nullable: true },
+          phone: { type: 'string', nullable: true },
           logo: { type: 'string', format: 'binary', nullable: true },
           type: { type: 'string', enum: ['سياحي', 'عقاري', 'الكل'], nullable: true },
           commission: { type: 'number', nullable: true },

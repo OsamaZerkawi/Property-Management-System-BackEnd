@@ -22,6 +22,7 @@ import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { Property } from 'src/domain/entities/property.entity';
+import { User } from 'src/domain/entities/user.entity';
 
 @Injectable()
 export class OfficeRepository implements OfficeRepositoryInterface {
@@ -153,7 +154,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
       for (const key of [
         'name',
-        'logo',
+        'logo', 
         'type',
         'commission',
         'booking_period',
@@ -180,11 +181,22 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         officeUpdateData.region = region;
       }
 
+      if (dto.phone !== undefined) {
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: office.user.id },
+      });
+
+      if (!user) {
+        throw new NotFoundException('المستخدم المرتبط بالمكتب غير موجود');
+      }
+
+      user.phone = dto.phone;
+      await queryRunner.manager.save(user);
+      }
+      
       if (Object.keys(officeUpdateData).length > 0) {
         await queryRunner.manager.update(Office, officeId, officeUpdateData);
-      }
-      console.log('Processing socials:', dto.socials); // للتتبع
-      //هنا يطبع Processing socials: [ {}, {} ]
+      } 
       if (dto.socials && dto.socials.length > 0) {
         for (const social of dto.socials) {
           const platform = await queryRunner.manager.findOne(SocialPlatform, {

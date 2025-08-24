@@ -175,8 +175,7 @@ export class OfficeController {
     @Body() dto: UpdateOfficeDto,
     @UploadedFile() logoFile?: Express.Multer.File,
   ) {
-    if (logoFile) dto.logo = logoFile.filename;
-    console.log('incoming dto.socials:', dto.socials);
+    if (logoFile) dto.logo = logoFile.filename; 
     await this.updateOfficeUseCase.execute(user.sub, dto);
     return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
   }
