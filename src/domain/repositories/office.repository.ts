@@ -4,6 +4,7 @@ import { Office } from 'src/domain/entities/offices.entity';
 import { UpdateOfficeFeesDto } from "src/application/dtos/office/Update-office-fees.dto";
 import { ExploreMapDto } from "src/application/dtos/map/explore-map.dto";
 import { UpdateOfficeDto } from 'src/application/dtos/office/update-office.dto';
+import { PropertyType } from '../enums/property-type.enum';
 
 export const OFFICE_REPOSITORY = 'OFFICE_REPOSITORY';
 export interface OfficeRepositoryInterface {
@@ -24,5 +25,6 @@ export interface OfficeRepositoryInterface {
   rateAnOffice( userId: number, officeId: number, rate: number,)
   createComplaint(userId: number, officeId: number, complaintText: string): Promise<void>
   findOfficeDetailsById(officeId: number, baseUrl: string)
-  getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> 
+  getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> ,
+  findTopRatedPropertiesForOffice(userId: number,type: PropertyType);
 }

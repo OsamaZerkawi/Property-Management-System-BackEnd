@@ -17,13 +17,13 @@ export class ProfitsSubscriber
     return UserPropertyInvoice;
   }
 
-  async afterInsert(event: InsertEvent<UserPropertyInvoice>) { 
+  async afterInsert(event: InsertEvent<UserPropertyInvoice>) {
     if (event.entity?.status === InvoicesStatus.PAID) {
       await this.updateOfficeProfits(event, event.entity);
     }
   }
 
-  async afterUpdate(event: UpdateEvent<UserPropertyInvoice>) { 
+  async afterUpdate(event: UpdateEvent<UserPropertyInvoice>) {
     const newInvoice = event.entity as UserPropertyInvoice;
     const oldInvoice = event.databaseEntity as UserPropertyInvoice;
 
@@ -41,7 +41,7 @@ export class ProfitsSubscriber
     event: InsertEvent<UserPropertyInvoice> | UpdateEvent<UserPropertyInvoice>,
     invoice: UserPropertyInvoice,
   ) {
-    console.log('hi it works')
+    console.log('hi it works');
     const propertyRepo = event.manager.getRepository(Property);
     const officeRepo = event.manager.getRepository(Office);
 
@@ -54,7 +54,7 @@ export class ProfitsSubscriber
 
     const office = property.office;
     const commissionRate = office.commission || 0;
-    const commissionAmount = (Number(invoice.amount) * commissionRate);
+    const commissionAmount = Number(invoice.amount) * commissionRate;
 
     await officeRepo.update(
       { id: office.id },

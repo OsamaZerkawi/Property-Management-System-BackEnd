@@ -1,5 +1,5 @@
 /* src/infrastructure/repositories/office.repository.ts */
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Office } from 'src/domain/entities/offices.entity';
@@ -16,6 +16,12 @@ import {
   UpdateOfficeDto,
 } from 'src/application/dtos/office/update-office.dto';
 import { Region } from 'src/domain/entities/region.entity';
+import { PropertyType } from 'src/domain/enums/property-type.enum';
+import { ListingType } from 'src/domain/enums/listing-type.enum';
+import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
+import { PropertyStatus } from 'src/domain/enums/property-status.enum';
+import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
+import { Property } from 'src/domain/entities/property.entity';
 
 @Injectable()
 export class OfficeRepository implements OfficeRepositoryInterface {
@@ -24,8 +30,81 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     private readonly officeRepo: Repository<Office>,
     @InjectRepository(OfficeSocial)
     private readonly socialRepo: Repository<OfficeSocial>,
+    @InjectRepository(Property)
+    private readonly propertyRepo: Repository<Property>,
     private readonly dataSource: DataSource,
   ) {}
+
+  async findTopRatedPropertiesForOffice(userId: number, type: PropertyType) {
+    const baseQuery = this.propertyRepo
+      .createQueryBuilder('property')
+      .leftJoin('property.post', 'post')
+      .leftJoin('property.region', 'region')
+      .leftJoin('region.city', 'city')
+      .leftJoin('property.feedbacks', 'feedback')
+      .leftJoin('property.office', 'office')
+      .leftJoin('office.user', 'user')
+      .where('property.property_type = :type', { type })
+      .andWhere('property.is_deleted = false')
+      .andWhere('post.status = :status', {
+        status: PropertyPostStatus.APPROVED,
+      })
+      .andWhere('user.id = :userId', { userId });
+
+    if (type === PropertyType.RESIDENTIAL) {
+      baseQuery
+        .leftJoin('property.residential', 'residential')
+        .andWhere('residential.listing_type = :listingType', {
+          listingType: ListingType.RENT,
+        })
+        .select([
+          'property.id AS property_id',
+          'post.id',
+          'post.title AS post_title',
+          'post.image AS post_image',
+          'post.created_at AS post_date',
+          'city.name AS city_name',
+          'region.name AS region_name',
+          'residential.id',
+          'residential.listing_type AS listing_type',
+          'residential.rental_price AS rental_price',
+          'residential.rental_period AS rental_period',
+          'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+          'COUNT(DISTINCT feedback.user_id) AS rating_count',
+        ])
+        .groupBy('property.id')
+        .addGroupBy('post.id')
+        .addGroupBy('city.name')
+        .addGroupBy('region.name')
+        .addGroupBy('residential.id');
+    } else if (type === PropertyType.TOURISTIC) {
+      baseQuery
+        .leftJoin('property.touristic', 'touristic')
+        .select([
+          'property.id AS property_id',
+          'post.title AS post_title',
+          'post.image AS post_image',
+          'city.name AS city_name',
+          'region.name AS region_name',
+          'touristic.price AS touristic_price',
+          'COALESCE(AVG(feedback.rate), 0) AS avg_rate',
+          'COUNT(DISTINCT feedback.user_id) AS rating_count',
+        ])
+        .groupBy('property.id')
+        .addGroupBy('post.title')
+        .addGroupBy('post.image')
+        .addGroupBy('city.name')
+        .addGroupBy('region.name')
+        .addGroupBy('touristic.price')
+        .addGroupBy('touristic.status');
+    }
+
+    baseQuery.orderBy('avg_rate', 'DESC').limit(5);
+
+    const raw = await baseQuery.getRawMany();
+
+    return raw;
+  }
 
   async findOfficesByCityId(cityId: number) {
     return this.baseOfficesQuery()

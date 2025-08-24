@@ -37,6 +37,9 @@ import { TOURISM_REPOSITORY } from "src/domain/repositories/tourism.repository";
 import { TourismRepository } from "src/infrastructure/repositories/tourism.repository";
 import { TourismModule } from "./tourism.module";
 import { Residential } from "src/domain/entities/residential.entity";
+import { GetTopRatedPropertiesForOfficeUseCase } from "src/application/use-cases/office/get-top-rated-properties-for-office.use-case";
+import { Property } from "src/domain/entities/property.entity";
+import { User } from "src/domain/entities/user.entity";
 
 @Module({
   imports: [
@@ -44,7 +47,7 @@ import { Residential } from "src/domain/entities/residential.entity";
     PropertyModule,
     forwardRef(() => ResidentialOfficeModule), 
     forwardRef(() => TourismModule),      
-    TypeOrmModule.forFeature([Office, Region, OfficeSocial, SocialPlatform,OfficeFeedback,Residential
+    TypeOrmModule.forFeature([Office, Region, OfficeSocial, SocialPlatform,OfficeFeedback,Residential,Property,User
 ]),
   ],
   controllers: [OfficeController],
@@ -67,6 +70,7 @@ import { Residential } from "src/domain/entities/residential.entity";
     GetPropertiesForOfficeUseCase,
     GetOfficeDashboardUseCase,
     GetTopRegionsUseCase,
+    GetTopRatedPropertiesForOfficeUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository

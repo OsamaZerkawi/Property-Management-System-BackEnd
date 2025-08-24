@@ -33,7 +33,7 @@ export class GetPopularStatsUseCase {
         id: item.id,
         name: item.name,
         logo: item.logo
-          ? `${baseUrl}/uploads/service-providers/logos/${item.logo}`
+          ? `${baseUrl}/uploads/providers/logo/${item.logo}`
           : null,
         career: item.career,
         location: item.location,
