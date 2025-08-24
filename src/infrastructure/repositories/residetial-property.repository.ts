@@ -1,6 +1,6 @@
 import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { addMonths, startOfDay } from "date-fns";
+import { addDays, addMonths, startOfDay } from "date-fns";
 import { stat } from "fs";
 import { ResidentialPropertiesSearchFiltersDto } from "src/application/dtos/property/residential-properties-search-filters.dto";
 import { ResidentialPropertyDto } from "src/application/dtos/property/ResidentialProperty.dto";
@@ -381,11 +381,19 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
         relations: ['residential', 'office'],
       });
 
-      if (!property) throw new NotFoundException('العقار غير موجود');
-      if (!property.residential) throw new NotFoundException('هذا العقار ليس سكنياً أو تفاصيله غير موجودة');
+    if (!property) throw new NotFoundException('العقار غير موجود');
+    if (!property.residential) throw new NotFoundException('هذا العقار ليس سكنياً أو تفاصيله غير موجودة');
 
-      const residential = property.residential;
-  
+
+    const residential = property.residential;
+    const office = property.office;
+ 
+    const isAvailable = residential.status===PropertyStatus.AVAILABLE;
+ 
+    if (!isAvailable) {
+      throw new BadRequestException('العقار محجوز أو غير متاح حالياً');
+    }
+      const nowStart = startOfDay(new Date());
       const purchaseRepo = manager.getRepository(UserPropertyPurchase);
       const purchase = purchaseRepo.create({
         user: { id: userId } as any,
@@ -396,21 +404,25 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
       await purchaseRepo.save(purchase);
  
       const invoiceRepo = manager.getRepository(UserPropertyInvoice);
- 
+      const bookingPeriodDays = Number(office?.booking_period ?? 0);
       const depositInvoice = invoiceRepo.create({
         user: { id: userId } as any,
         property: { id: propertyId } as any,
         amount: deposit,
-        billing_period_start: startOfDay(new Date()),
+        billing_period_start: nowStart,
         reason: InoviceReasons.DEPOSIT,
         status: InvoicesStatus.PAID,
         stripePaymentIntentId: paymentIntentId ?? undefined, 
+        payment_deadline:nowStart,
         paymentMethod: PaymentMethod.STRIPE,
       });
       await invoiceRepo.save(depositInvoice);
- 
-      const remaining = Number(totalPrice) - Number(deposit);
 
+     residential.status = 'محجوز' as any;
+     await manager.save(Residential, residential);
+
+      const remaining = Number(totalPrice) - Number(deposit);
+      const firstDueDeadline = bookingPeriodDays > 0 ? addDays(nowStart, bookingPeriodDays) : addDays(nowStart, 1);
       if (!installment) { 
         const remInvoice = invoiceRepo.create({
           user: { id: userId } as any,
@@ -420,6 +432,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
           reason: InoviceReasons.PROPERTY_PURCHASE,
           status: InvoicesStatus.PENDING,
           stripePaymentIntentId: undefined,
+          payment_deadline:  firstDueDeadline,
           paymentMethod: PaymentMethod.STRIPE,
         });
         await invoiceRepo.save(remInvoice);
@@ -437,7 +450,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
           const isLast = i === months - 1;
           const amount = isLast ? Number((remaining - accumulated).toFixed(2)) : Number(base.toFixed(2));
           accumulated += amount;
-
+        const paymentDeadline = (i === 0) ? firstDueDeadline : addMonths(dueDate, 1);
           const installmentInvoice = invoiceRepo.create({
             user: { id: userId } as any,
             property: { id: propertyId } as any,
@@ -446,6 +459,7 @@ export class ResidentialPropertyRepository implements ResidentialPropertyReposit
             reason: InoviceReasons.INSTALLMENT_PAYMENT,
             status: InvoicesStatus.PENDING,
             stripePaymentIntentId: undefined,
+            payment_deadline:paymentDeadline,
             paymentMethod: PaymentMethod.STRIPE,
           });
           await invoiceRepo.save(installmentInvoice);

@@ -1,12 +1,19 @@
 // src/infrastructure/repositories/rental-contract.repository.ts
-import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { DataSource, DeepPartial, Repository } from 'typeorm';
 import { RentalContract } from 'src/domain/entities/rental-contract.entity';
 import { RentalContractRepositoryInterface } from 'src/domain/repositories/rental-contract.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
 import { Property } from 'src/domain/entities/property.entity';
+import { addDays, addMonths, addYears, startOfDay } from 'date-fns';
+import { PropertyStatus } from 'src/domain/enums/property-status.enum';
+import { Residential } from 'src/domain/entities/residential.entity';
+import { RentalPeriod } from 'src/domain/enums/rental-period.enum';
+import { InoviceReasons } from 'src/domain/enums/inovice-reasons.enum';
+import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
  
 @Injectable()
 export class RentalContractRepository  
@@ -18,7 +25,8 @@ export class RentalContractRepository
     @InjectRepository(UserPropertyInvoice)
     private readonly InvoiceRepo: Repository<UserPropertyInvoice>,
     @InjectRepository(Property)
-    private readonly propertyRepo: Repository<Property>,) {}
+    private readonly propertyRepo: Repository<Property>,
+    private readonly dataSource: DataSource) {}
  
   async save(contract: RentalContract): Promise<RentalContract> {
     return this.repo.save(contract);
@@ -150,6 +158,85 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
         user:     { id: userId },
       },
       order: { billing_period_start: 'ASC' },
+    });
+  }
+  async createRentalBooking( 
+    userId: number,
+    propertyId: number,
+    periodCount: number,
+    totalPrice: number,
+    paymentIntentId?: string
+  )  { 
+
+    return await this.dataSource.transaction(async (manager) => {
+ 
+      const property = await manager.findOne( Property , {
+        where: { id: propertyId },
+        relations: ['residential', 'office'],
+      } as any);
+
+      if (!property) throw new NotFoundException('العقار غير موجود');
+      if (!property.residential) throw new NotFoundException('تفاصيل السكني غير موجودة');
+
+      const residential = property.residential;
+      const office = property.office;
+
+     const isAvailable = residential.status===PropertyStatus.AVAILABLE; 
+        if (!isAvailable) throw new BadRequestException('العقار محجوز أو غير متوفر حالياً');
+ 
+      const startDate = startOfDay(new Date());
+      let endDate: Date;
+    
+      const rentalPeriod = residential.rental_period ?? RentalPeriod.MONTHLY; 
+       let reason;
+      if (rentalPeriod===RentalPeriod.YEARLY) {
+        endDate = addYears(startDate, periodCount);
+        reason=InoviceReasons.YEARLY_RENT
+      } else { 
+        endDate = addMonths(startDate, periodCount);
+        reason=InoviceReasons.MONTHLY_RENT
+      }
+ 
+      const rcRepo = manager.getRepository(RentalContract);
+      const rentalPayload: DeepPartial<any> = {
+        user: { id: userId } as any,
+        residential: { id: residential.id } as any,
+        period: periodCount,
+        start_date: startDate,
+        end_date: endDate,
+        price_per_period: totalPrice, 
+      };
+      const rentalContract = rcRepo.create(rentalPayload);
+      await rcRepo.save(rentalContract);
+ 
+      residential.status = PropertyStatus.RESERVED;
+      await manager.save( Residential , residential);
+ 
+      const invoiceRepo = manager.getRepository( UserPropertyInvoice );
+      const perPeriodRaw = Number(totalPrice) / Number(periodCount); 
+      const perPeriod = Math.round(perPeriodRaw * 100) / 100;
+ 
+      let curStart = startDate;
+      const bookingPeriodDays = Number(office?.booking_period ?? 0);
+      for (let i = 0; i < periodCount; i++) {
+        const isFirst = i === 0; 
+        const billingStart = curStart; 
+        const paymentDeadline = bookingPeriodDays > 0 ? addDays(billingStart, bookingPeriodDays) : addDays(billingStart, 1);
+
+        const invoicePayload: DeepPartial<any> = {
+          user: { id: userId } as any,
+          property: { id: propertyId } as any,
+          calendar: null,
+          amount:  perPeriod,  
+          billing_period_start: billingStart,
+          payment_deadline: paymentDeadline,
+          reason: reason,
+          status: isFirst && paymentIntentId ?  InvoicesStatus.PAID  :  InvoicesStatus.PENDING ,
+          stripePaymentIntentId: isFirst && paymentIntentId ? paymentIntentId : null,
+          paymentMethod:  PaymentMethod.STRIPE , 
+        }; 
+         invoiceRepo.create(invoicePayload);  
+      } 
     });
   }
 }

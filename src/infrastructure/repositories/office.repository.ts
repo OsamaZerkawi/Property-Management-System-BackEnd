@@ -22,6 +22,7 @@ import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { Property } from 'src/domain/entities/property.entity';
+import { User } from 'src/domain/entities/user.entity';
 
 @Injectable()
 export class OfficeRepository implements OfficeRepositoryInterface {
@@ -81,7 +82,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findOneByUserId(userId: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'socials', 'region', 'region.city'],
+      relations: ['user', 'region', 'region.city'],
     });
   }
 
@@ -136,7 +137,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
   async findById(id: number): Promise<Office | null> {
     return this.officeRepo.findOne({
       where: { id },
-      relations: ['user', 'socials', 'region', 'region.city'],
+      relations: ['user', 'region', 'region.city'],
     });
   }
   async updateOfficeWithSocials(
@@ -153,7 +154,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
       for (const key of [
         'name',
-        'logo',
+        'logo', 
         'type',
         'commission',
         'booking_period',
@@ -180,11 +181,22 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         officeUpdateData.region = region;
       }
 
+      if (dto.phone !== undefined) {
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: office.user.id },
+      });
+
+      if (!user) {
+        throw new NotFoundException('المستخدم المرتبط بالمكتب غير موجود');
+      }
+
+      user.phone = dto.phone;
+      await queryRunner.manager.save(user);
+      }
+      
       if (Object.keys(officeUpdateData).length > 0) {
         await queryRunner.manager.update(Office, officeId, officeUpdateData);
-      }
-      console.log('Processing socials:', dto.socials); // للتتبع
-      //هنا يطبع Processing socials: [ {}, {} ]
+      } 
       if (dto.socials && dto.socials.length > 0) {
         for (const social of dto.socials) {
           const platform = await queryRunner.manager.findOne(SocialPlatform, {
@@ -647,5 +659,30 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
     const raw = await qb.getRawOne();
     return raw || null;
+  }
+  
+    async getAllSocialPlatformsWithOfficeLinks(officeId: number): Promise<Array<{ id: number; name: string; link: string | null }>> {
+    const spRepo = this.dataSource.getRepository(SocialPlatform);
+    const osRepo = this.dataSource.getRepository(OfficeSocial);
+ 
+    const platforms = await spRepo.find({ order: { id: 'ASC' } });
+ 
+    const officeSocials = await osRepo.find({
+      where: { office: { id: officeId } as any },
+      relations: ['platform'],
+    });
+ 
+    const linkMap = new Map<number, string | null>();
+    for (const os of officeSocials) {
+      if (os.platform && typeof os.platform.id === 'number') {
+        linkMap.set(os.platform.id, os.link ?? null);
+      }
+    }
+ 
+    return platforms.map(p => ({
+      id: p.id,
+      name: p.name,
+      link: linkMap.has(p.id) ? linkMap.get(p.id) ?? null : null,
+    }));
   }
 }

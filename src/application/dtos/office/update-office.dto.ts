@@ -10,10 +10,10 @@ import {
   import { OfficeType } from 'src/domain/enums/office-type.enum';
   import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
   export class SocialItem {
-    @IsNotEmpty()
-    @IsNumber()
-    id: number;
-  
+  @IsNotEmpty()
+  @IsNumber()
+  id: number;
+
   @IsOptional()
   @IsString()
   @IsUrl({}, { message: 'الرابط يجب أن يكون صحيحاً' })
@@ -28,6 +28,10 @@ import {
   @IsOptional()
   @IsString()
   logo?: string|null;
+
+  @IsOptional()
+  @IsString()
+  phone: string;
 
   @IsOptional()
   @IsEnum(OfficeType, { message: 'type must be one of the following values: touristic, residential, both' })

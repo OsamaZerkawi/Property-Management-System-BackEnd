@@ -8,9 +8,9 @@ export class GetCommissionOfOfficeUseCase {
         private readonly officeRepo: OfficeRepositoryInterface,
     ){}
 
-    async execute(userId: number){
+    async execute(officeId: number){
 
-        const office =  await this.officeRepo.findOneByUserId(userId);
+        const office =  await this.officeRepo.findById(officeId);
 
         if(!office){
             throw new NotFoundException(
@@ -19,7 +19,9 @@ export class GetCommissionOfOfficeUseCase {
         }
 
         return {
-            commission: Number(office.commission)??0.00
+            commission: Number(office.commission)??0.00,
+            deposit_per_m2:Number(office.deposit_per_m2)??0.00
+
         };
     }
 }
