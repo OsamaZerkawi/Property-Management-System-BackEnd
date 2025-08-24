@@ -233,7 +233,7 @@ export class TourismController {
     return successResponse(data, 'تم ارجاع تفاصيل العقار السياحي بنجاح');
   }
 
-  //@Roles('صاحب مكتب')
+  @Roles('صاحب مكتب')
   @UseGuards(JwtAuthGuard)
   @ShowTourismFinanceByYearSwaggerDoc()
   @Get('/:id/year/:year')

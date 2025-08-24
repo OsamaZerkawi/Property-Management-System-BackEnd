@@ -482,24 +482,40 @@ export class TourismRepository implements ITourismRepository {
       ])
       .getRawMany();
   }
-  async findFullPropertyDetails(propertyId: number, officeId: number) {
-    return await this.propRepo.findOne({
-      where: {
-        id: propertyId,
-        property_type: PropertyType.TOURISTIC,
-        office: { id: officeId },
-      },
-      relations: [
-        'region',
-        'region.city',
-        'post',
-        'touristic',
-        'images',
-        'touristic.additionalServices',
-        'touristic.additionalServices.service',
-      ],
-    });
-  }
+async findFullPropertyDetails(propertyId: number, officeId: number) {
+  const qb = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoinAndSelect('property.region', 'region')
+    .leftJoinAndSelect('region.city', 'city')
+    .leftJoinAndSelect('property.post', 'post')
+    .leftJoinAndSelect('property.touristic', 'touristic')
+    .leftJoinAndSelect('property.images', 'images')
+    .leftJoinAndSelect('touristic.additionalServices', 'additionalServices')
+    .leftJoinAndSelect('additionalServices.service', 'service')
+    .addSelect(
+      (subQb) =>
+        subQb
+          .select('ROUND(AVG(pf.rate)::numeric, 2)')
+          .from('property_feedbacks', 'pf')
+          .where('pf.property_id = property.id'),
+      'avg_rate',
+    )
+    .where('property.id = :propertyId', { propertyId })
+    .andWhere('property.property_type = :type', { type: PropertyType.TOURISTIC })
+    .andWhere('property.office_id = :officeId', { officeId });
+
+  const { entities, raw } = await qb.getRawAndEntities();
+
+  if (!entities[0]) return null;
+
+  // أرجع الـ entity + القيمة المحسوبة
+  return {
+    ...entities[0],
+    avgRate: raw[0]?.avg_rate ? Number(raw[0].avg_rate) : null,
+  };
+}
+
+
 
   async findPropertyDetails(propertyId: number, userId?: number) {
     const qb = this.propRepo
