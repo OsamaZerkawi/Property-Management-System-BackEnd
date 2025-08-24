@@ -38,6 +38,7 @@ export class GetTourismFinanceByYearUseCase {
 
     for (let m = 1; m <= lastMonth; m++) {
       const records = await this.repo.findByMonth(propertyId, year, m,baseUrl);
+      console.log(records)
       result.push({ month: m, records });
     }
 

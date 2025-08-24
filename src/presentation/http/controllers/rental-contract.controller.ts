@@ -32,7 +32,7 @@ export class RentalContractController {
     private readonly createRentalRequestUseCase: CreateRentalRequestUseCase
   ) {}
 
-  @Post()
+  @Post('Rent')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async createRental(
