@@ -71,7 +71,11 @@ export class TouristicPropertySeeder {
         name: faker.company.name(),
         logo: 'office.jpeg',
         type: OfficeType.TOURISTIC,
-        commission: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        commission: faker.number.float({
+          min: 0.01,
+          max: 0.1,
+          fractionDigits: 2,
+        }),
         booking_period: faker.number.int({ min: 1, max: 30 }),
         deposit_per_m2: faker.number.float({
           min: 10,
@@ -82,7 +86,7 @@ export class TouristicPropertySeeder {
           min: 0,
           max: 1,
           fractionDigits: 2,
-        }), 
+        }),
         payment_method: PaymentMethod.BOTH,
         opening_time: '08:00 صباحًا',
         closing_time: '08:00 مساءً',

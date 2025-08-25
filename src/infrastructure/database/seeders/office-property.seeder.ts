@@ -79,7 +79,11 @@ export class OfficePropertySeeder {
         name: faker.company.name(),
         logo: 'office.jpeg',
         type: OfficeType.RESIDENTIAL,
-        commission: faker.number.float({ min: 0, max: 1, fractionDigits: 2 }),
+        commission: faker.number.float({
+          min: 0.01,
+          max: 0.1,
+          fractionDigits: 2,
+        }),
         booking_period: faker.number.int({ min: 1, max: 30 }),
         deposit_per_m2: faker.number.float({
           min: 10,
