@@ -66,11 +66,11 @@ export class ShowTourismMobileUseCase {
       livingRoomCount: entity.living_room_count ?? null,
       kitchenCount: entity.kitchen_count ?? null,
       bathroomCount: entity.bathroom_count ?? null,
-      hasFurniture: entity.has_furniture ?? null,    
+      hasFurniture: entity.has_furniture ?? null,   
+      status:entity.touristic.status, 
       rate,
       avg_rate,  
       is_favorite,
-
       office:{
       id: entity.office?.id ?? null, 
       logo: `${baseUrl}/uploads/offices/logos/${entity.office?.logo}`,
