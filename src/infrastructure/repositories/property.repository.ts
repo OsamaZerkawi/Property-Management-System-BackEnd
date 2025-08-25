@@ -53,7 +53,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       where: {
         id: propertyId,
       },
-      relations: { office: { user: true } },
+      relations: { office: { user: true }, post: true },
     });
   }
 

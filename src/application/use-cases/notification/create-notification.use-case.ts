@@ -14,7 +14,13 @@ export class CreateNotificationUseCase {
     private readonly notificationQueue: NotificationQueueService,
   ) {}
 
-  async execute(userId: number, title: string, body: string,senderName: string,data?: any) {
+  async execute(
+    userId: number,
+    title: string,
+    body: string,
+    senderName: string,
+    data?: any,
+  ) {
     const notification = await this.notificationRepo.create({
       userId,
       title,
@@ -32,7 +38,6 @@ export class CreateNotificationUseCase {
       //   notification_id: notification.id,
       // };
 
-      // هون لازم نلاقي حل اذا كذا توكن
       for (const token of tokens) {
         this.notificationQueue.sendToDevice(token, title, body);
       }
