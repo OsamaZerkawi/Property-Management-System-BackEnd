@@ -16,6 +16,7 @@ import { NotificationQueueService } from "src/infrastructure/queues/notificatoin
 import { CreateNotificationForTargetUseCase } from "src/application/use-cases/notification/create-notification-for-target.use-case";
 import { User } from "src/domain/entities/user.entity";
 import { UserModule } from "./user.module";
+import { ListNotificationsMobileUseCase } from "src/application/use-cases/notification/list-notifications-mobile.use-case";
 
 @Module({
     imports:[
@@ -31,6 +32,7 @@ import { UserModule } from "./user.module";
       ListNotificationsUseCase,
       MarkNotificationReadUseCase,
       CreateNotificationForTargetUseCase,
+      ListNotificationsMobileUseCase,
       {
         provide:NOTIFICATION_REPOSITORY,
         useClass:NotificationRepository

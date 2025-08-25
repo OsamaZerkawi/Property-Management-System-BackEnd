@@ -25,6 +25,7 @@ import { Public } from 'src/shared/decorators/public.decorator';
 import { CreateNotificationForTargetUseCase } from 'src/application/use-cases/notification/create-notification-for-target.use-case';
 import { Roles } from 'src/shared/decorators/role.decorator';
 import { Permissions } from 'src/shared/decorators/permission.decorator';
+import { ListNotificationsMobileUseCase } from 'src/application/use-cases/notification/list-notifications-mobile.use-case';
 
 @Controller('notifications')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -37,6 +38,7 @@ export class NotificationsController {
     private readonly firebaseService: FirebaseService,
     private readonly notificationQueue: NotificationQueueService,
     private readonly createNotificationForTargetUseCase: CreateNotificationForTargetUseCase,
+    private readonly listNotificationsMobileUseCase: ListNotificationsMobileUseCase,
   ) {}
 
   @Get()
@@ -56,7 +58,9 @@ export class NotificationsController {
   @GetUserNotificationsSwaggerDoc()
   async getUserNotificationsMobile(@CurrentUser() user) {
     const userId = user.sub;
-    const notifications = await this.listNotificationsUseCase.execute(userId);
+    const notifications = await this.listNotificationsMobileUseCase.execute(
+      userId,
+    );
 
     return successResponse(
       notifications,

@@ -8,7 +8,7 @@ import {
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class ListNotificationsUseCase {
+export class ListNotificationsMobileUseCase {
   constructor(
     @Inject(NOTIFICATION_REPOSITORY)
     private readonly notificationRepository: NotificationRepositoryInterface,
@@ -20,16 +20,11 @@ export class ListNotificationsUseCase {
     const notifications = await this.notificationRepository.findByUser(userId);
 
     return notifications.map((notification) => {
-      const senderRole =
-        notification.sender?.userRoles?.length > 0
-          ? notification.sender.userRoles[0].role.name
-          : null;
-
       return {
         id: notification.id,
         title: notification.title,
         body: notification.body,
-        name: senderRole,
+        name: notification.senderName,
         isRead: notification.isRead,
         sent_at: notification.sent_at?.toISOString().slice(0, 10),
       };

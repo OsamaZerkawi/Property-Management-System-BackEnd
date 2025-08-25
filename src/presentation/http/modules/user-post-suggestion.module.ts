@@ -11,9 +11,11 @@ import { UserPost } from "src/domain/entities/user-post.entity";
 import { UserPostSuggestion } from "src/domain/entities/user-post-suggestions.entity";
 import { Property } from "src/domain/entities/property.entity";
 import { PropertyModule } from "./property.module";
+import { NotificationModule } from "./notification.module";
 
 @Module({
     imports:[
+        NotificationModule,
         AuthModule,
         UserPostModule,
         PropertyModule,
