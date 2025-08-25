@@ -18,8 +18,8 @@ export function UploadInvoiceDocumentSwaggerDoc() {
     ApiBearerAuth(),
  
     ApiOperation({
-      summary: 'رفع وثيقة فاتورة لعقد إيجار',
-      description: 'يُستخدم هذا الـ API لرفع وثيقة فاتورة لعقد إيجار موجود.',
+      summary: 'خاص بداش المكتب',
+      description: 'يُستخدم هذا الـ API لرفع وثيقة فاتورة لعقد إيجار او حجز سياحي موجود.',
     }),
  
     ApiParam({

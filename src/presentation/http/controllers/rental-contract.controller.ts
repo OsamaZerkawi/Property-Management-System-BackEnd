@@ -27,7 +27,6 @@ export class RentalContractController {
    constructor(
     private readonly createRentalContractUseCase: CreateRentalContractUseCase,
     private readonly getRentalContractsUseCase: GetRentalContractsUseCase,
-    private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
     private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
     private readonly getContractDetailsUseCase: GetContractDetailsUseCase ,
     private readonly createRentalRequestUseCase: CreateRentalRequestUseCase
@@ -86,28 +85,6 @@ export class RentalContractController {
       const message = error.message || 'حدث خطأ غير متوقع';
       return errorResponse(message, statusCode);
     } 
-  }
-
-  @Post(':id/document')  
-  @UploadInvoiceDocumentSwaggerDoc()
-  @UseGuards(JwtAuthGuard)
-  @UserInvoiceImageInterceptor()
-  async uploadDocument(
-    @Param('id', ParseIntPipe) invoiceId: number,
-    @UploadedFile() document: Express.Multer.File,
-  ) {
-    if (!document) {
-      return errorResponse( 'يجب إرفاق ملف الفاتورة', 400);
-    }
-
-    try {
-      await this.uploadInvoiceDocumentUseCase.execute(invoiceId, document.filename);
-      return successResponse(null, 'تم رفع الوثيقة بنجاح', 200);
-    } catch (error) {
-      const statusCode = error.getStatus?.() || 500;
-      const message = error.message || 'حدث خطأ غير متوقع';
-      return errorResponse(message, statusCode);
-    }
   }
 
   @Get('search')

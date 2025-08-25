@@ -1,19 +1,23 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Req, UploadedFile, UseGuards } from "@nestjs/common";
 import { Request } from "express";
 import { FindAllUserInvoicesUseCase } from "src/application/use-cases/user-invoices/find-all-user-invoices.use-case";
 import { CurrentUser } from "src/shared/decorators/current-user.decorator";
-import { successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
+import { errorResponse, successPaginatedResponse, successResponse } from "src/shared/helpers/response.helper";
 import { GetOwnInvoicesSwaggerDoc } from "../swagger/user-invoices/get-own-invoices-for-property.swagger";
 import { PayInvoiceUseCase } from "src/application/use-cases/user-invoices/pay-invoice.usecase";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { PayInvoiceDto } from "src/application/dtos/property/pay-invoice.dto";
 import { PayInvoiceSwaggerDoc } from "../swagger/user-property-invoices/pay-invoice.swagger";
+import { UploadInvoiceDocumentSwaggerDoc } from "../swagger/rental-contract/upload-document.swagger";
+import { UserInvoiceImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
+import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-property-reservation/upload-document-invoice.use-case";
 
 @Controller('user-invoice')
 export class UserInvoiceController {
     constructor(
         private readonly findAllUserInvoicesUseCase: FindAllUserInvoicesUseCase,
-        private readonly payInvoiceUseCase: PayInvoiceUseCase
+        private readonly payInvoiceUseCase: PayInvoiceUseCase,
+        private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
 
     ){}
 
@@ -47,4 +51,25 @@ export class UserInvoiceController {
     const result = await this.payInvoiceUseCase.execute(invoiceId, dto.paymentIntentId);
     return successResponse(result, 'تم تسجيل الدفع بنجاح', HttpStatus.OK);
   }
+    @Post(':id/document')  
+    @UploadInvoiceDocumentSwaggerDoc()
+    @UseGuards(JwtAuthGuard)
+    @UserInvoiceImageInterceptor()
+    async uploadDocument(
+      @Param('id', ParseIntPipe) invoiceId: number,
+      @UploadedFile() document: Express.Multer.File,
+    ) {
+      if (!document) {
+        return errorResponse( 'يجب إرفاق ملف الفاتورة', 400);
+      }
+  
+      try {
+        await this.uploadInvoiceDocumentUseCase.execute(invoiceId, document.filename);
+        return successResponse(null, 'تم رفع الوثيقة بنجاح', 200);
+      } catch (error) {
+        const statusCode = error.getStatus?.() || 500;
+        const message = error.message || 'حدث خطأ غير متوقع';
+        return errorResponse(message, statusCode);
+      }
+    }
 }
