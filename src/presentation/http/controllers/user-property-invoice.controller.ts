@@ -8,6 +8,7 @@ import { errorResponse, successResponse } from "src/shared/helpers/response.help
 import { UserPropertyInvoiceImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
 import { UploadUserPropertyInvoiceDocumentSwaggerDoc } from "../swagger/user-property-invoices/upload-document.swagger";
 import { UploadInvoiceDocumentOfflineSwaggerDoc } from "../swagger/user-property-invoices/upload-document-offline.swagger";
+import { CurrentUser } from "src/shared/decorators/current-user.decorator";
 
 @Controller('user-property-invoices')
 export class UserPropertyInvoiceController {

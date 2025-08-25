@@ -14,12 +14,13 @@ export class CreateNotificationUseCase {
     private readonly notificationQueue: NotificationQueueService,
   ) {}
 
-  async execute(userId: number, title: string, body: string, data?: any) {
+  async execute(userId: number, title: string, body: string,senderName: string,data?: any) {
     const notification = await this.notificationRepo.create({
       userId,
       title,
       body,
       data,
+      senderName,
       isRead: false,
       sent_at: new Date(),
     });

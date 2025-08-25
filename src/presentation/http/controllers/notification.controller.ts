@@ -52,6 +52,19 @@ export class NotificationsController {
     );
   }
 
+  @Get('mobile')
+  @GetUserNotificationsSwaggerDoc()
+  async getUserNotificationsMobile(@CurrentUser() user) {
+    const userId = user.sub;
+    const notifications = await this.listNotificationsUseCase.execute(userId);
+
+    return successResponse(
+      notifications,
+      'تم ارجاع جميع الاشعارات الخاصة بك ',
+      200,
+    );
+  }
+
   @Public()
   @Post('device')
   @HttpCode(HttpStatus.OK)

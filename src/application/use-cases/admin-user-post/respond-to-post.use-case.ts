@@ -34,6 +34,7 @@ export class RespondToUserPostUseCase {
         userPost.user.id,
         `المنشور ${userPost.title}`,
         'تم قبول طلب منشورك',
+        'مشرف'
       );
     } else {
       await this.userPostRepo.update(id, {
@@ -43,7 +44,8 @@ export class RespondToUserPostUseCase {
       await this.createNotificationUseCase.execute(
         userPost.user.id,
         `المنشور ${userPost.title}`,
-        'تم رفض طلب منشورك'
+        'تم رفض طلب منشورك',
+        'مشرف'
       )
     }
   }

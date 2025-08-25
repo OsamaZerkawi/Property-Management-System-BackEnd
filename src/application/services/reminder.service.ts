@@ -114,11 +114,7 @@ export class ReminderService {
           invoice.user.id,
           title,
           body,
-          {
-            invoice_id: invoice.id,
-            reminder_type: log.reminderType,
-            deadline: invoice.payment_deadline,
-          }
+          'مشرف',
         );
 
         await this.invoiceReminderLogRepo.update(log.id, {

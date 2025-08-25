@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NotificationKind } from 'rxjs';
 import { User } from 'src/domain/entities/user.entity';
 import {
   NOTIFICATION_REPOSITORY,
@@ -20,17 +21,12 @@ export class ListNotificationsUseCase {
     const notifications = await this.notificationRepository.findByUser(userId);
 
     return notifications.map((notification) => {
-      const senderRole =
-        notification.sender?.userRoles?.length > 0
-          ? notification.sender.userRoles[0].role.name
-          : null;
-
       return {
         id: notification.id,
         title: notification.title,
         body: notification.body,
-        name: senderRole,
-        // isRead: notification.isRead,
+        name: notification.senderName,
+        isRead: notification.isRead,
         sent_at: notification.sent_at?.toISOString().slice(0, 10),
       };
     });

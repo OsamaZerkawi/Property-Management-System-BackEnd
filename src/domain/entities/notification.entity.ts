@@ -29,6 +29,9 @@ export class Notification {
   @Column({ nullable: true })
   senderId: number;
 
+  @Column({ nullable: true })
+  senderName: string;
+
   @ManyToOne(() => User, (user) => user.sentNotifications, { eager: true })
   @JoinColumn({ name: 'senderId' })
   sender: User;
