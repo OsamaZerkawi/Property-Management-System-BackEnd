@@ -7,6 +7,7 @@ import { GetOwnInvoicesSwaggerDoc } from "../swagger/user-invoices/get-own-invoi
 import { PayInvoiceUseCase } from "src/application/use-cases/user-invoices/pay-invoice.usecase";
 import { JwtAuthGuard } from "src/shared/guards/jwt-auth.guard";
 import { PayInvoiceDto } from "src/application/dtos/property/pay-invoice.dto";
+import { PayInvoiceSwaggerDoc } from "../swagger/user-property-invoices/pay-invoice.swagger";
 
 @Controller('user-invoice')
 export class UserInvoiceController {
@@ -34,6 +35,7 @@ export class UserInvoiceController {
     }
     
     @Post(':invoiceId')
+    @PayInvoiceSwaggerDoc()
     @UseGuards(JwtAuthGuard)   
     @HttpCode(HttpStatus.OK)
     async payInvoice(
