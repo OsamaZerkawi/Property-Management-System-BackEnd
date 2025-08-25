@@ -29,10 +29,10 @@ export function UpdateServiceProviderSwagger() {
           opening_time: { type: 'string', example: '09:00', description: 'وقت الافتتاح بصيغة HH:mm' },
           closing_time: { type: 'string', example: '22:00', description: 'وقت الإغلاق بصيغة HH:mm' },
           details: { type: 'string', example: 'وصف مختصر للخدمة', description: 'تفاصيل مزود الخدمة' },
-          status: { type: 'boolean', example: '1', description: 'هل الخدمة فعالة ام لا' },
+          status: { type: 'boolean', example: 'true', description: 'هل الخدمة فعالة ام لا' },
           career: {
             type: 'string',
-            example: 'RESTAURANT',
+            example: 'كهربائي',
             description:
               'نوع مزود الخدمة (استخدم إحدى قيم enum ServiceProviderType المتاحة في مشروعك).',
           },
