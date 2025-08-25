@@ -8,4 +8,5 @@ export interface UserPropertyInvoiceRepositoryInterface{
     createInvoice(data: UploadPropertyReservationDto,image: string);
     getUserPropertyInvoices(userId: number,propertyId: number);
     saveBulk(invoices: UserPropertyInvoice[]): Promise<UserPropertyInvoice[]>;
+    markInvoiceAsPaid(invoiceId: number, paymentIntentId: string)
 }

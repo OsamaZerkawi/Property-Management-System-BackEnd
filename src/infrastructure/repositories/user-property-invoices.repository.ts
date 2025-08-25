@@ -1,4 +1,4 @@
-import { Inject, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { addMonths, endOfMonth, startOfMonth } from "date-fns";
 import { UploadPropertyReservationDto } from "src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto";
@@ -16,7 +16,7 @@ import { UserPropertyInvoiceRepositoryInterface } from "src/domain/repositories/
 import { USER_PURCHASE_REPOSITORY, UserPurchaseRepositoryInterface } from "src/domain/repositories/user-purchase.repository";
 import { USER_REPOSITORY, UserRepositoryInterface } from "src/domain/repositories/user.repository";
 import { errorResponse } from "src/shared/helpers/response.helper";
-import { Brackets, Repository } from "typeorm";
+import { Brackets, DataSource, Repository } from "typeorm";
 
 export class UserPropertyInvoiceRepository implements UserPropertyInvoiceRepositoryInterface {
     constructor(
@@ -31,6 +31,7 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
         @Inject(USER_PURCHASE_REPOSITORY)
         private readonly userPurchaseRepo: UserPurchaseRepositoryInterface,
         private readonly reminderService: ReminderService,
+        private readonly dataSource: DataSource
     ){}
 
 
@@ -198,4 +199,17 @@ export class UserPropertyInvoiceRepository implements UserPropertyInvoiceReposit
     async saveBulk(invoices: UserPropertyInvoice[]): Promise<UserPropertyInvoice[]> {
     return this.userPropertyInvoiceRepo.save(invoices);
   }
+  async markInvoiceAsPaid(invoiceId: number, paymentIntentId: string): Promise<void> {
+  
+    const invoice = await this.userPropertyInvoiceRepo.findOneBy({ id: invoiceId });
+    if (!invoice) throw new NotFoundException('الفاتورة غير موجودة');
+    if (invoice.status === InvoicesStatus.PAID) throw new BadRequestException('الفاتورة مدفوعة مسبقاً');
+
+    await this.userPropertyInvoiceRepo.update({ id: invoiceId }, {
+      stripePaymentIntentId: paymentIntentId,
+      paymentMethod: PaymentMethod.STRIPE,
+      status: InvoicesStatus.PAID,
+    });
+  }
+
 }
