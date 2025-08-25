@@ -871,10 +871,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         id: property.region?.city?.id,
         name: property.region?.city?.name,
       },
-      // images: property.images.map((image) => ({
-      //   id: image.id,
-      //   image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
-      // })),
+      images: property.images.map((image) => ({
+      id: image.id,
+      image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+      })),
       tag: property.post?.tag,
     };
 
