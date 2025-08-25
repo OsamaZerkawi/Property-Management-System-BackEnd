@@ -25,55 +25,62 @@ export class ShowTourismUseCase {
     const office = await this.officeRepo.findOneByUserId(userId);
     if (!office) throw new NotFoundException('المكتب غير موجود');
 
-    const property = await this.tourismRepo.findFullPropertyDetails(
-      propertyId,
-      office.id,
-    );
+    const result = await this.tourismRepo.findFullPropertyDetails(
+    propertyId,
+    office.id,
+  );
 
-    if (!property) {
-      throw new NotFoundException('العقار غير موجود أو لا ينتمي إلى مكتبك');
-    }
+  const property = await this.tourismRepo.findFullPropertyDetails(
+  propertyId,
+  office.id,
+);
 
-    const { post, touristic, images, region } = property;
+if (!property) {
+  throw new NotFoundException('العقار غير موجود أو لا ينتمي إلى مكتبك');
+}
 
-    const dto = {
-      propertyId: property.id,
-      title: post.title,
-      description: post.description,
-      date: format(post.date, 'yyyy-MM-dd'),
-      tag: post.tag,
-      postImage: post.image
-        ? `${baseUrl}/uploads/properties/posts/images/${post.image}`
-        : null,
-      images: property.images.map((image) => ({
-        id: image.id,
-        image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
-      })),
-      longitude: property.longitude,
-      latitude: property.latitude,
-      postStatus: post.status,
-      status: touristic.status,
-      region: region.name,
-      city: region.city.name,
-      street: touristic.street,
-      area: property.area,
-      roomCount: property.room_count,
-      livingRoomCount: property.living_room_count,
-      kitchenCount: property.kitchen_count,
-      bathroomCount: property.bathroom_count,
-      bedroomCount: property.bedroom_count,
-      hasFurniture: property.has_furniture,
+const { post, touristic, images, region } = property as any;
+const rate = (property as any).avgRate;
 
-      price: Number(touristic.price),
-      electricity: touristic.electricity,
-      water: touristic.water,
-      pool: touristic.pool,
+const dto = {
+  propertyId: property.id,
+  title: post.title,
+  description: post.description,
+  date: format(post.date, 'yyyy-MM-dd'),
+  tag: post.tag,
+  postImage: post.image
+    ? `${baseUrl}/uploads/properties/posts/images/${post.image}`
+    : null,
+  images: images.map((image) => ({
+    id: image.id,
+    image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+  })),
+  longitude: property.longitude,
+  latitude: property.latitude,
+  postStatus: post.status,
+  status: touristic.status,
+  region: region.name,
+  city: region.city.name,
+  street: touristic.street,
+  area: property.area,
+  roomCount: property.room_count,
+  livingRoomCount: property.living_room_count,
+  kitchenCount: property.kitchen_count,
+  bathroomCount: property.bathroom_count,
+  bedroomCount: property.bedroom_count,
+  hasFurniture: property.has_furniture,
 
-      additionalServices: touristic.additionalServices.map(
-        (rel) => rel.service.name,
-      ),
-    };
+  price: Number(touristic.price),
+  electricity: touristic.electricity,
+  water: touristic.water,
+  pool: touristic.pool,
 
-    return dto;
+  additionalServices: touristic.additionalServices.map(
+    (rel) => rel.service.name,
+  ), 
+  rate,  
+};
+
+return dto;
   }
 }

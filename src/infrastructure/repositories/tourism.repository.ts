@@ -482,24 +482,40 @@ export class TourismRepository implements ITourismRepository {
       ])
       .getRawMany();
   }
-  async findFullPropertyDetails(propertyId: number, officeId: number) {
-    return await this.propRepo.findOne({
-      where: {
-        id: propertyId,
-        property_type: PropertyType.TOURISTIC,
-        office: { id: officeId },
-      },
-      relations: [
-        'region',
-        'region.city',
-        'post',
-        'touristic',
-        'images',
-        'touristic.additionalServices',
-        'touristic.additionalServices.service',
-      ],
-    });
-  }
+async findFullPropertyDetails(propertyId: number, officeId: number) {
+  const qb = this.propRepo
+    .createQueryBuilder('property')
+    .leftJoinAndSelect('property.region', 'region')
+    .leftJoinAndSelect('region.city', 'city')
+    .leftJoinAndSelect('property.post', 'post')
+    .leftJoinAndSelect('property.touristic', 'touristic')
+    .leftJoinAndSelect('property.images', 'images')
+    .leftJoinAndSelect('touristic.additionalServices', 'additionalServices')
+    .leftJoinAndSelect('additionalServices.service', 'service')
+    .addSelect(
+      (subQb) =>
+        subQb
+          .select('ROUND(AVG(pf.rate)::numeric, 2)')
+          .from('property_feedbacks', 'pf')
+          .where('pf.property_id = property.id'),
+      'avg_rate',
+    )
+    .where('property.id = :propertyId', { propertyId })
+    .andWhere('property.property_type = :type', { type: PropertyType.TOURISTIC })
+    .andWhere('property.office_id = :officeId', { officeId });
+
+  const { entities, raw } = await qb.getRawAndEntities();
+
+  if (!entities[0]) return null;
+
+  // أرجع الـ entity + القيمة المحسوبة
+  return {
+    ...entities[0],
+    avgRate: raw[0]?.avg_rate ? Number(raw[0].avg_rate) : null,
+  };
+}
+
+
 
   async findPropertyDetails(propertyId: number, userId?: number) {
     const qb = this.propRepo
@@ -694,12 +710,12 @@ export class TourismRepository implements ITourismRepository {
     return { data, total };
   }
 
-  async findByMonth(
-    propertyId: number,
-    year: number,
-    month: number,
-    baseUrl: string,
-  ) {
+   async findByMonth(
+  propertyId: number,
+  year: number,
+  month: number,
+  baseUrl: string,
+) {
     const raws = await this.invoiceRepo
       .createQueryBuilder('ui')
       .innerJoin('ui.calendar', 'c')
@@ -709,19 +725,23 @@ export class TourismRepository implements ITourismRepository {
       .andWhere('EXTRACT(YEAR FROM c.start_date) = :year', { year })
       .andWhere('EXTRACT(MONTH FROM c.start_date) = :month', { month })
       .select([
+        'ui.id AS "id"',                   
+        'ui.paymentMethod AS "paymentMethod"',  
         `TO_CHAR(c.start_date, 'YYYY-MM-DD') AS "startDate"`,
         `TO_CHAR(c.end_date, 'YYYY-MM-DD') AS "endDate"`,
-        'u.phone                AS "phone"',
-        'ui.invoiceImage      AS "invoiceImage"',
-        'ui.amount             AS "price"',
-        'ui.status             AS "status"',
-        'ui.reason             AS "reason"',
+        'u.phone AS "phone"',
+        'ui.invoiceImage AS "invoiceImage"',
+        'ui.amount AS "price"',
+        'ui.status AS "status"',
+        'ui.reason AS "reason"',
       ])
       .orderBy('c.start_date')
       .addOrderBy('ui.reason')
       .getRawMany();
 
     return raws.map((r) => ({
+      id: r.id,
+      paymentMethod: r.paymentMethod,
       startDate: r.startDate,
       endDate: r.endDate,
       phone: r.phone,
@@ -750,6 +770,7 @@ export class TourismRepository implements ITourismRepository {
       relations: ['office', 'touristic'],
     });
   }
+
   async findRelatedTouristicProperties(options: {
     PropertyId: number;
     targetPrice: number;

@@ -28,6 +28,7 @@ export function ShowTourismSwaggerDoc() {
         properties: {
           propertyId:       { type: 'number', example: 106 },
           title:            { type: 'string', example: 'فيلا 350 متر مربع' },
+          rate:            { type: 'number', example: 4.5 },
           description:      { type: 'string', example: 'وصف مختصر للمنشور هنا' },
           date:             { type: 'string', example: '2025-08-05' },
           tag:              { type: 'string', example: 'فيلا' },

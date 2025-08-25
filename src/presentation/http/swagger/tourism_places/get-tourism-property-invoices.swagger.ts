@@ -31,6 +31,8 @@ export function ShowTourismFinanceByYearSwaggerDoc() {
               items: {
                 type: 'object',
                 properties: {
+                  id:           { type: 'integer', example: 3 },
+                  paymentMethod:{ type: 'string', example: 'دفع يدوي' },
                   startDate:    { type: 'string', example: '2025-08-01' },
                   endDate:      { type: 'string', example: '2025-08-06' },
                   phone:        { type: 'string', example: '0599999999' },

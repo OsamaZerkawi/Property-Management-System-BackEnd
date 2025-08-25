@@ -40,6 +40,7 @@ import { Residential } from "src/domain/entities/residential.entity";
 import { GetTopRatedPropertiesForOfficeUseCase } from "src/application/use-cases/office/get-top-rated-properties-for-office.use-case";
 import { Property } from "src/domain/entities/property.entity";
 import { User } from "src/domain/entities/user.entity";
+import { GetCommissionOfOfficeMobileUseCase } from "src/application/use-cases/office/get-commission-of-office(mobile).use-case";
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { User } from "src/domain/entities/user.entity";
     GetOfficeDashboardUseCase,
     GetTopRegionsUseCase,
     GetTopRatedPropertiesForOfficeUseCase,
+    GetCommissionOfOfficeMobileUseCase,
     {
       provide: OFFICE_REPOSITORY,
       useClass: OfficeRepository
