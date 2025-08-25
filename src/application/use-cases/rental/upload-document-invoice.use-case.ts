@@ -17,10 +17,8 @@ export class UploadInvoiceDocumentUseCase {
       }
       if(invoice.invoiceImage!=null){
         throw new BadRequestException('يوجد وثيقة لهذا السجل بالفعل');
-      }
-      invoice.invoiceImage = filename;
-      invoice.status       = InvoicesStatus.PAID;
-      await this.invoiceRepo.saveInvoice(invoice); 
+      } 
+      await this.invoiceRepo.saveInvoice(invoiceId,filename); 
   }
 }
 

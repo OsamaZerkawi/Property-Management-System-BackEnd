@@ -8,7 +8,7 @@ export interface RentalContractRepositoryInterface {
   save(contract: RentalContract): Promise<RentalContract>;
   findContractsByOfficeId(officeId: number);
   findOneById(id: number): Promise<UserPropertyInvoice | null>;
-  saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice>;
+  saveInvoice(invoiceId: number, filename: string);
   searchContractsBytitle(officeId: number,keyword: string);
   findByIdWithRelations(id: number): Promise<RentalContract | null>;
   verifyPropertyBelongsToOffice(   propertyId: number,  officeId: number,): Promise<boolean>; 
