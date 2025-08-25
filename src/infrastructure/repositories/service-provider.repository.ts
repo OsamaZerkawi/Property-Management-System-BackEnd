@@ -210,7 +210,7 @@ export class ServiceProviderRepository
    async findOneByUserId(userId: number): Promise<ServiceProvider | null> {
     return this.serviceProviderRepo.findOne({
       where: { user: { id: userId } },
-      relations: ['user', 'region'],  
+      relations: ['user', 'region','region.city'],  
     });
   }
 

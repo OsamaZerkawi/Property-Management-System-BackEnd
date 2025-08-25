@@ -44,6 +44,8 @@ import { UpdateServiceProviderDto } from 'src/application/dtos/service-provider/
 import { UpdateServiceProviderUseCase } from 'src/application/use-cases/service-provider/update-service-provider.use-case';
 import { ServiceProviderLogoInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 import { UpdateServiceProviderSwagger } from '../swagger/service-provider/update-service-provider.swagger';
+import { GetServiceProviderUseCase } from 'src/application/use-cases/service-provider/get-service-provider-details(dashboard).use-case';
+import { GetServiceProviderSwagger } from '../swagger/service-provider/get-service-provider.swagger';
 @Controller('service-provider')
 export class ServiceProviderController {
   constructor(
@@ -53,8 +55,21 @@ export class ServiceProviderController {
     private readonly getTopRatedServiceProvidersUseCase: GetTopRatedServiceProvidersUseCase,
     private readonly createOrUpdateServiceProviderFeedbackUseCase: CreateOrUpdateServiceProviderFeedbackUseCase,
     private readonly getServiceProviderDetailsUseCase: GetServiceProviderDetailsUseCase,
-    private readonly updateUseCase: UpdateServiceProviderUseCase
+    private readonly updateUseCase: UpdateServiceProviderUseCase,
+    private readonly getServiceProviderUseCase: GetServiceProviderUseCase,
   ) {}
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard) 
+  @GetServiceProviderSwagger()
+  async getMyServiceProvider(
+    @CurrentUser() user: any,
+    @Req() request: Request,
+  ) {
+    const baseUrl = `${request.protocol}://${request.get('host')}`;
+    const data = await this.getServiceProviderUseCase.execute(user.sub, baseUrl);
+    return successResponse(data, 'تم جلب بيانات مزود الخدمة بنجاح');
+  }
 
   @Get()
   @GetAllServiceProvidersSwaggerDoc()
@@ -243,4 +258,6 @@ export class ServiceProviderController {
   
     return successResponse([], 'تم تحديث بيانات مزود الخدمة بنجاح', HttpStatus.OK);
   } 
+  
+ 
 }
