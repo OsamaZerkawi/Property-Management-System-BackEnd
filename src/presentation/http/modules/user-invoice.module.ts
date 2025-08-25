@@ -22,7 +22,7 @@ import { ReminderService } from "src/application/services/reminder.service";
 import { NotificationModule } from "./notification.module";
 import { ReminderModule } from "./reminder.module";
 import { PayInvoiceUseCase } from "src/application/use-cases/user-invoices/pay-invoice.usecase";
-import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-property-reservation/upload-document-invoice.use-case";
+import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 
 @Module({
     imports:[
@@ -42,8 +42,8 @@ import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-pro
     controllers:[UserInvoiceController],
     providers:[
         FindAllUserInvoicesUseCase,
-        UploadInvoiceDocumentUseCase,
         PayInvoiceUseCase,
+        UploadInvoiceDocumentUseCase,
         {
             provide:USER_PROPERTY_INVOICES_REPOSITORY,
             useClass:UserPropertyInvoiceRepository,

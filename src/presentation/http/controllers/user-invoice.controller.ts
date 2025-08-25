@@ -10,7 +10,7 @@ import { PayInvoiceDto } from "src/application/dtos/property/pay-invoice.dto";
 import { PayInvoiceSwaggerDoc } from "../swagger/user-property-invoices/pay-invoice.swagger";
 import { UploadInvoiceDocumentSwaggerDoc } from "../swagger/rental-contract/upload-document.swagger";
 import { UserInvoiceImageInterceptor } from "src/shared/interceptors/file-upload.interceptor";
-import { UploadInvoiceDocumentUseCase } from "src/application/use-cases/user-property-reservation/upload-document-invoice.use-case";
+import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 
 @Controller('user-invoice')
 export class UserInvoiceController {

@@ -9,11 +9,9 @@ import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-
 import { Request } from 'express';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
-import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
 import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
 import { CreateRentalContractSwaggerDoc } from '../swagger/rental-contract/create-contract.swagger';
-import { UploadInvoiceDocumentSwaggerDoc } from '../swagger/rental-contract/upload-document.swagger';
 import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-contract.swagger';
 import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
 import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-rental-contracts.swagger';
