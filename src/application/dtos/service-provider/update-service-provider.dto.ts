@@ -26,18 +26,11 @@ export class UpdateServiceProviderDto {
   @Type(() => Number)
   @IsNumber()
   region_id?: number;
-
+  
   @IsOptional()
-  @IsString()
-  service?: string; // optional textual name of service
-
-  @IsOptional()
-  @Type(() => Number)
-  latitude?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  longitude?: number;
+  @Type(()=>Boolean)
+  @IsBoolean()
+  status?:boolean;
 
   @IsOptional()
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'الوقت يجب أن يكون بصيغة HH:mm' })

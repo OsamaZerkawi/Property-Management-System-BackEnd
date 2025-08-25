@@ -239,8 +239,7 @@ export class ServiceProviderRepository
       if (dto.career !== undefined) sp.career = dto.career;
       if (dto.opening_time !== undefined) sp.opening_time = dto.opening_time;
       if (dto.closing_time !== undefined) sp.closing_time = dto.closing_time;
-      if (dto.latitude !== undefined) (sp as any).latitude = dto.latitude;
-      if (dto.longitude !== undefined) (sp as any).longitude = dto.longitude;
+      if (dto.status !== undefined) (sp as any).active = dto.status; 
       if (dto.logo !== undefined) sp.logo = dto.logo;
  
       if (dto.phone !== undefined) {

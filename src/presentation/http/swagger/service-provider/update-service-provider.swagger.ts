@@ -26,12 +26,10 @@ export function UpdateServiceProviderSwagger() {
           name: { type: 'string', example: 'مطبخ الشامي', description: 'اسم مزود الخدمة' },
           phone: { type: 'string', example: '09991234567', description: 'رقم التواصل' },
           region_id: { type: 'number', example: 3, description: 'معرّف المنطقة' },
-          service: { type: 'string', example: 'طعام منزلي', description: 'اسم الخدمة أو التصنيف' },
-          latitude: { type: 'number', example: 33.5138, description: 'خط العرض' },
-          longitude: { type: 'number', example: 36.2765, description: 'خط الطول' },
           opening_time: { type: 'string', example: '09:00', description: 'وقت الافتتاح بصيغة HH:mm' },
           closing_time: { type: 'string', example: '22:00', description: 'وقت الإغلاق بصيغة HH:mm' },
           details: { type: 'string', example: 'وصف مختصر للخدمة', description: 'تفاصيل مزود الخدمة' },
+          status: { type: 'boolean', example: '1', description: 'هل الخدمة فعالة ام لا' },
           career: {
             type: 'string',
             example: 'RESTAURANT',
