@@ -42,6 +42,7 @@ import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateServiceProviderDto } from 'src/application/dtos/service-provider/update-service-provider.dto';
 import { UpdateServiceProviderUseCase } from 'src/application/use-cases/service-provider/update-service-provider.use-case';
+import { ServiceProviderLogoInterceptor } from 'src/shared/interceptors/file-upload.interceptor';
 @Controller('service-provider')
 export class ServiceProviderController {
   constructor(
@@ -227,7 +228,7 @@ export class ServiceProviderController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(FileInterceptor('logo'))
+  @ServiceProviderLogoInterceptor() 
   async update(
     @CurrentUser() user,
     @Body() dto: UpdateServiceProviderDto,

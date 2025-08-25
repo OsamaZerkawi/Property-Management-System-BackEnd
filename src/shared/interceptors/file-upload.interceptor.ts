@@ -149,6 +149,48 @@ export function OfficeLogoInterceptor() {
   );
 }
 
+export function ServiceProviderLogoInterceptor() {
+  return UseInterceptors(
+    FileInterceptor('logo', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const dir = './uploads/service-provider/logos';
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          cb(null, dir);
+        },
+        filename: (req: any, file, cb) => {
+          const userId = (req.user as any)?.sub || 'unknown';
+          const timestamp = Date.now();
+          const safeName = file.originalname
+            .replace(/\s+/g, '-')
+            .replace(/\.[^/.]+$/, '')
+            .replace(/[^a-zA-Z0-9-_]/g, '');
+          const ext = extname(file.originalname);
+          cb(null, `service-provider-logo-${userId}-${safeName}-${timestamp}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        const allowed = [
+          'image/jpeg',
+          'image/jpg',
+          'image/png',
+          'image/gif',
+          'image/webp',
+          'image/bmp',
+          'image/tiff',
+          'image/svg+xml',
+        ];
+        if (!allowed.includes(file.mimetype)) {
+          return cb(new BadRequestException('Only images are allowed'), false);
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  );
+}
 export function UserProfileImageInterceptor() {
   return UseInterceptors(
     FileInterceptor('photo', {
