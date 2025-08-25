@@ -32,7 +32,7 @@ import {
   UserRepositoryInterface,
 } from 'src/domain/repositories/user.repository';
 import { errorResponse } from 'src/shared/helpers/response.helper';
-import { DataSource, Repository } from 'typeorm';
+import {  Repository } from 'typeorm';
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -44,8 +44,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     @InjectRepository(PropertyFeedback)
     private readonly feedbackRepo: Repository<PropertyFeedback>,
     @InjectRepository(Image)
-    private readonly imageRepo: Repository<Image>,
-    private readonly dataSource: DataSource,
+    private readonly imageRepo: Repository<Image>, 
   ) {}
 
   async findByIdWithOwner(propertyId: number) {

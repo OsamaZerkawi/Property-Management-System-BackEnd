@@ -8,9 +8,13 @@ import {
   NotFoundException,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ServiceProviderFeedbackDto } from 'src/application/dtos/service-provider/service-provider-feedback.dto';
@@ -34,6 +38,10 @@ import { GetAllServiceProvidersWithFiltersSwaggerDoc } from '../swagger/service-
 import { SearchServiceProvidersSwaggerDoc } from '../swagger/service-provider/search-by-name';
 import { CreateOrUpdateFeedbackSwaggerDoc } from '../swagger/service-provider/create-or-update-feedback';
 import { GetServiceProviderDetailsSwaggerDoc } from '../swagger/service-provider/get-one';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateServiceProviderDto } from 'src/application/dtos/service-provider/update-service-provider.dto';
+import { UpdateServiceProviderUseCase } from 'src/application/use-cases/service-provider/update-service-provider.use-case';
 @Controller('service-provider')
 export class ServiceProviderController {
   constructor(
@@ -43,6 +51,7 @@ export class ServiceProviderController {
     private readonly getTopRatedServiceProvidersUseCase: GetTopRatedServiceProvidersUseCase,
     private readonly createOrUpdateServiceProviderFeedbackUseCase: CreateOrUpdateServiceProviderFeedbackUseCase,
     private readonly getServiceProviderDetailsUseCase: GetServiceProviderDetailsUseCase,
+    private readonly updateUseCase: UpdateServiceProviderUseCase
   ) {}
 
   @Get()
@@ -214,4 +223,21 @@ export class ServiceProviderController {
 
     return successResponse([], 'تم التقييم او تقديم شكوى بنجاح', 201);
   }
+  
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('logo'))
+  async update(
+    @CurrentUser() user,
+    @Body() dto: UpdateServiceProviderDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const userId = user.sub;
+    if (file?.filename) dto.logo = file.filename;
+
+    await this.updateUseCase.execute(userId, dto);
+  
+    return successResponse([], 'تم تحديث بيانات مزود الخدمة بنجاح', HttpStatus.OK);
+  } 
 }

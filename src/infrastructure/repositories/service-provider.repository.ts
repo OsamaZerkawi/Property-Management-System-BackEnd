@@ -1,12 +1,16 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { waitForDebugger } from 'inspector';
 import { ServiceProviderFeedbackDto } from 'src/application/dtos/service-provider/service-provider-feedback.dto';
 import { ServiceProviderFiltersDto } from 'src/application/dtos/service-provider/service-provider-filters.dto';
+import { UpdateServiceProviderDto } from 'src/application/dtos/service-provider/update-service-provider.dto';
+import { Region } from 'src/domain/entities/region.entity';
 import { ServiceFeedback } from 'src/domain/entities/service-feedback.entity';
 import { ServiceProvider } from 'src/domain/entities/service-provider.entity';
+import { User } from 'src/domain/entities/user.entity';
 import { ComplaintStatus } from 'src/domain/enums/complaint-status.enum';
 import { ServiceProviderRepositoryInterface } from 'src/domain/repositories/service-provider.repository';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 export class ServiceProviderRepository
   implements ServiceProviderRepositoryInterface
@@ -16,6 +20,7 @@ export class ServiceProviderRepository
     private readonly serviceProviderRepo: Repository<ServiceProvider>,
     @InjectRepository(ServiceFeedback)
     private readonly feedbackRepo: Repository<ServiceFeedback>,
+     private readonly dataSource: DataSource,
   ) {}
   async findAll(baseUrl: string) {
     const query = await this.fetchServiceProviders(baseUrl);
@@ -201,4 +206,53 @@ export class ServiceProviderRepository
 
     return await this.feedbackRepo.save(feedback);
   }
+  
+   async findOneByUserId(userId: number): Promise<ServiceProvider | null> {
+    return this.serviceProviderRepo.findOne({
+      where: { user: { id: userId } },
+      relations: ['user', 'region'],  
+    });
+  }
+
+  async updateServiceProvider(
+    serviceProviderId: number,
+    options: { dto: UpdateServiceProviderDto; userId: number },
+  ): Promise<void> {
+    const { dto } = options;
+
+    await this.dataSource.transaction(async (manager) => {
+      const sp = await manager.findOne(ServiceProvider, {
+        where: { id: serviceProviderId },
+        relations: ['user', 'region'],
+      });
+
+      if (!sp) throw new NotFoundException('مزود الخدمة غير موجود');
+ 
+      if (dto.region_id !== undefined) {
+        const region = await manager.findOne(Region, { where: { id: dto.region_id } });
+        if (!region) throw new NotFoundException('المنطقة غير موجودة');
+        sp.region = region;
+      }
+ 
+      if (dto.name !== undefined) sp.name = dto.name;
+      if (dto.details !== undefined) sp.details = dto.details;
+      if (dto.career !== undefined) sp.career = dto.career;
+      if (dto.opening_time !== undefined) sp.opening_time = dto.opening_time;
+      if (dto.closing_time !== undefined) sp.closing_time = dto.closing_time;
+      if (dto.latitude !== undefined) (sp as any).latitude = dto.latitude;
+      if (dto.longitude !== undefined) (sp as any).longitude = dto.longitude;
+      if (dto.logo !== undefined) sp.logo = dto.logo;
+ 
+      if (dto.phone !== undefined) {
+        const user = await manager.findOne(User, { where: { id: sp.user.id } });
+        if (!user) throw new NotFoundException('المستخدم المرتبط غير موجود');
+        user.phone = dto.phone;
+        await manager.save(User, user);
+      }
+ 
+      await manager.save(ServiceProvider, sp);
+
+     });
+  }
+
 }
