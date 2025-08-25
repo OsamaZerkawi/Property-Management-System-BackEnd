@@ -21,6 +21,7 @@ import { InvoiceReminderLog } from "src/domain/entities/invoice-reminder-log.ent
 import { ReminderService } from "src/application/services/reminder.service";
 import { NotificationModule } from "./notification.module";
 import { ReminderModule } from "./reminder.module";
+import { PayInvoiceUseCase } from "src/application/use-cases/user-invoices/pay-invoice.usecase";
 
 @Module({
     imports:[
@@ -36,9 +37,11 @@ import { ReminderModule } from "./reminder.module";
             InvoiceReminderLog,
         ])
     ],
+    
     controllers:[UserInvoiceController],
     providers:[
         FindAllUserInvoicesUseCase,
+        PayInvoiceUseCase,
         {
             provide:USER_PROPERTY_INVOICES_REPOSITORY,
             useClass:UserPropertyInvoiceRepository,
