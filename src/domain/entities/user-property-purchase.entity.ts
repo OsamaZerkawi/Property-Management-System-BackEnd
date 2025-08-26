@@ -1,30 +1,45 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { User } from "./user.entity";
-import { Residential } from "./residential.entity";
-import { PurchaseStatus } from "../enums/property-purchases.enum";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { User } from './user.entity';
+import { Residential } from './residential.entity';
+import { PurchaseStatus } from '../enums/property-purchases.enum';
 
-@Entity('user_property_purchases')  
+@Entity('user_property_purchases')
 export class UserPropertyPurchase {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @ManyToOne(() => User, (user) => user.propertyPurchases,{onDelete:'CASCADE'})
-    @JoinColumn({name:'user_id'})
-    user: User;
+  @ManyToOne(() => User, (user) => user.propertyPurchases, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-    @ManyToOne(() => Residential, (residential) => residential.purchases, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'residential_id' })
-    residential: Residential;
+  @ManyToOne(() => Residential, (residential) => residential.purchases, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'residential_id' })
+  residential: Residential;
 
-    @Column({nullable: true})
-    end_booking: Date;
+  @Column({ nullable: true })
+  end_booking: Date;
 
-    @Column({ type: 'enum', enum: PurchaseStatus })
-    status: PurchaseStatus;
+  @Column({ type: 'enum', enum: PurchaseStatus })
+  status: PurchaseStatus;
 
-    @CreateDateColumn()
-    created_at: Date;
+  @Column({ type: 'int', default: 0 })
+  installments_paid: number;
 
-    @UpdateDateColumn()
-    updated_at: Date;
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 }
