@@ -7,8 +7,6 @@ export const RENTAL_CONTRACT_REPOSITORY = 'RENTAL_CONTRACT_REPOSITORY';
 export interface RentalContractRepositoryInterface {
   save(contract: RentalContract): Promise<RentalContract>;
   findContractsByOfficeId(officeId: number);
-  findOneById(id: number): Promise<UserPropertyInvoice | null>;
-  saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice>;
   searchContractsBytitle(officeId: number,keyword: string);
   findByIdWithRelations(id: number): Promise<RentalContract | null>;
   verifyPropertyBelongsToOffice(   propertyId: number,  officeId: number,): Promise<boolean>; 

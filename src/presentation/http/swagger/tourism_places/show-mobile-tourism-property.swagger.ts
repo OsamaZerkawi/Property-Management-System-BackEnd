@@ -43,6 +43,7 @@ export function ShowMobileTourismSwaggerDoc() {
             rate:1.00,
             avg_rate: 3.00,
             is_favorite: true, 
+            status: 'متوفر', 
             office: {
               id: 5,
               logo: 'http://localhost:3000/uploads/offices/logos/logo.png',

@@ -301,4 +301,19 @@ export class UserPropertyInvoiceRepository
       },
     );
   }
+  async findOneById(id: number): Promise<UserPropertyInvoice | null> {
+    return this.userPropertyInvoiceRepo.findOne({ where: { id } });
+  }
+  async saveInvoice(invoiceId: number, filename: string) {
+    await this.userPropertyInvoiceRepo
+      .createQueryBuilder()
+      .update(UserPropertyInvoice)
+      .set({
+        invoiceImage: filename,
+        status: InvoicesStatus.PAID,
+      })
+      .where('id = :id', { id: invoiceId })
+      .andWhere('invoiceImage IS NULL')
+      .execute();
+  }
 }

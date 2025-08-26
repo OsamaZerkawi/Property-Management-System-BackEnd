@@ -9,11 +9,9 @@ import { GetRentalContractsUseCase } from 'src/application/use-cases/rental/get-
 import { Request } from 'express';
 import { ContractFiltersDto } from 'src/application/dtos/rental_contracts/filter-rental-contract.dto';
 import { errorResponse, successResponse } from 'src/shared/helpers/response.helper';
-import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
 import { SearchRentalContractsUseCase } from 'src/application/use-cases/rental/search-rental-contracts.use-case';
 import { GetContractDetailsUseCase } from 'src/application/use-cases/rental/get-contract-details.use-case';
 import { CreateRentalContractSwaggerDoc } from '../swagger/rental-contract/create-contract.swagger';
-import { UploadInvoiceDocumentSwaggerDoc } from '../swagger/rental-contract/upload-document.swagger';
 import { SearchContractsSwaggerDoc } from '../swagger/rental-contract/search-contract.swagger';
 import { GetContractDetailsSwaggerDoc } from '../swagger/rental-contract/get-contract-details.swagger';
 import { GetRentalContractsSwaggerDoc } from '../swagger/rental-contract/get-rental-contracts.swagger';
@@ -27,7 +25,6 @@ export class RentalContractController {
    constructor(
     private readonly createRentalContractUseCase: CreateRentalContractUseCase,
     private readonly getRentalContractsUseCase: GetRentalContractsUseCase,
-    private readonly uploadInvoiceDocumentUseCase: UploadInvoiceDocumentUseCase,
     private readonly searchContractsUseCase:  SearchRentalContractsUseCase,
     private readonly getContractDetailsUseCase: GetContractDetailsUseCase ,
     private readonly createRentalRequestUseCase: CreateRentalRequestUseCase
@@ -86,28 +83,6 @@ export class RentalContractController {
       const message = error.message || 'حدث خطأ غير متوقع';
       return errorResponse(message, statusCode);
     } 
-  }
-
-  @Post(':id/document')  
-  @UploadInvoiceDocumentSwaggerDoc()
-  @UseGuards(JwtAuthGuard)
-  @UserInvoiceImageInterceptor()
-  async uploadDocument(
-    @Param('id', ParseIntPipe) invoiceId: number,
-    @UploadedFile() document: Express.Multer.File,
-  ) {
-    if (!document) {
-      return errorResponse( 'يجب إرفاق ملف الفاتورة', 400);
-    }
-
-    try {
-      await this.uploadInvoiceDocumentUseCase.execute(invoiceId, document.filename);
-      return successResponse(null, 'تم رفع الوثيقة بنجاح', 200);
-    } catch (error) {
-      const statusCode = error.getStatus?.() || 500;
-      const message = error.message || 'حدث خطأ غير متوقع';
-      return errorResponse(message, statusCode);
-    }
   }
 
   @Get('search')

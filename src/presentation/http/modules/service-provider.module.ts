@@ -15,6 +15,8 @@ import { SearchServiceProviderUseCase } from "src/application/use-cases/service-
 import { GetTopRatedServiceProvidersUseCase } from "src/application/use-cases/service-provider/get-top-rated-providers.use-case";
 import { CreateOrUpdateServiceProviderFeedbackUseCase } from "src/application/use-cases/service-provider/create-or-update-service-provider-feedback.use-case";
 import { GetServiceProviderDetailsUseCase } from "src/application/use-cases/service-provider/get-service-provider-details.use-case";
+import { UpdateServiceProviderUseCase } from "src/application/use-cases/service-provider/update-service-provider.use-case";
+import { GetServiceProviderUseCase } from "src/application/use-cases/service-provider/get-service-provider-details(dashboard).use-case";
 
 @Module({
     imports:[
@@ -29,6 +31,8 @@ import { GetServiceProviderDetailsUseCase } from "src/application/use-cases/serv
         GetTopRatedServiceProvidersUseCase,
         CreateOrUpdateServiceProviderFeedbackUseCase,
         GetServiceProviderDetailsUseCase,
+        UpdateServiceProviderUseCase,
+        GetServiceProviderUseCase,
         {
             provide:SERVICE_PROVIDER_REPOSITORY,
             useClass: ServiceProviderRepository,

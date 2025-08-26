@@ -11,13 +11,13 @@ export class ServiceProvider {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255 ,nullable:true})
   name: string;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255 ,nullable:true})
   logo: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text',nullable:true })
   details: string;
 
   @Column({ type: 'boolean', default: true })
@@ -47,10 +47,10 @@ export class ServiceProvider {
   )
   socials: ServiceProviderSocial[];
 
-  @Column()
+  @Column({nullable:true})
   opening_time: string;
 
-  @Column()
+  @Column({nullable:true})
   closing_time: string;
 
   @CreateDateColumn()

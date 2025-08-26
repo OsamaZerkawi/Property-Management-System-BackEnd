@@ -32,7 +32,7 @@ import {
   UserRepositoryInterface,
 } from 'src/domain/repositories/user.repository';
 import { errorResponse } from 'src/shared/helpers/response.helper';
-import { DataSource, Repository } from 'typeorm';
+import {  Repository } from 'typeorm';
 
 @Injectable()
 export class PropertyRepository implements PropertyRepositoryInterface {
@@ -44,8 +44,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     @InjectRepository(PropertyFeedback)
     private readonly feedbackRepo: Repository<PropertyFeedback>,
     @InjectRepository(Image)
-    private readonly imageRepo: Repository<Image>,
-    private readonly dataSource: DataSource,
+    private readonly imageRepo: Repository<Image>, 
   ) {}
 
   async findByIdWithOwner(propertyId: number) {
@@ -871,10 +870,10 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         id: property.region?.city?.id,
         name: property.region?.city?.name,
       },
-      // images: property.images.map((image) => ({
-      //   id: image.id,
-      //   image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
-      // })),
+      images: property.images.map((image) => ({
+      id: image.id,
+      image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+      })),
       tag: property.post?.tag,
     };
 

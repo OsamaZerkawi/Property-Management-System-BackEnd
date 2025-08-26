@@ -78,14 +78,7 @@ async findContractsByOfficeId(
   }
 
   return qb.getRawMany();
-}
-  
-    async findOneById(id: number): Promise<UserPropertyInvoice | null> {
-    return this.InvoiceRepo.findOne({ where: { id } });
-  }
-  async saveInvoice(invoice: UserPropertyInvoice): Promise<UserPropertyInvoice> {
-    return this.InvoiceRepo.save(invoice);
-  }
+} 
 async searchContractsBytitle(
   officeId: number,
   keyword: string,
