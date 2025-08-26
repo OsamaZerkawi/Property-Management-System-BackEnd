@@ -3,9 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { 
-  UserPurchaseRepositoryInterface,
-} from 'src/domain/repositories/user-purchase.repository';
+import { UserPurchaseRepositoryInterface } from 'src/domain/repositories/user-purchase.repository';
 import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
 import { Residential } from 'src/domain/entities/residential.entity';
 import { User } from 'src/domain/entities/user.entity';
@@ -13,16 +11,25 @@ import { PurchaseStatus } from 'src/domain/enums/property-purchases.enum';
 import { addDays } from 'date-fns';
 
 @Injectable()
-export class UserPurchaseRepository
-  implements UserPurchaseRepositoryInterface
-{
+export class UserPurchaseRepository implements UserPurchaseRepositoryInterface {
   constructor(
     @InjectRepository(UserPropertyPurchase)
-    private readonly repo: Repository<UserPropertyPurchase>
+    private readonly repo: Repository<UserPropertyPurchase>,
   ) {}
+  async save(purchase: UserPropertyPurchase) {
+    await this.repo.save(purchase);
+  }
+  async findOneByUserIdAndPropertyId(userId: number, propertyId: number) {
+    return await this.repo.findOne({
+      where: {
+        user: { id: userId },
+        residential: { property: { id: propertyId } },
+      },
+      relations: ['residential', 'residential.property'],
+    });
+  }
 
-  async bookPropertyForUser(residential: Residential, user: User){
-
+  async bookPropertyForUser(residential: Residential, user: User) {
     const bookingPeriod = residential.property.office.booking_period;
 
     const endBooking = addDays(new Date(), bookingPeriod);
@@ -30,16 +37,16 @@ export class UserPurchaseRepository
     const purchase = await this.repo.create({
       residential,
       user,
-      end_booking:endBooking,
-      status: PurchaseStatus.RESERVED
+      end_booking: endBooking,
+      status: PurchaseStatus.RESERVED,
     });
 
     return await this.repo.save(purchase);
   }
 
-  async findByUserId(userId: number,page:number,items: number) {
+  async findByUserId(userId: number, page: number, items: number) {
     const offset = (page - 1) * items;
-  
+
     const raws = await this.repo
       .createQueryBuilder('up')
       .innerJoin('up.residential', 'r')
@@ -64,9 +71,9 @@ export class UserPurchaseRepository
       .offset(offset)
       .limit(items)
       .getRawMany();
-  
+
     const total = raws.length ? Number(raws[0].total_count) : 0;
-  
+
     return { raws, total };
   }
 }

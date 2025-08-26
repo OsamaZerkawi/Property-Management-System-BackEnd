@@ -1,5 +1,14 @@
-import { applyDecorators } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiParam, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { applyDecorators } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiForbiddenResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiParam,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 
 export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
   return applyDecorators(
@@ -26,8 +35,8 @@ export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
             description: 'صورة الوثيقة (إجباري)',
           },
         },
-        required: ['document', 'propertyId']
-      }
+        required: ['document'],
+      },
     }),
 
     ApiOkResponse({
@@ -38,8 +47,8 @@ export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
           message: 'تم رفع صورة الوثيقة بنجاح',
           data: [],
           status_code: 200,
-        }
-      }
+        },
+      },
     }),
 
     ApiNotFoundResponse({
@@ -47,24 +56,15 @@ export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
       content: {
         'application/json': {
           schema: {
-            oneOf: [
-              {
-                type: 'object',
-                properties: {
-                  successful: { type: 'boolean', example: false },
-                  error: { type: 'string', example: 'لم يتم رفع صورة الوثيقة' },
-                  status_code: { type: 'number', example: 404 },
-                },
+            type: 'object',
+            properties: {
+              successful: { type: 'boolean', example: false },
+              error: {
+                type: 'string',
+                example: 'لم يتم رفع صورة الوثيقة | الفاتورة غير موجودة',
               },
-              {
-                type: 'object',
-                properties: {
-                  successful: { type: 'boolean', example: false },
-                  error: { type: 'string', example: 'الفاتورة غير موجودة' },
-                  status_code: { type: 'number', example: 404 },
-                },
-              },
-            ],
+              status_code: { type: 'number', example: 404 },
+            },
           },
           examples: {
             documentNotUploaded: {
@@ -95,8 +95,8 @@ export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
           successful: false,
           error: 'توكن غير صالح',
           status_code: 401,
-        }
-      }
+        },
+      },
     }),
 
     ApiForbiddenResponse({
@@ -106,8 +106,8 @@ export function UploadUserPropertyInvoiceDocumentSwaggerDoc() {
           successful: false,
           error: 'المستخدم لا يمتلك الدور المطلوب',
           status_code: 403,
-        }
-      }
-    })
+        },
+      },
+    }),
   );
 }

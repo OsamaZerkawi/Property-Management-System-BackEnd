@@ -38,7 +38,7 @@ export class UserPropertyInvoiceController {
     }
 
     @Roles('صاحب مكتب')
-    @HttpCode(HttpStatus.CREATED)
+    @HttpCode(HttpStatus.OK)
     @UploadInvoiceDocumentOfflineSwaggerDoc()
     @UserPropertyInvoiceImageInterceptor()
     @Post('/upload-docement')

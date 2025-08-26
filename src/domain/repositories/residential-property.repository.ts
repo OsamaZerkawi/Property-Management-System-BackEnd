@@ -7,14 +7,14 @@ import { PropertyStatus } from "../enums/property-status.enum";
 export const RESIDENTIAL_PROPERTY_REPOSITORY ='RESIDENTIAL_PROPERTY_REPOSITORY';
 
 export interface ResidentialPropertyRepositoryInterface{
-    createResidentialPropertyAndSaveIt(data: ResidentialPropertyDto);
-    updateResidentialProperty(propertyId: number,data: UpdateResidentialPropertyDetailsDto);
-    updateStatusOfProperty(propertyId: number, status: PropertyStatus);
-    searchFilteredResidentialsProperties(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number);
-    findById(id: number);
-    findOneByPropertyId(propertyId: number): Promise<Residential|null> 
-    findTopResidentialLocationsByOffice(officeId: number): Promise<string[]> 
- 
+  createResidentialPropertyAndSaveIt(data: ResidentialPropertyDto);
+  updateResidentialProperty(propertyId: number,data: UpdateResidentialPropertyDetailsDto);
+  updateStatusOfProperty(propertyId: number, status: PropertyStatus);
+  searchFilteredResidentialsProperties(baseUrl: string,filters: ResidentialPropertiesSearchFiltersDto,page: number,items: number,userId: number);
+  findById(id: number);
+  findOneByPropertyId(propertyId: number): Promise<Residential|null> 
+  findTopResidentialLocationsByOffice(officeId: number): Promise<string[]> 
+  save(residential: Residential);
   createPurchaseWithInvoices(options: {
     userId: number;
     propertyId: number;
