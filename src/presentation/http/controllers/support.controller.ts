@@ -45,8 +45,7 @@ export class SupportController {
 
     return successResponse(faqs, 'تم جلب قائمة الأسئلة بنجاح', 200);
   }
-
-  @Roles('مزود خدمة') 
+ 
   @ApiGetAllFaqs()
   @Get('Pfaqs')
   @HttpCode(HttpStatus.OK)
