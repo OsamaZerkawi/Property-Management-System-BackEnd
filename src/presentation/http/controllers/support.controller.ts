@@ -51,7 +51,7 @@ export class SupportController {
   @Get('Pfaqs')
   @HttpCode(HttpStatus.OK)
   async getAllFaqsForProvider() {
-    const faqs = await this.findAllFaqsUseCase.execute();
+  const faqs = await this.findAllFaqsUseCase.execute();
 
     return successResponse(faqs, 'تم جلب قائمة الأسئلة بنجاح', 200);
   }
