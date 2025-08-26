@@ -22,7 +22,7 @@ export class UpdateServiceProviderUseCase {
         try {
           const oldImagePath = path.join(
             process.cwd(),
-            'uploads/service-provider/logos',
+            'uploads/providers/logo',
             sp.logo,
           );
           if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);

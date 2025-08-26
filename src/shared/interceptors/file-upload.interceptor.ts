@@ -154,7 +154,7 @@ export function ServiceProviderLogoInterceptor() {
     FileInterceptor('logo', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const dir = './uploads/service-provider/logos';
+          const dir = './uploads/providers/logo';
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
           }
@@ -168,7 +168,7 @@ export function ServiceProviderLogoInterceptor() {
             .replace(/\.[^/.]+$/, '')
             .replace(/[^a-zA-Z0-9-_]/g, '');
           const ext = extname(file.originalname);
-          cb(null, `service-provider-logo-${userId}-${safeName}-${timestamp}${ext}`);
+          cb(null, `logo-${userId}-${safeName}-${timestamp}${ext}`);
         },
       }),
       fileFilter: (req, file, cb) => {

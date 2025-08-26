@@ -16,7 +16,7 @@ export class GetServiceProviderUseCase {
       id: sp.id,
       name: sp.name,
       phone: sp.user?.phone ?? null,
-      logo: sp.logo ? `${baseUrl}/uploads/service-providers/logos/${sp.logo}` : null,
+      logo: sp.logo ? `${baseUrl}/uploads/providers/logo/${sp.logo}` : null,
       details: sp.details ?? null,
       career: sp.career ?? null,
       status:sp.active,

@@ -252,6 +252,7 @@ export class ServiceProviderController {
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const userId = user.sub;
+    console.log(dto.status)
     if (file?.filename) dto.logo = file.filename;
 
     await this.updateUseCase.execute(userId, dto);

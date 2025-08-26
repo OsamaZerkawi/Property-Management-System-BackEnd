@@ -28,9 +28,8 @@ export class UpdateServiceProviderDto {
   region_id?: number;
   
   @IsOptional()
-  @Type(()=>Boolean)
-  @IsBoolean()
-  status?:boolean;
+  @Type(()=>Number) 
+  status?:number;
 
   @IsOptional()
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'الوقت يجب أن يكون بصيغة HH:mm' })
