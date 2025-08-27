@@ -45,7 +45,16 @@ export class SupportController {
 
     return successResponse(faqs, 'تم جلب قائمة الأسئلة بنجاح', 200);
   }
+ 
+  @ApiGetAllFaqs()
+  @Get('Pfaqs')
+  @HttpCode(HttpStatus.OK)
+  async getAllFaqsForProvider() {
+  const faqs = await this.findAllFaqsUseCase.execute();
 
+    return successResponse(faqs, 'تم جلب قائمة الأسئلة بنجاح', 200);
+  }
+  
   @Roles('مشرف', 'مدير')
   @Permissions('إدارة الشكاوي والدعم')
   @ApiCreateFaq()
