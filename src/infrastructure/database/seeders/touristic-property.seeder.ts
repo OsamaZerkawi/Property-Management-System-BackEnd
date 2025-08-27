@@ -78,13 +78,13 @@ export class TouristicPropertySeeder {
         }),
         booking_period: faker.number.int({ min: 1, max: 30 }),
         deposit_per_m2: faker.number.float({
-          min: 10,
-          max: 200,
+          min: 1,
+          max: 50,
           fractionDigits: 2,
         }),
         tourism_deposit: faker.number.float({
-          min: 0,
-          max: 1,
+          min: 0.01,
+          max: 0.1,
           fractionDigits: 2,
         }),
         payment_method: PaymentMethod.BOTH,
@@ -104,7 +104,7 @@ export class TouristicPropertySeeder {
 
         const region = faker.helpers.arrayElement(regions);
         const property = this.propertyRepo.create({
-          area: faker.number.float({ min: 50, max: 200 }),
+          area: faker.number.float({ min: 50, max: 300 }),
           floor_number: faker.number.int({ min: 0, max: 5 }),
           latitude,
           longitude,

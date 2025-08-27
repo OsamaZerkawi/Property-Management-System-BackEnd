@@ -86,19 +86,19 @@ export class OfficePropertySeeder {
         }),
         booking_period: faker.number.int({ min: 1, max: 30 }),
         deposit_per_m2: faker.number.float({
-          min: 10,
-          max: 200,
+          min: 1,
+          max: 50,
           fractionDigits: 2,
         }),
         tourism_deposit: faker.number.float({
-          min: 0,
-          max: 1,
+          min: 0.01,
+          max: 0.1,
           fractionDigits: 2,
         }),
         payment_method: faker.helpers.arrayElement(
           Object.values(PaymentMethod),
         ),
-        profits: faker.number.float({ min: 0, max: 100000, fractionDigits: 2 }),
+        // profits: faker.number.float({ min: 0, max: 100000, fractionDigits: 2 }),
         opening_time: getRandomTimeWithPeriod(8, 10),
         closing_time: getRandomTimeWithPeriod(17, 20),
         latitude,
@@ -171,13 +171,13 @@ export class OfficePropertySeeder {
           listing_type: listingType,
           status: faker.helpers.arrayElement(Object.values(PropertyStatus)),
           ...(listingType === ListingType.SALE && {
-            selling_price: faker.number.int({ min: 100000, max: 700000 }),
+            selling_price: faker.number.int({ min: 4000, max: 15000 }),
             installment_allowed: faker.datatype.boolean(),
             installment_duration: faker.number.int({ min: 1, max: 24 }),
           }),
 
           ...(listingType === ListingType.RENT && {
-            rental_price: faker.number.int({ min: 500, max: 3000 }),
+            rental_price: faker.number.int({ min: 200, max: 3000 }),
             rental_period: faker.helpers.arrayElement(
               Object.values(RentalPeriod),
             ),
