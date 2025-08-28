@@ -35,6 +35,9 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     private readonly propertyRepo: Repository<Property>,
     private readonly dataSource: DataSource,
   ) {}
+  async save(office: Office) {
+    await this.officeRepo.save(office);
+  }
 
   async findOfficesByCityId(cityId: number) {
     return this.baseOfficesQuery()
@@ -154,7 +157,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
 
       for (const key of [
         'name',
-        'logo', 
+        'logo',
         'type',
         'commission',
         'booking_period',
@@ -182,21 +185,21 @@ export class OfficeRepository implements OfficeRepositoryInterface {
       }
 
       if (dto.phone !== undefined) {
-      const user = await queryRunner.manager.findOne(User, {
-        where: { id: office.user.id },
-      });
+        const user = await queryRunner.manager.findOne(User, {
+          where: { id: office.user.id },
+        });
 
-      if (!user) {
-        throw new NotFoundException('المستخدم المرتبط بالمكتب غير موجود');
+        if (!user) {
+          throw new NotFoundException('المستخدم المرتبط بالمكتب غير موجود');
+        }
+
+        user.phone = dto.phone;
+        await queryRunner.manager.save(user);
       }
 
-      user.phone = dto.phone;
-      await queryRunner.manager.save(user);
-      }
-      
       if (Object.keys(officeUpdateData).length > 0) {
         await queryRunner.manager.update(Office, officeId, officeUpdateData);
-      } 
+      }
       if (dto.socials && dto.socials.length > 0) {
         for (const social of dto.socials) {
           const platform = await queryRunner.manager.findOne(SocialPlatform, {
@@ -660,26 +663,28 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     const raw = await qb.getRawOne();
     return raw || null;
   }
-  
-    async getAllSocialPlatformsWithOfficeLinks(officeId: number): Promise<Array<{ id: number; name: string; link: string | null }>> {
+
+  async getAllSocialPlatformsWithOfficeLinks(
+    officeId: number,
+  ): Promise<Array<{ id: number; name: string; link: string | null }>> {
     const spRepo = this.dataSource.getRepository(SocialPlatform);
     const osRepo = this.dataSource.getRepository(OfficeSocial);
- 
+
     const platforms = await spRepo.find({ order: { id: 'ASC' } });
- 
+
     const officeSocials = await osRepo.find({
       where: { office: { id: officeId } as any },
       relations: ['platform'],
     });
- 
+
     const linkMap = new Map<number, string | null>();
     for (const os of officeSocials) {
       if (os.platform && typeof os.platform.id === 'number') {
         linkMap.set(os.platform.id, os.link ?? null);
       }
     }
- 
-    return platforms.map(p => ({
+
+    return platforms.map((p) => ({
       id: p.id,
       name: p.name,
       link: linkMap.has(p.id) ? linkMap.get(p.id) ?? null : null,

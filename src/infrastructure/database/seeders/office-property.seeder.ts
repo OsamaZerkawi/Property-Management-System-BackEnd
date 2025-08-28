@@ -171,7 +171,7 @@ export class OfficePropertySeeder {
           listing_type: listingType,
           status: faker.helpers.arrayElement(Object.values(PropertyStatus)),
           ...(listingType === ListingType.SALE && {
-            selling_price: faker.number.int({ min: 4000, max: 15000 }),
+            selling_price: faker.number.int({ min: 4000, max: 50000 }),
             installment_allowed: faker.datatype.boolean(),
             installment_duration: faker.number.int({ min: 1, max: 24 }),
           }),

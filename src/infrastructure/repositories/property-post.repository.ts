@@ -109,6 +109,11 @@ export class PropertyPostRepository implements PropertyPostRepositoryInterface {
   async updatePropertyPost(id: number, data: UpdatePropertyPostDto) {
     const propertyPost = await this.propertyPostRepo.findOne({ where: { id } });
 
+    if (propertyPost?.status === PropertyPostStatus.REJECTED) {
+      propertyPost.status = PropertyPostStatus.PENDING;
+      await this.propertyPostRepo.save(propertyPost);
+    }
+
     if (!propertyPost) {
       throw new NotFoundException(
         errorResponse('لا يوجد منشور لهذا العقار', 404),

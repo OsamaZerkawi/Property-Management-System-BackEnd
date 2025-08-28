@@ -26,5 +26,6 @@ export interface OfficeRepositoryInterface {
   createComplaint(userId: number, officeId: number, complaintText: string): Promise<void>
   findOfficeDetailsById(officeId: number, baseUrl: string)
   getOfficeDashboardByOfficeId(officeId: number): Promise<any | null> ,
-  getAllSocialPlatformsWithOfficeLinks(officeId: number): Promise<Array<{ id: number; name: string; link: string | null }>> 
+  getAllSocialPlatformsWithOfficeLinks(officeId: number): Promise<Array<{ id: number; name: string; link: string | null }>> ,
+  save(office: Office);
 }

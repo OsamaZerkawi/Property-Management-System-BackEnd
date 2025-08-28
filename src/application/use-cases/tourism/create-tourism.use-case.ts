@@ -1,35 +1,52 @@
 // application/use-cases/tourism/create-tourism.use-case.ts
-import { Injectable,NotFoundException ,Inject, BadRequestException} from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Inject,
+  BadRequestException,
+} from '@nestjs/common';
 import { ITourismRepository } from '../../../domain/repositories/tourism.repository';
 import { CreateTourismDto } from 'src/application/dtos/tourism/create-tourism.dto';
 import { Property } from 'src/domain/entities/property.entity';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
 import { Touristic } from 'src/domain/entities/touristic.entity';
-import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
+import {
+  OFFICE_REPOSITORY,
+  OfficeRepositoryInterface,
+} from 'src/domain/repositories/office.repository';
 import { TOURISM_REPOSITORY } from 'src/domain/repositories/tourism.repository';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
 import { errorResponse } from 'src/shared/helpers/response.helper';
+import { OfficeType } from 'src/domain/enums/office-type.enum';
 @Injectable()
 export class CreateTourismUseCase {
-  
   constructor(
     @Inject(TOURISM_REPOSITORY)
-    private readonly repo: ITourismRepository,  
+    private readonly repo: ITourismRepository,
     @Inject(OFFICE_REPOSITORY)
     private readonly officeRepo: OfficeRepositoryInterface,
-) {}
+  ) {}
 
   async execute(userId: number, dto: CreateTourismDto) {
-  const office = await this.officeRepo.findOneByUserId(userId); 
-      if (!office) throw new NotFoundException('المكتب غير موجود');
-  
-  const property = new Property();  
- 
+    const office = await this.officeRepo.findOneByUserId(userId);
+    if (!office) throw new NotFoundException('المكتب غير موجود');
 
-  const region = await this.repo.findRegionById(dto.region_id); 
-  if (!region) throw new NotFoundException('المنطقة غير موجودة');
+    if (office.type === OfficeType.NEW) {
+      office.type = OfficeType.TOURISTIC;
+
+      await this.officeRepo.save(office);
+    } else if (office.type === OfficeType.RESIDENTIAL) {
+      office.type = OfficeType.BOTH;
+
+      await this.officeRepo.save(office);
+    }
+
+    const property = new Property();
+
+    const region = await this.repo.findRegionById(dto.region_id);
+    if (!region) throw new NotFoundException('المنطقة غير موجودة');
     Object.assign(property, {
-      office: office,  
+      office: office,
       region: region,
       latitude: dto.latitude,
       longitude: dto.longitude,
@@ -38,17 +55,17 @@ export class CreateTourismUseCase {
       living_room_count: dto.living_room_count,
       kitchen_count: dto.kitchen_count,
       bathroom_count: dto.bathroom_count,
-      bedroom_count:dto.bedroom_count,
+      bedroom_count: dto.bedroom_count,
       has_furniture: dto.has_furniture,
-      property_type: PropertyType.TOURISTIC
+      property_type: PropertyType.TOURISTIC,
     });
- 
+
     const savedProperty = await this.repo.createProperty(property);
     const generatedTitle = `${dto.tag} ${dto.area} م²`;
-    
+
     const post = new PropertyPost();
     Object.assign(post, {
-      property: savedProperty,  
+      property: savedProperty,
       title: generatedTitle,
       description: dto.description,
       tag: dto.tag,
@@ -56,33 +73,32 @@ export class CreateTourismUseCase {
       date: new Date(),
     });
     await this.repo.createPost(post);
-    
+
     const touristic = new Touristic();
     Object.assign(touristic, {
-      property: savedProperty,  
+      property: savedProperty,
       price: dto.price,
       street: dto.street,
       electricity: dto.electricity,
       water: dto.water,
       pool: dto.pool,
-      status: "غير متوفر"
+      status: 'غير متوفر',
     });
     const savedTouristic = await this.repo.createTouristicDetails(touristic);
-    
+
     if (dto.additional_services?.length) {
-      const serviceIds = await this.repo.getAdditionalServicesIdsByNames(dto.additional_services);
-      
-      if(serviceIds.length !== dto.additional_services.length){
+      const serviceIds = await this.repo.getAdditionalServicesIdsByNames(
+        dto.additional_services,
+      );
+
+      if (serviceIds.length !== dto.additional_services.length) {
         throw new BadRequestException(
-          errorResponse('واحد أو أكثر من المرفقات الإضافية غير صحيح',400)
+          errorResponse('واحد أو أكثر من المرفقات الإضافية غير صحيح', 400),
         );
       }
-      await this.repo.addServicesToTouristic(
-        savedTouristic.id,
-        serviceIds,
-      );
+      await this.repo.addServicesToTouristic(savedTouristic.id, serviceIds);
     }
- 
-    return  { property_id : savedProperty.id};
+
+    return { property_id: savedProperty.id };
   }
 }

@@ -154,7 +154,7 @@ export class TouristicPropertySeeder {
 
         const touristic = this.touristicRepo.create({
           property,
-          price: faker.number.float({ min: 1000, max: 5000 }),
+          price: faker.number.float({ min: 50, max: 1000 }),
           street: faker.location.street(),
           electricity: faker.helpers.arrayElement([
             'كهرباء 24 ساعة',

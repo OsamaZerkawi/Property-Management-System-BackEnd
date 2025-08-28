@@ -33,6 +33,7 @@ export class Office {
   @Column({
     type: 'enum',
     enum: OfficeType,
+    default: OfficeType.NEW,
   })
   type: OfficeType;
 

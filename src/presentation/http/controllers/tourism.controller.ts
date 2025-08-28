@@ -93,7 +93,7 @@ export class TourismController {
       items,
       'تم ارجاع العقارات السياحية بنجاح',
       200
-    );
+    ); 
   }
 
   @Get('mobile/search')
