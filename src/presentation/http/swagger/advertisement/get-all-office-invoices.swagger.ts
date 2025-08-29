@@ -38,7 +38,7 @@ export function GetAllOfficeInvoicesSwaggerDoc() {
                 day_period: 3,
                 amount: 5000,
                 advertisement_status: 'مدفوع',
-                stripUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
+                stripeUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
               },
               {
                 advertisement_id: 2,
@@ -48,7 +48,7 @@ export function GetAllOfficeInvoicesSwaggerDoc() {
                 day_period: 'مسائي',
                 amount: null,
                 advertisement_status: 'قيد الانتظار',
-                stripUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
+                stripeUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
 
               },
               {
@@ -59,7 +59,7 @@ export function GetAllOfficeInvoicesSwaggerDoc() {
                 day_period: 'مسائي',
                 amount: null,
                 advertisement_status: 'مرفوض',
-                stripUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
+                stripeUrl:'https://checkout.stripe.com/c/pay/cs_test_a1X7ZFybeOXuAEk7Qj8PYbU6SztC8zMACa3gha92vF3TWDx13IiJOa1dxQ#fidkdWxOYHwnPyd1blpxYHZxWjA0V1dSVFw1M0EzQ2hzQlExYXRSNUQ2MXxNMTBIUUxBYDFtc2BPNH19NHB3clVANlVPRzNwcWJJcVxDdWNTZjRQaUxzYDBAYHdWMTBERHxrMm1gajRPN3MyNTVTVEh%2Fd3BdSCcpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl'
 
               },
             ],
