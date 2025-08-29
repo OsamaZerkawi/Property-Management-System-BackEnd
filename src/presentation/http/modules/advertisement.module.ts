@@ -38,6 +38,7 @@ import { StripePaymentModule } from "./stripe-payment.module";
         NotificationModule,
         forwardRef(() => OfficeModule),
         AuthModule,
+        StripePaymentModule,
         TypeOrmModule.forFeature([Advertisement,OnlineInvoice,Office,Notification,User,ServicePrice,PromotedProperty,Property,])
     ],
     controllers:[AdvertisementController,FinanceAdsManagementController],
@@ -52,8 +53,7 @@ import { StripePaymentModule } from "./stripe-payment.module";
         GetAllAdvertisementInvoicesUseCase,
         GetAdvertisementsUseCase,
         UpdateStripeCustomerUseCase,
-        GetStripeCustomerUseCase,
-        StripePaymentModule,
+        GetStripeCustomerUseCase, 
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,

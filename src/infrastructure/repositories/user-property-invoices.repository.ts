@@ -109,8 +109,8 @@ export class UserPropertyInvoiceRepository
       .getMany();
   }
 
-  async attachInvoiceImage(id: number, documentImage: string) {
-    // === 1. Fetch invoice ===
+  async attachInvoiceImage(id: number, documentImage: string,method?:string) {
+    // === 1. Fetch invoice === 
     const invoice = await this.userPropertyInvoiceRepo.findOne({
       where: { id },
       relations: ['property', 'user'],
@@ -122,7 +122,7 @@ export class UserPropertyInvoiceRepository
 
     // === 2. Update invoice ===
     invoice.invoiceImage = documentImage;
-    invoice.paymentMethod = PaymentMethod.CASH;
+    invoice.paymentMethod = method === 'دفع الكتروني'? PaymentMethod.STRIPE: PaymentMethod.CASH;
     invoice.status = InvoicesStatus.PAID;
     await this.userPropertyInvoiceRepo.save(invoice);
 
@@ -351,16 +351,17 @@ export class UserPropertyInvoiceRepository
   async findOneById(id: number): Promise<UserPropertyInvoice | null> {
     return this.userPropertyInvoiceRepo.findOne({ where: { id } });
   }
-  async saveInvoice(invoiceId: number, filename: string) {
-    await this.userPropertyInvoiceRepo
-      .createQueryBuilder()
-      .update(UserPropertyInvoice)
-      .set({
-        invoiceImage: filename,
-        status: InvoicesStatus.PAID,
-      })
-      .where('id = :id', { id: invoiceId })
-      .andWhere('invoiceImage IS NULL')
-      .execute();
-  }
+
+  // async saveInvoice(invoiceId: number, filename: string) {
+  //   await this.userPropertyInvoiceRepo
+  //     .createQueryBuilder()
+  //     .update(UserPropertyInvoice)
+  //     .set({
+  //       invoiceImage: filename,
+  //       status: InvoicesStatus.PAID,
+  //     })
+  //     .where('id = :id', { id: invoiceId })
+  //     .andWhere('invoiceImage IS NULL')
+  //     .execute();
+  // }
 }
