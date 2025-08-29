@@ -22,6 +22,7 @@ export function GetOfficeDetailsSwagger() {
               phone: { type: 'string', example: '0969090711' },
               logo: { type: 'string', nullable: true, example: 'http://localhost:3000/uploads/offices/logos/logo.png' },
               type: { type: 'string', example: 'سياحي' },
+              stripe_payment:{ type: 'boolean', example: 'true' },
               commission: { type: 'number', example: 10 },
               booking_period: { type: 'number', example: 30 },
               deposit_per_m2: { type: 'number', example: 50 },

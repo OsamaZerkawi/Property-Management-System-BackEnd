@@ -4,11 +4,11 @@ import { UserPropertyInvoice } from "../entities/user-property-invoice.entity";
 export const USER_PROPERTY_INVOICES_REPOSITORY = 'USER_PROPERTY_INVOICES_REPOSITORY';
 export interface UserPropertyInvoiceRepositoryInterface{
     findInvoicesByPropertyId(propertyId: number);
-    attachInvoiceImage(id: number,documentImage: string);
+    attachInvoiceImage(id: number,documentImage: string,method?:string);
     createInvoice(data: UploadPropertyReservationDto,image: string);
     getUserPropertyInvoices(userId: number,propertyId: number);
     saveBulk(invoices: UserPropertyInvoice[]): Promise<UserPropertyInvoice[]>;
     markInvoiceAsPaid(invoiceId: number, paymentIntentId: string)
     findOneById(id: number): Promise<UserPropertyInvoice | null>
-    saveInvoice(invoiceId: number, filename: string);
+   // saveInvoice(invoiceId: number, filename: string);
 }

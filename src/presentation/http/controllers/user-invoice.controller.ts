@@ -40,7 +40,7 @@ export class UserInvoiceController {
     
     @Post(':invoiceId')
     @PayInvoiceSwaggerDoc()
-    //@UseGuards(JwtAuthGuard)   
+    @UseGuards(JwtAuthGuard)   
     @HttpCode(HttpStatus.OK)
     async payInvoice(
     @Param('invoiceId') invoiceId: number,

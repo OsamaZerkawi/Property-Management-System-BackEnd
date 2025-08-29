@@ -23,6 +23,7 @@ import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { TouristicStatus } from 'src/domain/enums/touristic-status.enum';
 import { Property } from 'src/domain/entities/property.entity';
 import { User } from 'src/domain/entities/user.entity';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 
 @Injectable()
 export class OfficeRepository implements OfficeRepositoryInterface {
@@ -154,7 +155,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     try {
       const officeId = office.id;
       const officeUpdateData: Partial<Office> = {};
-
+//stripe_payment if true then the payment method is Stripe if false then its cach and it won't send the payment method directly
       for (const key of [
         'name',
         'logo',
@@ -162,8 +163,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         'commission',
         'booking_period',
         'deposit_per_m2',
-        'tourism_deposit',
-        'payment_method',
+        'tourism_deposit', 
         'opening_time',
         'closing_time',
         'latitude',
@@ -172,7 +172,9 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         if (dto[key] !== undefined) {
           officeUpdateData[key] = dto[key];
         }
-      }
+       } 
+       if(dto.stripe_payment!==undefined)
+      {officeUpdateData.payment_method = dto.stripe_payment === 1? PaymentMethod.STRIPE: PaymentMethod.CASH;}
 
       if (dto.region_id !== undefined) {
         const region = await queryRunner.manager.findOne(Region, {

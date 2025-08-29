@@ -19,7 +19,7 @@ export class UploadInvoiceDocumentUseCase {
       if(invoice.invoiceImage!=null){
         throw new BadRequestException('يوجد وثيقة لهذا السجل بالفعل');
       } 
-      await this.userInvoicesRepo.saveInvoice(invoiceId,filename); 
+      await this.userInvoicesRepo.attachInvoiceImage(invoiceId,filename,'دفع الكتروني'); 
   }
 }
 
