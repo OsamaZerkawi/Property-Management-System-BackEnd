@@ -391,7 +391,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     return properties.map((property) => {
       const rate = avgRateMap.get(property.id) || 0;
       return {
-        ...this.formatPropertyDetails(property, baseUrl),
+        ...this.formatPropertyDetailsForWeb(property, baseUrl),
         images: imagesMap[property.id],
         rate,
       };
@@ -877,6 +877,97 @@ export class PropertyRepository implements PropertyRepositoryInterface {
       id: image.id,
       image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
       })),
+      tag: property.post?.tag,
+    };
+
+    if (property.property_type === PropertyType.RESIDENTIAL) {
+      const res = property.residential;
+
+      return {
+        ...base,
+        ownership_type: res?.ownership_type ?? null,
+        direction: res?.direction ?? null,
+        status: res?.status ?? null,
+        room_counts: {
+          total: property.room_count,
+          bedroom: property.bedroom_count,
+          living_room: property.living_room_count,
+          kitchen: property.kitchen_count,
+          bathroom: property.bathroom_count,
+        },
+        // rate: property.rate ?? null,
+        listing_type: res?.listing_type === ListingType.RENT ? 'أجار' : 'بيع',
+        ...(res?.listing_type === ListingType.RENT
+          ? {
+              rent_details: {
+                price: res.rental_price ?? null,
+                rental_period: res.rental_period ?? null,
+              },
+            }
+          : {
+              sell_details: {
+                selling_price: res.selling_price ?? null,
+                installment_allowed: res.installment_allowed ?? false,
+                installment_duration: res.installment_duration ?? null,
+              },
+            }),
+      };
+    }
+
+    if (property.property_type === PropertyType.TOURISTIC) {
+      const tour = property.touristic;
+
+      return {
+        ...base,
+        // rate: property.rate ?? null,
+        price: tour?.price,
+        status: tour?.status,
+        touristic_info: {
+          street: tour?.street,
+          electricity: tour?.electricity,
+          water: tour?.water,
+          pool: tour?.pool,
+        },
+        services: tour?.additionalServices?.map((s) => s.service.name) ?? [],
+      };
+    }
+
+    // Add fallback if needed for other types
+    return base;
+  }
+
+    private formatPropertyDetailsForWeb(property: Property, baseUrl: string) {
+    const base = {
+      residentialId: property.residential.id,
+      postTitle: property.post?.title,
+      postDescription: property.post?.description,
+      postImage: `${baseUrl}/uploads/properties/posts/images/${property.post.image}`,
+      postDate: property.post.created_at.toISOString().split('T')[0],
+      postStatus: property.post.status,
+      propertyId: property.id,
+      area: property.area,
+      property_type: property.property_type,
+      coordinates: {
+        latitude: property.latitude,
+        longitude: property.longitude,
+      },
+      floor_number: property.floor_number,
+      notes: property.notes ?? null,
+      highlighted: property.highlighted,
+      has_furniture: property.has_furniture,
+      location: `${property.region?.city?.name}, ${property.region?.name}`,
+      region: {
+        id: property.region?.id,
+        name: property.region?.name,
+      },
+      city: {
+        id: property.region?.city?.id,
+        name: property.region?.city?.name,
+      },
+      // images: property.images.map((image) => ({
+      // id: image.id,
+      // image_url: `${baseUrl}/uploads/properties/images/${image.image_path}`,
+      // })),
       tag: property.post?.tag,
     };
 
