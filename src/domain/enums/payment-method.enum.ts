@@ -1,5 +1,5 @@
 export enum PaymentMethod {
-  BOTH='both', 
+  BOTH='الكل', 
   STRIPE = 'دفع الكتروني',
   CASH = 'دفع يدوي', 
 }

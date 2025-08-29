@@ -40,14 +40,12 @@ export class UserInvoiceController {
     
     @Post(':invoiceId')
     @PayInvoiceSwaggerDoc()
-    @UseGuards(JwtAuthGuard)   
+    //@UseGuards(JwtAuthGuard)   
     @HttpCode(HttpStatus.OK)
     async payInvoice(
     @Param('invoiceId') invoiceId: number,
     @Body() dto: PayInvoiceDto,
-  ) {
-    console.log(invoiceId)
-    console.log(dto.paymentIntentId)
+  ) { 
     const result = await this.payInvoiceUseCase.execute(invoiceId, dto.paymentIntentId);
     return successResponse(result, 'تم تسجيل الدفع بنجاح', HttpStatus.OK);
   }
