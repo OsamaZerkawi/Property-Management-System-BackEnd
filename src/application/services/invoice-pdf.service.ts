@@ -7,7 +7,8 @@ import * as puppeteer from 'puppeteer-core';
 export class InvoicePdfService {
   private readonly logger = new Logger(InvoicePdfService.name);
  
-  private UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'invoices', 'user');
+  private UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'properties', 'users','invoices','images');
+
   private DEFAULT_FONT_PATH = path.join(process.cwd(), 'assets', 'fonts', 'Cairo-Regular.ttf');
 
   constructor() {
@@ -282,7 +283,7 @@ export class InvoicePdfService {
    
     const fontPath =
       (payload && payload.fontPath) || (fs.existsSync(this.DEFAULT_FONT_PATH) ? this.DEFAULT_FONT_PATH : null);
-      const userUploadDir = path.join(process.cwd(), 'uploads', 'invoices', 'user');
+      const userUploadDir = path.join(process.cwd(), 'uploads', 'properties', 'users','invoices','images');
     if (!fs.existsSync(userUploadDir)) {
       fs.mkdirSync(userUploadDir, { recursive: true });
     }
