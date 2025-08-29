@@ -163,6 +163,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
         'commission',
         'booking_period',
         'deposit_per_m2',
+        'creditCard',
         'tourism_deposit', 
         'opening_time',
         'closing_time',
