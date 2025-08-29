@@ -10,6 +10,7 @@ import { OfficeRepositoryInterface } from 'src/domain/repositories/office.reposi
 import { TOURISM_REPOSITORY } from 'src/domain/repositories/tourism.repository';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository'; 
 import { format } from 'date-fns';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 @Injectable()
 export class ShowTourismMobileUseCase { 
   constructor( 
@@ -76,6 +77,9 @@ export class ShowTourismMobileUseCase {
       logo: `${baseUrl}/uploads/offices/logos/${entity.office?.logo}`,
       type: propertyType,
       name: entity.office?.name ?? null,
+      stripe_payment: 
+            entity.office?.payment_method === PaymentMethod.BOTH ||
+            entity.office?.payment_method === PaymentMethod.STRIPE,
       location: `${entity.office?.region?.city?.name ?? ''}، ${entity.office?.region?.name ?? ''}`.trim(),
       rate:Number(office_rate)??0.00,  
       rating_count:Number(office_feedback_count),

@@ -1,7 +1,8 @@
-import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { addMonths, endOfMonth, startOfMonth } from 'date-fns';
 import { UploadPropertyReservationDto } from 'src/application/dtos/user-property-reservation/UploadProeprtyReservation.dto';
+import { InvoicePdfService } from 'src/application/services/invoice-pdf.service';
 import { ReminderService } from 'src/application/services/reminder.service';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
 import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
@@ -49,7 +50,8 @@ export class UserPropertyInvoiceRepository
     private readonly userPropertyInvoiceRepo: Repository<UserPropertyInvoice>,
     @Inject(USER_PURCHASE_REPOSITORY)
     private readonly userPurchaseRepo: UserPurchaseRepositoryInterface,
-    private readonly reminderService: ReminderService,
+    private readonly reminderService: ReminderService, 
+    private readonly invoicePdfService:InvoicePdfService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -281,26 +283,71 @@ export class UserPropertyInvoiceRepository
   ): Promise<UserPropertyInvoice[]> {
     return this.userPropertyInvoiceRepo.save(invoices);
   }
-  async markInvoiceAsPaid(
-    invoiceId: number,
-    paymentIntentId: string,
-  ): Promise<void> {
-    const invoice = await this.userPropertyInvoiceRepo.findOneBy({
-      id: invoiceId,
-    });
-    if (!invoice) throw new NotFoundException('الفاتورة غير موجودة');
-    if (invoice.status === InvoicesStatus.PAID)
-      throw new BadRequestException('الفاتورة مدفوعة مسبقاً');
-
-    await this.userPropertyInvoiceRepo.update(
-      { id: invoiceId },
-      {
-        stripePaymentIntentId: paymentIntentId,
-        paymentMethod: PaymentMethod.STRIPE,
-        status: InvoicesStatus.PAID,
-      },
-    );
+    parseToDate(value: any): Date | null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  // لو القيمة كانت 'YYYY-MM-DD' أو أي تمثيل تاريخ آخر
+  const v = String(value);
+  // محاولة تفكيك 'YYYY-MM-DD' بدلاً من new Date() مباشرة لتجنب انزياحات التايمزون
+  const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [_, y, m, d] = isoDateMatch;
+    return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
   }
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+  toYMD(value: any): string {
+  const d = this.parseToDate(value);
+  return d ? d.toISOString().slice(0, 10) : '';
+}
+
+ async markInvoiceAsPaid(
+  invoiceId: number,
+  paymentIntentId: string,
+): Promise<void> {
+  const invoice = await this.userPropertyInvoiceRepo.findOne({
+    where: { id: invoiceId },
+    relations: ['user', 'property', 'property.post'],
+  });
+  if (!invoice) throw new NotFoundException('الفاتورة غير موجودة');
+  if (invoice.status === InvoicesStatus.PAID) {
+    throw new BadRequestException('الفاتورة مدفوعة مسبقاً');
+  }
+
+  invoice.stripePaymentIntentId = paymentIntentId;
+  invoice.paymentMethod = PaymentMethod.STRIPE;
+  invoice.status = InvoicesStatus.PAID;
+  await this.userPropertyInvoiceRepo.save(invoice);
+
+  if (invoice.paymentMethod === PaymentMethod.STRIPE) {
+    const payload = {
+      invoiceId: invoice.id,
+      createdAt: this.toYMD(invoice.created_at),
+      amount: Number(invoice.amount || 0).toFixed(2),
+      currency: 'SAR',
+      reason: invoice.reason,
+      status: invoice.status,
+      paymentDate: new Date().toISOString().slice(0, 10),
+      paymentIntentId: invoice.stripePaymentIntentId ?? '',
+      userName: invoice.user
+        ? `${invoice.user.first_name ?? ''} ${invoice.user.last_name ?? ''}`.trim()
+        : '',
+      userPhone: invoice.user?.phone ?? '',
+      postTitle: invoice.property?.post?.title ?? '',
+      billingPeriodStart: this.toYMD(invoice.billing_period_start),
+      paymentMethod: invoice.paymentMethod,
+    };
+
+    const { filename } = await this.invoicePdfService.generatePdf(payload);
+
+    await this.userPropertyInvoiceRepo.update(invoice.id, {
+      invoiceImage: filename,
+    });
+  }
+}
+
   async findOneById(id: number): Promise<UserPropertyInvoice | null> {
     return this.userPropertyInvoiceRepo.findOne({ where: { id } });
   }

@@ -21,6 +21,7 @@ import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.e
 import { UserPropertyPurchase } from 'src/domain/entities/user-property-purchase.entity';
 import { CombinedPropertyStatus } from 'src/domain/enums/combined-property-status.enum';
 import { ListingType } from 'src/domain/enums/listing-type.enum';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { PropertyPostStatus } from 'src/domain/enums/property-post-status.enum';
 import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { PropertyType } from 'src/domain/enums/property-type.enum';
@@ -434,8 +435,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
     );
 
     const formatted = this.formatPropertyDetails(property, baseUrl);
-
-    return {
+     return {
       ...formatted,
       avg_rate: parseFloat(parseFloat(rawData.avg_rate).toFixed(1)) || 0,
       rating_count: parseInt(rawData.rating_count) || 0,
@@ -447,6 +447,9 @@ export class PropertyRepository implements PropertyRepositoryInterface {
           ? `${baseUrl}/uploads/offices/logos/${property.office.logo}`
           : null,
         type: property.office?.type ?? null,
+        stripe_payment: 
+      property.office?.payment_method === PaymentMethod.BOTH ||
+      property.office?.payment_method === PaymentMethod.STRIPE,
         location: `${property.office.region.city.name}, ${property.office.region.name}`,
         rate: parseFloat(rawData.office_average_rating).toFixed(1) || 0,
         rating_count: parseInt(rawData.office_rating_count),
@@ -1220,6 +1223,7 @@ export class PropertyRepository implements PropertyRepositoryInterface {
         'office.id',
         'office.name',
         'office.region',
+        'office.payment_method',
         'officeRegion.id',
         'officeRegion.name',
         'officeCity.id',

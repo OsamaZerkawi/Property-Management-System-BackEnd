@@ -49,6 +49,7 @@ export function ShowMobileTourismSwaggerDoc() {
               logo: 'http://localhost:3000/uploads/offices/logos/logo.png',
               type: 'وكالة عقارية',
               name: 'مكتب المستقبل',
+              stripe_payment:true,
               location: 'حلب، العزيزية',
               rate: 4.20,
               rating_count: 25

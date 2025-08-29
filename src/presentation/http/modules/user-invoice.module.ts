@@ -23,6 +23,8 @@ import { NotificationModule } from "./notification.module";
 import { ReminderModule } from "./reminder.module";
 import { PayInvoiceUseCase } from "src/application/use-cases/user-invoices/pay-invoice.usecase";
 import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/upload-document-invoice.use-case';
+import { InvoicePdfModule } from "./invoice-pdf.module";
+import { UserPropertyInvoiceModule } from "./user-property-invoice.module";
 
 @Module({
     imports:[
@@ -32,6 +34,8 @@ import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/u
         RegionModule,
         ResidentialOfficeModule,
         PropertyModule,
+        InvoicePdfModule,
+        UserPropertyInvoiceModule,
         TypeOrmModule.forFeature([
             UserPropertyInvoice,RentalContract,Residential,
             Property,PropertyPost,Region,UserPropertyPurchase,
@@ -43,11 +47,7 @@ import { UploadInvoiceDocumentUseCase } from 'src/application/use-cases/rental/u
     providers:[
         FindAllUserInvoicesUseCase,
         PayInvoiceUseCase,
-        UploadInvoiceDocumentUseCase,
-        {
-            provide:USER_PROPERTY_INVOICES_REPOSITORY,
-            useClass:UserPropertyInvoiceRepository,
-        }
+        UploadInvoiceDocumentUseCase, 
     ],
     exports:[]  
 })
