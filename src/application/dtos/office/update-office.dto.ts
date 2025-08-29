@@ -54,8 +54,8 @@ import {
   tourism_deposit: number;
 
   @IsOptional()
-  @IsEnum(PaymentMethod, { message: 'payment_method must be one of the following values: stripe, cash' })
-  payment_method: PaymentMethod;
+  @IsNumber()
+  stripe_payment: number;
 
   @IsOptional()
   @Matches(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'الوقت يجب أن يكون بصيغة HH:mm' })

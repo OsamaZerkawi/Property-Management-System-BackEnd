@@ -1,4 +1,5 @@
 import {Inject, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { OFFICE_REPOSITORY, OfficeRepositoryInterface } from 'src/domain/repositories/office.repository';
 
 @Injectable()
@@ -26,6 +27,9 @@ export class GetOfficeDetailsUseCase {
     phone: office.user?.phone ?? null,
     logo: office.logo ? `${baseUrl}/uploads/offices/logos/${office.logo}` : null,
     type: office.type,
+    stripe_payment: 
+    office.payment_method === PaymentMethod.BOTH ||
+    office.payment_method === PaymentMethod.STRIPE,
     commission: office.commission,
     booking_period: office.booking_period,
     deposit_per_m2: office.deposit_per_m2,

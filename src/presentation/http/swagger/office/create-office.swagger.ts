@@ -36,10 +36,9 @@ export function CreateOfficeSwaggerDoc() {
           booking_period:   { type: 'number', example: 3, description: 'مدة الحجز بالأيام' },
           deposit_per_m2:   { type: 'number', example: 10, description: 'الضمان لكل متر مربع' },
           tourism_deposit:  { type: 'number', example: 500, description: 'الضمان السياحي' },
-          payment_method: {
-            type: 'string',
-            enum: Object.values(PaymentMethod),
-            example: PaymentMethod.STRIPE,
+          stripe_payment: {
+            type: 'boolean', 
+            example: true,
             description: 'طريقة الدفع',
           },
           opening_time:     { type: 'string', example: '08:00', description: 'وقت افتتاح المكتب HH:mm' },
