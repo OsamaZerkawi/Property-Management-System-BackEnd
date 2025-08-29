@@ -49,7 +49,7 @@ export class ListOfficesUseCase {
       location: `${r.city_name || ''}، ${r.region_name || ''}`.trim(),
       rate:
         typeof r.avg_rate === 'string'
-          ? parseFloat(r.avg_rate)
+          ? parseFloat(parseFloat(r.avg_rate).toFixed(1))
           : r.avg_rate ?? 0.00,
     };
   });
