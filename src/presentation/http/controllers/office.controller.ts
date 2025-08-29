@@ -194,7 +194,7 @@ export class OfficeController {
     return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
   }
   
-  //@Roles('صاحب مكتب')
+  @Roles('صاحب مكتب')
   @Get()
   @UseGuards(JwtAuthGuard)
   @GetOfficeDetailsSwagger()

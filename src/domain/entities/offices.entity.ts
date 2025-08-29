@@ -27,6 +27,9 @@ export class Office {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 
+   @Column({ type: 'varchar', length: 20,nullable:true })
+   creditCard: string;
+  
   @Column({ type: 'varchar', length: 500, nullable: true })
   logo: string | null;
 

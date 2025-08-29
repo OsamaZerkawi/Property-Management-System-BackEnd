@@ -41,6 +41,7 @@ export function CreateOfficeSwaggerDoc() {
             example: true,
             description: 'طريقة الدفع',
           },
+          creditCard:       { type:'string',example:'424242424242'},
           opening_time:     { type: 'string', example: '08:00', description: 'وقت افتتاح المكتب HH:mm' },
           closing_time:     { type: 'string', example: '18:00', description: 'وقت إغلاق المكتب HH:mm' },
           region_id:        { type: 'number', example: 2, description: 'معرّف المنطقة' },
