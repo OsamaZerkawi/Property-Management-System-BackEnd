@@ -26,7 +26,7 @@ export class FindAllUserInvoicesUseCase {
         payment_method: invoice.paymentMethod,
         amount: Number(invoice.amount),
         status: invoice.status,
-        invoiceImage:`${baseUrl}/uploads/invocies/user/${invoice.invoiceImage}` // maybe should to modify path of image
+        invoiceImage:`${baseUrl}/uploads/invoices/user/${invoice.invoiceImage}` // maybe should to modify path of image
       };
     }
     
