@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Req,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -23,6 +24,12 @@ import { GetApprovedAdsSwaggerDoc } from '../swagger/advertisement/get-apporved-
 import { RespondToAdRequestSwaggerDoc } from '../swagger/advertisement/respond-to-ad-requset.swgger';
 import { GetAllAdvertisementInvoicesSwaggerDoc } from '../swagger/advertisement/get-all-ads-invoices.swagger';
 import { GetAdRequestsSwaggerDoc } from '../swagger/advertisement/get-ad-request.swagger';
+import { CurrentUser } from 'src/shared/decorators/current-user.decorator';
+import { UpdateStripeCustomerDto } from 'src/application/dtos/user/update-stripe-id.dto';
+import { UpdateStripeCustomerUseCase } from 'src/application/use-cases/user/update-stripe-customer.use-case';
+import { UpdateStripeCustomerSwaggerDoc } from '../swagger/admins/update-stirpe-customer.swagger';
+import { GetStripeCustomerUseCase } from 'src/application/use-cases/user/get-stripe-customer.use-case';
+import { GetStripeCustomerSwaggerDoc } from '../swagger/admins/get-stripe-customer.swagger';
 
 @ApiTags('Finance & Ads Management')
 @Controller('admin/finance-ads-management')
@@ -33,6 +40,8 @@ export class FinanceAdsManagementController {
     private readonly rejectAdRequestUseCase: RejectAdRequestUseCase,
     private readonly getApprovedAdvertisementUseCase: GetApprovedAdvertisementUseCase,
     private readonly getAllAdvertisementInvoicesUseCase: GetAllAdvertisementInvoicesUseCase,
+    private readonly updateStripeCustomerUseCase: UpdateStripeCustomerUseCase,
+    private readonly getStripeCustomerUseCase: GetStripeCustomerUseCase,
   ) {}
 
   @Roles('مشرف', 'مدير')
@@ -90,5 +99,37 @@ export class FinanceAdsManagementController {
     const data = await this.getAllAdvertisementInvoicesUseCase.execute(baseUrl);
 
     return successResponse(data, 'تم إرجاع جميع فواتير الإعلانات بنجاح', 200);
+  }
+
+  @Roles('مدير')
+  @Permissions('إدارة المالية والإعلانات')
+  @GetStripeCustomerSwaggerDoc()
+  @Get('/stripe')
+  async getStripeId(
+    @CurrentUser() user,
+  ) {
+    const userId = user.sub;
+
+    const stripeCustomerId = await this.getStripeCustomerUseCase.execute(userId);
+
+    return successResponse({stripeCustomerId}, 'تم تعديل تفاصيل البطاقة بنجاح', 200);
+  }
+
+  @Roles('مدير')
+  @Permissions('إدارة المالية والإعلانات')
+  @UpdateStripeCustomerSwaggerDoc()
+  @Put('/stripe')
+  async updateStripeId(
+    @Body() dto: UpdateStripeCustomerDto,
+    @CurrentUser() user,
+  ) {
+    const userId = user.sub;
+
+    await this.updateStripeCustomerUseCase.execute(
+      userId,
+      dto.stripe_customer_id,
+    );
+
+    return successResponse([], 'تم تعديل تفاصيل البطاقة بنجاح', 200);
   }
 }

@@ -69,6 +69,7 @@ export class OfficePropertySeeder {
         phone: `09${faker.string.numeric(8)}`,
         username: faker.internet.userName(),
         email: faker.internet.email(),
+        stripe_customer_id: faker.string.numeric(16),
         password: password,
       });
       await this.userRepo.save(user);

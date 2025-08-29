@@ -78,6 +78,7 @@ export class UserRepository implements UserRepositoryInterface {
         'email',
         'username',
         'photo',
+        'stripe_customer_id',
       ],
     });
   }

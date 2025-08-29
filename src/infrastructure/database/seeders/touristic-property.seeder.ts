@@ -62,6 +62,7 @@ export class TouristicPropertySeeder {
         username: faker.internet.userName(),
         email: faker.internet.email(),
         password: password,
+        stripe_customer_id: faker.string.numeric(16),
       });
       await this.userRepo.save(user);
 

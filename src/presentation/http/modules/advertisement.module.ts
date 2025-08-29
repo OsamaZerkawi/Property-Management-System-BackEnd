@@ -26,6 +26,8 @@ import { PromotedProperty } from "src/domain/entities/promoted-property.entity";
 import { PropertyModule } from "./property.module";
 import { Property } from "src/domain/entities/property.entity";
 import { GetAdvertisementsUseCase } from "src/application/use-cases/advertisement/get-office-ads.use-case";
+import { UpdateStripeCustomerUseCase } from "src/application/use-cases/user/update-stripe-customer.use-case";
+import { GetStripeCustomerUseCase } from "src/application/use-cases/user/get-stripe-customer.use-case";
 
 @Module({
     imports:[
@@ -48,6 +50,8 @@ import { GetAdvertisementsUseCase } from "src/application/use-cases/advertisemen
         GetApprovedAdvertisementUseCase,
         GetAllAdvertisementInvoicesUseCase,
         GetAdvertisementsUseCase,
+        UpdateStripeCustomerUseCase,
+        GetStripeCustomerUseCase,
         {
             provide: ADVERTISEMENT_REPOSITORY,
             useClass:AdvertisementRepository,

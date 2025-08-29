@@ -20,6 +20,7 @@ import { Advertisement } from "src/domain/entities/advertisements.entity";
 import { AdvertisementSeeder } from "./advertisement.seeder";
 import { JoinRequestSeeder } from "./join-requests.seeder";
 import { SocialPlatformSeeder } from "./social-platform.seeder";
+import { ManagerSeeder } from "./manager.seeder";
 
 @Injectable()
 export class SeederService {
@@ -39,6 +40,7 @@ export class SeederService {
     private readonly advertisementSeeder: AdvertisementSeeder,
     private readonly joinRequestSeeder: JoinRequestSeeder,
     private readonly socialPlatformSeeder: SocialPlatformSeeder,
+    private readonly managerSeeder: ManagerSeeder,
     
     @InjectRepository(City)
     private readonly cityRepo: Repository<City>,
@@ -58,6 +60,8 @@ export class SeederService {
     // 2. Seed permissions and roles
     await this.permissionSeeder.seed();
     await this.roleSeeder.seed();
+
+    await this.managerSeeder.seed();
 
     // 3. Seed offices, properties, posts, residentials
     await this.officePropertySeeder.seed();
