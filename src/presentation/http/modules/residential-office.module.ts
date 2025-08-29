@@ -36,6 +36,7 @@ import { GetExpectedPricePropertyUseCase } from "src/application/use-cases/prope
 import { PropertyModule } from "./property.module";
 import { GetRentalPriceUseCase } from "src/application/use-cases/residential/get-rental-price.use-case";
 import { CreatePurchaseUseCase } from "src/application/use-cases/residential/create-purchase.use-case";
+import { ReminderModule } from "./reminder.module";
 
 
 @Module({
@@ -43,6 +44,7 @@ import { CreatePurchaseUseCase } from "src/application/use-cases/residential/cre
         forwardRef(() => PropertyModule),
         forwardRef(() => OfficeModule),
         PropertyPostModule,
+        ReminderModule,
         RegionModule,
         AuthModule,
         CityModule,

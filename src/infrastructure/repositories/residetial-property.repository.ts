@@ -5,6 +5,7 @@ import { stat } from 'fs';
 import { ResidentialPropertiesSearchFiltersDto } from 'src/application/dtos/property/residential-properties-search-filters.dto';
 import { ResidentialPropertyDto } from 'src/application/dtos/property/ResidentialProperty.dto';
 import { UpdateResidentialPropertyDetailsDto } from 'src/application/dtos/property/UpdateResidentialPropertyDetails.dto';
+import { ReminderService } from 'src/application/services/reminder.service';
 import { Property } from 'src/domain/entities/property.entity';
 import { Residential } from 'src/domain/entities/residential.entity';
 import { UserPropertyInvoice } from 'src/domain/entities/user-property-invoice.entity';
@@ -29,6 +30,7 @@ export class ResidentialPropertyRepository
     @InjectRepository(Residential)
     private readonly residentialRepo: Repository<Residential>,
     private readonly dataSource: DataSource,
+    private readonly reminderService: ReminderService,
   ) {}
   async save(residential: Residential) {
     await this.residentialRepo.save(residential);
@@ -575,6 +577,8 @@ export class ResidentialPropertyRepository
           paymentMethod: PaymentMethod.STRIPE,
         });
         await invoiceRepo.save(remInvoice);
+
+        await this.reminderService.scheduleRemindersForInvoice(remInvoice);
       } else {
         const months = Number(residential.installment_duration ?? 0);
         if (!months || months <= 0) {
@@ -607,7 +611,9 @@ export class ResidentialPropertyRepository
             paymentMethod: PaymentMethod.STRIPE,
           });
           await invoiceRepo.save(installmentInvoice);
-
+          await this.reminderService.scheduleRemindersForInvoice(
+            installmentInvoice,
+          );
           dueDate = addMonths(dueDate, 1);
         }
       }
