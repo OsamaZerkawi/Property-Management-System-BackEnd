@@ -1,13 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as puppeteer from 'puppeteer'; // أو 'puppeteer' إن لم تثبّت puppeteer-core
+import * as puppeteer from 'puppeteer';  
 
 @Injectable()
 export class InvoicePdfService {
   private readonly logger = new Logger(InvoicePdfService.name);
-
-  // تعديل المسارات حسب حاجتك
+ 
   private UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'invoices');
   private DEFAULT_FONT_PATH = path.join(process.cwd(), 'assets', 'fonts', 'Cairo-Regular.ttf');
 
@@ -16,8 +15,7 @@ export class InvoicePdfService {
       fs.mkdirSync(this.UPLOAD_DIR, { recursive: true });
     }
   }
-
-  // Helper: سلات التبديل الآمنة (تهرب HTML)
+ 
   private escapeHtml(input: any) {
     if (input === null || input === undefined) return '';
     const s = String(input);
@@ -262,8 +260,7 @@ export class InvoicePdfService {
 </body>
 </html>`;
 
-
-  // الاستبدال الآمن للقالب
+ 
   private fillTemplate(data: Record<string, any>, fontPathToUse?: string) {
     const htmlWithFont = this.templateHtml.replace(
       /{{fontPath}}/g,
@@ -271,25 +268,22 @@ export class InvoicePdfService {
     );
 
     let html = htmlWithFont;
-
-    // نمر على كل مفتاح في data ونستبدل
+ 
     Object.keys(data || {}).forEach((k) => {
       const re = new RegExp(`{{${k}}}`, 'g');
       html = html.replace(re, this.escapeHtml(data[k]));
     });
-
-    // إزالة أي متغيرات غير مستبدلة بفراغ للحفاظ على شكل الـ HTML
+ 
     html = html.replace(/{{[^}]+}}/g, '');
 
     return html;
   }
 
   async generatePdf(payload: Record<string, any>): Promise<{ filename: string; filePath: string }> {
-    // مسار الخط الافتراضي أو من payload
+   
     const fontPath =
       (payload && payload.fontPath) || (fs.existsSync(this.DEFAULT_FONT_PATH) ? this.DEFAULT_FONT_PATH : null);
-
-    // استبدال القيم مع الهروب من HTML
+ 
     const data = {
       invoiceId: payload.invoiceId ?? '',
       createdAt: payload.createdAt ?? '',
@@ -307,18 +301,15 @@ export class InvoicePdfService {
     };
 
     let finalHtml = this.fillTemplate(data, fontPath);
-
-    // إذا لم يوجد خط، نزيل تعريف @font-face ونغيّر font-family لاستخدام sans-serif
+ 
     if (!fontPath) {
       finalHtml = finalHtml.replace(/@font-face\s*{[^}]*}/s, '');
       finalHtml = finalHtml.replace(/font-family:\s*'CairoCustom',\s*sans-serif;/g, "font-family: sans-serif;");
     }
-
-    // إعداد ملف الإخراج
+ 
     const filename = `invoice-${data.invoiceId || 'unknown'}-${Date.now()}.pdf`;
     const filePath = path.join(this.UPLOAD_DIR, filename);
-
-    // اختيار مسار كروم
+ 
     const chromeCandidates = [
       process.env.CHROME_PATH,
       '/usr/bin/google-chrome-stable',
@@ -355,10 +346,8 @@ export class InvoicePdfService {
 
       await page.setViewport({ width: 1200, height: 800 });
       await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
-
-      // استخدم emulateMediaType بدلاً من emulateMedia
-      if (typeof (page as any).emulateMediaType === 'function') {
-        // 'screen' أم 'print' حسب ما تريد - عادة نستخدم 'screen' لأن التصميم هنا لعرض عادي
+ 
+      if (typeof (page as any).emulateMediaType === 'function') { 
         await (page as any).emulateMediaType('screen');
       }
 
