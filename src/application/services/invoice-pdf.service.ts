@@ -7,7 +7,8 @@ import * as puppeteer from 'puppeteer-core';
 export class InvoicePdfService {
   private readonly logger = new Logger(InvoicePdfService.name);
  
-  private UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'invoices');
+  private UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'properties', 'users','invoices','images');
+
   private DEFAULT_FONT_PATH = path.join(process.cwd(), 'assets', 'fonts', 'Cairo-Regular.ttf');
 
   constructor() {
@@ -27,8 +28,7 @@ export class InvoicePdfService {
       .replace(/'/g, '&#039;');
   }
 
-  // تمثل الاستمارة الـ HTML التي زودتنا بها — سنستبدل القيم بواسطة {{key}}
-  private templateHtml = `<!doctype html>
+   private templateHtml = `<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -283,7 +283,10 @@ export class InvoicePdfService {
    
     const fontPath =
       (payload && payload.fontPath) || (fs.existsSync(this.DEFAULT_FONT_PATH) ? this.DEFAULT_FONT_PATH : null);
- 
+      const userUploadDir = path.join(process.cwd(), 'uploads', 'properties', 'users','invoices','images');
+    if (!fs.existsSync(userUploadDir)) {
+      fs.mkdirSync(userUploadDir, { recursive: true });
+    }
     const data = {
       invoiceId: payload.invoiceId ?? '',
       createdAt: payload.createdAt ?? '',
