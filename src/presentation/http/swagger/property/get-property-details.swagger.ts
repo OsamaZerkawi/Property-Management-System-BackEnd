@@ -71,6 +71,7 @@ export function GetPropertyDetailsSwaggerDoc() {
             office: {
               id: 4,
               name: 'بن حسين and Sons',
+              stripe_payment:true,
               logo: 'http://localhost:3000/uploads/offices/logos/...',
               type: 'كلاهما',
               rate: {
