@@ -109,7 +109,7 @@ export class UserPropertyInvoiceRepository
       .getMany();
   }
 
-  async attachInvoiceImage(id: number, documentImage: string,method?:string) {
+  async attachInvoiceImage(id: number, documentImage: string) {
     // === 1. Fetch invoice === 
     const invoice = await this.userPropertyInvoiceRepo.findOne({
       where: { id },
@@ -122,7 +122,7 @@ export class UserPropertyInvoiceRepository
 
     // === 2. Update invoice ===
     invoice.invoiceImage = documentImage;
-    invoice.paymentMethod = method === 'دفع الكتروني'? PaymentMethod.STRIPE: PaymentMethod.CASH;
+    invoice.paymentMethod = PaymentMethod.CASH;
     invoice.status = InvoicesStatus.PAID;
     await this.userPropertyInvoiceRepo.save(invoice);
 
@@ -300,8 +300,7 @@ export class UserPropertyInvoiceRepository
   const d = this.parseToDate(value);
   return d ? d.toISOString().slice(0, 10) : '';
 }
-
- async markInvoiceAsPaid(
+async markInvoiceAsPaid(
   invoiceId: number,
   paymentIntentId: string,
 ): Promise<void> {
@@ -309,6 +308,7 @@ export class UserPropertyInvoiceRepository
     where: { id: invoiceId },
     relations: ['user', 'property', 'property.post'],
   });
+  
   if (!invoice) throw new NotFoundException('الفاتورة غير موجودة');
   if (invoice.status === InvoicesStatus.PAID) {
     throw new BadRequestException('الفاتورة مدفوعة مسبقاً');
@@ -324,7 +324,7 @@ export class UserPropertyInvoiceRepository
       invoiceId: invoice.id,
       createdAt: this.toYMD(invoice.created_at),
       amount: Number(invoice.amount || 0).toFixed(2),
-      currency: 'SAR',
+      currency: 'USD',
       reason: invoice.reason,
       status: invoice.status,
       paymentDate: new Date().toISOString().slice(0, 10),
@@ -343,6 +343,25 @@ export class UserPropertyInvoiceRepository
     await this.userPropertyInvoiceRepo.update(invoice.id, {
       invoiceImage: filename,
     });
+  } 
+  const purchase = await this.userPurchaseRepo.findOneByUserIdAndPropertyId(
+    invoice.user.id,
+    invoice.property.id,
+  );
+
+  if (!purchase) return;
+
+   switch (invoice.reason) {
+    case InoviceReasons.INSTALLMENT_PAYMENT:
+      await this.handleInstallmentPayment(purchase);
+      break;
+
+    case InoviceReasons.PROPERTY_PURCHASE:
+      await this.markPropertyAsSold(purchase);
+      break;
+
+    default:
+      break;
   }
 }
 
