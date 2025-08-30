@@ -5,6 +5,7 @@ import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express'; 
 import { setupSwagger } from './presentation/http/swagger/swagger.config'; 
  import * as express from 'express'; 
+ import * as bodyParser from 'body-parser';
 import { ParseJsonFieldsPipe } from './shared/interceptors/parse-json-field.interceptor';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -38,5 +39,8 @@ async function bootstrap() {
   });
   app.use(express.json());   
    await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+     app.use(bodyParser.json({
+    verify: (req: any, res, buf) => { req.rawBody = buf; }
+  }));
 }
 bootstrap();

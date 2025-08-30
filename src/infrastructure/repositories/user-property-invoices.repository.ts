@@ -286,10 +286,8 @@ export class UserPropertyInvoiceRepository
     parseToDate(value: any): Date | null {
   if (!value) return null;
   if (value instanceof Date) return value;
-  // لو القيمة كانت 'YYYY-MM-DD' أو أي تمثيل تاريخ آخر
-  const v = String(value);
-  // محاولة تفكيك 'YYYY-MM-DD' بدلاً من new Date() مباشرة لتجنب انزياحات التايمزون
-  const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+   const v = String(value);
+   const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (isoDateMatch) {
     const [_, y, m, d] = isoDateMatch;
     return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));

@@ -155,8 +155,7 @@ export class OfficeRepository implements OfficeRepositoryInterface {
     try {
       const officeId = office.id;
       const officeUpdateData: Partial<Office> = {};
-//stripe_payment if true then the payment method is Stripe if false then its cach and it won't send the payment method directly
-      for (const key of [
+       for (const key of [
         'name',
         'logo',
         'type',
