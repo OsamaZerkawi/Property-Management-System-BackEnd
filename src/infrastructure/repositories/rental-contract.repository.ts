@@ -262,16 +262,14 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
   manager: EntityManager,
   invoiceId: number,
   paymentIntentId: string
-) {
-  // جلب الفاتورة مع العلاقات المطلوبة
+) { 
   const invoice = await manager.findOne(UserPropertyInvoice, {
     where: { id: invoiceId },
     relations: ['user', 'property', 'property.post'],
   });
 
   if (!invoice) return;
-
-  // إن payload للفاتورة
+ 
   const payload = {
     invoiceId: invoice.id,
     createdAt: this.toYMD(invoice.created_at),
@@ -289,11 +287,9 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
     billingPeriodStart: this.toYMD(invoice.billing_period_start),
     paymentMethod: invoice.paymentMethod,
   };
-
-  // إنشاء PDF
+ 
   const { filename } = await this.invoicePdfService.generatePdf(payload);
-
-  // تحديث الفاتورة برابط PDF
+ 
   await manager.update(
     UserPropertyInvoice,
     invoice.id,

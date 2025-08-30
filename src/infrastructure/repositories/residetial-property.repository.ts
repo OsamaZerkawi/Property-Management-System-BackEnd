@@ -5,6 +5,7 @@ import { stat } from 'fs';
 import { ResidentialPropertiesSearchFiltersDto } from 'src/application/dtos/property/residential-properties-search-filters.dto';
 import { ResidentialPropertyDto } from 'src/application/dtos/property/ResidentialProperty.dto';
 import { UpdateResidentialPropertyDetailsDto } from 'src/application/dtos/property/UpdateResidentialPropertyDetails.dto';
+import { InvoicePdfService } from 'src/application/services/invoice-pdf.service';
 import { ReminderService } from 'src/application/services/reminder.service';
 import { Property } from 'src/domain/entities/property.entity';
 import { Residential } from 'src/domain/entities/residential.entity';
@@ -21,7 +22,7 @@ import { PropertyStatus } from 'src/domain/enums/property-status.enum';
 import { RentalPeriod } from 'src/domain/enums/rental-period.enum';
 import { ResidentialPropertyRepositoryInterface } from 'src/domain/repositories/residential-property.repository';
 import { errorResponse } from 'src/shared/helpers/response.helper';
-import { DataSource, DeepPartial, Repository } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 
 export class ResidentialPropertyRepository
   implements ResidentialPropertyRepositoryInterface
@@ -31,6 +32,8 @@ export class ResidentialPropertyRepository
     private readonly residentialRepo: Repository<Residential>,
     private readonly dataSource: DataSource,
     private readonly reminderService: ReminderService,
+    private readonly invoicePdfService:InvoicePdfService,
+    
   ) {}
   async save(residential: Residential) {
     await this.residentialRepo.save(residential);
@@ -555,6 +558,7 @@ export class ResidentialPropertyRepository
         paymentMethod: PaymentMethod.STRIPE,
       });
       await invoiceRepo.save(depositInvoice);
+      await this.generateAndUpdateInvoicePdf(manager, depositInvoice.id, paymentIntentId);
 
       residential.status = 'محجوز' as any;
       await manager.save(Residential, residential);
@@ -618,5 +622,58 @@ export class ResidentialPropertyRepository
         }
       }
     });
+  }
+   private parseToDate(value: any): Date | undefined|null {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+     const v = String(value);
+     const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (isoDateMatch) {
+      const [_, y, m, d] = isoDateMatch;
+      return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+    }
+  }
+  
+    private toYMD(value: any): string {
+    const d = this.parseToDate(value);
+    return d ? d.toISOString().slice(0, 10) : '';
+  }
+    private async generateAndUpdateInvoicePdf(
+    manager: EntityManager,
+    invoiceId: number,
+    paymentIntentId: string|null|undefined
+  ) { 
+    const invoice = await manager.findOne(UserPropertyInvoice, {
+      where: { id: invoiceId },
+      relations: ['user', 'property', 'property.post'],
+    });
+  
+    if (!invoice) return;
+   
+    const payload = {
+      invoiceId: invoice.id,
+      createdAt: this.toYMD(invoice.created_at),
+      amount: Number(invoice.amount || 0).toFixed(2),
+      currency: 'SAR',
+      reason: invoice.reason,
+      status: invoice.status,
+      paymentDate: new Date().toISOString().slice(0, 10),
+      paymentIntentId: paymentIntentId,
+      userName: invoice.user
+        ? `${invoice.user.first_name || ''} ${invoice.user.last_name || ''}`.trim()
+        : '',
+      userPhone: invoice.user?.phone || '',
+      postTitle: invoice.property?.post?.title || '',
+      billingPeriodStart: this.toYMD(invoice.billing_period_start),
+      paymentMethod: invoice.paymentMethod,
+    };
+   
+    const { filename } = await this.invoicePdfService.generatePdf(payload);
+   
+    await manager.update(
+      UserPropertyInvoice,
+      invoice.id,
+      { invoiceImage: filename }
+    );
   }
 }
