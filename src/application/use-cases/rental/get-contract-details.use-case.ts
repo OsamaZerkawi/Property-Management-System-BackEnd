@@ -68,7 +68,7 @@ export class GetContractDetailsUseCase {
       status: inv.status,
       reason: inv.reason,
       paymentMethod: inv.status === InvoicesStatus.PENDING ? null : inv.paymentMethod,
-      invoiceImage: inv.invoiceImage? `${baseUrl}/uploads/UserRentalInvoices/${inv.invoiceImage}`: null,
+      invoiceImage: inv.invoiceImage? `${baseUrl}/uploads/properties/users/invoices/images/${inv.invoiceImage}`: null,
     })); 
 
     return {  formattedContract, invoices: formattedInvoices };

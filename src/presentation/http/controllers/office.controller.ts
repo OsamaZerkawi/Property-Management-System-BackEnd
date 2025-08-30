@@ -179,7 +179,7 @@ export class OfficeController {
   //   //const result = await this.createOfficeUseCase.execute(user.sub, dto);
   //   //return successResponse(result, 'تم إنشاء المكتب بنجاح', HttpStatus.CREATED);
   // }
-  @Roles('صاحب مكتب')
+  //@Roles('صاحب مكتب')
   @Post()
   @UseGuards(JwtAuthGuard)
   @UpdateOfficeSwagger()
@@ -194,7 +194,7 @@ export class OfficeController {
     return successResponse([], 'تم تحديث بيانات المكتب بنجاح', 200);
   }
   
-  @Roles('صاحب مكتب')
+  //@Roles('صاحب مكتب')
   @Get()
   @UseGuards(JwtAuthGuard)
   @GetOfficeDetailsSwagger()

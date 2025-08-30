@@ -255,7 +255,7 @@ export function UserInvoiceImageInterceptor() {
     FileInterceptor('document', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          const dir = './uploads/UserRentalInvoices';
+          const dir = './uploads/properties/users/invoices/images';
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
           }

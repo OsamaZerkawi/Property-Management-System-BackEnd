@@ -1,6 +1,6 @@
 // src/infrastructure/repositories/rental-contract.repository.ts
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { DataSource, DeepPartial, Repository } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import { RentalContract } from 'src/domain/entities/rental-contract.entity';
 import { RentalContractRepositoryInterface } from 'src/domain/repositories/rental-contract.repository';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,7 @@ import { RentalPeriod } from 'src/domain/enums/rental-period.enum';
 import { InoviceReasons } from 'src/domain/enums/inovice-reasons.enum';
 import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
 import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
+import { InvoicePdfService } from 'src/application/services/invoice-pdf.service';
  
 @Injectable()
 export class RentalContractRepository  
@@ -26,6 +27,8 @@ export class RentalContractRepository
     private readonly InvoiceRepo: Repository<UserPropertyInvoice>,
     @InjectRepository(Property)
     private readonly propertyRepo: Repository<Property>,
+    private readonly invoicePdfService:InvoicePdfService,
+  
     private readonly dataSource: DataSource) {}
  
   async save(contract: RentalContract): Promise<RentalContract> {
@@ -210,6 +213,7 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
       const perPeriod = Math.round(perPeriodRaw * 100) / 100;
  
       let curStart = startDate; 
+      let firstInvoice ;
       for (let i = 0; i < periodCount; i++) {
         const isFirst = i === 0; 
         const billingStart = curStart; 
@@ -227,9 +231,70 @@ async findByIdWithRelations(id: number): Promise<RentalContract | null> {
           paymentMethod:  PaymentMethod.STRIPE , 
         }; 
          const invoice = invoiceRepo.create(invoicePayload);  
-         await invoiceRepo.save(invoice);  
+         await invoiceRepo.save(invoice); 
+          if (i === 0 && paymentIntentId) {
+         firstInvoice = invoice;  
+         console.log(firstInvoice)
+      } 
          curStart = rentalPeriod === RentalPeriod.YEARLY   ? addYears(billingStart, 1) : addMonths(billingStart, 1);
       } 
+      if (paymentIntentId && firstInvoice) {
+      await this.generateAndUpdateInvoicePdf(manager, firstInvoice.id, paymentIntentId);
+    }
     });
   }
+  private parseToDate(value: any): Date | undefined|null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+   const v = String(value);
+   const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoDateMatch) {
+    const [_, y, m, d] = isoDateMatch;
+    return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+  }
+}
+
+  private toYMD(value: any): string {
+  const d = this.parseToDate(value);
+  return d ? d.toISOString().slice(0, 10) : '';
+}
+  private async generateAndUpdateInvoicePdf(
+  manager: EntityManager,
+  invoiceId: number,
+  paymentIntentId: string
+) { 
+  const invoice = await manager.findOne(UserPropertyInvoice, {
+    where: { id: invoiceId },
+    relations: ['user', 'property', 'property.post'],
+  });
+
+  if (!invoice) return;
+ 
+  const payload = {
+    invoiceId: invoice.id,
+    createdAt: this.toYMD(invoice.created_at),
+    amount: Number(invoice.amount || 0).toFixed(2),
+    currency: 'SAR',
+    reason: invoice.reason,
+    status: invoice.status,
+    paymentDate: new Date().toISOString().slice(0, 10),
+    paymentIntentId: paymentIntentId,
+    userName: invoice.user
+      ? `${invoice.user.first_name || ''} ${invoice.user.last_name || ''}`.trim()
+      : '',
+    userPhone: invoice.user?.phone || '',
+    postTitle: invoice.property?.post?.title || '',
+    billingPeriodStart: this.toYMD(invoice.billing_period_start),
+    paymentMethod: invoice.paymentMethod,
+  };
+ 
+  const { filename } = await this.invoicePdfService.generatePdf(payload);
+ 
+  await manager.update(
+    UserPropertyInvoice,
+    invoice.id,
+    { invoiceImage: filename }
+  );
+}
+
 }
