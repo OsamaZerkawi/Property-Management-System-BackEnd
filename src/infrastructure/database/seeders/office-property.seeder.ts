@@ -91,6 +91,7 @@ export class OfficePropertySeeder {
           max: 50,
           fractionDigits: 2,
         }),
+        creditCard:faker.string.numeric(16),
         tourism_deposit: faker.number.float({
           min: 0.01,
           max: 0.1,

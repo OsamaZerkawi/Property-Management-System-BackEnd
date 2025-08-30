@@ -88,6 +88,7 @@ export class TouristicPropertySeeder {
           max: 0.1,
           fractionDigits: 2,
         }),
+        creditCard:faker.string.numeric(16),
         payment_method: PaymentMethod.BOTH,
         opening_time: '08:00 صباحًا',
         closing_time: '08:00 مساءً',
