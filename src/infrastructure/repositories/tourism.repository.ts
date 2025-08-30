@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, In, Repository, SelectQueryBuilder } from 'typeorm';
+import { DeepPartial, EntityManager, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { ITourismRepository } from 'src/domain/repositories/tourism.repository';
 import { Property } from 'src/domain/entities/property.entity';
 import { PropertyPost } from 'src/domain/entities/property-posts.entitiy';
@@ -31,6 +31,7 @@ import { CalendarStatus } from 'src/domain/enums/calendar-status.enum';
 import { PaymentMethod } from 'src/domain/enums/payment-method.enum';
 import { InoviceReasons } from 'src/domain/enums/inovice-reasons.enum';
 import { InvoicesStatus } from 'src/domain/enums/invoices-status.enum';
+import { InvoicePdfService } from 'src/application/services/invoice-pdf.service';
 
 export interface FinanceRecord {
   startDate: string;
@@ -61,6 +62,7 @@ export class TourismRepository implements ITourismRepository {
     private readonly invoiceRepo: Repository<UserPropertyInvoice>,
     @InjectRepository(Calendar)
     private readonly calendarRepo: Repository<Calendar>,
+    private readonly invoicePdfService:InvoicePdfService,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -1032,6 +1034,7 @@ export class TourismRepository implements ITourismRepository {
 
       const depositInvoice = invoiceRepo.create(depositInvoiceData);
       await invoiceRepo.save(depositInvoice);
+      await this.generateAndUpdateInvoicePdf(manager, depositInvoice.id, payment_id);
 
       const remainingAmount = Number(totalPrice) - Number(deposit);
       const remainingInvoiceData: DeepPartial<UserPropertyInvoice> = {
@@ -1048,8 +1051,62 @@ export class TourismRepository implements ITourismRepository {
 
       const remainingInvoice = invoiceRepo.create(remainingInvoiceData);
       await invoiceRepo.save(remainingInvoice);
+
     });
   }
+    private parseToDate(value: any): Date | undefined|null {
+      if (!value) return null;
+      if (value instanceof Date) return value;
+       const v = String(value);
+       const isoDateMatch = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (isoDateMatch) {
+        const [_, y, m, d] = isoDateMatch;
+        return new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+      }
+    }
+    
+      private toYMD(value: any): string {
+      const d = this.parseToDate(value);
+      return d ? d.toISOString().slice(0, 10) : '';
+    }
+      private async generateAndUpdateInvoicePdf(
+      manager: EntityManager,
+      invoiceId: number,
+      paymentIntentId: string|null|undefined
+    ) { 
+      const invoice = await manager.findOne(UserPropertyInvoice, {
+        where: { id: invoiceId },
+        relations: ['user', 'property', 'property.post'],
+      });
+    
+      if (!invoice) return;
+     
+      const payload = {
+        invoiceId: invoice.id,
+        createdAt: this.toYMD(invoice.created_at),
+        amount: Number(invoice.amount || 0).toFixed(2),
+        currency: 'SAR',
+        reason: invoice.reason,
+        status: invoice.status,
+        paymentDate: new Date().toISOString().slice(0, 10),
+        paymentIntentId: paymentIntentId,
+        userName: invoice.user
+          ? `${invoice.user.first_name || ''} ${invoice.user.last_name || ''}`.trim()
+          : '',
+        userPhone: invoice.user?.phone || '',
+        postTitle: invoice.property?.post?.title || '',
+        billingPeriodStart: this.toYMD(invoice.billing_period_start),
+        paymentMethod: invoice.paymentMethod,
+      };
+     
+      const { filename } = await this.invoicePdfService.generatePdf(payload);
+     
+      await manager.update(
+        UserPropertyInvoice,
+        invoice.id,
+        { invoiceImage: filename }
+      );
+    }
   async findCalendarsForTouristicInRange(
     touristicId: number,
     rangeStart: Date,

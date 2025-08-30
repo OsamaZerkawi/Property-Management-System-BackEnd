@@ -560,6 +560,7 @@ export class ResidentialPropertyRepository
       await invoiceRepo.save(depositInvoice);
       await this.generateAndUpdateInvoicePdf(manager, depositInvoice.id, paymentIntentId);
 
+      
       residential.status = 'محجوز' as any;
       await manager.save(Residential, residential);
 
