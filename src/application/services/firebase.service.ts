@@ -8,7 +8,7 @@ import { ServiceAccount } from 'firebase-admin';
 @Injectable()
 export class FirebaseService {
   private readonly logger = new Logger(FirebaseService.name);
-  private messaging: admin.messaging.Messaging;
+  private messaging: admin.messaging.Messaging | null = null;
 
   constructor() {
     this.initializeFirebase();
@@ -19,7 +19,8 @@ export class FirebaseService {
       const configPath = process.env.FIREBASE_CONFIG_PATH;
 
       if (!configPath || !fs.existsSync(configPath)) {
-        throw new Error('Firebase config path is missing or invalid');
+        this.logger.warn('⚠️ Firebase config missing — skipping Firebase initialization');
+        return; // Skip Firebase entirely
       }
 
       const serviceAccount: ServiceAccount = require(path.resolve(configPath));
@@ -31,20 +32,17 @@ export class FirebaseService {
       }
 
       this.messaging = admin.messaging();
+      this.logger.log('✅ Firebase initialized successfully');
     } catch (error) {
       this.logger.error('Error initializing Firebase Admin', error.stack);
-      throw new Error('Failed to initialize Firebase Admin');
+      // Do not throw — allow app to start without Firebase
     }
   }
 
   async sendToDevice(token: string, notification: { title: string; body: string }, data?: any) {
+    if (!this.messaging) return; // Firebase not initialized
     try {
-      const message: admin.messaging.Message = {
-        token,
-        notification,
-        data,
-      };
-
+      const message: admin.messaging.Message = { token, notification, data };
       const response = await this.messaging.send(message);
       this.logger.log(`Notification sent: ${response}`);
       return response;
@@ -55,13 +53,9 @@ export class FirebaseService {
   }
 
   async sendToDevices(tokens: string[], notification: { title: string; body: string }, data?: any) {
+    if (!this.messaging) return; // Firebase not initialized
     try {
-      const message: admin.messaging.MulticastMessage = {
-        tokens,
-        notification,
-        data,
-      };
-
+      const message: admin.messaging.MulticastMessage = { tokens, notification, data };
       const response = await this.messaging.sendEachForMulticast(message);
       this.logger.log(`Sent: ${response.successCount}, Failed: ${response.failureCount}`);
       return response;
@@ -70,6 +64,4 @@ export class FirebaseService {
       throw error;
     }
   }
-
-  
 }
